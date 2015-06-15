@@ -54,7 +54,6 @@ function Entity (x, y, z) {
 	this.zMov = 0;
 	this.moveDelay = 0;
 	this.delayTime = 10;
-	this.renderDone = false;
 }
 
 var player = CreateEntity();
@@ -73,7 +72,6 @@ function Area (x, y, z, xSize, ySize, zSize) {
 	this.xSize = xSize;
 	this.ySize = ySize;
 	this.zSize = zSize;
-	this.renderDone = false;
 	this.extraData = [];
 	this.map = [];
 	for (var i = 0; i < xSize; i++)
@@ -136,7 +134,9 @@ function Area (x, y, z, xSize, ySize, zSize) {
 function Init () {
 	window.requestAnimationFrame(Update);
 	CreateArea();
-
+	/*CreateArea(); areas[1].x = 11; areas[1].z = -10;
+	CreateArea(); areas[2].x = 8; areas[2].y = 11; areas[2].z = -10;
+	*/
 
 }
 
@@ -493,7 +493,6 @@ function DrawAllObjects () {
 	var bottomI = 0;
 	for (var i = 0; i < drawObjects.length; i++)
 	{
-		drawObjects[i].renderDone = false;
 		if (drawObjects[i] instanceof Area)
 		{
 			//Only areas can have a higher z than the last object
@@ -504,23 +503,35 @@ function DrawAllObjects () {
 	{
 		var i = bottomI;
 		var currentObject = drawObjects[i];
+
+		//Loop through objects, stopping when no more objects or next object is above currentZ
 		while (currentObject !== undefined && currentObject.z <= z)
 		{
 			if (DObjInZ(currentObject, z))
 			{
 				DrawDObjZ(currentObject, z);
 			}
-			if (drawObjects[i] instanceof Entity)
+
+			//move bottomI up when possible
+			if (i === bottomI)
 			{
-				
-			}
-			if (drawObjects[i] instanceof Area)
-			{
-				
+				if (currentObject instanceof Entity)
+				{
+					if (z > currentObject.z)
+					{
+						bottomI ++;
+					}
+				}
+				else if (currentObject instanceof Area)
+				{
+					if (z > currentObject.z + currentObject.zSize)
+					{
+						bottomI ++;
+					}
+				}
 			}
 			
 
-			//???? change bottomI to highest non-completely-rendered object
 
 			i ++;
 			currentObject = drawObjects[i];
@@ -568,7 +579,7 @@ function DrawAreaZSlice(area, z) {
 					var y = scale * (j + area.y - yCam) + CANVAS_HALF_HEIGHT;
 					if (y > 0 - scale && y < CANVAS_HEIGHT)
 					{	
-						var tile = area.map[i][j][z];
+						var tile = area.map[i][j][z - area.z];
 						if (tile === 1)
 						{
 							DrawTile(x, y, scale);
