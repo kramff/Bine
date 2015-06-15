@@ -31,7 +31,6 @@ var zCam = 0;
 
 var edgeSquareLimit = {active:false, x: 300, y: 300, xSize: 0, ySize: 0}
 
-var player = {x:5, y:5, z:7, moveDelay: 0, delayTime: 10, xMov: 0, yMov: 0, zMov: 0};
 
 var MOVEMENT_CHANGE_WINDOW = 3;
 
@@ -40,26 +39,31 @@ var entities = [];
 var drawObjects = [];
 
 function CreateEntity () {
-	var newEntity = new Entity (3, 3, 5);
+	var newEntity = new Entity (5, 6, 6);
 	entities.push(newEntity);
 	drawObjects.push(newEntity);
+	return newEntity;
 }
 
 function Entity (x, y, z) {
 	this.x = x;
 	this.y = y;
 	this.z = z;
-	this.moveDelay = 0;
-	this.delayTime = 10;
 	this.xMov = 0;
 	this.yMov = 0;
 	this.zMov = 0;
+	this.moveDelay = 0;
+	this.delayTime = 10;
+	this.renderDone = false;
 }
+
+var player = CreateEntity();
 
 function CreateArea () {
 	var newArea = new Area(0, 0, 0, 11, 11, 10);
 	areas.push(newArea);
 	drawObjects.push(newArea);
+	return newArea;
 }
 
 function Area (x, y, z, xSize, ySize, zSize) {
@@ -69,6 +73,7 @@ function Area (x, y, z, xSize, ySize, zSize) {
 	this.xSize = xSize;
 	this.ySize = ySize;
 	this.zSize = zSize;
+	this.renderDone = false;
 	this.extraData = [];
 	this.map = [];
 	for (var i = 0; i < xSize; i++)
@@ -112,8 +117,8 @@ function Area (x, y, z, xSize, ySize, zSize) {
 				}
 				*/
 
-				//random nonsense room
-				if (i%10 === 0 || j%10 === 0 || k === 0)
+				//stairs room with right side open
+				if (i%11 === 0 || j%10 === 0 || k === 0)
 				{
 					tile = 1;
 				}
@@ -415,7 +420,7 @@ function Render () {
 	ctx.fillStyle = "#000000";
 
 	numSquares = 0;
-	DrawAreas();
+	DrawAllObjects();
 
 	if (edgeSquareLimit.active)
 	{
@@ -475,6 +480,106 @@ function GetScale (z) {
 /*function GetScale (z) {
 	return -(Math.atan(TILE_SIZE / ( Z_MULTIPLIER * (z - zCam) - EYE_DISTANCE))) * SCALE_MULTIPLIER;
 }*/
+
+function DrawAllObjects () {
+	if (drawObjects.length === 0)
+	{
+		//no objects to draw
+		return;
+	}
+	drawObjects.sort(function (a, b) {return a.z - b.z;});
+	var bottomZ = drawObjects[0].z;
+	var topZ = drawObjects[drawObjects.length - 1].z;
+	var bottomI = 0;
+	for (var i = 0; i < drawObjects.length; i++)
+	{
+		drawObjects[i].renderDone = false;
+		if (drawObjects[i] instanceof Area)
+		{
+			//Only areas can have a higher z than the last object
+			topZ = Math.max(topZ, drawObjects[i].z + drawObjects[i].zSize);
+		}
+	}
+	for (var z = bottomZ; z <= topZ; z++)
+	{
+		var i = bottomI;
+		var currentObject = drawObjects[i];
+		while (currentObject !== undefined && currentObject.z <= z)
+		{
+			if (DObjInZ(currentObject, z))
+			{
+				DrawDObjZ(currentObject, z);
+			}
+			if (drawObjects[i] instanceof Entity)
+			{
+				
+			}
+			if (drawObjects[i] instanceof Area)
+			{
+				
+			}
+			
+
+			//???? change bottomI to highest non-completely-rendered object
+
+			i ++;
+			currentObject = drawObjects[i];
+		}
+	}
+	//debugger;
+}
+
+//Draw Object in Z: returns true if the object should be drawn at the given z
+function DObjInZ (dObj, z) {
+	if (dObj instanceof Entity)
+	{
+		return Math.ceil(GetEntityZ(dObj)) === z;
+	}
+	if (dObj instanceof Area)
+	{
+		return (dObj.z <= z && dObj.z + dObj.zSize > z);
+	}
+}
+
+//Entity - DrawEntity
+//Area - DrawAreaZSlice
+function DrawDObjZ (dObj, z) {
+	if (dObj instanceof Entity)
+	{
+		DrawEntity(dObj);
+	}
+	else if (dObj instanceof Area)
+	{
+		DrawAreaZSlice(dObj, z);
+	}
+}
+
+function DrawAreaZSlice(area, z) {
+	var scale = GetScale(z);
+	if (scale > 0.01)
+	{
+		for (var i = 0; i < area.xSize; i++)
+		{
+			var x = scale * (i + area.x - xCam) + CANVAS_HALF_WIDTH;
+			if (x > 0 - scale && x < CANVAS_WIDTH)
+			{
+				for (var j = 0; j < area.ySize; j++)
+				{
+					var y = scale * (j + area.y - yCam) + CANVAS_HALF_HEIGHT;
+					if (y > 0 - scale && y < CANVAS_HEIGHT)
+					{	
+						var tile = area.map[i][j][z];
+						if (tile === 1)
+						{
+							DrawTile(x, y, scale);
+							numSquares ++;
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
 function DrawAreas () {
 	for (var i = 0; i < areas.length; i++)
