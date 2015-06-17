@@ -34,12 +34,17 @@ var edgeSquareLimit = {active:false, x: 300, y: 300, xSize: 0, ySize: 0}
 
 var MOVEMENT_CHANGE_WINDOW = 3;
 
+var EMPTY = 0;
+var SOLID = 1;
+var DISAPPEAR_BLOCK = 2;
+var APPEAR_BLOCK = 3;
+
 var areas = [];
 var entities = [];
 var drawObjects = [];
 
 function CreateEntity () {
-	var newEntity = new Entity (5, 6, 6);
+	var newEntity = new Entity (16, 5, 4);
 	entities.push(newEntity);
 	drawObjects.push(newEntity);
 	return newEntity;
@@ -77,54 +82,73 @@ function Area (x, y, z, xSize, ySize, zSize) {
 	for (var i = 0; i < xSize; i++)
 	{
 		this.map.push([]);
+		this.extraData.push([]);
 		for (var j = 0; j < ySize; j++)
 		{
 			this.map[i].push([]);
+			this.extraData[i].push([]);
 			for (var k = 0; k < zSize; k++)
 			{
-				var tile = 0;
-				
-				/*
-				//Dumb stairs room
-				if (i%10 === 0 || j%10 === 0 || k === 0)
-				{
-					tile = 1;
-				}
-				if (i === 5 && j > k)
-				{
-					tile = 1;
-				}
-				*/
+				var tile = EMPTY;
 
-				/*
-				//some pillars room
-				if (i === 0 || j === 0 || k === 0)
+				if (areas.length === 0)
 				{
-					tile = 1;
+					//stairs room with right side open
+					if (i%11 === 0 || j%10 === 0 || k === 0)
+					{
+						tile = SOLID;
+					}
+					if (i === 5 && j > k && k !== 0 && j !== 10)
+					{
+						tile = APPEAR_BLOCK;
+					}
+					if (i === 8 &&  k !== 0 && j !== 10 && j !== 0 && k < 4)
+					{
+						tile = DISAPPEAR_BLOCK;
+					}
 				}
-				if ((i-j)%3 === 0 && (i+j)/2-2>k)
+				else if (areas.length === 1)
 				{
-					tile = 1;
+					//Valley
+					if (k === Math.abs(i - 5))
+					{
+						tile = APPEAR_BLOCK;
+					}
 				}
-				*/
-				/*
-				//Valley
-				if (k === Math.abs(i - 5))
+				else if (areas.length === 2)
 				{
-					tile = 1;
+					//some pillars room
+					if (j === 0 || j === 10 || i === 10 || k === 0)
+					{
+						tile = SOLID;
+					}
+					if ((i-j)%3 === 0 && (i+j)/2-0>k)
+					{
+						tile = APPEAR_BLOCK;
+					}
 				}
-				*/
-
-				//stairs room with right side open
-				if (i%11 === 0 || j%10 === 0 || k === 0)
+				else
 				{
-					tile = 1;
+					//narrow walkway room
+					if ((i === 4 || i === 5 || i === 6) && k === 4 || ((i === 2 || i === 8) && j%5 === 2))
+					{
+						tile = SOLID;
+					}
 				}
-				if (i === 5 && j > k)
+				var extra;
+				switch (tile)
 				{
-					tile = 1;
+					default:
+						this.extra = {};
+					break
+					case APPEAR_BLOCK:
+						this.extra = {opacity: 0};
+					break;
+					case DISAPPEAR_BLOCK:
+						this.extra = {opacity: 1};
+					break;
 				}
-				
+				this.extraData[i][j].push(extra);
 				this.map[i][j].push(tile);
 			}
 		}
@@ -134,9 +158,13 @@ function Area (x, y, z, xSize, ySize, zSize) {
 function Init () {
 	window.requestAnimationFrame(Update);
 	CreateArea();
-	/*CreateArea(); areas[1].x = 11; areas[1].z = -10;
-	CreateArea(); areas[2].x = 8; areas[2].y = 11; areas[2].z = -10;
-	*/
+	CreateArea(); areas[1].x = 11; areas[1].z = -5;
+	CreateArea(); areas[2].x = 22;
+	CreateArea(); areas[3].y = 11; areas[3].z = 5;
+	CreateArea(); areas[4].y = 22; areas[4].z = 5;
+	CreateArea(); areas[5].y = 33; areas[5].z = 5;
+	CreateArea(); areas[6].y = 44; areas[6].z = 5;
+	
 
 }
 
@@ -337,7 +365,9 @@ function MovementXYRules (entity) {
 	else
 	{
 		//Diagonal movement
-		if (MovementZRulesCheck(entity, entity.xMov, entity.yMov))
+		var xOption = MovementZRulesCheck(entity, entity.xMov, 0);
+		var yOption = MovementZRulesCheck(entity, 0, entity.yMov);
+		if ((xOption && yOption) && MovementZRulesCheck(entity, entity.xMov, entity.yMov))
 		{
 			//regular diagonal movment
 			MovementZRules(entity);
@@ -345,8 +375,6 @@ function MovementXYRules (entity) {
 		else
 		{
 			//regular diagonal movement blocked, check x and y options
-			var xOption = MovementZRulesCheck(entity, entity.xMov, 0);
-			var yOption = MovementZRulesCheck(entity, 0, entity.yMov);
 			if (xOption && !yOption)
 			{
 				//Go x direction only if y blocked
@@ -361,9 +389,9 @@ function MovementXYRules (entity) {
 			}
 			else
 			{
-				//If both are blocked or both open, stop
-				entity.xMov = 0;
+				//If both are blocked or both open, default to x movement i guess
 				entity.yMov = 0;
+				MovementZRules(entity);
 			}
 		}
 	}
@@ -417,7 +445,7 @@ function Render () {
 	zCam = (zCam * 4 + GetEntityZ(player)) * 0.2;
 
 	ctx.strokeStyle = "#FFFFFF";
-	ctx.fillStyle = "#000000";
+	ctx.fillStyle = "#101010";
 
 	numSquares = 0;
 	DrawAllObjects();
@@ -580,9 +608,16 @@ function DrawAreaZSlice(area, z) {
 					if (y > 0 - scale && y < CANVAS_HEIGHT)
 					{	
 						var tile = area.map[i][j][z - area.z];
-						if (tile === 1)
+						if (tile > 0)
 						{
-							DrawTile(x, y, scale);
+							if (tile > 1)
+							{
+								DrawTileExtra(x, y, scale, tile, i + area.x, j + area.y, z, area.extraData[i][j][z - area.z]);
+							}
+							else
+							{
+								DrawTile(x, y, scale, tile, i + area.x, j + area.y, z);
+							}
 							numSquares ++;
 						}
 					}
@@ -592,93 +627,39 @@ function DrawAreaZSlice(area, z) {
 	}
 }
 
-function DrawAreas () {
-	for (var i = 0; i < areas.length; i++)
+function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
+	switch (tile)
 	{
-		if (edgeSquareLimit.active)
-		{
-			DrawAreaWithEdgeSquareLimits(areas[i]);
-		}
-		else
-		{
-			DrawArea(areas[i]);
-		}
+		case DISAPPEAR_BLOCK:
+			if (!IsNear(i, j, k, player.x, player.y, player.z, 3))
+			{
+				ctx.fillRect(x, y, scale, scale);
+				ctx.strokeRect(x, y, scale, scale);
+			}
+		break;
+		case APPEAR_BLOCK:
+			if (IsNear(i, j, k, player.x, player.y, player.z, 3))
+			{
+				ctx.fillRect(x, y, scale, scale);
+				ctx.strokeRect(x, y, scale, scale);
+			}
+		break;
 	}
 }
 
-function DrawArea (area) {
-	//Loop through Z first
-	for (var k = 0; k < area.zSize; k++)
-	{
-		var scale = GetScale(k + area.z);
-		if (scale > 0.01)
-		{
-			for (var i = 0; i < area.xSize; i++)
-			{
-				var x = scale * (i + area.x - xCam) + CANVAS_HALF_WIDTH;
-				if (x > 0 - scale && x < CANVAS_WIDTH)
-				{
-					for (var j = 0; j < area.ySize; j++)
-					{
-						var y = scale * (j + area.y - yCam) + CANVAS_HALF_HEIGHT;
-						if (y > 0 - scale && y < CANVAS_HEIGHT)
-						{	
-							var tile = area.map[i][j][k];
-							if (tile === 1)
-							{
-								DrawTile(x, y, scale);
-								numSquares ++;
-							}
-						}
-					}
-				}
-			}
-			if (Math.ceil(GetEntityZ(player)) === k)
-			{
-				DrawEntity(player);
-			}
-		}
-	}
-}
-
-function DrawAreaWithEdgeSquareLimits (area) {
-	//Loop through Z first
-	for (var k = 0; k < area.zSize; k++)
-	{
-		var scale = GetScale(k + area.z);
-		if (scale > 0.01)
-		{
-			for (var i = 0; i < area.xSize; i++)
-			{
-				var x = scale * (i + area.x - xCam) + CANVAS_HALF_WIDTH;
-				if (x > edgeSquareLimit.x && x < edgeSquareLimit.x + edgeSquareLimit.xSize - scale)
-				{
-					for (var j = 0; j < area.ySize; j++)
-					{
-						var y = scale * (j + area.y - yCam) + CANVAS_HALF_HEIGHT;
-						if (y > edgeSquareLimit.y && y < edgeSquareLimit.y + edgeSquareLimit.ySize - scale)
-						{	
-							var tile = area.map[i][j][k];
-							if (tile === 1)
-							{
-								DrawTile(x, y, scale);
-								numSquares ++;
-							}
-						}
-					}
-				}
-			}
-			if (Math.ceil(GetEntityZ(player)) === k)
-			{
-				DrawEntity(player);
-			}
-		}
-	}
-}
-
-function DrawTile (x, y, scale) {
+//i, j, k: world x, y, z position
+function DrawTile (x, y, scale, tile, i, j, k) {
 	ctx.fillRect(x, y, scale, scale);
 	ctx.strokeRect(x, y, scale, scale);
+}
+
+//Up to 1 tile away in all directions
+function IsNear (x1, y1, z1, x2, y2, z2, dist) {
+	if (Math.abs(x1 - x2) + Math.abs(y1 - y2) + Math.abs(z1 - z2) <= dist)
+	{
+		return true;
+	}
+	return false;
 }
 
 function DrawEntity (entity) {
@@ -686,19 +667,11 @@ function DrawEntity (entity) {
 	var scale = GetScale(GetEntityZ(entity));
 	var x = scale * (GetEntityX(entity) - xCam) + CANVAS_HALF_WIDTH;
 	var y = scale * (GetEntityY(entity) - yCam) + CANVAS_HALF_HEIGHT;
-				
 	ctx.strokeStyle = "#00FF00";
+	ctx.fillStyle = "#004000";
 	ctx.fillRect(x, y, scale, scale);
 	ctx.strokeRect(x, y, scale, scale);
 	ctx.restore();
-}
-
-function StartEdgeSquareLimitEffect () {
-	edgeSquareLimit.active = true;
-	edgeSquareLimit.x = CANVAS_HALF_WIDTH;
-	edgeSquareLimit.y = CANVAS_HALF_HEIGHT;
-	edgeSquareLimit.xSize = 0;
-	edgeSquareLimit.ySize = 0;
 }
 
 
@@ -710,7 +683,11 @@ function IsSolid (x, y, z) {
 		{
 			//Within area's bounds
 			var tile = area.map[x - area.x][y - area.y][z - area.z];
-			if (tile === 1)
+			if (tile === SOLID)
+			{
+				return true;
+			}
+			if (tile === APPEAR_BLOCK)
 			{
 				return true;
 			}
@@ -795,43 +772,4 @@ function DoKeyUp (e) {
 	{
 		eKey = false;
 	}
-}
-
-
-function InitSliders () {
-	sliders.push(document.getElementById("s1"));
-	sliders.push(document.getElementById("s2"));
-	sliders.push(document.getElementById("s3"));
-	sliders.push(document.getElementById("s4"));
-
-	sliders[0].value = EYE_DISTANCE * 10;
-	sliders[1].value = SCALE_MULTIPLIER * 10;
-	sliders[2].value = Z_MULTIPLIER * 100;
-	sliders[3].value = TILE_SIZE * 10;
-
-	sliders[0].oninput = function () {
-		EYE_DISTANCE = this.value / 10;
-	}
-	sliders[1].oninput = function () {
-		SCALE_MULTIPLIER = this.value / 10;
-	}
-	sliders[2].oninput = function () {
-		Z_MULTIPLIER = this.value / 100;
-	}
-	sliders[3].oninput = function () {
-		TILE_SIZE = this.value / 10;
-	}
-
-	var button = document.getElementById("btn1");
-	button.onclick = LogSliderValues;
-
-
-}
-
-function LogSliderValues () {
-	console.log("-----------------");
-	console.log("EYE_DISTANCE: " + EYE_DISTANCE);
-	console.log("SCALE_MULTIPLIER: " + SCALE_MULTIPLIER);
-	console.log("Z_MULTIPLIER: " + Z_MULTIPLIER);
-	console.log("TILE_SIZE: " + TILE_SIZE);
 }
