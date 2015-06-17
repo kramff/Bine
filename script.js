@@ -139,13 +139,13 @@ function Area (x, y, z, xSize, ySize, zSize) {
 				switch (tile)
 				{
 					default:
-						this.extra = {};
+						extra = {};
 					break
 					case APPEAR_BLOCK:
-						this.extra = {opacity: 0};
+						extra = {opacity: 0};
 					break;
 					case DISAPPEAR_BLOCK:
-						this.extra = {opacity: 1};
+						extra = {opacity: 1};
 					break;
 				}
 				this.extraData[i][j].push(extra);
@@ -565,7 +565,6 @@ function DrawAllObjects () {
 			currentObject = drawObjects[i];
 		}
 	}
-	//debugger;
 }
 
 //Draw Object in Z: returns true if the object should be drawn at the given z
@@ -616,7 +615,8 @@ function DrawAreaZSlice(area, z) {
 							}
 							else
 							{
-								DrawTile(x, y, scale, tile, i + area.x, j + area.y, z);
+								//SOLID tile
+								DrawTile(x, y, scale);
 							}
 							numSquares ++;
 						}
@@ -628,27 +628,40 @@ function DrawAreaZSlice(area, z) {
 }
 
 function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
+	ctx.save();
 	switch (tile)
 	{
 		case DISAPPEAR_BLOCK:
 			if (!IsNear(i, j, k, player.x, player.y, player.z, 3))
 			{
-				ctx.fillRect(x, y, scale, scale);
-				ctx.strokeRect(x, y, scale, scale);
+				extra.opacity = Math.min(1, extra.opacity + 0.05);
 			}
+			else
+			{
+				extra.opacity = Math.max(0, extra.opacity - 0.05);
+			}
+			ctx.globalAlpha = extra.opacity;
+			DrawTile(x, y, scale)
 		break;
 		case APPEAR_BLOCK:
 			if (IsNear(i, j, k, player.x, player.y, player.z, 3))
 			{
-				ctx.fillRect(x, y, scale, scale);
-				ctx.strokeRect(x, y, scale, scale);
+				extra.opacity = Math.min(1, extra.opacity + 0.05);
 			}
+			else
+			{
+				extra.opacity = Math.max(0, extra.opacity - 0.05);
+			}
+			ctx.globalAlpha = extra.opacity;
+			DrawTile(x, y, scale)
+
 		break;
 	}
+	ctx.restore();
 }
 
 //i, j, k: world x, y, z position
-function DrawTile (x, y, scale, tile, i, j, k) {
+function DrawTile (x, y, scale) {
 	ctx.fillRect(x, y, scale, scale);
 	ctx.strokeRect(x, y, scale, scale);
 }
