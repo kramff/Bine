@@ -873,7 +873,6 @@ function StepOnTile (entity, area, x, y, z) {
 		break;
 		case PATTERN_ACTIVATE_BLOCK:
 			ActivateAreaPattern(area);
-			area.status = STATUS_ACTIVE;
 		break;
 	}
 }
@@ -890,20 +889,59 @@ function CheckPattern (area, pattern) {
 }
 
 function ActivateAreaPattern (area) {
+	if (area.status !== STATUS_DRAWING)
+	{
+		return;
+	}
+	area.status = STATUS_ACTIVE;
 	for (var i = 0; i < 5; i++) {
 		for (var j = 0; j < 5; j++)
 		{
-			if (pattern1[i][j] === 1)
+			var areaX = i + 3;
+			var areaY = j + 3;
+			var areaZ = 0;
+			//Use [j][i] because arrays are backwards
+			if (pattern1[j][i] === 1)
 			{
-				if (area.map[i][j][0] === PATTERN_BLOCK)
+				if (area.map[areaX][areaY][areaZ] === PATTERN_BLOCK)
 				{
-					if (area.extraData[i][j][0].pattern === 1)
+					if (area.extraData[areaX][areaY][areaZ].pattern === 1)
 					{
 						//cool
+						console.log("good");
 					}
+					else
+					{
+						console.log("bad: not lit up");
+						area.status = STATUS_NORMAL;
+					}
+				}
+				else
+				{
+					console.log("bad: not pattern block");
+					area.status = STATUS_NORMAL;
+				}
+			}
+			else
+			{
+				if (area.map[areaX][areaY][areaZ] === PATTERN_BLOCK)
+				{
+					if (area.extraData[areaX][areaY][areaZ].pattern === 1)
+					{
+						console.log("bad: shouldn't be lit up");
+						area.status = STATUS_NORMAL;
+					} 
 				}
 			}
 		}
+	}
+	if (area.status === STATUS_ACTIVE)
+	{
+		console.log("pattern confirmed!");
+	}
+	else
+	{
+		ClearAreaPattern(area);
 	}
 }
 
