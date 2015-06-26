@@ -38,6 +38,13 @@ var EMPTY = 0;
 var SOLID = 1;
 var DISAPPEAR_BLOCK = 2;
 var APPEAR_BLOCK = 3;
+var PATTERN_BLOCK = 4;
+var PATTERN_CLEAR_BLOCK = 5;
+var PATTERN_ACTIVATE_BLOCK = 6;
+
+var STATUS_NORMAL = 0;
+var STATUS_DRAWING = 1;
+var STATUS_ACTIVE = 2;
 
 var areas = [];
 var entities = [];
@@ -77,6 +84,7 @@ function Area (x, y, z, xSize, ySize, zSize) {
 	this.xSize = xSize;
 	this.ySize = ySize;
 	this.zSize = zSize;
+	this.status = 0;
 	this.extraData = [];
 	this.map = [];
 	for (var i = 0; i < xSize; i++)
@@ -127,10 +135,30 @@ function Area (x, y, z, xSize, ySize, zSize) {
 						tile = APPEAR_BLOCK;
 					}
 				}
+				else if (areas.length === 3)
+				{
+					//neato pattern test room
+					if (k === 0)
+					{
+						tile = SOLID;
+						if ((i > 1 && i < 9) && (j > 1 && j < 9))
+						{
+							tile = PATTERN_ACTIVATE_BLOCK;
+						}
+						if (i > 2 && i < 8 && j > 2 && j < 8)
+						{
+							tile = PATTERN_BLOCK;
+						}
+						if ((i === 1 || i === 9) && (j === 1 || j === 9))
+						{
+							tile = PATTERN_CLEAR_BLOCK;
+						}
+					}
+				}
 				else
 				{
 					//narrow walkway room
-					if ((i === 4 || i === 5 || i === 6) && k === 4 || ((i === 2 || i === 8) && j%5 === 2))
+					if ((i === 4 || i === 5 || i === 6) && k === 0 || ((i === 2 || i === 8) && j%5 === 2))
 					{
 						tile = SOLID;
 					}
@@ -147,6 +175,9 @@ function Area (x, y, z, xSize, ySize, zSize) {
 					case DISAPPEAR_BLOCK:
 						extra = {opacity: 1};
 					break;
+					case PATTERN_BLOCK:
+						extra = {pattern: 0};
+					break;
 				}
 				this.extraData[i][j].push(extra);
 				this.map[i][j].push(tile);
@@ -160,10 +191,10 @@ function Init () {
 	CreateArea();
 	CreateArea(); areas[1].x = 11; areas[1].z = -5;
 	CreateArea(); areas[2].x = 22;
-	CreateArea(); areas[3].y = 11; areas[3].z = 5;
-	CreateArea(); areas[4].y = 22; areas[4].z = 5;
-	CreateArea(); areas[5].y = 33; areas[5].z = 5;
-	CreateArea(); areas[6].y = 44; areas[6].z = 5;
+	CreateArea(); areas[3].y = 11; areas[3].z = 9;
+	CreateArea(); areas[4].y = 22; areas[4].z = 9;
+	CreateArea(); areas[5].y = 33; areas[5].z = 9;
+	CreateArea(); areas[6].y = 44; areas[6].z = 9;
 	
 
 }
@@ -221,6 +252,7 @@ function Control () {
 			player.xMov = 0;
 			player.yMov = 0;
 			player.zMov = 0;
+			EndMovement(player);
 		}
 		else
 		{
@@ -342,6 +374,12 @@ function Control () {
 		player.yMov = 0;
 		player.zMov = -1;
 		SetMoveDelay(player, 2);
+	}
+	if (player.z < -20)
+	{
+		player.x = 15;
+		player.y = 5;
+		player.z = 4;
 	}
 }
 
@@ -632,30 +670,74 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 	switch (tile)
 	{
 		case DISAPPEAR_BLOCK:
-			if (!IsNear(i, j, k, player.x, player.y, player.z, 3))
+			if (!IsNear(i, j, k, player.x, player.y, player.z, 1))
 			{
-				extra.opacity = Math.min(1, extra.opacity + 0.05);
+				extra.opacity = Math.min(1, extra.opacity + 0.07);
 			}
 			else
 			{
-				extra.opacity = Math.max(0, extra.opacity - 0.05);
+				extra.opacity = Math.max(0, extra.opacity - 0.07);
 			}
-			ctx.globalAlpha = extra.opacity;
-			DrawTile(x, y, scale)
+			if (extra.opacity !== 1)
+			{
+				ctx.globalAlpha = extra.opacity;
+			}
+			if (extra.opacity !== 0)
+			{
+				DrawTile(x, y, scale)
+			}
 		break;
 		case APPEAR_BLOCK:
-			if (IsNear(i, j, k, player.x, player.y, player.z, 3))
+			if (IsNear(i, j, k, player.x, player.y, player.z, 1))
 			{
-				extra.opacity = Math.min(1, extra.opacity + 0.05);
+				extra.opacity = Math.min(1, extra.opacity + 0.07);
 			}
 			else
 			{
-				extra.opacity = Math.max(0, extra.opacity - 0.05);
+				extra.opacity = Math.max(0, extra.opacity - 0.07);
 			}
-			ctx.globalAlpha = extra.opacity;
-			DrawTile(x, y, scale)
+			if (extra.opacity !== 1)
+			{
+				ctx.globalAlpha = extra.opacity;
+			}
+			if (extra.opacity !== 0)
+			{
+				DrawTile(x, y, scale)
+			}
 
 		break;
+		case PATTERN_BLOCK:
+			ctx.save();
+			if (extra.pattern === 0)
+			{
+				ctx.fillStyle = "#800000";
+			}
+			else
+			{
+				ctx.fillStyle = "#C0C000";
+			}
+			DrawTile(x, y, scale);
+			ctx.restore;
+		break;
+		case PATTERN_BLOCK:
+			ctx.save();
+			ctx.fillStyle = "#800000";
+			DrawTile(x, y, scale);
+			ctx.restore;
+		break;
+		case PATTERN_CLEAR_BLOCK:
+			ctx.save();
+			ctx.fillStyle = "#000080";
+			DrawTile(x, y, scale);
+			ctx.restore;
+		break;
+		case PATTERN_ACTIVATE_BLOCK:
+			ctx.save();
+			ctx.fillStyle = "#400080";
+			DrawTile(x, y, scale);
+			ctx.restore;
+		break;
+
 	}
 	ctx.restore();
 }
@@ -668,7 +750,7 @@ function DrawTile (x, y, scale) {
 
 //Up to 1 tile away in all directions
 function IsNear (x1, y1, z1, x2, y2, z2, dist) {
-	if (Math.abs(x1 - x2) + Math.abs(y1 - y2) + Math.abs(z1 - z2) <= dist)
+	if (Math.abs(x1 - x2) <= dist && Math.abs(y1 - y2) <= dist && Math.abs(z1 - z2) <= dist + 2)
 	{
 		return true;
 	}
@@ -676,15 +758,22 @@ function IsNear (x1, y1, z1, x2, y2, z2, dist) {
 }
 
 function DrawEntity (entity) {
-	ctx.save();
 	var scale = GetScale(GetEntityZ(entity));
+	if (scale < 0)
+	{
+		return;
+	}
 	var x = scale * (GetEntityX(entity) - xCam) + CANVAS_HALF_WIDTH;
 	var y = scale * (GetEntityY(entity) - yCam) + CANVAS_HALF_HEIGHT;
-	ctx.strokeStyle = "#00FF00";
-	ctx.fillStyle = "#004000";
-	ctx.fillRect(x, y, scale, scale);
-	ctx.strokeRect(x, y, scale, scale);
-	ctx.restore();
+	if (x > 0 - scale && x < CANVAS_WIDTH && y > 0 - scale && y < CANVAS_HEIGHT)
+	{
+		ctx.save();
+		ctx.strokeStyle = "#80FFFF";
+		ctx.fillStyle = "#208080";
+		ctx.fillRect(x, y, scale, scale);
+		ctx.strokeRect(x, y, scale, scale);
+		ctx.restore();
+	}
 }
 
 
@@ -701,6 +790,18 @@ function IsSolid (x, y, z) {
 				return true;
 			}
 			if (tile === APPEAR_BLOCK)
+			{
+				return true;
+			}
+			if (tile === PATTERN_BLOCK)
+			{
+				return true;
+			}
+			if (tile === PATTERN_ACTIVATE_BLOCK)
+			{
+				return true;
+			}
+			if (tile === PATTERN_CLEAR_BLOCK)
 			{
 				return true;
 			}
@@ -723,6 +824,104 @@ function IsSolidEMov (entity) {
 
 function IsSolidEMovOffset (entity, x, y, z) {
 	return IsSolid(entity.x + entity.xMov + x, entity.y + entity.yMov + y, entity.z + entity.zMov + z);
+}
+
+function LocationInArea (area, x, y, z) {
+	if (area.x <= x && x < area.x + area.xSize)
+	{
+		if (area.y <= y && y < area.y + area.ySize)
+		{
+			if (area.z <= z && z < area.z + area.zSize)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+function EndMovement (entity) {
+	//Multiple tiles could exist at the same location
+	
+	for (var i = 0; i < areas.length; i++) {
+		var area = areas[i];
+		if (LocationInArea(area, entity.x, entity.y, entity.z - 1))
+		{
+			StepOnTile(entity, area, entity.x - area.x, entity.y - area.y, entity.z - 1 - area.z);
+		}
+	}
+}
+
+function StepOnTile (entity, area, x, y, z) {
+	var tile = area.map[x][y][z];
+	var extra = area.extraData[x][y][z];
+
+	switch (tile) {
+		case PATTERN_BLOCK:
+			if (area.status === STATUS_NORMAL)
+			{
+				area.status = STATUS_DRAWING;
+			}
+			if (area.status === STATUS_DRAWING)
+			{
+				extra.pattern = 1;
+			}
+		break;
+		case PATTERN_CLEAR_BLOCK:
+			ClearAreaPattern(area);
+			area.status = STATUS_NORMAL
+		break;
+		case PATTERN_ACTIVATE_BLOCK:
+			ActivateAreaPattern(area);
+			area.status = STATUS_ACTIVE;
+		break;
+	}
+}
+
+var pattern1 = [
+	[0, 0, 1, 0, 0],
+	[0, 0, 1, 0, 0],
+	[0, 0, 1, 0, 0],
+	[0, 0, 1, 0, 0],
+	[0, 0, 1, 0, 0],];
+
+function CheckPattern (area, pattern) {
+
+}
+
+function ActivateAreaPattern (area) {
+	for (var i = 0; i < 5; i++) {
+		for (var j = 0; j < 5; j++)
+		{
+			if (pattern1[i][j] === 1)
+			{
+				if (area.map[i][j][0] === PATTERN_BLOCK)
+				{
+					if (area.extraData[i][j][0].pattern === 1)
+					{
+						//cool
+					}
+				}
+			}
+		}
+	}
+}
+
+function ClearAreaPattern (area) {
+	for (var i = 0; i < area.xSize; i++)
+	{
+		for (var j = 0; j < area.ySize; j++)
+		{
+			for (var k = 0; k < area.zSize; k++)
+			{
+				var tile = area.map[i][j][k];
+				if (tile === PATTERN_BLOCK)
+				{
+					area.extraData[i][j][k].pattern = 0;
+				}
+			}
+		}
+	}
 }
 
 window.addEventListener('keydown', DoKeyDown, true);
