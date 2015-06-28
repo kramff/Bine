@@ -41,6 +41,7 @@ var APPEAR_BLOCK = 3;
 var PATTERN_BLOCK = 4;
 var PATTERN_CLEAR_BLOCK = 5;
 var PATTERN_ACTIVATE_BLOCK = 6;
+var PATTERN_EFFECT_BLOCK = 7;
 
 var STATUS_NORMAL = 0;
 var STATUS_DRAWING = 1;
@@ -183,6 +184,28 @@ function Area (x, y, z, xSize, ySize, zSize) {
 				this.map[i][j].push(tile);
 			}
 		}
+	}
+}
+
+function SetTile (area, x, y, z, tile) {
+	area.map[x][y][z] = tile;
+	switch (tile)
+	{
+		default:
+			area.extraData[x][y][z] = {};
+		break
+		case APPEAR_BLOCK:
+			area.extraData[x][y][z] = {opacity: 0};
+		break;
+		case DISAPPEAR_BLOCK:
+			area.extraData[x][y][z] = {opacity: 1};
+		break;
+		case PATTERN_BLOCK:
+			area.extraData[x][y][z] = {pattern: 0};
+		break;
+		case PATTERN_EFFECT_BLOCK:
+			area.extraData[x][y][z] = {opacity: 0};
+		break;
 	}
 }
 
@@ -669,6 +692,9 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 	ctx.save();
 	switch (tile)
 	{
+		default:
+			DrawTile(x, y, scale);
+		break;
 		case DISAPPEAR_BLOCK:
 			if (!IsNear(i, j, k, player.x, player.y, player.z, 1))
 			{
@@ -737,6 +763,13 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 			DrawTile(x, y, scale);
 			ctx.restore;
 		break;
+		case PATTERN_EFFECT_BLOCK:
+			ctx.save();
+			extra.opacity = Math.min(0.75, extra.opacity + 0.02);
+			ctx.globalAlpha = extra.opacity;
+			DrawTile(x, y, scale);
+			ctx.restore();
+		break;
 
 	}
 	ctx.restore();
@@ -802,6 +835,10 @@ function IsSolid (x, y, z) {
 				return true;
 			}
 			if (tile === PATTERN_CLEAR_BLOCK)
+			{
+				return true;
+			}
+			if (tile === PATTERN_EFFECT_BLOCK)
 			{
 				return true;
 			}
@@ -877,7 +914,7 @@ function StepOnTile (entity, area, x, y, z) {
 	}
 }
 
-var pattern1 = [
+var PATTERN_STAIRS_V = [
 	[0, 0, 1, 0, 0],
 	[0, 0, 1, 0, 0],
 	[0, 0, 1, 0, 0],
@@ -900,8 +937,8 @@ function ActivateAreaPattern (area) {
 			var areaX = i + 3;
 			var areaY = j + 3;
 			var areaZ = 0;
-			//Use [j][i] because arrays are backwards
-			if (pattern1[j][i] === 1)
+			//Use [j][i] because arrays are flipped
+			if (PATTERN_STAIRS_V[j][i] === 1)
 			{
 				if (area.map[areaX][areaY][areaZ] === PATTERN_BLOCK)
 				{
@@ -938,6 +975,7 @@ function ActivateAreaPattern (area) {
 	if (area.status === STATUS_ACTIVE)
 	{
 		console.log("pattern confirmed!");
+		ApplyPatternEffect(area);
 	}
 	else
 	{
@@ -957,8 +995,20 @@ function ClearAreaPattern (area) {
 				{
 					area.extraData[i][j][k].pattern = 0;
 				}
+				if (tile === PATTERN_EFFECT_BLOCK)
+				{
+					SetTile(area, i, j, k, EMPTY);
+				}
 			}
 		}
+	}
+}
+
+function ApplyPatternEffect (area) {
+	//Create stairs
+	for (var i = 0; i < 5; i++)
+	{
+		SetTile(area, 5, 3+i, 1+i, PATTERN_EFFECT_BLOCK)
 	}
 }
 
