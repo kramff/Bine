@@ -914,16 +914,21 @@ function StepOnTile (entity, area, x, y, z) {
 	}
 }
 
+
 var PATTERN_STAIRS_V = [
 	[0, 0, 1, 0, 0],
 	[0, 0, 1, 0, 0],
 	[0, 0, 1, 0, 0],
 	[0, 0, 1, 0, 0],
 	[0, 0, 1, 0, 0],];
+var PATTERN_STAIRS_H = [
+	[0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0],
+	[1, 1, 1, 1, 1],
+	[0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0],];
 
-function CheckPattern (area, pattern) {
-
-}
+var patterns = [PATTERN_STAIRS_V, PATTERN_STAIRS_H];
 
 function ActivateAreaPattern (area) {
 	if (area.status !== STATUS_DRAWING)
@@ -1072,4 +1077,12 @@ function DoKeyUp (e) {
 	{
 		eKey = false;
 	}
+}
+
+var music = new Audio();
+music.src = "Lux.mp3";
+music.play();
+music.onended = function() {
+	music.currentTime = 0;
+	music.play();
 }
