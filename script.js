@@ -42,6 +42,7 @@ var PATTERN_BLOCK = 4;
 var PATTERN_CLEAR_BLOCK = 5;
 var PATTERN_ACTIVATE_BLOCK = 6;
 var PATTERN_EFFECT_BLOCK = 7;
+var PATTERN_HOLE_BLOCK = 8;
 
 var STATUS_NORMAL = 0;
 var STATUS_DRAWING = 1;
@@ -52,7 +53,8 @@ var entities = [];
 var drawObjects = [];
 
 function CreateEntity () {
-	var newEntity = new Entity (16, 5, 4);
+	//initial location
+	var newEntity = new Entity (16, 5, -4);
 	entities.push(newEntity);
 	drawObjects.push(newEntity);
 	return newEntity;
@@ -159,7 +161,11 @@ function Area (x, y, z, xSize, ySize, zSize) {
 				else
 				{
 					//narrow walkway room
-					if ((i === 4 || i === 5 || i === 6) && k === 0 || ((i === 2 || i === 8) && j%5 === 2))
+					if ((j === 4 || j === 5 || j === 6) && k === 0)
+					{
+						tile = APPEAR_BLOCK;
+					}
+					if ((i === 4 || i === 5 || i === 6) && k === 0 || ((i === 2 || i === 8) && j%6 === 2))
 					{
 						tile = SOLID;
 					}
@@ -206,6 +212,9 @@ function SetTile (area, x, y, z, tile) {
 		case PATTERN_EFFECT_BLOCK:
 			area.extraData[x][y][z] = {opacity: 0};
 		break;
+		case PATTERN_HOLE_BLOCK:
+			area.extraData[x][y][z] = {opacity: 1};
+		break;
 	}
 }
 
@@ -215,9 +224,7 @@ function Init () {
 	CreateArea(); areas[1].x = 11; areas[1].z = -5;
 	CreateArea(); areas[2].x = 22;
 	CreateArea(); areas[3].y = 11; areas[3].z = 9;
-	CreateArea(); areas[4].y = 22; areas[4].z = 9;
-	CreateArea(); areas[5].y = 33; areas[5].z = 9;
-	CreateArea(); areas[6].y = 44; areas[6].z = 9;
+	CreateArea(); areas[4].y = 11; areas[4].z = -100;
 	
 
 }
@@ -398,8 +405,9 @@ function Control () {
 		player.zMov = -1;
 		SetMoveDelay(player, 2);
 	}
-	if (player.z < -20)
+	if (false && player.z < -20)
 	{
+		//respawn
 		player.x = 15;
 		player.y = 5;
 		player.z = 4;
@@ -733,7 +741,6 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 
 		break;
 		case PATTERN_BLOCK:
-			ctx.save();
 			if (extra.pattern === 0)
 			{
 				ctx.fillStyle = "#800000";
@@ -743,32 +750,32 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 				ctx.fillStyle = "#C0C000";
 			}
 			DrawTile(x, y, scale);
-			ctx.restore;
 		break;
 		case PATTERN_BLOCK:
-			ctx.save();
 			ctx.fillStyle = "#800000";
 			DrawTile(x, y, scale);
-			ctx.restore;
 		break;
 		case PATTERN_CLEAR_BLOCK:
-			ctx.save();
 			ctx.fillStyle = "#000080";
 			DrawTile(x, y, scale);
-			ctx.restore;
 		break;
 		case PATTERN_ACTIVATE_BLOCK:
-			ctx.save();
 			ctx.fillStyle = "#400080";
 			DrawTile(x, y, scale);
-			ctx.restore;
 		break;
 		case PATTERN_EFFECT_BLOCK:
-			ctx.save();
 			extra.opacity = Math.min(0.75, extra.opacity + 0.02);
 			ctx.globalAlpha = extra.opacity;
 			DrawTile(x, y, scale);
-			ctx.restore();
+		break;
+		case PATTERN_HOLE_BLOCK:
+			extra.opacity = Math.max(0, extra.opacity - 0.07);
+			if (extra.opacity !== 0)
+			{
+				ctx.fillStyle = "#800000";
+				ctx.globalAlpha = extra.opacity;
+				DrawTile(x, y, scale)
+			}
 		break;
 
 	}
@@ -915,72 +922,145 @@ function StepOnTile (entity, area, x, y, z) {
 }
 
 
-var PATTERN_STAIRS_V = [
-	[0, 0, 1, 0, 0],
-	[0, 0, 1, 0, 0],
-	[0, 0, 1, 0, 0],
-	[0, 0, 1, 0, 0],
-	[0, 0, 1, 0, 0],];
-var PATTERN_STAIRS_H = [
-	[0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0],
-	[1, 1, 1, 1, 1],
-	[0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0],];
+var PATTERN_STAIRS_V = {
+	pattern:[
+		[0, 0, 1, 0, 0],
+		[0, 0, 1, 0, 0],
+		[0, 0, 1, 0, 0],
+		[0, 0, 1, 0, 0],
+		[0, 0, 1, 0, 0],],
+	effect: function (area) {
+		//Create stairs
+		if (player.y > area.y + 5)
+		{
+			//Stairs with top on north
+			for (var i = 0; i < 5; i++)
+			{
+				SetTile(area, 5, 3+i, 5-i, PATTERN_EFFECT_BLOCK)
+			}
+		}
+		else
+		{
+			//Stairs with top on south
+			for (var i = 0; i < 5; i++)
+			{
+				SetTile(area, 5, 3+i, 1+i, PATTERN_EFFECT_BLOCK)
+			}
+		}
+	}
+}
+var PATTERN_STAIRS_H = {
+	pattern:[
+		[0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0],
+		[1, 1, 1, 1, 1],
+		[0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0],],
+	effect: function (area) {
+		//Create stairs
+		if (player.x > area.x + 5)
+		{
+			//Stairs with top on west
+			for (var i = 0; i < 5; i++)
+			{
+				SetTile(area, 3+i, 5, 5-i, PATTERN_EFFECT_BLOCK)
+			}
+		}
+		else
+		{
+			//Stairs with top on east
+			for (var i = 0; i < 5; i++)
+			{
+				SetTile(area, 3+i, 5, 1+i, PATTERN_EFFECT_BLOCK)
+			}
+		}
+	}
+}
 
-var patterns = [PATTERN_STAIRS_V, PATTERN_STAIRS_H];
+var PATTERN_HOLE = {
+	pattern:[
+		[1, 1, 1, 1, 1],
+		[1, 0, 0, 0, 1],
+		[1, 0, 0, 0, 1],
+		[1, 0, 0, 0, 1],
+		[1, 1, 1, 1, 1],],
+	effect: function (area) {
+		//Create hole
+		for (var i = 0; i < 3; i++)
+		{
+			for (var j = 0; j < 3; j++)
+			{
+				SetTile(area, 4+i, 4+j, 0, PATTERN_HOLE_BLOCK)
+			}
+		}
+	}
+}
+
+var patterns = [PATTERN_STAIRS_V, PATTERN_STAIRS_H, PATTERN_HOLE];
 
 function ActivateAreaPattern (area) {
 	if (area.status !== STATUS_DRAWING)
 	{
 		return;
 	}
-	area.status = STATUS_ACTIVE;
-	for (var i = 0; i < 5; i++) {
+
+	var possiblePatterns = patterns.slice(0);
+	for (var i = 0; i < 5; i++)
+	{
 		for (var j = 0; j < 5; j++)
 		{
 			var areaX = i + 3;
 			var areaY = j + 3;
 			var areaZ = 0;
-			//Use [j][i] because arrays are flipped
-			if (PATTERN_STAIRS_V[j][i] === 1)
+			//reverse iteration to because patterns will be removed from this array
+			for (var p = possiblePatterns.length - 1; p >= 0; p--)
 			{
-				if (area.map[areaX][areaY][areaZ] === PATTERN_BLOCK)
+				var pattern = possiblePatterns[p];
+				var patternFailed = false;
+				//Use [j][i] because arrays are flipped
+				if (pattern.pattern[j][i] === 1)
 				{
-					if (area.extraData[areaX][areaY][areaZ].pattern === 1)
+					if (area.map[areaX][areaY][areaZ] === PATTERN_BLOCK)
 					{
-						//cool
-						console.log("good");
+						if (area.extraData[areaX][areaY][areaZ].pattern === 1)
+						{
+							//cool
+						}
+						else
+						{
+							console.log("bad: not lit up");
+							patternFailed = true;
+						}
 					}
 					else
 					{
-						console.log("bad: not lit up");
-						area.status = STATUS_NORMAL;
+						console.log("bad: not pattern block");
+						patternFailed = true;
 					}
 				}
 				else
 				{
-					console.log("bad: not pattern block");
-					area.status = STATUS_NORMAL;
-				}
-			}
-			else
-			{
-				if (area.map[areaX][areaY][areaZ] === PATTERN_BLOCK)
-				{
-					if (area.extraData[areaX][areaY][areaZ].pattern === 1)
+					if (area.map[areaX][areaY][areaZ] === PATTERN_BLOCK)
 					{
-						console.log("bad: shouldn't be lit up");
-						area.status = STATUS_NORMAL;
-					} 
+						if (area.extraData[areaX][areaY][areaZ].pattern === 1)
+						{
+							console.log("bad: shouldn't be lit up");
+							patternFailed = true;
+						}
+					}
+				}
+				if (patternFailed)
+				{
+					possiblePatterns.splice(p, 1);
 				}
 			}
 		}
 	}
-	if (area.status === STATUS_ACTIVE)
+	if (possiblePatterns.length > 0)
 	{
-		console.log("pattern confirmed!");
-		ApplyPatternEffect(area);
+		area.status = STATUS_ACTIVE;
+		var usePattern = possiblePatterns[0];
+		usePattern.effect(area);
 	}
 	else
 	{
@@ -1003,6 +1083,10 @@ function ClearAreaPattern (area) {
 				if (tile === PATTERN_EFFECT_BLOCK)
 				{
 					SetTile(area, i, j, k, EMPTY);
+				}
+				if (tile === PATTERN_HOLE_BLOCK)
+				{
+					SetTile(area, i, j, k, PATTERN_BLOCK);
 				}
 			}
 		}
@@ -1081,7 +1165,7 @@ function DoKeyUp (e) {
 
 var music = new Audio();
 music.src = "Lux.mp3";
-music.play();
+//music.play();
 music.onended = function() {
 	music.currentTime = 0;
 	music.play();
