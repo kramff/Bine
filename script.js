@@ -1028,13 +1028,13 @@ function ActivateAreaPattern (area) {
 						}
 						else
 						{
-							console.log("bad: not lit up");
+							//bad: not lit up
 							patternFailed = true;
 						}
 					}
 					else
 					{
-						console.log("bad: not pattern block");
+						//bad: not pattern block
 						patternFailed = true;
 					}
 				}
@@ -1044,7 +1044,7 @@ function ActivateAreaPattern (area) {
 					{
 						if (area.extraData[areaX][areaY][areaZ].pattern === 1)
 						{
-							console.log("bad: shouldn't be lit up");
+							//bad: shouldn't be lit up
 							patternFailed = true;
 						}
 					}
@@ -1165,7 +1165,7 @@ function DoKeyUp (e) {
 
 var music = new Audio();
 music.src = "Lux.mp3";
-//music.play();
+music.play();
 music.onended = function() {
 	music.currentTime = 0;
 	music.play();
