@@ -1,13 +1,73 @@
 //Bine puzzle game copyright Mark Foster 2015
 
+
+
+// You can use either `new PIXI.WebGLRenderer`, `new PIXI.CanvasRenderer`, or `PIXI.autoDetectRenderer`
+// which will try to choose the best renderer for the environment you are in.
+var renderer = new PIXI.autoDetectRenderer(600, 600);
+
+// The renderer will create a canvas element for you that you can then insert into the DOM.
+//... in Init()
+
+// You need to create a root container that will hold the scene you want to draw.
+var stage = new PIXI.Container();
+
+// This creates a texture from a 'bunny.png' image.
+//var bunnyTexture = PIXI.Texture.fromImage('bunny.png');
+//var bunny = new PIXI.Sprite(bunnyTexture);
+
+// Setup the position and scale of the bunny
+//bunny.position.x = 400;
+//bunny.position.y = 300;
+
+//bunny.scale.x = 2;
+//bunny.scale.y = 2;
+
+// Add the bunny to the scene we are building.
+//stage.addChild(bunny);
+
+/*var square = new PIXI.Graphics();
+square.beginFill(0x00FF00);
+square.lineStyle(3, 0x0000FF);
+square.drawRect(20, 30, 80, 80);
+square.pivot = new PIXI.Point(60, 70);
+square.position = new PIXI.Point(300, 0);
+stage.addChild(square);*/
+
+
+
+// kick off the animation loop (defined below)
+//animate();
+
+//function animate() {
+	// start the timer for the next animation loop
+	//requestAnimationFrame(animate);
+
+	// each frame we spin the bunny around a bit
+	//bunny.rotation += 0.01;
+
+	//square.rotation += 0.11;
+
+	// this is the main render call that makes pixi draw your container and its children.
+	//renderer.render(stage);
+//}
+
+
+
+
+
+
+
+
+
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
-var CANVAS_WIDTH = 600;
-var CANVAS_HEIGHT = 600;
+var CANVAS_WIDTH = 200;
+var CANVAS_HEIGHT = 200;
 
-var CANVAS_HALF_WIDTH = 300;
-var CANVAS_HALF_HEIGHT = 300;
+var CANVAS_HALF_WIDTH = 100;
+var CANVAS_HALF_HEIGHT = 100;
 
 var EYE_DISTANCE = 45;
 var SCALE_MULTIPLIER = 490;
@@ -52,6 +112,8 @@ var areas = [];
 var entities = [];
 var drawObjects = [];
 
+
+
 function CreateEntity () {
 	//initial location
 	var newEntity = new Entity (16, 5, -4);
@@ -88,18 +150,28 @@ function Area (x, y, z, xSize, ySize, zSize) {
 	this.ySize = ySize;
 	this.zSize = zSize;
 	this.status = 0;
-	this.extraData = [];
-	this.map = [];
+	this.extraData = []; //[x][y][z] - object with any values
+	this.map = []; //[x][y][z] - type (number)
+	this.containerLayers = []; //[z] - PIXI Container
+	this.tileGraphics = []; //[x][y][z] - PIXI Graphics
 	for (var i = 0; i < xSize; i++)
 	{
 		this.map.push([]);
 		this.extraData.push([]);
+		this.tileGraphics.push([]);
 		for (var j = 0; j < ySize; j++)
 		{
 			this.map[i].push([]);
 			this.extraData[i].push([]);
+			this.tileGraphics[i].push([]);
 			for (var k = 0; k < zSize; k++)
 			{
+				if (this.containerLayers.length <= k)
+				{
+					var layer = new PIXI.Container();
+					this.containerLayers.push(layer);
+					stage.addChild(layer);
+				}
 				var tile = EMPTY;
 
 				if (areas.length === 0)
@@ -188,6 +260,17 @@ function Area (x, y, z, xSize, ySize, zSize) {
 				}
 				this.extraData[i][j].push(extra);
 				this.map[i][j].push(tile);
+
+				var graphics = new PIXI.Graphics();
+				this.tileGraphics[i][j].push(graphics);
+				var curLayer = this.containerLayers[k];
+				curLayer.addChild(graphics)
+				if (tile !== 0)
+				{
+					DrawTilePixi(graphics, tile, extra)
+				}
+				graphics.position.x = i + k * 0.1;
+				graphics.position.y = j + k * 0.1;
 			}
 		}
 	}
@@ -225,6 +308,13 @@ function Init () {
 	CreateArea(); areas[2].x = 22;
 	CreateArea(); areas[3].y = 11; areas[3].z = 9;
 	CreateArea(); areas[4].y = 11; areas[4].z = -100;
+
+
+
+
+
+
+	document.body.appendChild(renderer.view);
 	
 
 }
@@ -507,6 +597,33 @@ function MovementZRules (entity) {
 }
 
 function Render () {
+
+	//PIXI rendering
+	for (var ai = 0; ai < areas.length; ai++)
+	{
+		var area = areas[ai]
+		for (var li = 0; li < area.containerLayers.length; li++)
+		{
+			var layer = area.containerLayers[li];
+			var scale = GetScale(area.z + li);
+			layer.scale = new PIXI.Point(scale, scale);
+			layer.position = new PIXI.Point((area.x - xCam) * scale, (area.y - yCam) * scale);
+			layer.zPos = area.z + li;
+		}
+	}
+	stage.children.sort(function (a, b) {
+		if (a.zPos < b.zPos)
+			return -1;
+		if (a.zPos > b.zPos)
+			return 1;
+		return 0;
+	});
+
+	renderer.render(stage);
+
+
+
+	//Canvas rendering
 	canvas.width = canvas.width;
 
 	xCam = (xCam * 4 + GetEntityX(player) + 0.5) * 0.2;
@@ -786,6 +903,15 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 function DrawTile (x, y, scale) {
 	ctx.fillRect(x, y, scale, scale);
 	ctx.strokeRect(x, y, scale, scale);
+}
+
+function DrawTilePixi (tileGraphic, tile, extra) {
+	tileGraphic.clear();
+	tileGraphic.beginFill(0x101010);
+	//tileGraphic.beginFill(0xFFFFFF * Math.random());
+	tileGraphic.lineStyle(0.05, 0xFFFFFF);
+	tileGraphic.drawRect(0, 0, 1, 1);
+
 }
 
 //Up to 1 tile away in all directions
@@ -1165,7 +1291,7 @@ function DoKeyUp (e) {
 
 var music = new Audio();
 music.src = "Lux.mp3";
-music.play();
+//music.play();
 music.onended = function() {
 	music.currentTime = 0;
 	music.play();
