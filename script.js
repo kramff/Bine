@@ -35,6 +35,11 @@ square.position = new PIXI.Point(300, 0);
 stage.addChild(square);*/
 
 
+var tileTexture = PIXI.Texture.fromImage("tile2.png");
+
+var TEX_SIZE = 64;
+
+
 
 // kick off the animation loop (defined below)
 //animate();
@@ -267,10 +272,11 @@ function Area (x, y, z, xSize, ySize, zSize) {
 				curLayer.addChild(graphics)
 				if (tile !== 0)
 				{
-					DrawTilePixi(graphics, tile, extra)
+					//DrawTilePixi(graphics, tile, extra)
+					graphics.addChild(new PIXI.Sprite(tileTexture))
 				}
-				graphics.position.x = i + k * 0.1;
-				graphics.position.y = j + k * 0.1;
+				graphics.position.x = TEX_SIZE * i;
+				graphics.position.y = TEX_SIZE * j;
 			}
 		}
 	}
@@ -598,6 +604,12 @@ function MovementZRules (entity) {
 
 function Render () {
 
+	//Camera position
+
+	xCam = (xCam * 4 + GetEntityX(player) + 0.5) * 0.2;
+	yCam = (yCam * 4 + GetEntityY(player) + 0.5) * 0.2;
+	zCam = (zCam * 4 + GetEntityZ(player)) * 0.2;
+
 	//PIXI rendering
 	for (var ai = 0; ai < areas.length; ai++)
 	{
@@ -605,9 +617,18 @@ function Render () {
 		for (var li = 0; li < area.containerLayers.length; li++)
 		{
 			var layer = area.containerLayers[li];
-			var scale = GetScale(area.z + li);
-			layer.scale = new PIXI.Point(scale, scale);
-			layer.position = new PIXI.Point((area.x - xCam) * scale, (area.y - yCam) * scale);
+			var scale = GetScale(area.z + li) / TEX_SIZE;
+			if (scale < 0.01)
+			{
+				layer.visible = false;
+			}
+			else
+			{
+				layer.visible = true;
+				layer.scale = new PIXI.Point(scale, scale);
+				layer.position = new PIXI.Point((area.x - xCam) * scale * TEX_SIZE + 300, (area.y - yCam) * scale * TEX_SIZE + 300);
+			}
+			
 			layer.zPos = area.z + li;
 		}
 	}
@@ -622,13 +643,8 @@ function Render () {
 	renderer.render(stage);
 
 
-
 	//Canvas rendering
 	canvas.width = canvas.width;
-
-	xCam = (xCam * 4 + GetEntityX(player) + 0.5) * 0.2;
-	yCam = (yCam * 4 + GetEntityY(player) + 0.5) * 0.2;
-	zCam = (zCam * 4 + GetEntityZ(player)) * 0.2;
 
 	ctx.strokeStyle = "#FFFFFF";
 	ctx.fillStyle = "#101010";
