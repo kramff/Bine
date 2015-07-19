@@ -4,13 +4,15 @@
 
 // You can use either `new PIXI.WebGLRenderer`, `new PIXI.CanvasRenderer`, or `PIXI.autoDetectRenderer`
 // which will try to choose the best renderer for the environment you are in.
-var renderer = new PIXI.autoDetectRenderer(600, 600);
+// >>>
+// var renderer = new PIXI.autoDetectRenderer(600, 600);
 
 // The renderer will create a canvas element for you that you can then insert into the DOM.
 //... in Init()
 
 // You need to create a root container that will hold the scene you want to draw.
-var stage = new PIXI.Container();
+// >>>
+// var stage = new PIXI.Container();
 
 // This creates a texture from a 'bunny.png' image.
 //var bunnyTexture = PIXI.Texture.fromImage('bunny.png');
@@ -35,9 +37,10 @@ square.position = new PIXI.Point(300, 0);
 stage.addChild(square);*/
 
 
-var tileTexture = PIXI.Texture.fromImage("tile2.png");
+//var tileTexture = PIXI.Texture.fromImage("tile2.png");
 
-var TEX_SIZE = 64;
+// >>>
+// var TEX_SIZE = 64;
 
 
 
@@ -68,11 +71,11 @@ var TEX_SIZE = 64;
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
-var CANVAS_WIDTH = 200;
-var CANVAS_HEIGHT = 200;
+var CANVAS_WIDTH = 600;
+var CANVAS_HEIGHT = 600;
 
-var CANVAS_HALF_WIDTH = 100;
-var CANVAS_HALF_HEIGHT = 100;
+var CANVAS_HALF_WIDTH = 300;
+var CANVAS_HALF_HEIGHT = 300;
 
 var EYE_DISTANCE = 45;
 var SCALE_MULTIPLIER = 490;
@@ -89,6 +92,13 @@ var dKey;
 
 var qKey;
 var eKey;
+
+var mouseX = 0;
+var mouseY = 0;
+
+var mouseMovement = false;
+var mouseTilesX = 0;
+var mouseTilesY = 0;
 
 var xCam = 0;
 var yCam = 0;
@@ -157,26 +167,26 @@ function Area (x, y, z, xSize, ySize, zSize) {
 	this.status = 0;
 	this.extraData = []; //[x][y][z] - object with any values
 	this.map = []; //[x][y][z] - type (number)
-	this.containerLayers = []; //[z] - PIXI Container
-	this.tileGraphics = []; //[x][y][z] - PIXI Graphics
+	// this.containerLayers = []; //[z] - PIXI Container
+	// this.tileGraphics = []; //[x][y][z] - PIXI Graphics
 	for (var i = 0; i < xSize; i++)
 	{
 		this.map.push([]);
 		this.extraData.push([]);
-		this.tileGraphics.push([]);
+		// this.tileGraphics.push([]);
 		for (var j = 0; j < ySize; j++)
 		{
 			this.map[i].push([]);
 			this.extraData[i].push([]);
-			this.tileGraphics[i].push([]);
+			// this.tileGraphics[i].push([]);
 			for (var k = 0; k < zSize; k++)
 			{
-				if (this.containerLayers.length <= k)
-				{
-					var layer = new PIXI.Container();
-					this.containerLayers.push(layer);
-					stage.addChild(layer);
-				}
+				// if (this.containerLayers.length <= k)
+				// {
+					// var layer = new PIXI.Container();
+					// this.containerLayers.push(layer);
+					// stage.addChild(layer);
+				// }
 				var tile = EMPTY;
 
 				if (areas.length === 0)
@@ -266,17 +276,17 @@ function Area (x, y, z, xSize, ySize, zSize) {
 				this.extraData[i][j].push(extra);
 				this.map[i][j].push(tile);
 
-				var graphics = new PIXI.Graphics();
-				this.tileGraphics[i][j].push(graphics);
-				var curLayer = this.containerLayers[k];
-				curLayer.addChild(graphics)
-				if (tile !== 0)
-				{
-					//DrawTilePixi(graphics, tile, extra)
-					graphics.addChild(new PIXI.Sprite(tileTexture))
-				}
-				graphics.position.x = TEX_SIZE * i;
-				graphics.position.y = TEX_SIZE * j;
+				// var graphics = new PIXI.Graphics();
+				// this.tileGraphics[i][j].push(graphics);
+				// var curLayer = this.containerLayers[k];
+				// curLayer.addChild(graphics)
+				// if (tile !== 0)
+				// {
+					// DrawTilePixi(graphics, tile, extra)
+					// graphics.addChild(new PIXI.Sprite(tileTexture))
+				// }
+				// graphics.position.x = TEX_SIZE * i;
+				// graphics.position.y = TEX_SIZE * j;
 			}
 		}
 	}
@@ -319,8 +329,8 @@ function Init () {
 
 
 
-
-	document.body.appendChild(renderer.view);
+	// >>>
+	// document.body.appendChild(renderer.view);
 	
 
 }
@@ -364,6 +374,19 @@ function Update () {
 }
 
 function Control () {
+	var up = wKey;
+	var down = sKey;
+	var left = aKey;
+	var right = dKey
+	if (mouseMovement)
+	{
+		up = mouseTilesY < 0;
+		down = mouseTilesY > 0;
+		left = mouseTilesX < 0;
+		right = mouseTilesX > 0;
+	}
+
+
 	//Move delay greater than 0 -> in the process of moving
 	if (player.moveDelay > 0)
 	{
@@ -372,6 +395,11 @@ function Control () {
 		//Done with this movement
 		if (player.moveDelay <= 0)
 		{
+			if (mouseMovement)
+			{
+				mouseTilesX -= player.xMov;
+				mouseTilesY -= player.yMov;
+			}
 			player.x += player.xMov;
 			player.y += player.yMov;
 			player.z += player.zMov;
@@ -386,28 +414,28 @@ function Control () {
 			{
 				var movementChanged = false;
 				// Allow diagonal movement within a few frames
-				if (wKey && player.yMov === 0)
+				if (up && player.yMov === 0)
 				{
 					player.yMov = -1;
 					movementChanged = true;
 				}
-				if (sKey && player.yMov === 0)
+				if (down && player.yMov === 0)
 				{
 					player.yMov = 1;
 					movementChanged = true;
 				}
-				if (aKey && player.xMov === 0)
+				if (left && player.xMov === 0)
 				{
 					player.xMov = -1;
 					movementChanged = true;
 				}
-				if (dKey && player.xMov === 0)
+				if (right && player.xMov === 0)
 				{
 					player.xMov = 1;
 					movementChanged = true;
 				}
 				// Allow canceling movement by releasing key or pressing opposite
-				if (player.yMov === -1 && (!wKey || sKey))
+				if (player.yMov === -1 && (!up || down))
 				{
 					player.yMov = 0;
 					if (player.xMov === 0)
@@ -420,7 +448,7 @@ function Control () {
 						movementChanged = true;
 					}
 				}
-				if (player.yMov === 1 && (!sKey || wKey))
+				if (player.yMov === 1 && (!down || up))
 				{
 					player.yMov = 0;
 					if (player.xMov === 0)
@@ -433,7 +461,7 @@ function Control () {
 						movementChanged = true;
 					}
 				}
-				if (player.xMov === -1 && (!aKey || dKey))
+				if (player.xMov === -1 && (!left || right))
 				{
 					player.xMov = 0;
 					if (player.yMov === 0)
@@ -446,7 +474,7 @@ function Control () {
 						movementChanged = true;
 					}
 				}
-				if (player.xMov === 1 && (!dKey || aKey))
+				if (player.xMov === 1 && (!right || left))
 				{
 					player.xMov = 0;
 					if (player.yMov === 0)
@@ -471,22 +499,22 @@ function Control () {
 	if (IsSolidEOffset(player, 0, 0, -1))
 	{
 		//Solid ground below player - can move
-		if (wKey && !sKey)
+		if (up && !down)
 		{
 			player.yMov = -1;
 			SetMoveDelay(player, 10);
 		}
-		if (sKey && !wKey)
+		if (down && !up)
 		{
 			player.yMov = 1;
 			SetMoveDelay(player, 10);
 		}
-		if (aKey && !dKey)
+		if (left && !right)
 		{
 			player.xMov = -1;
 			SetMoveDelay(player, 10);
 		}
-		if (dKey && !aKey)
+		if (right && !left)
 		{
 			player.xMov = 1;
 			SetMoveDelay(player, 10);
@@ -611,36 +639,35 @@ function Render () {
 	zCam = (zCam * 4 + GetEntityZ(player)) * 0.2;
 
 	//PIXI rendering
-	for (var ai = 0; ai < areas.length; ai++)
-	{
-		var area = areas[ai]
-		for (var li = 0; li < area.containerLayers.length; li++)
-		{
-			var layer = area.containerLayers[li];
-			var scale = GetScale(area.z + li) / TEX_SIZE;
-			if (scale < 0.01)
-			{
-				layer.visible = false;
-			}
-			else
-			{
-				layer.visible = true;
-				layer.scale = new PIXI.Point(scale, scale);
-				layer.position = new PIXI.Point((area.x - xCam) * scale * TEX_SIZE + 300, (area.y - yCam) * scale * TEX_SIZE + 300);
-			}
-			
-			layer.zPos = area.z + li;
-		}
-	}
-	stage.children.sort(function (a, b) {
-		if (a.zPos < b.zPos)
-			return -1;
-		if (a.zPos > b.zPos)
-			return 1;
-		return 0;
-	});
-
-	renderer.render(stage);
+	// for (var ai = 0; ai < areas.length; ai++)
+	// {
+		// var area = areas[ai]
+		// for (var li = 0; li < area.containerLayers.length; li++)
+		// {
+			// var layer = area.containerLayers[li];
+			// var scale = GetScale(area.z + li) / TEX_SIZE;
+			// if (scale < 0.01)
+			// {
+				// layer.visible = false;
+			// }
+			// else
+			// {
+				// layer.visible = true;
+				// layer.scale = new PIXI.Point(scale, scale);
+				// layer.position = new PIXI.Point((area.x - xCam) * scale * TEX_SIZE + 300, (area.y - yCam) * scale * TEX_SIZE + 300);
+			// }
+			// 
+			// layer.zPos = area.z + li;
+		// }
+	// }
+	// stage.children.sort(function (a, b) {
+		// if (a.zPos < b.zPos)
+			// return -1;
+		// if (a.zPos > b.zPos)
+			// return 1;
+		// return 0;
+	// });
+	//renderer.render(stage);
 
 
 	//Canvas rendering
@@ -921,14 +948,13 @@ function DrawTile (x, y, scale) {
 	ctx.strokeRect(x, y, scale, scale);
 }
 
-function DrawTilePixi (tileGraphic, tile, extra) {
-	tileGraphic.clear();
-	tileGraphic.beginFill(0x101010);
-	//tileGraphic.beginFill(0xFFFFFF * Math.random());
-	tileGraphic.lineStyle(0.05, 0xFFFFFF);
-	tileGraphic.drawRect(0, 0, 1, 1);
-
-}
+// function DrawTilePixi (tileGraphic, tile, extra) {
+	// tileGraphic.clear();
+	// tileGraphic.beginFill(0x101010);
+	// tileGraphic.beginFill(0xFFFFFF * Math.random());
+	// tileGraphic.lineStyle(2, 0xFFFFFF);
+	// tileGraphic.drawRect(0, 0, TEX_SIZE, TEX_SIZE);
+// }
 
 //Up to 1 tile away in all directions
 function IsNear (x1, y1, z1, x2, y2, z2, dist) {
@@ -1245,6 +1271,7 @@ function ApplyPatternEffect (area) {
 
 window.addEventListener('keydown', DoKeyDown, true);
 window.addEventListener('keyup', DoKeyUp, true);
+window.addEventListener('mousedown', DoMouseDown, true);
 
 function DoKeyDown (e) {
 	if (e.keyCode === 8)
@@ -1276,6 +1303,7 @@ function DoKeyDown (e) {
 	{
 		eKey = true;
 	}
+	mouseMovement = false;
 }
 
 function DoKeyUp (e) {
@@ -1303,6 +1331,18 @@ function DoKeyUp (e) {
 	{
 		eKey = false;
 	}
+}
+
+var standardTileSize = 55; 
+
+function DoMouseDown (e) {
+	mouseX = e.clientX;
+	mouseY = e.clientY;
+
+	mouseTilesX = Math.round((mouseX - 300) / standardTileSize);
+	mouseTilesY = Math.round((mouseY - 300) / standardTileSize);
+	
+	mouseMovement = true;
 }
 
 var music = new Audio();
