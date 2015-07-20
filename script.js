@@ -18,7 +18,6 @@ var TILE_SIZE = 5.4;
 
 
 
-
 var wKey;
 var aKey;
 var sKey;
@@ -70,7 +69,6 @@ function CreateEntity () {
 	drawObjects.push(newEntity);
 	return newEntity;
 
-	DoResize();
 }
 
 function Entity (x, y, z) {
@@ -597,7 +595,7 @@ function Render () {
 		edgeSquareLimit.y -= 3;
 		edgeSquareLimit.xSize += 6;
 		edgeSquareLimit.ySize += 6;
-		if (edgeSquareLimit.xSize > CANVAS_WIDTH + 300)
+		if (edgeSquareLimit.xSize > CANVAS_WIDTH + 310)
 		{
 			edgeSquareLimit.active = false;
 		}
@@ -1246,29 +1244,10 @@ function DoMouseDown (e) {
 	mouseX = e.clientX;
 	mouseY = e.clientY;
 
-	mouseTilesX = Math.round((mouseX - 300) / standardTileSize);
-	mouseTilesY = Math.round((mouseY - 300) / standardTileSize);
+	mouseTilesX = Math.round((mouseX - CANVAS_HALF_WIDTH) / standardTileSize);
+	mouseTilesY = Math.round((mouseY - CANVAS_HALF_HEIGHT) / standardTileSize);
 	
 	mouseMovement = true;
 }
 
-window.addEventListener('resize', DoResize, true);
 
-function DoResize (e) {
-
-	CANVAS_WIDTH = canvas.offsetWidth;
-	CANVAS_HEIGHT = canvas.offsetHeight;
-	CANVAS_HALF_WIDTH = CANVAS_WIDTH / 2;
-	CANVAS_HALF_HEIGHT = CANVAS_HEIGHT / 2;
-}
-
-
-
-//var music = new Audio();
-//music.src = "bgm.mp3";
-//music.play();
-//music.volue = 0.5;
-// music.onended = function() {
-	// music.currentTime = 0;
-	// music.play();
-// }
