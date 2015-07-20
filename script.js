@@ -1,73 +1,6 @@
 //Bine puzzle game copyright Mark Foster 2015
 
 
-
-// You can use either `new PIXI.WebGLRenderer`, `new PIXI.CanvasRenderer`, or `PIXI.autoDetectRenderer`
-// which will try to choose the best renderer for the environment you are in.
-// >>>
-// var renderer = new PIXI.autoDetectRenderer(600, 600);
-
-// The renderer will create a canvas element for you that you can then insert into the DOM.
-//... in Init()
-
-// You need to create a root container that will hold the scene you want to draw.
-// >>>
-// var stage = new PIXI.Container();
-
-// This creates a texture from a 'bunny.png' image.
-//var bunnyTexture = PIXI.Texture.fromImage('bunny.png');
-//var bunny = new PIXI.Sprite(bunnyTexture);
-
-// Setup the position and scale of the bunny
-//bunny.position.x = 400;
-//bunny.position.y = 300;
-
-//bunny.scale.x = 2;
-//bunny.scale.y = 2;
-
-// Add the bunny to the scene we are building.
-//stage.addChild(bunny);
-
-/*var square = new PIXI.Graphics();
-square.beginFill(0x00FF00);
-square.lineStyle(3, 0x0000FF);
-square.drawRect(20, 30, 80, 80);
-square.pivot = new PIXI.Point(60, 70);
-square.position = new PIXI.Point(300, 0);
-stage.addChild(square);*/
-
-
-//var tileTexture = PIXI.Texture.fromImage("tile2.png");
-
-// >>>
-// var TEX_SIZE = 64;
-
-
-
-// kick off the animation loop (defined below)
-//animate();
-
-//function animate() {
-	// start the timer for the next animation loop
-	//requestAnimationFrame(animate);
-
-	// each frame we spin the bunny around a bit
-	//bunny.rotation += 0.01;
-
-	//square.rotation += 0.11;
-
-	// this is the main render call that makes pixi draw your container and its children.
-	//renderer.render(stage);
-//}
-
-
-
-
-
-
-
-
-
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
@@ -76,6 +9,7 @@ var CANVAS_HEIGHT = 600;
 
 var CANVAS_HALF_WIDTH = 300;
 var CANVAS_HALF_HEIGHT = 300;
+
 
 var EYE_DISTANCE = 45;
 var SCALE_MULTIPLIER = 490;
@@ -135,6 +69,8 @@ function CreateEntity () {
 	entities.push(newEntity);
 	drawObjects.push(newEntity);
 	return newEntity;
+
+	DoResize();
 }
 
 function Entity (x, y, z) {
@@ -216,13 +152,13 @@ function Area (x, y, z, xSize, ySize, zSize) {
 				else if (areas.length === 2)
 				{
 					//some pillars room
-					if (j === 0 || j === 10 || i === 10 || k === 0)
-					{
-						tile = SOLID;
-					}
 					if ((i-j)%3 === 0 && (i+j)/2-0>k)
 					{
 						tile = APPEAR_BLOCK;
+					}
+					if (j === 0 || j === 10 || i === 10 || k === 0)
+					{
+						tile = SOLID;
 					}
 				}
 				else if (areas.length === 3)
@@ -325,13 +261,6 @@ function Init () {
 	CreateArea(); areas[3].y = 11; areas[3].z = 9;
 	CreateArea(); areas[4].y = 11; areas[4].z = -100;
 
-
-
-
-
-	// >>>
-	// document.body.appendChild(renderer.view);
-	
 
 }
 
@@ -595,9 +524,14 @@ function MovementXYRules (entity) {
 function MovementZRulesCheck (entity, x, y) {
 	var aboveSolid = IsSolidEOffset(entity, x, y, 1);
 	var levelSolid = IsSolidEOffset(entity, x, y, 0);
+	var selfAboveSolid = IsSolidEOffset(entity, 0, 0, 1);
 	
 	if (!aboveSolid || !levelSolid)
 	{
+		if (levelSolid && selfAboveSolid)
+		{
+			return false;
+		}
 		return true;
 	}
 	return false;
@@ -607,6 +541,7 @@ function MovementZRules (entity) {
 	var aboveSolid = IsSolidEMovOffset(entity, 0, 0, 1);
 	var levelSolid = IsSolidEMovOffset(entity, 0, 0, 0);
 	var belowSolid = IsSolidEMovOffset(entity, 0, 0, -1);
+	var selfAboveSolid = IsSolidEOffset(entity, 0, 0, 1);
 
 	if (levelSolid)
 	{
@@ -618,8 +553,17 @@ function MovementZRules (entity) {
 		}
 		else
 		{
-			//upwards movement
-			entity.zMov = 1;
+			if (selfAboveSolid)
+			{
+				//blocked by ceiling
+				entity.xMov = 0;
+				entity.yMov = 0;
+			}
+			else
+			{
+				//upwards movement
+				entity.zMov = 1;
+			}
 		}
 	}
 	else if (!belowSolid)
@@ -637,38 +581,6 @@ function Render () {
 	xCam = (xCam * 4 + GetEntityX(player) + 0.5) * 0.2;
 	yCam = (yCam * 4 + GetEntityY(player) + 0.5) * 0.2;
 	zCam = (zCam * 4 + GetEntityZ(player)) * 0.2;
-
-	//PIXI rendering
-	// for (var ai = 0; ai < areas.length; ai++)
-	// {
-		// var area = areas[ai]
-		// for (var li = 0; li < area.containerLayers.length; li++)
-		// {
-			// var layer = area.containerLayers[li];
-			// var scale = GetScale(area.z + li) / TEX_SIZE;
-			// if (scale < 0.01)
-			// {
-				// layer.visible = false;
-			// }
-			// else
-			// {
-				// layer.visible = true;
-				// layer.scale = new PIXI.Point(scale, scale);
-				// layer.position = new PIXI.Point((area.x - xCam) * scale * TEX_SIZE + 300, (area.y - yCam) * scale * TEX_SIZE + 300);
-			// }
-			// 
-			// layer.zPos = area.z + li;
-		// }
-	// }
-	// stage.children.sort(function (a, b) {
-		// if (a.zPos < b.zPos)
-			// return -1;
-		// if (a.zPos > b.zPos)
-			// return 1;
-		// return 0;
-	// });
-	//renderer.render(stage);
-
 
 	//Canvas rendering
 	canvas.width = canvas.width;
@@ -1261,17 +1173,8 @@ function ClearAreaPattern (area) {
 	}
 }
 
-function ApplyPatternEffect (area) {
-	//Create stairs
-	for (var i = 0; i < 5; i++)
-	{
-		SetTile(area, 5, 3+i, 1+i, PATTERN_EFFECT_BLOCK)
-	}
-}
 
 window.addEventListener('keydown', DoKeyDown, true);
-window.addEventListener('keyup', DoKeyUp, true);
-window.addEventListener('mousedown', DoMouseDown, true);
 
 function DoKeyDown (e) {
 	if (e.keyCode === 8)
@@ -1306,6 +1209,8 @@ function DoKeyDown (e) {
 	mouseMovement = false;
 }
 
+window.addEventListener('keyup', DoKeyUp, true);
+
 function DoKeyUp (e) {
 	if (e.keyCode === 87)
 	{
@@ -1335,6 +1240,8 @@ function DoKeyUp (e) {
 
 var standardTileSize = 55; 
 
+window.addEventListener('mousedown', DoMouseDown, true);
+
 function DoMouseDown (e) {
 	mouseX = e.clientX;
 	mouseY = e.clientY;
@@ -1345,10 +1252,23 @@ function DoMouseDown (e) {
 	mouseMovement = true;
 }
 
-var music = new Audio();
-music.src = "Lux.mp3";
-//music.play();
-music.onended = function() {
-	music.currentTime = 0;
-	music.play();
+window.addEventListener('resize', DoResize, true);
+
+function DoResize (e) {
+
+	CANVAS_WIDTH = canvas.offsetWidth;
+	CANVAS_HEIGHT = canvas.offsetHeight;
+	CANVAS_HALF_WIDTH = CANVAS_WIDTH / 2;
+	CANVAS_HALF_HEIGHT = CANVAS_HEIGHT / 2;
 }
+
+
+
+//var music = new Audio();
+//music.src = "bgm.mp3";
+//music.play();
+//music.volue = 0.5;
+// music.onended = function() {
+	// music.currentTime = 0;
+	// music.play();
+// }
