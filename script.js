@@ -644,10 +644,6 @@ function GetScale (z) {
 	return -(TILE_SIZE / ( Z_MULTIPLIER * (z - zCam) - EYE_DISTANCE)) * SCALE_MULTIPLIER;
 }
 
-/*function GetScale (z) {
-	return -(Math.atan(TILE_SIZE / ( Z_MULTIPLIER * (z - zCam) - EYE_DISTANCE))) * SCALE_MULTIPLIER;
-}*/
-
 function DrawAllObjects () {
 	if (drawObjects.length === 0)
 	{
@@ -857,14 +853,6 @@ function DrawTile (x, y, scale) {
 	ctx.fillRect(x, y, scale, scale);
 	ctx.strokeRect(x, y, scale, scale);
 }
-
-// function DrawTilePixi (tileGraphic, tile, extra) {
-	// tileGraphic.clear();
-	// tileGraphic.beginFill(0x101010);
-	// tileGraphic.beginFill(0xFFFFFF * Math.random());
-	// tileGraphic.lineStyle(2, 0xFFFFFF);
-	// tileGraphic.drawRect(0, 0, TEX_SIZE, TEX_SIZE);
-// }
 
 //Up to 1 tile away in all directions
 function IsNear (x1, y1, z1, x2, y2, z2, dist) {
