@@ -95,32 +95,29 @@ function Area (x, y, z, xSize, ySize, zSize) {
 	this.x = x;
 	this.y = y;
 	this.z = z;
+
+	this.xMov = 0;
+	this.yMov = 0;
+	this.zMov = 0;
+	this.moveDelay = 0;
+	this.delayTime = 10;
+
 	this.xSize = xSize;
 	this.ySize = ySize;
 	this.zSize = zSize;
 	this.status = 0;
 	this.extraData = []; //[x][y][z] - object with any values
 	this.map = []; //[x][y][z] - type (number)
-	// this.containerLayers = []; //[z] - PIXI Container
-	// this.tileGraphics = []; //[x][y][z] - PIXI Graphics
 	for (var i = 0; i < xSize; i++)
 	{
 		this.map.push([]);
 		this.extraData.push([]);
-		// this.tileGraphics.push([]);
 		for (var j = 0; j < ySize; j++)
 		{
 			this.map[i].push([]);
 			this.extraData[i].push([]);
-			// this.tileGraphics[i].push([]);
 			for (var k = 0; k < zSize; k++)
 			{
-				// if (this.containerLayers.length <= k)
-				// {
-					// var layer = new PIXI.Container();
-					// this.containerLayers.push(layer);
-					// stage.addChild(layer);
-				// }
 				var tile = EMPTY;
 
 				if (areas.length === 0)
@@ -209,18 +206,6 @@ function Area (x, y, z, xSize, ySize, zSize) {
 				}
 				this.extraData[i][j].push(extra);
 				this.map[i][j].push(tile);
-
-				// var graphics = new PIXI.Graphics();
-				// this.tileGraphics[i][j].push(graphics);
-				// var curLayer = this.containerLayers[k];
-				// curLayer.addChild(graphics)
-				// if (tile !== 0)
-				// {
-					// DrawTilePixi(graphics, tile, extra)
-					// graphics.addChild(new PIXI.Sprite(tileTexture))
-				// }
-				// graphics.position.x = TEX_SIZE * i;
-				// graphics.position.y = TEX_SIZE * j;
 			}
 		}
 	}
@@ -289,7 +274,7 @@ function Update () {
 		}
 	}
 
-
+	AreaUpdate();
 	Control();
 	Render();
 
@@ -298,6 +283,26 @@ function Update () {
 	totalDelay += delay;
 	frameCount ++;
 	lastTime = new Date;
+}
+
+function AreaUpdate () {
+	for (var i = 0; i < areas.length; i++)
+	{
+		var area = areas[i];
+		if (area.moveDelay > 0)
+		{
+			area.moveDelay --;
+			if (area.moveDelay <= 0)
+			{
+				area.x += area.xMov;
+				area.y += area.yMov;
+				area.z += area.zMov;
+				area.xMov = 0;
+				area.yMov = 0;
+				area.zMov = 0;
+			}
+		}
+	}
 }
 
 function Control () {
@@ -640,6 +645,18 @@ function GetEntityZ (entity) {
 	return entity.z + entity.zMov * (entity.delayTime - entity.moveDelay) / entity.delayTime;
 }
 
+function GetAreaX (area) {
+	return area.x + area.xMov * (area.delayTime - area.moveDelay) / area.delayTime;
+}
+
+function GetAreaY (area) {
+	return area.y + area.yMov * (area.delayTime - area.moveDelay) / area.delayTime;
+}
+
+function GetAreaZ (area) {
+	return area.z + area.zMov * (area.delayTime - area.moveDelay) / area.delayTime;
+}
+
 function GetScale (z) {
 	return -(TILE_SIZE / ( Z_MULTIPLIER * (z - zCam) - EYE_DISTANCE)) * SCALE_MULTIPLIER;
 }
@@ -733,15 +750,15 @@ function DrawAreaZSlice(area, z) {
 	{
 		for (var i = 0; i < area.xSize; i++)
 		{
-			var x = scale * (i + area.x - xCam) + CANVAS_HALF_WIDTH;
+			var x = scale * (i + GetAreaX(area) - xCam) + CANVAS_HALF_WIDTH;
 			if (x > 0 - scale && x < CANVAS_WIDTH)
 			{
 				for (var j = 0; j < area.ySize; j++)
 				{
-					var y = scale * (j + area.y - yCam) + CANVAS_HALF_HEIGHT;
+					var y = scale * (j + GetAreaY(area) - yCam) + CANVAS_HALF_HEIGHT;
 					if (y > 0 - scale && y < CANVAS_HEIGHT)
 					{	
-						var tile = area.map[i][j][z - area.z];
+						var tile = area.map[i][j][z - GetAreaZ(area)];
 						if (tile > 0)
 						{
 							if (tile > 1)
@@ -864,6 +881,7 @@ function IsNear (x1, y1, z1, x2, y2, z2, dist) {
 }
 
 function DrawEntity (entity) {
+
 	var scale = GetScale(GetEntityZ(entity));
 	if (scale < 0)
 	{
@@ -997,7 +1015,7 @@ var PATTERN_STAIRS_V = {
 		[0, 0, 1, 0, 0],],
 	effect: function (area) {
 		//Create stairs
-		if (player.y > area.y + 5)
+		if (player.y > GetAreaY(area) + 5)
 		{
 			//Stairs with top on north
 			for (var i = 0; i < 5; i++)
@@ -1024,7 +1042,7 @@ var PATTERN_STAIRS_H = {
 		[0, 0, 0, 0, 0],],
 	effect: function (area) {
 		//Create stairs
-		if (player.x > area.x + 5)
+		if (player.x > GetAreaX(area) + 5)
 		{
 			//Stairs with top on west
 			for (var i = 0; i < 5; i++)
@@ -1239,3 +1257,9 @@ function DoMouseDown (e) {
 }
 
 
+function TestAreaMove (delay) {
+	var area = areas[0];
+	area.moveDelay = delay;
+	area.delayTime = delay;
+	area.xMov = -1;
+}
