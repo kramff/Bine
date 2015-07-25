@@ -16,7 +16,7 @@ var SCALE_MULTIPLIER = 490;
 var Z_MULTIPLIER = 3.1;
 var TILE_SIZE = 5.4;
 
-
+var editorActive = false;
 
 var wKey;
 var aKey;
@@ -28,6 +28,8 @@ var eKey;
 
 var mouseX = 0;
 var mouseY = 0;
+
+var mousePressed = false;
 
 var mouseMovement = false;
 var mouseTilesX = 0;
@@ -776,6 +778,13 @@ function DrawAreaZSlice(area, z) {
 				}
 			}
 		}
+		if (editorActive)
+		{
+			if (z === area.z || z === area.z + area.zSize)
+			{
+				DrawAreaEdges(area, scale);
+			}
+		}
 	}
 }
 
@@ -898,6 +907,17 @@ function DrawEntity (entity) {
 		ctx.strokeRect(x, y, scale, scale);
 		ctx.restore();
 	}
+}
+
+function DrawAreaEdges (area, scale) {
+	var x0 = scale * (0 + GetAreaX(area) - xCam) + CANVAS_HALF_WIDTH;
+	var x1 = scale * (area.xSize + GetAreaX(area) - xCam) + CANVAS_HALF_WIDTH;
+	var y0 = scale * (0 + GetAreaY(area) - yCam) + CANVAS_HALF_HEIGHT;
+	var y1 = scale * (area.ySize + GetAreaY(area) - yCam) + CANVAS_HALF_HEIGHT;
+	ctx.save();
+	ctx.strokeStyle = "#FF0000";
+	ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+	ctx.restore();
 }
 
 
@@ -1249,13 +1269,50 @@ window.addEventListener('mousedown', DoMouseDown, true);
 function DoMouseDown (e) {
 	mouseX = e.clientX;
 	mouseY = e.clientY;
-
+	mousePressed = true;
+	if (editorActive)
+	{
+		EditorMouseDown();
+		return;
+	}
 	mouseTilesX = Math.round((mouseX - CANVAS_HALF_WIDTH) / standardTileSize);
 	mouseTilesY = Math.round((mouseY - CANVAS_HALF_HEIGHT) / standardTileSize);
 	
 	mouseMovement = true;
 }
 
+window.addEventListener('mousemove', DoMouseMove, true);
+
+function DoMouseMove (e) {
+	mouseX = e.clientX;
+	mouseY = e.clientY;
+	if (editorActive)
+	{
+		EditorMouseMove();
+		return;
+	}
+}
+
+window.addEventListener('mouseup', DoMouseUp, true);
+
+function DoMouseUp (e) {
+	mouseX = e.clientX;
+	mouseY = e.clientY;
+	mousePressed = false;
+	if (editorActive)
+	{
+		EditorMouseUp();
+		return;
+	}
+}
+
+function EditorMouseDown () {
+	
+}
+
+function EditorMouseUp () {
+	
+}
 
 function TestAreaMove (delay) {
 	var area = areas[0];
@@ -1288,4 +1345,8 @@ function ResizeCanvas () {
 	CANVAS_HEIGHT = canvas.height;
 	CANVAS_HALF_WIDTH = CANVAS_WIDTH / 2;
 	CANVAS_HALF_HEIGHT = CANVAS_HEIGHT / 2;
+}
+
+function StartMapEditor () {
+	editorActive = true;
 }
