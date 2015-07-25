@@ -1263,3 +1263,29 @@ function TestAreaMove (delay) {
 	area.delayTime = delay;
 	area.xMov = -1;
 }
+// mix: 0 = color0, 1 = color1
+function ColorBlend (color0, color1, mix) {
+	var r0 = parseInt(color0.slice(1, 3), 16);
+	var g0 = parseInt(color0.slice(3, 5), 16);
+	var b0 = parseInt(color0.slice(5, 7), 16);
+	var r1 = parseInt(color1.slice(1, 3), 16);
+	var g1 = parseInt(color1.slice(3, 5), 16);
+	var b1 = parseInt(color1.slice(5, 7), 16);
+	var rm = Math.round((r0 * (1 - mix) + r1 * mix)).toString(16);
+	var gm = Math.round((g0 * (1 - mix) + g1 * mix)).toString(16);
+	var bm = Math.round((b0 * (1 - mix) + b1 * mix)).toString(16);
+	rm = (rm.length === 2) ? rm : "0" + rm;
+	gm = (gm.length === 2) ? gm : "0" + gm;
+	bm = (bm.length === 2) ? bm : "0" + bm;
+	
+	return "#" + rm + gm + bm;
+}
+
+function ResizeCanvas () {
+	canvas.width = window.innerWidth - 25;
+	canvas.height = window.innerHeight - 25;
+	CANVAS_WIDTH = canvas.width;
+	CANVAS_HEIGHT = canvas.height;
+	CANVAS_HALF_WIDTH = CANVAS_WIDTH / 2;
+	CANVAS_HALF_HEIGHT = CANVAS_HEIGHT / 2;
+}
