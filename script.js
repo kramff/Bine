@@ -16,7 +16,7 @@ var SCALE_MULTIPLIER = 490;
 var Z_MULTIPLIER = 3.1;
 var TILE_SIZE = 5.4;
 
-
+var editorActive = false;
 
 var wKey = false;
 var aKey = false;
@@ -33,6 +33,8 @@ var rightKey = false;
 
 var mouseX = 0;
 var mouseY = 0;
+
+var mousePressed = false;
 
 var mouseMovement = false;
 var mouseTilesX = 0;
@@ -781,6 +783,13 @@ function DrawAreaZSlice(area, z) {
 				}
 			}
 		}
+		if (editorActive)
+		{
+			if (z === area.z || z === area.z + area.zSize)
+			{
+				DrawAreaEdges(area, scale);
+			}
+		}
 	}
 }
 
@@ -903,6 +912,17 @@ function DrawEntity (entity) {
 		ctx.strokeRect(x, y, scale, scale);
 		ctx.restore();
 	}
+}
+
+function DrawAreaEdges (area, scale) {
+	var x0 = scale * (0 + GetAreaX(area) - xCam) + CANVAS_HALF_WIDTH;
+	var x1 = scale * (area.xSize + GetAreaX(area) - xCam) + CANVAS_HALF_WIDTH;
+	var y0 = scale * (0 + GetAreaY(area) - yCam) + CANVAS_HALF_HEIGHT;
+	var y1 = scale * (area.ySize + GetAreaY(area) - yCam) + CANVAS_HALF_HEIGHT;
+	ctx.save();
+	ctx.strokeStyle = "#FF0000";
+	ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+	ctx.restore();
 }
 
 
@@ -1287,17 +1307,84 @@ window.addEventListener('mousedown', DoMouseDown, true);
 function DoMouseDown (e) {
 	mouseX = e.clientX;
 	mouseY = e.clientY;
-
+	mousePressed = true;
+	if (editorActive)
+	{
+		EditorMouseDown();
+		return;
+	}
 	mouseTilesX = Math.round((mouseX - CANVAS_HALF_WIDTH) / standardTileSize);
 	mouseTilesY = Math.round((mouseY - CANVAS_HALF_HEIGHT) / standardTileSize);
 	
 	mouseMovement = true;
 }
 
+window.addEventListener('mousemove', DoMouseMove, true);
+
+function DoMouseMove (e) {
+	mouseX = e.clientX;
+	mouseY = e.clientY;
+	if (editorActive)
+	{
+		EditorMouseMove();
+		return;
+	}
+}
+
+window.addEventListener('mouseup', DoMouseUp, true);
+
+function DoMouseUp (e) {
+	mouseX = e.clientX;
+	mouseY = e.clientY;
+	mousePressed = false;
+	if (editorActive)
+	{
+		EditorMouseUp();
+		return;
+	}
+}
+
+function EditorMouseDown () {
+	
+}
+
+function EditorMouseUp () {
+	
+}
 
 function TestAreaMove (delay) {
 	var area = areas[0];
 	area.moveDelay = delay;
 	area.delayTime = delay;
 	area.xMov = -1;
+}
+// mix: 0 = color0, 1 = color1
+function ColorBlend (color0, color1, mix) {
+	var r0 = parseInt(color0.slice(1, 3), 16);
+	var g0 = parseInt(color0.slice(3, 5), 16);
+	var b0 = parseInt(color0.slice(5, 7), 16);
+	var r1 = parseInt(color1.slice(1, 3), 16);
+	var g1 = parseInt(color1.slice(3, 5), 16);
+	var b1 = parseInt(color1.slice(5, 7), 16);
+	var rm = Math.round((r0 * (1 - mix) + r1 * mix)).toString(16);
+	var gm = Math.round((g0 * (1 - mix) + g1 * mix)).toString(16);
+	var bm = Math.round((b0 * (1 - mix) + b1 * mix)).toString(16);
+	rm = (rm.length === 2) ? rm : "0" + rm;
+	gm = (gm.length === 2) ? gm : "0" + gm;
+	bm = (bm.length === 2) ? bm : "0" + bm;
+	
+	return "#" + rm + gm + bm;
+}
+
+function ResizeCanvas () {
+	canvas.width = window.innerWidth - 25;
+	canvas.height = window.innerHeight - 25;
+	CANVAS_WIDTH = canvas.width;
+	CANVAS_HEIGHT = canvas.height;
+	CANVAS_HALF_WIDTH = CANVAS_WIDTH / 2;
+	CANVAS_HALF_HEIGHT = CANVAS_HEIGHT / 2;
+}
+
+function StartMapEditor () {
+	editorActive = true;
 }
