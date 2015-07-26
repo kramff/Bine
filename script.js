@@ -18,13 +18,18 @@ var TILE_SIZE = 5.4;
 
 
 
-var wKey;
-var aKey;
-var sKey;
-var dKey;
+var wKey = false;
+var aKey = false;
+var sKey = false;
+var dKey = false;
 
-var qKey;
-var eKey;
+var qKey = false;
+var eKey = false;
+
+var upKey = false;
+var downKey = false;
+var leftKey = false;
+var rightKey = false;
 
 var mouseX = 0;
 var mouseY = 0;
@@ -1210,6 +1215,23 @@ function DoKeyDown (e) {
 	{
 		eKey = true;
 	}
+	else if (e.keyCode === 38)
+	{
+		upKey = true;
+	}
+	else if (e.keyCode === 40)
+	{
+		downKey = true;
+	}
+	else if (e.keyCode === 37)
+	{
+		leftKey = true;
+	}
+	else if (e.keyCode === 39)
+	{
+		rightKey = true;
+	}
+	console.log(e.keyCode);
 	mouseMovement = false;
 }
 
@@ -1239,6 +1261,22 @@ function DoKeyUp (e) {
 	else if (e.keyCode === 69)
 	{
 		eKey = false;
+	}
+	else if (e.keyCode === 38)
+	{
+		upKey = false;
+	}
+	else if (e.keyCode === 40)
+	{
+		downKey = false;
+	}
+	else if (e.keyCode === 37)
+	{
+		leftKey = false;
+	}
+	else if (e.keyCode === 39)
+	{
+		rightKey = false;
 	}
 }
 
