@@ -251,7 +251,12 @@ function Init () {
 	CreateArea(); areas[3].y = 11; areas[3].z = 9;
 	CreateArea(); areas[4].y = 11; areas[4].z = -100;
 
+	ResizeCanvas();
+	StartMapEditor();
 
+	xCam = player.x + 0.5;
+	yCam = player.y + 0.5;
+	zCam = player.z;
 }
 
 var lastTime = new Date;
@@ -313,10 +318,11 @@ function AreaUpdate () {
 }
 
 function Control () {
-	var up = wKey;
-	var down = sKey;
-	var left = aKey;
-	var right = dKey
+
+	var up = wKey || upKey;
+	var down = sKey || downKey;
+	var left = aKey || leftKey;
+	var right = dKey || rightKey;
 	if (mouseMovement)
 	{
 		up = mouseTilesY < 0;
@@ -373,6 +379,17 @@ function Control () {
 					player.xMov = 1;
 					movementChanged = true;
 				}
+				if (editorActive)
+				{
+					if (qKey && player.zMov === 0)
+					{
+						player.zMov = 1;
+					}
+					if (eKey && player.zMov === 0)
+					{
+						player.zMov = -1;
+					}
+				}
 				// Allow canceling movement by releasing key or pressing opposite
 				if (player.yMov === -1 && (!up || down))
 				{
@@ -426,7 +443,7 @@ function Control () {
 						movementChanged = true;
 					}
 				}
-				if (movementChanged)
+				if (movementChanged && !editorActive)
 				{
 					player.zMov = 0;
 					MovementXYRules(player);
@@ -435,7 +452,7 @@ function Control () {
 			return;
 		}
 	}
-	if (IsSolidEOffset(player, 0, 0, -1))
+	if (IsSolidEOffset(player, 0, 0, -1) || editorActive)
 	{
 		//Solid ground below player - can move
 		if (up && !down)
@@ -458,9 +475,25 @@ function Control () {
 			player.xMov = 1;
 			SetMoveDelay(player, 10);
 		}
-		MovementXYRules(player);
+		if (editorActive)
+		{
+			if (qKey && !eKey)
+			{
+				player.zMov = 1;
+				SetMoveDelay(player, 10);
+			}
+			if (eKey && !qKey)
+			{
+				player.zMov = -1;
+				SetMoveDelay(player, 10);
+			}
+		}
+		else
+		{
+			MovementXYRules(player);
+		}
 	}
-	else
+	else if (!editorActive)
 	{
 		//Fall down
 		player.xMov = 0;
@@ -785,10 +818,7 @@ function DrawAreaZSlice(area, z) {
 		}
 		if (editorActive)
 		{
-			if (z === area.z || z === area.z + area.zSize)
-			{
-				DrawAreaEdges(area, scale);
-			}
+			DrawAreaEdges(area, scale, z);
 		}
 	}
 }
@@ -914,14 +944,26 @@ function DrawEntity (entity) {
 	}
 }
 
-function DrawAreaEdges (area, scale) {
+function DrawAreaEdges (area, scale, z) {
 	var x0 = scale * (0 + GetAreaX(area) - xCam) + CANVAS_HALF_WIDTH;
 	var x1 = scale * (area.xSize + GetAreaX(area) - xCam) + CANVAS_HALF_WIDTH;
 	var y0 = scale * (0 + GetAreaY(area) - yCam) + CANVAS_HALF_HEIGHT;
 	var y1 = scale * (area.ySize + GetAreaY(area) - yCam) + CANVAS_HALF_HEIGHT;
 	ctx.save();
+	if (z === player.z - 1)
+	{
+		ctx.fillStyle = "#000000";
+		ctx.globalAlpha = 0.9;
+		ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+	}
 	ctx.strokeStyle = "#FF0000";
 	ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+	if (z === player.z)
+	{
+		ctx.fillStyle = "#FFFFFF";
+		ctx.globalAlpha = 0.2;
+		ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+	}
 	ctx.restore();
 }
 
@@ -1202,6 +1244,18 @@ function ClearAreaPattern (area) {
 	}
 }
 
+//Should be determined through math
+var standardTileSize = 55;
+
+//Should care about input z level
+function ScreenXToWorldX (screenX, z) {
+	return Math.round((screenX - CANVAS_HALF_WIDTH) / standardTileSize);
+}
+
+function ScreenYToWorldY (screenY, z) {
+	return Math.round((screenY - CANVAS_HALF_HEIGHT) / standardTileSize);
+}
+
 
 window.addEventListener('keydown', DoKeyDown, true);
 
@@ -1251,7 +1305,6 @@ function DoKeyDown (e) {
 	{
 		rightKey = true;
 	}
-	console.log(e.keyCode);
 	mouseMovement = false;
 }
 
@@ -1300,7 +1353,6 @@ function DoKeyUp (e) {
 	}
 }
 
-var standardTileSize = 55; 
 
 window.addEventListener('mousedown', DoMouseDown, true);
 
@@ -1313,8 +1365,8 @@ function DoMouseDown (e) {
 		EditorMouseDown();
 		return;
 	}
-	mouseTilesX = Math.round((mouseX - CANVAS_HALF_WIDTH) / standardTileSize);
-	mouseTilesY = Math.round((mouseY - CANVAS_HALF_HEIGHT) / standardTileSize);
+	mouseTilesX = ScreenXToWorldX(mouseX, player.z);
+	mouseTilesY = ScreenYToWorldY(mouseY, player.z);
 	
 	mouseMovement = true;
 }
@@ -1344,8 +1396,53 @@ function DoMouseUp (e) {
 	}
 }
 
+function EditTile (editX, editY, editZ, tile) {
+	for (var i = 0; i < areas.length; i++)
+	{
+		var area = areas[i];
+		if (LocationInArea(area, editX, editY, editZ))
+		{
+			SetTile(area, editX - area.x, editY - area.y, editZ - area.z, tile)
+
+		}
+	}
+}
+
+var lastEditedX;
+var lastEditedY;
+var lastEditedZ;
+
+
 function EditorMouseDown () {
+	var editX = ScreenXToWorldX(mouseX, player.z) + player.x;
+	var editY = ScreenYToWorldY(mouseY, player.z) + player.y;
+	var editZ = player.z;
+
+	lastEditedX = editX;
+	lastEditedY = editY;
+	lastEditedZ = editZ;
+
+	EditTile(editX, editY, editZ, 1);
 	
+	
+}
+
+function EditorMouseMove () {
+	if (mousePressed)
+	{
+		var editX = ScreenXToWorldX(mouseX, player.z) + player.x;
+		var editY = ScreenYToWorldY(mouseY, player.z) + player.y;
+		var editZ = player.z;
+
+		if (lastEditedX !== editX || lastEditedY !== editY || lastEditedZ !== editZ)
+		{
+			lastEditedX = editX;
+			lastEditedY = editY;
+			lastEditedZ = editZ;
+
+			EditTile(editX, editY, editZ, 1);
+		}
+	}
 }
 
 function EditorMouseUp () {
@@ -1387,4 +1484,7 @@ function ResizeCanvas () {
 
 function StartMapEditor () {
 	editorActive = true;
+}
+function EndMapEditor () {
+	editorActive = false;
 }
