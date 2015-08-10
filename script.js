@@ -697,7 +697,8 @@ function BeginAreaMovement (area, xMov, yMov, zMov, delay) {
 		}
 	}
 	//Check if player is standing in path of a tile
-	if (LocationInArea(area, player.x - xMov, player.y - yMov, player.z - zMov))
+	//(cannot be pushed if already riding on area)
+	else if (LocationInArea(area, player.x - xMov, player.y - yMov, player.z - zMov))
 	{
 		var pushingTile = area.map[player.x - area.x - xMov][player.y - area.y - yMov][player.z - area.z - zMov];
 		if (TileIsSolid(pushingTile))
@@ -898,7 +899,7 @@ function DrawDObjZ (dObj, z) {
 }
 
 function DrawAreaZSlice(area, z) {
-	var scale = GetScale(z);
+	var scale = GetScale(z + GetAreaZ(area) - area.z);
 	if (scale > 0.01)
 	{
 		for (var i = 0; i < area.xSize; i++)
@@ -911,7 +912,7 @@ function DrawAreaZSlice(area, z) {
 					var y = scale * (j + GetAreaY(area) - yCam) + CANVAS_HALF_HEIGHT;
 					if (y > 0 - scale && y < CANVAS_HEIGHT)
 					{	
-						var tile = area.map[i][j][z - GetAreaZ(area)];
+						var tile = area.map[i][j][z - area.z];
 						if (tile > 0)
 						{
 							if (tile > 1)
@@ -960,6 +961,11 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 			{
 				extra.opacity = Math.max(0, extra.opacity - 0.07);
 			}
+			if (editorActive)
+			{
+				extra.opacity = 1;
+				ctx.fillStyle = "#501010"
+			}
 			if (extra.opacity !== 1)
 			{
 				ctx.globalAlpha = extra.opacity;
@@ -977,6 +983,11 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 			else
 			{
 				extra.opacity = Math.max(0, extra.opacity - 0.07);
+			}
+			if (editorActive)
+			{
+				extra.opacity = 1;
+				ctx.fillStyle = "#105010"
 			}
 			if (extra.opacity !== 1)
 			{
@@ -1211,13 +1222,66 @@ function IsSolid (x, y, z) {
 	for (var i = 0; i < areas.length; i++)
 	{
 		var area = areas[i];
-		if (x >= area.x && x < area.x + area.xSize && y >= area.y && y < area.y + area.ySize && z >= area.z && z < area.z + area.zSize)
+		if (x >= area.x && x < area.x + area.xSize &&
+			y >= area.y && y < area.y + area.ySize &&
+			z >= area.z && z < area.z + area.zSize)
 		{
 			//Within area's bounds
 			var tile = area.map[x - area.x][y - area.y][z - area.z];
 			if (TileIsSolid(tile))
 			{
 				return true;
+			}
+		}
+		if (area.xMov !== 0 || area.yMov !== 0 || area.zMov !== 0)
+		{
+			//Area is moving: check new bounds
+			if (x >= area.x + area.xMov && x < area.x + area.xMov + area.xSize &&
+				y >= area.y + area.yMov && y < area.y + area.yMov + area.ySize &&
+				z >= area.z + area.zMov && z < area.z + area.zMov + area.zSize)
+			{
+				var tile = area.map[x - area.x - area.xMov][y - area.y - area.yMov][z - area.z - area.zMov];
+				if (TileIsSolid(tile))
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+//Same as IsSolid but ignore an area
+function IsSolidIgnoreArea (x, y, z, ignoreArea) {
+	for (var i = 0; i < areas.length; i++)
+	{
+		var area = areas[i];
+		if (area !== ignoreArea)
+		{
+			if (x >= area.x && x < area.x + area.xSize &&
+				y >= area.y && y < area.y + area.ySize &&
+				z >= area.z && z < area.z + area.zSize)
+			{
+				//Within area's bounds
+				var tile = area.map[x - area.x][y - area.y][z - area.z];
+				if (TileIsSolid(tile))
+				{
+					return true;
+				}
+			}
+			if (area.xMov !== 0 || area.yMov !== 0 || area.zMov !== 0)
+			{
+				//Area is moving: check new bounds
+				if (x >= area.x + area.xMov && x < area.x + area.xMov + area.xSize &&
+					y >= area.y + area.yMov && y < area.y + area.yMov + area.ySize &&
+					z >= area.z + area.zMov && z < area.z + area.zMov + area.zSize)
+				{
+					var tile = area.map[x - area.x - area.xMov][y - area.y - area.yMov][z - area.z - area.zMov];
+					if (TileIsSolid(tile))
+					{
+						return true;
+					}
+				}
 			}
 		}
 	}
