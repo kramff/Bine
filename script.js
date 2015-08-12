@@ -97,7 +97,7 @@ function Entity (x, y, z) {
 
 }
 
-var player = CreateEntity();
+var player;
 var firstTransparentTilesArray = [[99, 99, 99],[99, 99, 99],[99, 99, 99]];
 var underCeiling = false;
 
@@ -112,6 +112,10 @@ function Area (x, y, z, xSize, ySize, zSize) {
 	this.x = x;
 	this.y = y;
 	this.z = z;
+	
+	this.xSize = xSize;
+	this.ySize = ySize;
+	this.zSize = zSize;
 
 	this.xMov = 0;
 	this.yMov = 0;
@@ -119,9 +123,6 @@ function Area (x, y, z, xSize, ySize, zSize) {
 	this.moveDelay = 0;
 	this.delayTime = 10;
 
-	this.xSize = xSize;
-	this.ySize = ySize;
-	this.zSize = zSize;
 	this.status = 0;
 	this.extraData = []; //[x][y][z] - object with any values
 	this.map = []; //[x][y][z] - type (number)
@@ -293,10 +294,18 @@ function Init () {
 	ResizeCanvas();
 	// StartMapEditor();
 
+	InitGame();
+}
+
+function InitGame () {
+	player = CreateEntity();
+
 	xCam = player.x + 0.5;
 	yCam = player.y + 0.5;
 	zCam = player.z;
 }
+
+
 
 var lastTime = new Date;
 var delay = 0;
@@ -1873,4 +1882,32 @@ function StartMapEditor () {
 }
 function EndMapEditor () {
 	editorActive = false;
+}
+
+function ClearLevel () {
+	areas = [];
+	drawObjects = [];
+	entities = [];
+	areaColors = [];
+
+	InitGame();
+
+}
+
+function ImportLevel (levelData) {
+	//import a levelData string into the current level
+	areas = JSON.parse(levelData);
+}
+
+function ExportLevel () {
+	//export the current level to a levelData string
+	return JSON.stringify(areas);
+}
+
+function SaveToLocalStorage (levelData, levelName) {
+	localStorage.setItem(levelName, levelData);
+}
+
+function LoadFromLocalStorage (levelName) {
+	return localStorage.getItem(levelName);
 }
