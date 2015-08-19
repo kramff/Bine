@@ -18,6 +18,8 @@ var TILE_SIZE = 5.4;
 
 var editorActive = false;
 
+var fakeExtra = {opacity: 1, pattern: 0};
+
 var wKey = false;
 var aKey = false;
 var sKey = false;
@@ -101,14 +103,14 @@ var player;
 var firstTransparentTilesArray = [[99, 99, 99],[99, 99, 99],[99, 99, 99]];
 var underCeiling = false;
 
-function CreateArea () {
-	var newArea = new Area(0, 0, 0, 11, 11, 10);
+function CreateArea (x, y, z, xSize, ySize, zSize) {
+	var newArea = new Area(x, y, z, xSize, ySize, zSize);
 	areas.push(newArea);
 	drawObjects.push(newArea);
 	return newArea;
 }
 
-function Area (x, y, z, xSize, ySize, zSize) {
+function Area (x, y, z, xSize, ySize, zSize, useImport, map, rule) {
 	this.x = x;
 	this.y = y;
 	this.z = z;
@@ -123,112 +125,39 @@ function Area (x, y, z, xSize, ySize, zSize) {
 	this.moveDelay = 0;
 	this.delayTime = 10;
 
+	this.rule = rule;
+
 	this.status = 0;
 	this.extraData = []; //[x][y][z] - object with any values
 	this.map = []; //[x][y][z] - type (number)
+	if (useImport)
+	{
+		this.map = map;
+	}
 	for (var i = 0; i < xSize; i++)
 	{
-		this.map.push([]);
+		if (!useImport)
+		{
+			this.map.push([]);
+		}
 		this.extraData.push([]);
 		for (var j = 0; j < ySize; j++)
 		{
-			this.map[i].push([]);
+			if (!useImport)
+			{
+				this.map[i].push([]);
+			}
 			this.extraData[i].push([]);
 			for (var k = 0; k < zSize; k++)
 			{
 				var tile = EMPTY;
-
-				if (areas.length === 0)
+				if (!useImport)
 				{
-					//stairs room with right side open
-					if (k === 9)
-					{
-						tile = DISAPPEAR_BLOCK;
-					}
-					if (i%11 === 0 || j%10 === 0 || k === 0)
-					{
-						tile = SOLID;
-					}
-					if (i === 5 && j > k && k !== 0 && j !== 10)
-					{
-						tile = APPEAR_BLOCK;
-					}
-					if (i === 8 &&  k !== 0 && j !== 10 && j !== 0 && k < 4)
-					{
-						tile = DISAPPEAR_BLOCK;
-					}
+					
 				}
-				else if (areas.length === 1)
+				else // (useImport === true)
 				{
-					//Valley
-					if (k === Math.abs(i - 5))
-					{
-						tile = APPEAR_BLOCK;
-					}
-				}
-				else if (areas.length === 2)
-				{
-					//some pillars room
-					if ((i-j)%3 === 0 && (i+j)/2-0>k)
-					{
-						tile = APPEAR_BLOCK;
-					}
-					if (j === 0 || j === 10 || i === 10 || k === 0)
-					{
-						tile = SOLID;
-					}
-				}
-				else if (areas.length === 3)
-				{
-					//neato pattern test room
-					if (k === 0)
-					{
-						tile = SOLID;
-						if ((i > 1 && i < 9) && (j > 1 && j < 9))
-						{
-							tile = PATTERN_ACTIVATE_BLOCK;
-						}
-						if (i > 2 && i < 8 && j > 2 && j < 8)
-						{
-							tile = PATTERN_BLOCK;
-						}
-						if ((i === 1 || i === 9) && (j === 1 || j === 9))
-						{
-							tile = PATTERN_CLEAR_BLOCK;
-						}
-					}
-				}
-				else if (areas.length === 4)
-				{
-					//narrow walkway room
-					if ((j === 4 || j === 5 || j === 6) && k === 0)
-					{
-						tile = APPEAR_BLOCK;
-					}
-					if ((i === 4 || i === 5 || i === 6) && k === 0 || ((i === 2 || i === 8) && j%6 === 2))
-					{
-						tile = SOLID;
-					}
-				}
-				else if (areas.length === 5)
-				{
-					//Simple room to test moving areas
-					if (k === 0)
-					{
-						tile = SOLID;
-					}
-				}
-				else if (areas.length === 6)
-				{
-					//Moving areas test
-					if (i === 2 && j < 5 && k === 0)
-					{
-						tile = SOLID;
-					}
-					if (i === 2 && j < 4 && k === 1)
-					{
-						tile = SOLID;
-					}
+					tile = this.map[i][j][k];
 				}
 				var extra;
 				switch (tile)
@@ -247,7 +176,10 @@ function Area (x, y, z, xSize, ySize, zSize) {
 					break;
 				}
 				this.extraData[i][j].push(extra);
-				this.map[i][j].push(tile);
+				if (!useImport)
+				{
+					this.map[i][j].push(tile);
+				}
 			}
 		}
 	}
@@ -280,25 +212,20 @@ function SetTile (area, x, y, z, tile) {
 
 function Init () {
 	window.requestAnimationFrame(Update);
-	CreateArea();
-	CreateArea(); areas[1].x = 11; areas[1].z = -5;
-	CreateArea(); areas[2].x = 22;
-	CreateArea(); areas[3].y = 11; areas[3].z = 9;
-	CreateArea(); areas[4].y = 11; areas[4].z = -100;
-	CreateArea(); areas[5].x = 11; areas[5].y = -11; areas[5].z = -5;
-	CreateArea(); areas[6].x = 11; areas[6].y = -8; areas[6].z = -4;
+	
 
 	areaColors = GenerateColorPalette(areas.length);
 
 
 	ResizeCanvas();
-	// StartMapEditor();
+	StartMapEditor();
 
+	player = CreateEntity();
 	InitGame();
 }
 
 function InitGame () {
-	player = CreateEntity();
+	//player = CreateEntity();
 
 	xCam = player.x + 0.5;
 	yCam = player.y + 0.5;
@@ -779,6 +706,41 @@ function Render () {
 		ctx.strokeText("Z(player):", 5, 120);
 		ctx.strokeText(GetEntityZ(player), 70, 120);
 	}
+
+	if (editorActive)
+	{
+
+		//Draw tile select left sidebar
+		ctx.fillStyle = "#000000";
+		ctx.fillRect(0, 0, 70, CANVAS_HEIGHT);
+		//8 = number of tile types so far
+		for (var i = 0; i < 8; i++)
+		{
+			DrawTileExtra(10, 10 + i * 60, 50, i, 0, 0, 0, fakeExtra);
+		}
+
+		//Draw other menu right sidebar
+		ctx.fillStyle = "#202000";
+		ctx.fillRect(CANVAS_WIDTH - 200, 0, 200, CANVAS_HEIGHT);
+
+		DrawEditorButton(0, "Create Area");
+		DrawEditorButton(1, "Remove Area");
+		DrawEditorButton(2, "Resize Area");
+		DrawEditorButton(3, "Load Level");
+		DrawEditorButton(4, "Save Level");
+
+	}
+}
+
+function DrawEditorButton (btnNum, text) {
+	ctx.fillStyle = "#303030";
+	ctx.fillRect(CANVAS_WIDTH - 190, 10 + btnNum * 60, 170, 50);
+
+
+	ctx.fillStyle = "#FFFFFF";
+	ctx.font = "16px sans-serif";
+	ctx.fillText(text, CANVAS_WIDTH - 90 - text.length * 5, 40 + btnNum * 60);
+
 }
 
 function GetEntityX (entity) {
@@ -842,7 +804,7 @@ function DrawAllObjects () {
 			topZ = Math.max(topZ, drawObjects[i].z + drawObjects[i].zSize);
 		}
 	}
-	for (var z = bottomZ; z <= topZ; z++)
+	for (var z = bottomZ; z <= topZ + 1; z++)
 	{
 		var i = bottomI;
 		var currentObject = drawObjects[i];
@@ -960,6 +922,9 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 	{
 		default:
 			//DrawTile(x, y, scale);
+		break;
+		case EMPTY:
+			doDraw = false;
 		break;
 		case DISAPPEAR_BLOCK:
 			if (!IsNear(i, j, k, player.x, player.y, player.z, 1))
@@ -1776,9 +1741,37 @@ var lastEditedY;
 var lastEditedZ;
 
 var editType = SOLID;
-
+var editTypeL = SOLID;
+var editTypeR = EMPTY;
 
 function EditorMouseDown () {
+	if (mouseX < 70)
+	{
+		// mouse is in tile selection part of screen
+		var tileNum = Math.floor((mouseY - 5) / 60);
+		if (mButton === 0)
+		{
+			editTypeL = tileNum;
+		}
+		if (mButton === 2)
+		{
+			editTypeR = tileNum;
+		}
+		return;
+	}
+	if (mouseX > CANVAS_WIDTH - 200)
+	{
+		//mouse is in the button menu part of screen
+		var buttonNum = Math.floor((mouseY - 5) / 60);
+		switch (buttonNum)
+		{
+			case 0: //Create Area
+				CreateArea(player.x, player.y, player.z, 10, 10, 10);
+			break;
+		}
+
+		return;
+	}
 	var editX = ScreenXToWorldX(mouseX, player.z) + player.x;
 	var editY = ScreenYToWorldY(mouseY, player.z) + player.y;
 	var editZ = player.z;
@@ -1789,11 +1782,11 @@ function EditorMouseDown () {
 
 	if (mButton === 0)
 	{
-		editType = SOLID;
+		editType = editTypeL;
 	}
 	if (mButton === 2)
 	{
-		editType = EMPTY;
+		editType = editTypeR;
 	}
 
 	EditTile(editX, editY, editZ, editType);
@@ -1896,12 +1889,40 @@ function ClearLevel () {
 
 function ImportLevel (levelData) {
 	//import a levelData string into the current level
-	areas = JSON.parse(levelData);
+	ClearLevel();
+	var importedData = JSON.parse(levelData);
+	for (var i = 0; i < importedData.areas.length; i++)
+	{
+		areaData = importedData.areas[i];
+		var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize, true, areaData.map);
+		areas.push(newArea);
+		drawObjects.push(newArea);
+	}
+	player = new Entity(importedData.player.x, importedData.player.y, importedData.player.z);
+	entities.push(player);
+	drawObjects.push(player);
+	InitGame();
 }
 
 function ExportLevel () {
 	//export the current level to a levelData string
-	return JSON.stringify(areas);
+	var levelData = {areas:[], player:{x: player.x, y: player.y, z: player.z}};
+	for (var i = 0; i < areas.length; i++)
+	{
+		var area = areas[i];
+		var dataObj = {
+			x: area.x,
+			y: area.y,
+			z: area.z,
+			xSize: area.xSize,
+			ySize: area.ySize,
+			zSize: area.zSize,
+			map: area.map,
+			rule: 0
+		};
+		levelData.areas.push(dataObj); 
+	}
+	return JSON.stringify(levelData);
 }
 
 function SaveToLocalStorage (levelData, levelName) {
