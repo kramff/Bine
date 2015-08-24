@@ -1861,6 +1861,10 @@ function RandomColor () {
 	return "#" + Math.round(Math.random() * 0xFFFFFF).toString(16);
 }
 
+window.onresize = function () {
+	ResizeCanvas();
+}
+
 function ResizeCanvas () {
 	canvas.width = window.innerWidth - 25;
 	canvas.height = window.innerHeight - 25;
