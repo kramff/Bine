@@ -103,13 +103,6 @@ var player;
 var firstTransparentTilesArray = [[99, 99, 99],[99, 99, 99],[99, 99, 99]];
 var underCeiling = false;
 
-function CreateArea (x, y, z, xSize, ySize, zSize) {
-	var newArea = new Area(x, y, z, xSize, ySize, zSize);
-	areas.push(newArea);
-	drawObjects.push(newArea);
-	return newArea;
-}
-
 function Area (x, y, z, xSize, ySize, zSize, useImport, map, rule) {
 	this.x = x;
 	this.y = y;
@@ -126,6 +119,8 @@ function Area (x, y, z, xSize, ySize, zSize, useImport, map, rule) {
 	this.delayTime = 10;
 
 	this.rule = rule;
+
+	this.name = "Area " + (areas.length + 1);
 
 	this.status = 0;
 	this.extraData = []; //[x][y][z] - object with any values
@@ -659,6 +654,9 @@ function Render () {
 	//Canvas rendering
 	canvas.width = canvas.width;
 
+	//Set standard font
+	ctx.font = "16px sans-serif";
+
 	ctx.strokeStyle = "#FFFFFF";
 	ctx.fillStyle = "#101010";
 
@@ -711,7 +709,7 @@ function Render () {
 	{
 
 		//Draw tile select left sidebar
-		ctx.fillStyle = "#000000";
+		ctx.fillStyle = "#300030";
 		ctx.fillRect(0, 0, 70, CANVAS_HEIGHT);
 		//8 = number of tile types so far
 		for (var i = 0; i < 8; i++)
@@ -719,15 +717,27 @@ function Render () {
 			DrawTileExtra(10, 10 + i * 60, 50, i, 0, 0, 0, fakeExtra);
 		}
 
-		//Draw other menu right sidebar
-		ctx.fillStyle = "#202000";
+		//Draw area/other menu right sidebar
+		ctx.fillStyle = "#303000";
 		ctx.fillRect(CANVAS_WIDTH - 200, 0, 200, CANVAS_HEIGHT);
-
+		//Draw area/other buttons
 		DrawEditorButton(0, "Create Area");
 		DrawEditorButton(1, "Remove Area");
 		DrawEditorButton(2, "Resize Area");
 		DrawEditorButton(3, "Load Level");
 		DrawEditorButton(4, "Save Level");
+
+		//Draw area selector top bar
+		ctx.fillStyle = "#404040";
+		ctx.fillRect(70, 0, CANVAS_WIDTH - 270, 40);
+		ctx.fillStyle = "#FFFFFF";
+		var infoString = "Level 1 : " + GetAreasAtPosition(player.x, player.y, player.z, true).join(", ");
+		ctx.fillText(infoString, 70, 30);
+
+
+		//Draw rules menu bottom bar
+		ctx.fillStyle = "#003030";
+		ctx.fillRect(70, CANVAS_HEIGHT - 100, CANVAS_WIDTH - 270, 100);
 
 	}
 }
@@ -735,12 +745,31 @@ function Render () {
 function DrawEditorButton (btnNum, text) {
 	ctx.fillStyle = "#303030";
 	ctx.fillRect(CANVAS_WIDTH - 190, 10 + btnNum * 60, 170, 50);
-
-
 	ctx.fillStyle = "#FFFFFF";
-	ctx.font = "16px sans-serif";
 	ctx.fillText(text, CANVAS_WIDTH - 90 - text.length * 5, 40 + btnNum * 60);
 
+}
+
+//getName: if true, get the name of each area
+//(For now, name is just "Area #")
+function GetAreasAtPosition (x, y, z, getName) {
+	var areasHere = [];
+	for (var i = 0; i < areas.length; i++)
+	{
+		var area = areas[i];
+		if (LocationInArea(area, x, y, z))
+		{
+			if (getName === true)
+			{
+				areasHere.push(area.name);
+			}
+			else
+			{
+				areasHere.push(area);
+			}
+		}
+	}
+	return areasHere;
 }
 
 function GetEntityX (entity) {
@@ -792,7 +821,14 @@ function DrawAllObjects () {
 		//no objects to draw
 		return;
 	}
-	drawObjects.sort(function (a, b) {return a.z - b.z;});
+	drawObjects.sort(function (a, b) {
+		if (a === player || b === player)
+		{
+			if (a === player) return a.z + 0.1 - b.z;
+			else return a.z - b.z - 0.1;
+		}
+		return a.z - b.z;
+	});
 	var bottomZ = drawObjects[0].z;
 	var topZ = drawObjects[drawObjects.length - 1].z;
 	var bottomI = 0;
@@ -1736,6 +1772,40 @@ function EditTile (editX, editY, editZ, tile) {
 	}
 }
 
+function CreateArea (x, y, z, xSize, ySize, zSize) {
+	var newArea = new Area(x, y, z, xSize, ySize, zSize);
+	areas.push(newArea);
+	drawObjects.push(newArea);
+	return newArea;
+}
+
+function RemoveAreaAt (x, y, z) {
+ 	for (var i = 0; i < areas.length; i++)
+ 	{
+ 		var area = areas[i];
+ 		if (LocationInArea(area, x, y, z))
+ 		{
+ 			drawObjects.splice(drawObjects.indexOf(area), 1);
+ 			areas.splice(areas.indexOf(area), 1);
+ 			return; //Only remove 1 area at a time
+ 		}
+ 	}
+}
+function ResizeAreaTo (x, y, z) {
+ 	for (var i = 0; i < areas.length; i++)
+ 	{
+ 		var area = areas[i];
+ 		if (LocationInArea(area, x, y, z))
+ 		{
+ 			area.xSize = x - area.x + 1;
+ 			area.ySize = y - area.y + 1;
+ 			area.zSize = z - area.z + 1;
+ 		}
+ 	}
+}
+
+
+
 var lastEditedX;
 var lastEditedY;
 var lastEditedZ;
@@ -1765,8 +1835,25 @@ function EditorMouseDown () {
 		var buttonNum = Math.floor((mouseY - 5) / 60);
 		switch (buttonNum)
 		{
-			case 0: //Create Area
-				CreateArea(player.x, player.y, player.z, 10, 10, 10);
+			case 0:
+				//Create Area
+				CreateArea(player.x, player.y, player.z, 5, 5, 5);
+			break;
+			case 1:
+				//Remove Area
+				RemoveAreaAt(player.x, player.y, player.z);
+			break;
+			case 2:
+				//Resize Area
+				ResizeAreaTo(player.x, player.y, player.z)
+			break;
+			case 3:
+				//Load Level
+				ImportLevel(LoadFromLocalStorage("level1"));
+			break;
+			case 4:
+				//Save Level
+				SaveToLocalStorage(ExportLevel(), "level1");
 			break;
 		}
 
@@ -1889,8 +1976,14 @@ function ClearLevel () {
 
 function ImportLevel (levelData) {
 	//import a levelData string into the current level
-	ClearLevel();
 	var importedData = JSON.parse(levelData);
+	if (importedData === null)
+	{
+		console.log("null levelData");
+		return;
+	}
+	ClearLevel();
+
 	for (var i = 0; i < importedData.areas.length; i++)
 	{
 		areaData = importedData.areas[i];
