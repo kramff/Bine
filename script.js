@@ -18,6 +18,8 @@ var TILE_SIZE = 5.4;
 
 var editorActive = false;
 
+var selectedArea = undefined;
+
 var fakeExtra = {opacity: 1, pattern: 0};
 
 var wKey = false;
@@ -33,6 +35,8 @@ var downKey = false;
 var leftKey = false;
 var rightKey = false;
 
+var shiftPressed = false;
+
 var mouseX = 0;
 var mouseY = 0;
 
@@ -41,6 +45,10 @@ var mousePressed = false;
 var mouseMovement = false;
 var mouseTilesX = 0;
 var mouseTilesY = 0;
+
+var middleClick = false;
+var midStartX = 0;
+var midStartY = 0;
 
 var xCam = 0;
 var yCam = 0;
@@ -499,6 +507,15 @@ function Control () {
 		player.y = 5;
 		player.z = 4;
 	}
+	if (editorActive)
+	{
+		if (shiftPressed)
+		{
+			player.xMov *= 5;
+			player.yMov *= 5;
+			player.zMov *= 5;
+		}
+	}
 }
 
 function SetMoveDelay (entity, delay) {
@@ -646,10 +663,21 @@ function BeginAreaMovement (area, xMov, yMov, zMov, delay) {
 function Render () {
 
 	//Camera position
-
-	xCam = (xCam * 4 + GetEntityX(player) + 0.5) * 0.2;
-	yCam = (yCam * 4 + GetEntityY(player) + 0.5) * 0.2;
-	zCam = (zCam * 4 + GetEntityZ(player)) * 0.2;
+	if (middleClick)
+	{
+		xCam += (midStartX - mouseX) / 58.8;
+		yCam += (midStartY - mouseY) / 58.8;
+		zCam = (zCam * 4 + GetEntityZ(player)) * 0.2;
+		midStartX = mouseX;
+		midStartY = mouseY;
+	}
+	else
+	{
+		//Standard camera movement
+		xCam = (xCam * 4 + GetEntityX(player) + 0.5) * 0.2;
+		yCam = (yCam * 4 + GetEntityY(player) + 0.5) * 0.2;
+		zCam = (zCam * 4 + GetEntityZ(player)) * 0.2;
+	}
 
 	//Canvas rendering
 	canvas.width = canvas.width;
@@ -714,6 +742,15 @@ function Render () {
 		//8 = number of tile types so far
 		for (var i = 0; i < 8; i++)
 		{
+			//Selected tile highlight
+			if (editTypeL === i || editTypeR === i)
+			{
+				ctx.save();
+				ctx.globalAlpha = 0.5;
+				ctx.fillStyle = (editTypeL === i) ? "#CCCCCC" : "#000000";
+				ctx.fillRect(0, i * 60, 70, 70);
+				ctx.restore();
+			}
 			DrawTileExtra(10, 10 + i * 60, 50, i, 0, 0, 0, fakeExtra);
 		}
 
@@ -721,7 +758,7 @@ function Render () {
 		ctx.fillStyle = "#303000";
 		ctx.fillRect(CANVAS_WIDTH - 200, 0, 200, CANVAS_HEIGHT);
 		//Draw area/other buttons
-		DrawEditorButton(0, "Create Area");
+		DrawEditorButton(0, "Create Area " + (shiftPressed ? "10x10x10" : "5x5x5"));
 		DrawEditorButton(1, "Remove Area");
 		DrawEditorButton(2, "Resize Area");
 		DrawEditorButton(3, "Load Level");
@@ -731,7 +768,7 @@ function Render () {
 		ctx.fillStyle = "#404040";
 		ctx.fillRect(70, 0, CANVAS_WIDTH - 270, 40);
 		ctx.fillStyle = "#FFFFFF";
-		var infoString = "Level 1 : " + GetAreasAtPosition(player.x, player.y, player.z, true).join(", ");
+		var infoString = "Level 1: " + GetAreasAtPosition(player.x, player.y, player.z, true).join(", ");
 		ctx.fillText(infoString, 70, 30);
 
 
@@ -761,7 +798,14 @@ function GetAreasAtPosition (x, y, z, getName) {
 		{
 			if (getName === true)
 			{
-				areasHere.push(area.name);
+				if (area === selectedArea)
+				{
+					areasHere.push("~" + area.name.toUpperCase() + "~");
+				}
+				else
+				{
+					areasHere.push(area.name);
+				}
 			}
 			else
 			{
@@ -1142,19 +1186,28 @@ function InCeiling (x, y, z) {
 
 
 function DrawEntity (entity) {
-
 	var scale = GetScale(GetEntityZ(entity));
+	var x = scale * (GetEntityX(entity) - xCam) + CANVAS_HALF_WIDTH;
+	var y = scale * (GetEntityY(entity) - yCam) + CANVAS_HALF_HEIGHT;
 	if (scale < 0)
 	{
 		return;
 	}
-	var x = scale * (GetEntityX(entity) - xCam) + CANVAS_HALF_WIDTH;
-	var y = scale * (GetEntityY(entity) - yCam) + CANVAS_HALF_HEIGHT;
 	if (x > 0 - scale && x < CANVAS_WIDTH && y > 0 - scale && y < CANVAS_HEIGHT)
 	{
 		ctx.save();
 		ctx.strokeStyle = "#80FFFF";
 		ctx.fillStyle = "#208080";
+		if (editorActive && entity === player)
+		{
+			//Editor player: transparent, move with camera when middle clicking
+			ctx.globalAlpha = 0.5;
+			if (middleClick)
+			{
+				x = CANVAS_HALF_WIDTH - scale / 2;
+				y = CANVAS_HALF_HEIGHT - scale / 2;
+			}
+		}
 		ctx.fillRect(x, y, scale, scale);
 		ctx.strokeRect(x, y, scale, scale);
 		ctx.restore();
@@ -1578,7 +1631,7 @@ function ScreenYToWorldY (screenY, z) {
 }
 
 
-window.addEventListener('keydown', DoKeyDown, true);
+window.addEventListener("keydown", DoKeyDown, true);
 
 function DoKeyDown (e) {
 	if (e.keyCode === 8)
@@ -1644,20 +1697,23 @@ function DoKeyDown (e) {
 		//2
 		//move areas[6] left
 
-		BeginAreaMovement(areas[6], -1, 0, 0, 10);
+		// BeginAreaMovement(areas[6], -1, 0, 0, 10);
 	}
 	else if (e.keyCode === 51)
 	{
 		//3
 		//move areas[6] right
 
-		BeginAreaMovement(areas[6], 1, 0, 0, 10);
+		// BeginAreaMovement(areas[6], 1, 0, 0, 10);
 	}
-	//console.log(e.keyCode);
+
+	shiftPressed = e.shiftKey;
+
+	console.log(e.keyCode);
 	mouseMovement = false;
 }
 
-window.addEventListener('keyup', DoKeyUp, true);
+window.addEventListener("keyup", DoKeyUp, true);
 
 function DoKeyUp (e) {
 	if (e.keyCode === 87)
@@ -1700,11 +1756,12 @@ function DoKeyUp (e) {
 	{
 		rightKey = false;
 	}
+	shiftPressed = e.shiftKey;
 }
 
 var mButton;
 
-window.addEventListener('mousedown', DoMouseDown, true);
+window.addEventListener("mousedown", DoMouseDown, true);
 
 function DoMouseDown (e) {
 	e.preventDefault();
@@ -1725,7 +1782,7 @@ function DoMouseDown (e) {
 
 }
 
-window.addEventListener('mousemove', DoMouseMove, true);
+window.addEventListener("mousemove", DoMouseMove, true);
 
 function DoMouseMove (e) {
 	e.preventDefault();
@@ -1739,7 +1796,7 @@ function DoMouseMove (e) {
 	}
 }
 
-window.addEventListener('mouseup', DoMouseUp, true);
+window.addEventListener("mouseup", DoMouseUp, true);
 
 function DoMouseUp (e) {
 	e.preventDefault();
@@ -1747,6 +1804,10 @@ function DoMouseUp (e) {
 	mouseX = e.clientX;
 	mouseY = e.clientY;
 	mousePressed = false;
+	if (e.button === 1)
+	{
+		middleClick = false;
+	}
 	if (editorActive)
 	{
 		EditorMouseUp();
@@ -1754,11 +1815,52 @@ function DoMouseUp (e) {
 	}
 }
 
-window.oncontextmenu = function(event) {
-	event.preventDefault();
-	//event.stopPropagation();
-	//return false;
-};
+window.addEventListener("mousewheel", DoMouseWheel, true);
+
+function DoMouseWheel (e) {
+	e.preventDefault();
+	if (!editorActive)
+	{
+		return;
+	}
+	if (e.deltaY > 0)
+	{
+		player.z += 1;
+	}
+	else if (e.deltaY < 0)
+	{
+		player.z -= 1;
+	}
+	if (e.deltaX > 0)
+	{
+		player.z += 5;
+	}
+	else if (e.deltaX < 0)
+	{
+		player.z -= 5;
+	}
+}
+
+window.addEventListener("resize", DoResize, true);
+
+function DoResize (e) {
+	ResizeCanvas();
+}
+
+function ResizeCanvas () {
+	canvas.width = window.innerWidth - 25;
+	canvas.height = window.innerHeight - 25;
+	CANVAS_WIDTH = canvas.width;
+	CANVAS_HEIGHT = canvas.height;
+	CANVAS_HALF_WIDTH = CANVAS_WIDTH / 2;
+	CANVAS_HALF_HEIGHT = CANVAS_HEIGHT / 2;
+}
+
+window.addEventListener("contextmenu", DoContextMenu, true);
+
+function DoContextMenu (e) {
+	e.preventDefault();
+}
 
 function EditTile (editX, editY, editZ, tile) {
 	for (var i = 0; i < areas.length; i++)
@@ -1837,7 +1939,14 @@ function EditorMouseDown () {
 		{
 			case 0:
 				//Create Area
-				CreateArea(player.x, player.y, player.z, 5, 5, 5);
+				if (shiftPressed)
+				{
+					CreateArea(player.x, player.y, player.z, 10, 10, 10);
+				}
+				else
+				{
+					CreateArea(player.x, player.y, player.z, 5, 5, 5);
+				}
 			break;
 			case 1:
 				//Remove Area
@@ -1867,21 +1976,36 @@ function EditorMouseDown () {
 	lastEditedY = editY;
 	lastEditedZ = editZ;
 
-	if (mButton === 0)
+	if (mButton === 1)
 	{
-		editType = editTypeL;
+		//Middle mouse drag
+		mousePressed = false;
+		middleClick = true;
+		midStartX = mouseX;
+		midStartY = mouseY;
 	}
-	if (mButton === 2)
+	else
 	{
-		editType = editTypeR;
+		if (mButton === 0)
+		{
+			editType = editTypeL;
+		}
+		if (mButton === 2)
+		{
+			editType = editTypeR;
+		}
+		EditTile(editX, editY, editZ, editType);
 	}
-
-	EditTile(editX, editY, editZ, editType);
 	
 	
 }
 
 function EditorMouseMove () {
+	if (mButton === 1)
+	{
+		player.x = Math.round(xCam - 0.5);
+		player.y = Math.round(yCam - 0.5);
+	}
 	if (mousePressed)
 	{
 		var editX = ScreenXToWorldX(mouseX, player.z) + player.x;
@@ -1900,7 +2024,11 @@ function EditorMouseMove () {
 }
 
 function EditorMouseUp () {
-	
+	if (mButton === 1)
+	{
+		player.x = Math.round(xCam - 0.5);
+		player.y = Math.round(yCam - 0.5);
+	}
 }
 
 // mix: 0 = color0, 1 = color1
@@ -1946,19 +2074,6 @@ function GenerateColorPalette (numColors) {
 
 function RandomColor () {
 	return "#" + Math.round(Math.random() * 0xFFFFFF).toString(16);
-}
-
-window.onresize = function () {
-	ResizeCanvas();
-}
-
-function ResizeCanvas () {
-	canvas.width = window.innerWidth - 25;
-	canvas.height = window.innerHeight - 25;
-	CANVAS_WIDTH = canvas.width;
-	CANVAS_HEIGHT = canvas.height;
-	CANVAS_HALF_WIDTH = CANVAS_WIDTH / 2;
-	CANVAS_HALF_HEIGHT = CANVAS_HEIGHT / 2;
 }
 
 function StartMapEditor () {
@@ -2029,3 +2144,24 @@ function SaveToLocalStorage (levelData, levelName) {
 function LoadFromLocalStorage (levelName) {
 	return localStorage.getItem(levelName);
 }
+
+// ░░░░░░░░░░░░▄▐ 
+// ░░░░░░▄▄▄░░▄██▄ 
+// ░░░░░▐▀█▀▌░░░░▀█▄ 
+// ░░░░░▐█▄█▌░░░░░░▀█▄ 
+// ░░░░░░▀▄▀░░░▄▄▄▄▄▀▀ 
+// ░░░░▄▄▄██▀▀▀▀ 
+// ░░░█▀▄▄▄█░▀▀ 
+// ░░░▌░▄▄▄▐▌▀▀▀ 
+// ▄░▐░░░▄▄░█░▀▀ U HAVE BEEN SPOOKED BY THE 
+// ▀█▌░░░▄░▀█▀░▀ 
+// ░░░░░░░▄▄▐▌▄▄ 
+// ░░░░░░░▀███▀█░▄ 
+// ░░░░░░▐▌▀▄▀▄▀▐▄ SPOOKY SKILENTON 
+// ░░░░░░▐▀░░░░░░▐▌ 
+// ░░░░░░█░░░░░░░░█ 
+// ░░░░░▐▌░░░░░░░░░█ 
+// ░░░░░█░░░░░░░░░░▐▌
+
+
+
