@@ -20,7 +20,7 @@ var editorActive = false;
 
 var selectedArea = undefined;
 
-var fakeExtra = {opacity: 1, pattern: 0};
+var fakeExtra = {opacity: 1, pattern: 0, fill: 1};
 
 var wKey = false;
 var aKey = false;
@@ -68,10 +68,23 @@ var PATTERN_CLEAR_BLOCK = 5;
 var PATTERN_ACTIVATE_BLOCK = 6;
 var PATTERN_EFFECT_BLOCK = 7;
 var PATTERN_HOLE_BLOCK = 8;
+var SIMULATION_BLOCK = 9;
+var FLUID_BLOCK = 10;
+
+var BLOCK_TYPES = 11;
 
 var STATUS_NORMAL = 0;
 var STATUS_DRAWING = 1;
 var STATUS_ACTIVE = 2;
+
+var DIRECTIONS = [
+	{x: 0, y: -1, z: 0}, //North
+	{x: 1, y: 0, z: 0}, //East
+	{x: 0, y: 1, z: 0}, //South
+	{x: -1, y: 0, z: 0}, //West
+	{x: 0, y: 0, z: 1}, //Up
+	{x: 0, y: 0, z: -1} //Down
+];
 
 var areas = [];
 var areaColors = [];
@@ -127,6 +140,7 @@ function Area (x, y, z, xSize, ySize, zSize, useImport, map, rule) {
 	this.delayTime = 10;
 
 	this.rule = rule;
+	this.simulate = false;
 
 	this.name = "Area " + (areas.length + 1);
 
@@ -177,6 +191,14 @@ function Area (x, y, z, xSize, ySize, zSize, useImport, map, rule) {
 					case PATTERN_BLOCK:
 						extra = {pattern: 0};
 					break;
+					case SIMULATION_BLOCK:
+						extra = {prevSim: 0, newSim: 0};
+						area.simulate = true;
+					break;
+					case FLUID_BLOCK:
+						extra = {prevFill: 0.1, newFill: 0.1, prevflow: [0, 0, 0, 0, 0, 0], newFlow: [0, 0, 0, 0, 0, 0]};
+						area.simulate = true;
+					break;
 				}
 				this.extraData[i][j].push(extra);
 				if (!useImport)
@@ -210,6 +232,14 @@ function SetTile (area, x, y, z, tile) {
 		case PATTERN_HOLE_BLOCK:
 			area.extraData[x][y][z] = {opacity: 1};
 		break;
+		case SIMULATION_BLOCK:
+			area.extraData[x][y][z] = {prevSim: 0, newSim: 0};
+			area.simulate = true;
+		break;
+		case FLUID_BLOCK:
+			area.extraData[x][y][z] = {prevFill: 0.1, newFill: 0.1, prevflow: [0, 0, 0, 0, 0, 0], newFlow: [0, 0, 0, 0, 0, 0]};
+			area.simulate = true;
+		break;
 	}
 }
 
@@ -217,14 +247,18 @@ function Init () {
 	window.requestAnimationFrame(Update);
 	
 
-	areaColors = GenerateColorPalette(areas.length);
+	areaColors = GenerateColorPalette(100);
 
 
 	ResizeCanvas();
-	StartMapEditor();
+	//StartMapEditor();
 
 	player = CreateEntity();
 	InitGame();
+	
+	setTimeout(function() {
+		ImportLevel(pyramidLevel2);
+	}, 500);
 }
 
 function InitGame () {
@@ -233,8 +267,14 @@ function InitGame () {
 	xCam = player.x + 0.5;
 	yCam = player.y + 0.5;
 	zCam = player.z;
+
+	
 }
 
+
+var lastX = 0;
+var lastY = 0;
+var lastZ = 0;
 
 
 var lastTime = new Date;
@@ -267,6 +307,18 @@ function Update () {
 	AreaUpdate();
 	Control();
 	Render();
+
+	if (editorActive && mousePressed)
+	{
+		if (lastX !== GetEntityX(player) || lastY !== GetEntityY(player) || lastZ !== GetEntityZ(player))
+		{
+			EditorMouseDown();
+		}
+	}
+
+	lastX = GetEntityX(player);
+	lastY = GetEntityY(player);
+	lastZ = GetEntityZ(player);
 
 	//Stats
 	delay = (new Date - lastTime);
@@ -311,6 +363,57 @@ function AreaUpdate () {
 				area.xMov = 0;
 				area.yMov = 0;
 				area.zMov = 0;
+			}
+		}
+		if (area.simulate)
+		{
+			//Update tile by tile
+			for (var i = 0; i < area.xSize; i++)
+			{
+				for (var j = 0; j < area.ySize; j++)
+				{
+					for (var k = 0; k < area.zSize; k++)
+					{
+						var tile = area.map[i][j][k];
+						var extra = area.extraData[i][j][k];
+						if (tile === FLUID_BLOCK)
+						{
+							//***
+							var amt = extra.prevFill / 10;
+							for (var d = 0; d < DIRECTIONS.length; d++)
+							{
+								var dir = DIRECTIONS[d];
+								if (CheckTileType(area, i + dir.x, j + dir.y, k + dir.z, FLUID_BLOCK))
+								{
+									var otherExtra = area.extraData[i + dir.x][j + dir.y][k + dir.z];
+
+									//Do actual flow stuff here
+									if (extra.prevFill > otherExtra.prevFill)
+									{
+										extra.newFill -= 0.01;
+										otherExtra.newFill += 0.01;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			//Update prev statuses from new statuses
+			for (var i = 0; i < area.xSize; i++)
+			{
+				for (var j = 0; j < area.ySize; j++)
+				{
+					for (var k = 0; k < area.zSize; k++)
+					{
+						var tile = area.map[i][j][k];
+						var extra = area.extraData[i][j][k];
+						if (tile === FLUID_BLOCK)
+						{
+							extra.prevFill = extra.newFill;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -739,8 +842,7 @@ function Render () {
 		//Draw tile select left sidebar
 		ctx.fillStyle = "#300030";
 		ctx.fillRect(0, 0, 70, CANVAS_HEIGHT);
-		//8 = number of tile types so far
-		for (var i = 0; i < 8; i++)
+		for (var i = 0; i < BLOCK_TYPES; i++)
 		{
 			//Selected tile highlight
 			if (editTypeL === i || editTypeR === i)
@@ -1062,9 +1164,6 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 				ctx.fillStyle = "#C0C000";
 			}
 		break;
-		case PATTERN_BLOCK:
-			ctx.fillStyle = "#800000";
-		break;
 		case PATTERN_CLEAR_BLOCK:
 			ctx.fillStyle = "#000080";
 		break;
@@ -1086,6 +1185,14 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 			{
 				doDraw = false;
 			}
+		break;
+		case SIMULATION_BLOCK:
+			ctx.fillStyle = "#C000C0";
+		break;
+		case FLUID_BLOCK:
+			ctx.fillStyle = "#0080C0";
+			ctx.strokeStyle = "#0080C0";
+			ctx.globalAlpha = extra.prevFill;
 		break;
 	}
 	if (doDraw)
@@ -1379,6 +1486,14 @@ function TileIsSolid (tile) {
 	return false;
 }
 
+function CheckTileType (area, i, j, k, type) {
+	if (!PositionInBounds(area, i, j, k))
+	{
+		return false;
+	}
+	return (area.map[i][j][k] === type);
+}
+
 function IsSolidE (entity) {
 	return IsSolid(entity.x, entity.y, entity.z);
 }
@@ -1401,6 +1516,20 @@ function LocationInArea (area, x, y, z) {
 		if (area.y <= y && y < area.y + area.ySize)
 		{
 			if (area.z <= z && z < area.z + area.zSize)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+function PositionInBounds (area, i, j, k) {
+	if (0 <= i && i < area.xSize)
+	{
+		if (0 <= j && j < area.ySize)
+		{
+			if (0 <= k && k < area.zSize)
 			{
 				return true;
 			}
@@ -1618,20 +1747,17 @@ function ClearAreaPattern (area) {
 	}
 }
 
-//Should be determined through math
-var standardTileSize = 55;
-
 //Should care about input z level
 function ScreenXToWorldX (screenX, z) {
-	return Math.round((screenX - CANVAS_HALF_WIDTH) / standardTileSize);
+	return Math.round((screenX - CANVAS_HALF_WIDTH) / GetScale(z));
 }
 
 function ScreenYToWorldY (screenY, z) {
-	return Math.round((screenY - CANVAS_HALF_HEIGHT) / standardTileSize);
+	return Math.round((screenY - CANVAS_HALF_HEIGHT) / GetScale(z));
 }
 
 
-window.addEventListener("keydown", DoKeyDown, true);
+document.addEventListener("keydown", DoKeyDown);
 
 function DoKeyDown (e) {
 	if (e.keyCode === 8)
@@ -1679,6 +1805,18 @@ function DoKeyDown (e) {
 	{
 		rightKey = true;
 	}
+	else if (e.keyCode === 32)
+	{
+		//Spacebar: select next overlapping area
+		SelectNextOverlappingArea(player.x, player.y, player.z);
+	}
+	else if (e.keyCode === 9)
+	{
+		//Tab: select and jump to next area
+		//prevent default because it selects address bar or whatever
+		e.preventDefault();
+		SelectAndJumpToNextArea();
+	}
 	else if (e.keyCode === 49)
 	{
 		//1
@@ -1713,7 +1851,7 @@ function DoKeyDown (e) {
 	mouseMovement = false;
 }
 
-window.addEventListener("keyup", DoKeyUp, true);
+document.addEventListener("keyup", DoKeyUp);
 
 function DoKeyUp (e) {
 	if (e.keyCode === 87)
@@ -1761,10 +1899,10 @@ function DoKeyUp (e) {
 
 var mButton;
 
-window.addEventListener("mousedown", DoMouseDown, true);
+window.addEventListener("mousedown", DoMouseDown);
 
 function DoMouseDown (e) {
-	e.preventDefault();
+	//e.preventDefault();
 
 	mouseX = e.clientX;
 	mouseY = e.clientY;
@@ -1782,7 +1920,7 @@ function DoMouseDown (e) {
 
 }
 
-window.addEventListener("mousemove", DoMouseMove, true);
+window.addEventListener("mousemove", DoMouseMove);
 
 function DoMouseMove (e) {
 	e.preventDefault();
@@ -1796,7 +1934,7 @@ function DoMouseMove (e) {
 	}
 }
 
-window.addEventListener("mouseup", DoMouseUp, true);
+window.addEventListener("mouseup", DoMouseUp);
 
 function DoMouseUp (e) {
 	e.preventDefault();
@@ -1815,7 +1953,7 @@ function DoMouseUp (e) {
 	}
 }
 
-window.addEventListener("mousewheel", DoMouseWheel, true);
+window.addEventListener("mousewheel", DoMouseWheel);
 
 function DoMouseWheel (e) {
 	e.preventDefault();
@@ -1841,7 +1979,7 @@ function DoMouseWheel (e) {
 	}
 }
 
-window.addEventListener("resize", DoResize, true);
+window.addEventListener("resize", DoResize);
 
 function DoResize (e) {
 	ResizeCanvas();
@@ -1856,21 +1994,154 @@ function ResizeCanvas () {
 	CANVAS_HALF_HEIGHT = CANVAS_HEIGHT / 2;
 }
 
-window.addEventListener("contextmenu", DoContextMenu, true);
+document.addEventListener("contextmenu", DoContextMenu);
 
 function DoContextMenu (e) {
 	e.preventDefault();
 }
 
+function SelectNextOverlappingArea (atX, atY, atZ) {
+	if (!shiftPressed)
+	{
+		//Forwards (no shift)
+		if (selectedArea !== undefined && LocationInArea(selectedArea, player.x, player.y, player.z))
+		{
+			//Select next overlapping area, starting from the current selected area
+			for (var i = areas.indexOf(selectedArea) + 1; i < areas.length; i++)
+			{
+				var area = areas[i];
+				if (LocationInArea(area, atX, atY, atZ))
+				{
+					selectedArea = area;
+					return;
+				}
+			}
+			//and then looping around from the start again
+			for (var i = 0; i < areas.indexOf(selectedArea); i++)
+			{
+				var area = areas[i];
+				if (LocationInArea(area, atX, atY, atZ))
+				{
+					selectedArea = area;
+					return;
+				}
+			}
+
+		}
+		//select first overlapping area
+		for (var i = 0; i < areas.length; i++)
+		{
+			var area = areas[i];
+			if (LocationInArea(area, atX, atY, atZ))
+			{
+				selectedArea = area;
+				return;
+			}
+		}
+	}
+	else
+	{
+		//Backwards (Shift)
+		if (selectedArea !== undefined && LocationInArea(selectedArea, player.x, player.y, player.z))
+		{
+			//Select prev overlapping area, starting from currently selected area
+			for (var i = areas.indexOf(selectedArea) - 1; i >= 0; i--)
+			{
+				var area = areas[i];
+				if (LocationInArea(area, atX, atY, atZ))
+				{
+					selectedArea = area;
+					return;
+				}
+			}
+			//and then looping around from the end
+			for (var i = areas.length - 1; i > areas.indexOf(selectedArea); i--)
+			{
+				var area = areas[i];
+				if (LocationInArea(area, atX, atY, atZ))
+				{
+					selectedArea = area;
+					return;
+				}
+			}
+		}
+		//select last overlapping area
+		for (var i = areas.length - 1; i >= 0; i--)
+		{
+			var area = areas[i];
+			if (LocationInArea(area, atX, atY, atZ))
+			{
+				selectedArea = area;
+				return;
+			}
+		}
+	}
+	//no area to select, clear selection 
+	selectedArea = undefined;
+}
+
+function SelectAndJumpToNextArea () {
+	var prevIndex = areas.indexOf(selectedArea);
+	if (!shiftPressed)
+	{
+		//forwards (no shift)
+		if (prevIndex + 1 >= areas.length)
+		{
+			//loop to start
+			selectedArea = areas[0];
+		}
+		else
+		{
+			//Go to next area
+			selectedArea = areas[prevIndex + 1]
+		}
+	}
+	else
+	{
+		//backwards (shift)
+		if (prevIndex <= 0)
+		{
+			//loop to end
+			selectedArea = areas[areas.length - 1];
+		}
+		else
+		{
+			//Go to previous area
+			selectedArea = areas[prevIndex - 1];
+		}
+	}
+	if (selectedArea !== undefined)
+	{
+		//Jump the player to the new selected area (if it exists)
+		player.x = selectedArea.x;
+		player.y = selectedArea.y;
+		player.z = selectedArea.z;
+	}
+}
+
 function EditTile (editX, editY, editZ, tile) {
+	//Target area is either first area containing this tile, or the selected area if it contains this tile
+	var targetArea;
 	for (var i = 0; i < areas.length; i++)
 	{
 		var area = areas[i];
 		if (LocationInArea(area, editX, editY, editZ))
 		{
-			SetTile(area, editX - area.x, editY - area.y, editZ - area.z, tile)
-
+			if (area === selectedArea)
+			{
+				//Selected area: affect
+				SetTile(area, editX - area.x, editY - area.y, editZ - area.z, tile);
+				return;
+			}
+			else if (targetArea === undefined)
+			{
+				targetArea = area;
+			}
 		}
+	}
+	if (targetArea !== undefined)
+	{
+		SetTile(targetArea, editX - targetArea.x, editY - targetArea.y, editZ - targetArea.z, tile);
 	}
 }
 
@@ -1968,9 +2239,9 @@ function EditorMouseDown () {
 
 		return;
 	}
-	var editX = ScreenXToWorldX(mouseX, player.z) + player.x;
-	var editY = ScreenYToWorldY(mouseY, player.z) + player.y;
-	var editZ = player.z;
+	var editX = ScreenXToWorldX(mouseX, GetEntityZ(player)) + Math.round(GetEntityX(player));
+	var editY = ScreenYToWorldY(mouseY, GetEntityZ(player)) + Math.round(GetEntityY(player));
+	var editZ = Math.round(GetEntityZ(player));
 
 	lastEditedX = editX;
 	lastEditedY = editY;
@@ -1994,6 +2265,7 @@ function EditorMouseDown () {
 		{
 			editType = editTypeR;
 		}
+
 		EditTile(editX, editY, editZ, editType);
 	}
 	
@@ -2070,6 +2342,18 @@ function GenerateColorPalette (numColors) {
 		colors.push("#" + rm + gm + bm); 
 	}
 	return colors;
+}
+
+function RandomBrightColor () {
+	var vv = Math.random() * 500 + 200;
+	var rf = Math.random(); var rr = rf;
+	var gf = Math.random(); var gg = gf;
+	var bf = Math.random(); var bb = bf;
+	if (rf < gf - 0.3 || rf < bf - 0.3) { rr *= 0.3; }
+	if (gf < rf - 0.3 || gf < bf - 0.3) { gg *= 0.3; }
+	if (bf < gf - 0.3 || bf < rf - 0.3) { bb *= 0.3; }
+	var tt = 1 / (rr + gg + bb);
+	var r = tt * vv * rr
 }
 
 function RandomColor () {
@@ -2162,6 +2446,3 @@ function LoadFromLocalStorage (levelName) {
 // ░░░░░░█░░░░░░░░█ 
 // ░░░░░▐▌░░░░░░░░░█ 
 // ░░░░░█░░░░░░░░░░▐▌
-
-
-
