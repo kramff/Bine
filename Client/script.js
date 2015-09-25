@@ -27,9 +27,8 @@ var receivedMessages = [];
 try
 {
 	var socket = io("http://localhost:8080");
-	socket.on("serverLevels", function (data) {
-		serverLevels = data;
-		console.log(data);
+	socket.on("connect", function (data) {
+		console.log("Connected to server with id: " + socket.id);
 	});
 	socket.on("motd", function (data) {
 		motd = data;
@@ -39,6 +38,7 @@ try
 		serverLevels = data;
 		console.log("Server levels: " + motd);
 	});
+	
 }
 catch (err)
 {
@@ -1895,7 +1895,7 @@ function DoKeyDown (e) {
 
 	shiftPressed = e.shiftKey;
 
-	console.log(e.keyCode);
+	// console.log(e.keyCode);
 	mouseMovement = false;
 }
 
