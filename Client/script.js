@@ -2,12 +2,42 @@
 
 
 
-//Socket.io stuff
+//Server stuff
+
+// motd: message of the day (string)
+var motd = "";
+
+// serverLevels: list of levels available from server.
+// [{name, curPlayers}, ...]
+var serverLevels = [];
+
+// downloadedLevel: most recently downloaded level (in json string data form (?))
+var downloadedLevel = "";
+
+// otherPlayers: other players in the same server level
+// [{id, name, color, x, y, z}, ...]
+var otherPlayers = [];
+
+// recievedMessages: recently recieved messages
+// [{id, text, timestamp, misc}, ...]
+// misc: {utterance, ...other effects go here}
+var receivedMessages = [];
+
+// socket.io connection
 try
 {
 	var socket = io("http://localhost:8080");
-	socket.on("test", function (data) {
+	socket.on("serverLevels", function (data) {
+		serverLevels = data;
 		console.log(data);
+	});
+	socket.on("motd", function (data) {
+		motd = data;
+		console.log("Message of the day: " + motd);
+	});
+	socket.on("serverLevels", function (data) {
+		serverLevels = data;
+		console.log("Server levels: " + motd);
 	});
 }
 catch (err)
