@@ -24,3 +24,5 @@ cd ..\..\bine-online
 git add -A
 git commit -m "batch commit for bine-online"
 git push heroku master
+echo go back to main bine folder
+cd ..\Bine
