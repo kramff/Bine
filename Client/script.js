@@ -1,8 +1,8 @@
-//Bine puzzle game copyright Mark Foster 2015
+// Bine puzzle game copyright Mark Foster 2015
 
 
 
-//Server stuff
+// Server stuff
 
 // motd: message of the day (string)
 var motd = "";
@@ -14,9 +14,11 @@ var serverLevels = [];
 // downloadedLevel: most recently downloaded level (in json string data form (?))
 var downloadedLevel = "";
 
-// otherPlayers: other players in the same server level
+var usingServerLevel = false;
+
+// playerArray: other players in the same server level
 // [{id, name, color, x, y, z}, ...]
-var otherPlayers = [];
+var playerArray = [];
 
 // recievedMessages: recently recieved messages
 // [{id, text, timestamp, misc}, ...]
@@ -24,9 +26,17 @@ var otherPlayers = [];
 var receivedMessages = [];
 
 // socket.io connection
+var MULTI_ON = false;
 try
 {
-	var socket = io("http://localhost:8080");
+	if (location.href === "http://kramff.github.io/")
+	{
+		socket = io("bine-online.herokuapp.com")
+	}
+	else
+	{
+		socket = io("http://localhost:5000");
+	}
 	socket.on("connect", function (data) {
 		console.log("Connected to server with id: " + socket.id);
 	});
@@ -36,76 +46,113 @@ try
 	});
 	socket.on("serverLevels", function (data) {
 		serverLevels = data;
-		console.log("Server levels: " + motd);
+		console.log("Server levels: " + serverLevels);
 	});
-	
+	socket.on("playerMove", function (data) {
+		UpdatePlayer(data);
+	});
+	socket.on("disconnection", function (data) {
+		console.log("player disconnected");
+		RemovePlayer(data);
+	});
+
+	//Temporary level direct download
+	socket.on("chosenLevel", function (data) {
+		console.log("got chosen level from server");
+		ImportLevel(data.data);
+	});
+
+	function UpdatePlayer (playerData) {
+		for (var i = 0; i < playerArray.length; i++)
+		{
+			if (playerArray[i].id === playerData.id)
+			{
+				// playerArray[i] = playerData;
+				playerArray[i].x = playerData.x;
+				playerArray[i].y = playerData.y;
+				playerArray[i].z = playerData.z;
+				return;
+			}
+		}
+		//New player
+		playerArray.push(playerData);
+		//Add to draw objects
+		drawObjects.push(playerData);
+	}
+	function RemovePlayer (playerData) {
+		for (var i = 0; i < playerArray.length; i++)
+		{
+			if (playerArray[i].id === playerData.id)
+			{
+				drawObjects.splice(drawObjects.indexOf(playerArray[i]), 1)
+				playerArray.splice(i, 1);
+				return;
+			}
+		}
+	}
+	MULTI_ON = true;
 }
 catch (err)
 {
 	console.error("server not up");
+	MULTI_ON = false;
 }
 
 
 
-//Canvas stuff
+// Canvas stuff
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-
 var CANVAS_WIDTH = 600;
 var CANVAS_HEIGHT = 600;
-
 var CANVAS_HALF_WIDTH = 300;
 var CANVAS_HALF_HEIGHT = 300;
 
-
+// Display variables
 var EYE_DISTANCE = 45;
 var SCALE_MULTIPLIER = 490;
 var Z_MULTIPLIER = 3.1;
 var TILE_SIZE = 5.4;
 
+// Editor variables
 var editorActive = false;
-
 var selectedArea = undefined;
-
 var fakeExtra = {opacity: 1, pattern: 0, fill: 1};
 
+// Input variables
 var wKey = false;
 var aKey = false;
 var sKey = false;
 var dKey = false;
-
 var qKey = false;
 var eKey = false;
-
 var upKey = false;
 var downKey = false;
 var leftKey = false;
 var rightKey = false;
-
 var shiftPressed = false;
-
 var mouseX = 0;
 var mouseY = 0;
-
 var mousePressed = false;
-
 var mouseMovement = false;
 var mouseTilesX = 0;
 var mouseTilesY = 0;
-
 var middleClick = false;
 var midStartX = 0;
 var midStartY = 0;
 
+// Camera
 var xCam = 0;
 var yCam = 0;
 var zCam = 0;
 
+// Special camera/screen manipulation
 var edgeSquareLimit = {active:false, x: 300, y: 300, xSize: 0, ySize: 0}
 
-
+// After holding a direction down from this long, that movement can't be canceled
 var MOVEMENT_CHANGE_WINDOW = 3;
 
+// Tile types
 var EMPTY = 0;
 var SOLID = 1;
 var DISAPPEAR_BLOCK = 2;
@@ -118,21 +165,25 @@ var PATTERN_HOLE_BLOCK = 8;
 var SIMULATION_BLOCK = 9;
 var FLUID_BLOCK = 10;
 
-var BLOCK_TYPES = 11;
+// Number of tile types
+var TILE_TYPES = 11;
 
+// Area status
 var STATUS_NORMAL = 0;
 var STATUS_DRAWING = 1;
 var STATUS_ACTIVE = 2;
 
+// Array of directions
 var DIRECTIONS = [
 	{x: 0, y: -1, z: 0}, //North
-	{x: 1, y: 0, z: 0}, //East
-	{x: 0, y: 1, z: 0}, //South
+	{x: 1, y: 0, z: 0},  //East
+	{x: 0, y: 1, z: 0},  //South
 	{x: -1, y: 0, z: 0}, //West
-	{x: 0, y: 0, z: 1}, //Up
-	{x: 0, y: 0, z: -1} //Down
+	{x: 0, y: 0, z: 1},  //Up
+	{x: 0, y: 0, z: -1}  //Down
 ];
 
+// Game data
 var areas = [];
 var areaColors = [];
 var entities = [];
@@ -298,7 +349,7 @@ function Init () {
 
 
 	ResizeCanvas();
-	StartMapEditor();
+	// StartMapEditor();
 
 	player = CreateEntity();
 	InitGame();
@@ -356,11 +407,15 @@ function Update () {
 	Control();
 	Render();
 
-	if (editorActive && mousePressed)
+	if (lastX !== GetEntityX(player) || lastY !== GetEntityY(player) || lastZ !== GetEntityZ(player))
 	{
-		if (lastX !== GetEntityX(player) || lastY !== GetEntityY(player) || lastZ !== GetEntityZ(player))
+		if (editorActive && mousePressed)
 		{
 			EditorMouseDown();
+		}
+		if (MULTI_ON)
+		{
+			socket.emit("playerMove", {x: GetEntityX(player), y: GetEntityY(player), z: GetEntityZ(player)})
 		}
 	}
 
@@ -890,7 +945,7 @@ function Render () {
 		//Draw tile select left sidebar
 		ctx.fillStyle = "#300030";
 		ctx.fillRect(0, 0, 70, CANVAS_HEIGHT);
-		for (var i = 0; i < BLOCK_TYPES; i++)
+		for (var i = 0; i < TILE_TYPES; i++)
 		{
 			//Selected tile highlight
 			if (editTypeL === i || editTypeR === i)
@@ -1080,14 +1135,19 @@ function DObjInZ (dObj, z) {
 	{
 		return Math.ceil(GetEntityZ(dObj)) === z;
 	}
-	if (dObj instanceof Area)
+	else if (dObj instanceof Area)
 	{
 		return (dObj.z <= z && dObj.z + dObj.zSize > z);
 	}
+	else
+	{
+		return Math.ceil(dObj.z) === z;
+	}
 }
 
-//Entity - DrawEntity
-//Area - DrawAreaZSlice
+// Entity - DrawEntity
+// Area - DrawAreaZSlice
+// Other - should be a Network Player
 function DrawDObjZ (dObj, z) {
 	if (dObj instanceof Entity)
 	{
@@ -1096,6 +1156,11 @@ function DrawDObjZ (dObj, z) {
 	else if (dObj instanceof Area)
 	{
 		DrawAreaZSlice(dObj, z);
+	}
+	else
+	{
+		// Otherwise: Network player
+		DrawNPlayer(dObj);
 	}
 }
 
@@ -1339,11 +1404,22 @@ function InCeiling (x, y, z) {
 	return true;
 }
 
-
 function DrawEntity (entity) {
 	var scale = GetScale(GetEntityZ(entity));
 	var x = scale * (GetEntityX(entity) - xCam) + CANVAS_HALF_WIDTH;
 	var y = scale * (GetEntityY(entity) - yCam) + CANVAS_HALF_HEIGHT;
+	DrawCharacter(entity, scale, x, y);
+}
+
+function DrawNPlayer (nPlayer) {
+	var scale = GetScale(nPlayer.z);
+	var x = scale * (nPlayer.x - xCam) + CANVAS_HALF_WIDTH;
+	var y = scale * (nPlayer.y - yCam) + CANVAS_HALF_HEIGHT;
+	DrawCharacter(nPlayer, scale, x, y);
+}
+
+function DrawCharacter (character, scale, x, y) {
+	
 	if (scale < 0)
 	{
 		return;
@@ -1353,7 +1429,7 @@ function DrawEntity (entity) {
 		ctx.save();
 		ctx.strokeStyle = "#80FFFF";
 		ctx.fillStyle = "#208080";
-		if (editorActive && entity === player)
+		if (editorActive && character === player)
 		{
 			//Editor player: transparent, move with camera when middle clicking
 			ctx.globalAlpha = 0.5;
