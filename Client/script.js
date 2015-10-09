@@ -25,78 +25,108 @@ var playerArray = [];
 // misc: {utterance, ...other effects go here}
 var receivedMessages = [];
 
+
+
 // socket.io connection
 var MULTI_ON = false;
-try
+
+var socketScript = document.createElement("script");
+if (location.href === "http://kramff.github.io/")
 {
-	if (location.href === "http://kramff.github.io/")
+	socketScript.setAttribute("src", "https://bine-online.herokuapp.com/socket.io/socket.io.js");
+}
+else
+{
+	socketScript.setAttribute("src", "http://localhost:5000/socket.io/socket.io.js");
+}
+document.getElementsByTagName('body')[0].appendChild(socketScript);
+var ssLoaded = false;
+function loadSScript () {
+	if (!ssLoaded)
 	{
-		socket = io("bine-online.herokuapp.com")
+		ssLoaded = true;
+		InitSocketConnection();
 	}
-	else
+}
+socketScript.onreadystatechange = loadSScript;
+socketScript.onload = loadSScript;
+
+
+function InitSocketConnection (argument) {
+	try
 	{
-		socket = io("http://localhost:5000");
-	}
-	socket.on("connect", function (data) {
-		console.log("Connected to server with id: " + socket.id);
-	});
-	socket.on("motd", function (data) {
-		motd = data;
-		console.log("Message of the day: " + motd);
-	});
-	socket.on("serverLevels", function (data) {
-		serverLevels = data;
-		console.log("Server levels: " + serverLevels);
-	});
-	socket.on("playerMove", function (data) {
-		UpdatePlayer(data);
-	});
-	socket.on("disconnection", function (data) {
-		console.log("player disconnected");
-		RemovePlayer(data);
-	});
-
-	//Temporary level direct download
-	socket.on("chosenLevel", function (data) {
-		console.log("got chosen level from server");
-		ImportLevel(data.data);
-	});
-
-	function UpdatePlayer (playerData) {
-		for (var i = 0; i < playerArray.length; i++)
+		if (location.href === "http://kramff.github.io/")
 		{
-			if (playerArray[i].id === playerData.id)
+			socket = io("bine-online.herokuapp.com")
+		}
+		else
+		{
+			socket = io("http://localhost:5000");
+		}
+		socket.on("connect", function (data) {
+			console.log("Connected to server with id: " + socket.id);
+		});
+		socket.on("motd", function (data) {
+			motd = data;
+			console.log("Message of the day: " + motd);
+		});
+		socket.on("serverLevels", function (data) {
+			serverLevels = data;
+			console.log("Server levels: " + serverLevels);
+		});
+		socket.on("playerMove", function (data) {
+			UpdatePlayer(data);
+		});
+		socket.on("disconnection", function (data) {
+			console.log("player disconnected");
+			RemovePlayer(data);
+		});
+
+		//Temporary level direct download
+		socket.on("chosenLevel", function (data) {
+			console.log("got chosen level from server");
+			ImportLevel(data.data);
+		});
+
+		function UpdatePlayer (playerData) {
+			for (var i = 0; i < playerArray.length; i++)
 			{
-				// playerArray[i] = playerData;
-				playerArray[i].x = playerData.x;
-				playerArray[i].y = playerData.y;
-				playerArray[i].z = playerData.z;
-				return;
+				if (playerArray[i].id === playerData.id)
+				{
+					// playerArray[i] = playerData;
+					playerArray[i].x = playerData.x;
+					playerArray[i].y = playerData.y;
+					playerArray[i].z = playerData.z;
+					return;
+				}
+			}
+			//New player
+			playerArray.push(playerData);
+			//Add to draw objects
+
+			drawObjects.push(playerData);
+			console.log("New player");
+		}
+		function RemovePlayer (playerData) {
+			for (var i = 0; i < playerArray.length; i++)
+			{
+				if (playerArray[i].id === playerData.id)
+				{
+					drawObjects.splice(drawObjects.indexOf(playerArray[i]), 1)
+					playerArray.splice(i, 1);
+					return;
+				}
 			}
 		}
-		//New player
-		playerArray.push(playerData);
-		//Add to draw objects
-		drawObjects.push(playerData);
+		MULTI_ON = true;
 	}
-	function RemovePlayer (playerData) {
-		for (var i = 0; i < playerArray.length; i++)
-		{
-			if (playerArray[i].id === playerData.id)
-			{
-				drawObjects.splice(drawObjects.indexOf(playerArray[i]), 1)
-				playerArray.splice(i, 1);
-				return;
-			}
-		}
+	catch (err)
+	{
+		console.error("server not up");
+		MULTI_ON = false;
 	}
-	MULTI_ON = true;
 }
-catch (err)
-{
-	console.error("server not up");
-	MULTI_ON = false;
-}
+
 
 
 
@@ -358,6 +388,7 @@ function Init () {
 		ImportLevel(pyramidLevel2);
 	}, 500);
 	*/
+
 }
 
 function InitGame () {
@@ -368,6 +399,14 @@ function InitGame () {
 	zCam = player.z;
 
 	
+	if (MULTI_ON)
+	{
+		for (var i = 0; i < playerArray.length; i++)
+		{
+			var otherPlayer = playerArray[i];
+			drawObjects.push(otherPlayer);
+		}
+	}
 }
 
 
@@ -982,6 +1021,7 @@ function Render () {
 		ctx.fillRect(70, CANVAS_HEIGHT - 100, CANVAS_WIDTH - 270, 100);
 
 	}
+
 }
 
 function DrawEditorButton (btnNum, text) {
@@ -1070,23 +1110,26 @@ function DrawAllObjects () {
 		//no objects to draw
 		return;
 	}
+	drawObjects.forEach(function (obj) {
+		SetDrawZ(obj);
+	});
 	drawObjects.sort(function (a, b) {
 		if (a === player || b === player)
 		{
-			if (a === player) return a.z + 0.1 - b.z;
-			else return a.z - b.z - 0.1;
+			if (a === player) return a.drawZ + 0.1 - b.drawZ;
+			else return a.drawZ - b.drawZ - 0.1;
 		}
-		return a.z - b.z;
+		return a.drawZ - b.drawZ;
 	});
-	var bottomZ = drawObjects[0].z;
-	var topZ = drawObjects[drawObjects.length - 1].z;
+	var bottomZ = drawObjects[0].drawZ;
+	var topZ = drawObjects[drawObjects.length - 1].drawZ;
 	var bottomI = 0;
 	for (var i = 0; i < drawObjects.length; i++)
 	{
 		if (drawObjects[i] instanceof Area)
 		{
 			//Only areas can have a higher z than the last object
-			topZ = Math.max(topZ, drawObjects[i].z + drawObjects[i].zSize);
+			topZ = Math.max(topZ, drawObjects[i].drawZ + drawObjects[i].zSize);
 		}
 	}
 	for (var z = bottomZ; z <= topZ + 1; z++)
@@ -1095,7 +1138,7 @@ function DrawAllObjects () {
 		var currentObject = drawObjects[i];
 
 		//Loop through objects, stopping when no more objects or next object is above currentZ
-		while (currentObject !== undefined && currentObject.z <= z)
+		while (currentObject !== undefined && currentObject.drawZ <= z)
 		{
 			if (DObjInZ(currentObject, z))
 			{
@@ -1107,14 +1150,14 @@ function DrawAllObjects () {
 			{
 				if (currentObject instanceof Entity)
 				{
-					if (z > currentObject.z)
+					if (z > currentObject.drawZ)
 					{
 						bottomI ++;
 					}
 				}
 				else if (currentObject instanceof Area)
 				{
-					if (z > currentObject.z + currentObject.zSize)
+					if (z > currentObject.drawZ + currentObject.zSize)
 					{
 						bottomI ++;
 					}
@@ -1126,6 +1169,21 @@ function DrawAllObjects () {
 			i ++;
 			currentObject = drawObjects[i];
 		}
+	}
+}
+
+function SetDrawZ (dObj) {
+	if (dObj instanceof Entity)
+	{
+		dObj.drawZ = Math.ceil(GetEntityZ(dObj));
+	}
+	else if (dObj instanceof Area)
+	{
+		dObj.drawZ = dObj.z;
+	}
+	else
+	{
+		dObj.drawZ = Math.ceil(dObj.z);
 	}
 }
 

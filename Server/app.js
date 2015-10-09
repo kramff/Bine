@@ -60,9 +60,10 @@ io.on("connection", function(socket) {
 	// - (For now) Send an initial upate for each current player
 	socket.emit("motd", motd);
 	socket.emit("serverLevels", serverLevels);
-	for (var i = 0; i < playerArray.length; i++) {
+	for (var i = 0; i < playerArray.length; i++)
+	{
 		socket.emit("playerMove", playerArray[i]);
-	};
+	}
 
 	//Temporary main level
 	socket.emit("chosenLevel", levelData[0]);
