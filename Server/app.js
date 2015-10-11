@@ -108,6 +108,7 @@ io.on("connection", function(socket) {
 	});
 	socket.on("message", function (data) {
 		// data - chat message sent by player
+		data.id = socket.id;
 		socket.broadcast.emit("message", data);
 	});
 	socket.on("levelEvent", function (data) {

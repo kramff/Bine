@@ -81,6 +81,9 @@ function InitSocketConnection (argument) {
 			console.log("player disconnected");
 			RemovePlayer(data);
 		});
+		socket.on("message", function (data) {
+			RecieveChatMessage(data);
+		});
 
 		//Temporary level direct download
 		socket.on("chosenLevel", function (data) {
@@ -88,43 +91,71 @@ function InitSocketConnection (argument) {
 			ImportLevel(data.data);
 		});
 
-		function UpdatePlayer (playerData) {
-			for (var i = 0; i < playerArray.length; i++)
-			{
-				if (playerArray[i].id === playerData.id)
-				{
-					// playerArray[i] = playerData;
-					playerArray[i].x = playerData.x;
-					playerArray[i].y = playerData.y;
-					playerArray[i].z = playerData.z;
-					return;
-				}
-			}
-			//New player
-			playerArray.push(playerData);
-			//Add to draw objects
+		
 
-			drawObjects.push(playerData);
-			console.log("New player");
-		}
-		function RemovePlayer (playerData) {
-			for (var i = 0; i < playerArray.length; i++)
-			{
-				if (playerArray[i].id === playerData.id)
-				{
-					drawObjects.splice(drawObjects.indexOf(playerArray[i]), 1)
-					playerArray.splice(i, 1);
-					return;
-				}
-			}
-		}
 		MULTI_ON = true;
+
 	}
 	catch (err)
 	{
 		console.error("server not up");
 		MULTI_ON = false;
 	}
+}
+
+//Functions to apply incoming data to game state
+function UpdatePlayer (playerData) {
+	for (var i = 0; i < playerArray.length; i++)
+	{
+		if (playerArray[i].id === playerData.id)
+		{
+			// playerArray[i] = playerData;
+			playerArray[i].x = playerData.x;
+			playerArray[i].y = playerData.y;
+			playerArray[i].z = playerData.z;
+			return;
+		}
+	}
+	//New player
+	playerArray.push(playerData);
+	//Add to draw objects
+
+	drawObjects.push(playerData);
+	console.log("New player");
+}
+function RemovePlayer (playerData) {
+	for (var i = 0; i < playerArray.length; i++)
+	{
+		if (playerArray[i].id === playerData.id)
+		{
+			drawObjects.splice(drawObjects.indexOf(playerArray[i]), 1)
+			playerArray.splice(i, 1);
+			return;
+		}
+	}
+}
+function RecieveChatMessage (message)
+{
+	console.log(message.text)
+	TextToSpeech(message.text);
+	AddMessage(message);
+}
+
+// Functions to send data to server
+function SendPositionUpdate (position)
+{
+	socket.emit("playerMove", position);
+}
+function SendChatMessage (message)
+{
+	socket.emit("message", message);
+	message.id = socket.id;
+	AddMessage(message);
+}
+
+function AddMessage (message) {
+	message.startTime = Date.now();
+	messages.push(message);
 }
 
 
@@ -218,6 +249,7 @@ var areas = [];
 var areaColors = [];
 var entities = [];
 var drawObjects = [];
+var messages = [];
 
 
 
@@ -454,7 +486,7 @@ function Update () {
 		}
 		if (MULTI_ON)
 		{
-			socket.emit("playerMove", {x: GetEntityX(player), y: GetEntityY(player), z: GetEntityZ(player)})
+			SendPositionUpdate({x: GetEntityX(player), y: GetEntityY(player), z: GetEntityZ(player)});
 		}
 	}
 
@@ -939,6 +971,7 @@ function Render () {
 	underCeiling = UnderCeilingCheck();
 
 	DrawAllObjects();
+	DrawAllMessages();
 
 	if (edgeSquareLimit.active)
 	{
@@ -1029,7 +1062,55 @@ function DrawEditorButton (btnNum, text) {
 	ctx.fillRect(CANVAS_WIDTH - 190, 10 + btnNum * 60, 170, 50);
 	ctx.fillStyle = "#FFFFFF";
 	ctx.fillText(text, CANVAS_WIDTH - 90 - text.length * 5, 40 + btnNum * 60);
+}
 
+function DrawAllMessages () {
+	ctx.save();
+	var currentTime = Date.now();
+	ctx.fillStyle = "#FFFFFF";
+	for (var i = messages.length - 1; i >= 0; i--) {
+		var message = messages[i];
+		var x, y;
+		if (MULTI_ON)
+		{
+			if (message.id === socket.id)
+			{
+				// Local player
+				x = GetScale(GetEntityZ(player)) * (GetEntityX(player) - xCam) + CANVAS_HALF_WIDTH;
+				y = GetScale(GetEntityZ(player)) * (GetEntityY(player) - yCam) + CANVAS_HALF_HEIGHT;
+			}
+			else
+			{
+				// Loop through network players
+				for (var np = 0; np < playerArray.length; np++)
+				{
+					var nPlayer = playerArray[np];
+					if (nPlayer.id === message.id)
+					{
+						x = GetScale(nPlayer.z) * (nPlayer.x - xCam) + CANVAS_HALF_WIDTH;
+						y = GetScale(nPlayer.z) * (nPlayer.y - yCam) + CANVAS_HALF_HEIGHT;
+					}
+				}
+			}
+		}
+		else
+		{
+			// Must be local player
+			x = GetScale(GetEntityZ(player)) * (GetEntityX(player) - xCam) + CANVAS_HALF_WIDTH;
+			y = GetScale(GetEntityZ(player)) * (GetEntityY(player) - yCam) + CANVAS_HALF_HEIGHT;
+		}
+		DrawTextBox(message.text, x, y);
+
+		if (currentTime - message.startTime > 5000)
+		{
+			messages.splice(i, 1);
+		}
+	}
+	ctx.restore();
+}
+
+function DrawTextBox (text, x, y) {
+	ctx.fillText(text, x, y);
 }
 
 //getName: if true, get the name of each area
@@ -1929,6 +2010,11 @@ function ClearAreaPattern (area) {
 	}
 }
 
+function TextToSpeech (text) {
+	var utterance = new SpeechSynthesisUtterance(text);
+	window.speechSynthesis.speak(utterance);
+}
+
 //Should care about input z level
 function ScreenXToWorldX (screenX, z) {
 	return Math.round((screenX - CANVAS_HALF_WIDTH) / GetScale(z));
@@ -1938,15 +2024,83 @@ function ScreenYToWorldY (screenY, z) {
 	return Math.round((screenY - CANVAS_HALF_HEIGHT) / GetScale(z));
 }
 
+var writingMessage = false;
+var messageInput = "";
+var enterPressed = false;
+
+document.addEventListener("keypress", DoKeyPress);
+
+function DoKeyPress (e) {
+	if (writingMessage)
+	{
+		if (e.keyCode == 13 && !enterPressed)
+		{
+			if (messageInput.length == 0)
+			{
+				writingMessage = false;
+				return;
+			}
+			// Send message
+			if (MULTI_ON)
+			{
+				SendChatMessage({text:messageInput});
+			}
+
+			// TEXT TO SPEECH
+			TextToSpeech(messageInput);
+
+			messageInput = "";
+			writingMessage = false;
+			return;
+		}
+		var letter = String.fromCharCode(e.keyCode);
+		letter = letter.replace(/[^a-zA-Z0-9 \\ \| ! @ # \$ % \^ & \* \( \) \- _ \+ = : ; " ' < > ,\. \? \/ \[ \] \{ \} ]/g, '');
+		messageInput += letter;
+		return;
+	}
+}
 
 document.addEventListener("keydown", DoKeyDown);
 
 function DoKeyDown (e) {
-	if (e.keyCode === 8)
+	if (writingMessage)
+	{
+		if (e.keyCode == 32)
+		{
+			//spacebar
+			messageInput += " ";
+			e.preventDefault();
+		}
+		if (e.keyCode == 8)
+		{
+			//backspace
+			messageInput = messageInput.slice(0, messageInput.length - 1);
+		}
+		return;
+	}
+	if (e.keyCode == 8)
 	{
 		//Backspace - prevent going back a page
 		e.preventDefault();
 	}
+	if (e.keyCode == 13)
+	{
+		if (!enterPressed)
+		{
+			writingMessage = true;
+			wKey = false;
+			aKey = false;
+			sKey = false;
+			dKey = false;
+			upKey = false;
+			downKey = false;
+			leftKey = false;
+			rightKey = false;
+		}
+		enterPressed = true;
+		return;
+	}
+
 	else if (e.keyCode === 87)
 	{
 		wKey = true;
@@ -2036,6 +2190,11 @@ function DoKeyDown (e) {
 document.addEventListener("keyup", DoKeyUp);
 
 function DoKeyUp (e) {
+	if (e.keyCode == 13)
+	{
+		enterPressed = false;
+	}
+
 	if (e.keyCode === 87)
 	{
 		wKey = false;
