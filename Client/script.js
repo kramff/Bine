@@ -1070,7 +1070,8 @@ function DrawAllMessages () {
 	ctx.fillStyle = "#FFFFFF";
 	for (var i = messages.length - 1; i >= 0; i--) {
 		var message = messages[i];
-		var x, y;
+		var x = -100;
+		var y = -100;
 		if (MULTI_ON)
 		{
 			if (message.id === socket.id)
@@ -1099,12 +1100,18 @@ function DrawAllMessages () {
 			x = GetScale(GetEntityZ(player)) * (GetEntityX(player) - xCam) + CANVAS_HALF_WIDTH;
 			y = GetScale(GetEntityZ(player)) * (GetEntityY(player) - yCam) + CANVAS_HALF_HEIGHT;
 		}
-		DrawTextBox(message.text, x, y);
+		DrawTextBox(message.text, x, y - 0.02 * (currentTime - message.startTime));
 
 		if (currentTime - message.startTime > 5000)
 		{
 			messages.splice(i, 1);
 		}
+	}
+	if (writingMessage)
+	{
+		var x = GetScale(GetEntityZ(player)) * (GetEntityX(player) - xCam) + CANVAS_HALF_WIDTH;
+		var y = GetScale(GetEntityZ(player)) * (GetEntityY(player) - yCam + 1.1) + CANVAS_HALF_HEIGHT;
+		DrawTextBox("> " + messageInput, x, y);
 	}
 	ctx.restore();
 }
