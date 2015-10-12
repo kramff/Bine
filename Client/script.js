@@ -2070,6 +2070,11 @@ function DoKeyPress (e) {
 document.addEventListener("keydown", DoKeyDown);
 
 function DoKeyDown (e) {
+	if (e.keyCode == 8)
+	{
+		//Backspace - prevent going back a page
+		e.preventDefault();
+	}
 	if (writingMessage)
 	{
 		if (e.keyCode == 32)
@@ -2084,11 +2089,6 @@ function DoKeyDown (e) {
 			messageInput = messageInput.slice(0, messageInput.length - 1);
 		}
 		return;
-	}
-	if (e.keyCode == 8)
-	{
-		//Backspace - prevent going back a page
-		e.preventDefault();
 	}
 	if (e.keyCode == 13)
 	{
