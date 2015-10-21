@@ -954,6 +954,12 @@ function Render () {
 		xCam = (xCam * 4 + GetEntityX(player) + 0.5) * 0.2;
 		yCam = (yCam * 4 + GetEntityY(player) + 0.5) * 0.2;
 		zCam = (zCam * 4 + GetEntityZ(player)) * 0.2;
+		if (editorActive)
+		{
+			xCam = (xCam * 1 + GetEntityX(player) + 0.5) * 0.5;
+			yCam = (yCam * 1 + GetEntityY(player) + 0.5) * 0.5;
+			zCam = (zCam * 1 + GetEntityZ(player)) * 0.5;
+		}
 	}
 
 	//Canvas rendering
@@ -2019,6 +2025,7 @@ function ClearAreaPattern (area) {
 
 function TextToSpeech (text) {
 	var utterance = new SpeechSynthesisUtterance(text);
+	utterance.lang = "en-US";
 	window.speechSynthesis.speak(utterance);
 }
 
@@ -2051,6 +2058,10 @@ function DoKeyPress (e) {
 			if (MULTI_ON)
 			{
 				SendChatMessage({text:messageInput});
+			}
+			else
+			{
+				AddMessage({text:messageInput});
 			}
 
 			// TEXT TO SPEECH
@@ -2535,6 +2546,8 @@ var editType = SOLID;
 var editTypeL = SOLID;
 var editTypeR = EMPTY;
 
+var lastAreaTime = 0;
+
 function EditorMouseDown () {
 	if (mouseX < 70)
 	{
@@ -2558,13 +2571,18 @@ function EditorMouseDown () {
 		{
 			case 0:
 				//Create Area
-				if (shiftPressed)
+				var currentTime = Date.now()
+				if (currentTime - lastAreaTime > 1000)
 				{
-					CreateArea(player.x, player.y, player.z, 10, 10, 10);
-				}
-				else
-				{
-					CreateArea(player.x, player.y, player.z, 5, 5, 5);
+					if (shiftPressed)
+					{
+						CreateArea(player.x, player.y, player.z, 10, 10, 10);
+					}
+					else
+					{
+						CreateArea(player.x, player.y, player.z, 5, 5, 5);
+					}
+					lastAreaTime = currentTime;
 				}
 			break;
 			case 1:
@@ -2649,6 +2667,7 @@ function EditorMouseUp () {
 		player.x = Math.round(xCam - 0.5);
 		player.y = Math.round(yCam - 0.5);
 	}
+	lastAreaTime = 0;
 }
 
 // mix: 0 = color0, 1 = color1
