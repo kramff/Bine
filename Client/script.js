@@ -20,7 +20,7 @@ var usingServerLevel = false;
 // [{id, name, color, x, y, z}, ...]
 var playerArray = [];
 
-// recievedMessages: recently recieved messages
+// receivedMessages: recently received messages
 // [{id, text, timestamp, misc}, ...]
 // misc: {utterance, ...other effects go here}
 var receivedMessages = [];
@@ -82,7 +82,18 @@ function InitSocketConnection (argument) {
 			RemovePlayer(data);
 		});
 		socket.on("message", function (data) {
-			RecieveChatMessage(data);
+			ReceiveChatMessage(data);
+		});
+
+		// Level editor
+		socket.on("tileChange", function (data) {
+			ReceiveTileChange(data);
+		});
+		socket.on("createArea", function (data) {
+			ReceiveCreateArea(data);
+		});
+		socket.on("removeArea", function (data) {
+			ReceiveRemoveArea(data);
 		});
 
 		//Temporary level direct download
@@ -134,25 +145,45 @@ function RemovePlayer (playerData) {
 		}
 	}
 }
-function RecieveChatMessage (message)
-{
+function ReceiveChatMessage (message) {
 	console.log(message.text)
 	TextToSpeech(message.text);
 	AddMessage(message);
 }
+function ReceiveTileChange (tileChange) {
+	var area = GetAreaByName(tileChange.name);
+	if (area !== undefined)
+	{
+		ActualSetTile(area, tileChange.x, tileChange.y, tileChange.z, tileChange.tile);
+	}
+}
+function ReceiveCreateArea (createArea) {
+
+}
 
 // Functions to send data to server
-function SendPositionUpdate (position)
-{
-	socket.emit("playerMove", position);
+function SendPositionUpdate (position) {
+	if (MULTI_ON)
+	{
+		socket.emit("playerMove", position);
+	}
 }
-function SendChatMessage (message)
-{
-	socket.emit("message", message);
-	message.id = socket.id;
-	AddMessage(message);
+function SendChatMessage (message) {
+	if (MULTI_ON)
+	{
+		socket.emit("message", message);
+		message.id = socket.id;	
+		AddMessage(message);
+	}
+}
+function SendTileChange (tileChange) {
+	if (MULTI_ON)
+	{
+		socket.emit("tileChange", tileChange);
+	}
 }
 
+// Show message on screen
 function AddMessage (message) {
 	message.startTime = Date.now();
 	messages.push(message);
@@ -283,6 +314,7 @@ function Entity (x, y, z) {
 var player;
 var firstTransparentTilesArray = [[99, 99, 99],[99, 99, 99],[99, 99, 99]];
 var underCeiling = false;
+var areaCounter = 0;
 
 function Area (x, y, z, xSize, ySize, zSize, useImport, map, rule) {
 	this.x = x;
@@ -302,7 +334,8 @@ function Area (x, y, z, xSize, ySize, zSize, useImport, map, rule) {
 	this.rule = rule;
 	this.simulate = false;
 
-	this.name = "Area " + (areas.length + 1);
+	areaCounter ++;
+	this.name = "Area " + areaCounter;
 
 	this.status = 0;
 	this.extraData = []; //[x][y][z] - object with any values
@@ -371,6 +404,30 @@ function Area (x, y, z, xSize, ySize, zSize, useImport, map, rule) {
 }
 
 function SetTile (area, x, y, z, tile) {
+	var prevTile = area.map[x][y][z];
+	if (tile === prevTile)
+	{
+		// No change needed
+		return false;
+	}
+	ActualSetTile(area, x, y, z, tile);
+	if (MULTI_ON)
+	{
+		SendTileChange({name: area.name, x: x, y: y, z: z, tile: tile});
+	}
+}
+function GetAreaByName (name) {
+	for (var i = 0; i < areas.length; i++)
+	{
+		var area = areas[i];
+		if (area.name === name)
+		{
+			return area;
+		}
+	}
+	return undefined;
+}
+function ActualSetTile (area, x, y, z, tile) {
 	area.map[x][y][z] = tile;
 	switch (tile)
 	{

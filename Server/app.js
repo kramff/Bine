@@ -6,6 +6,8 @@ console.log("starting server \\(^.^)/");
 var http = require("http");
 var socketio = require("socket.io");
 
+var levels = require("./levels.js");
+
 var listener = function (req, res) {
 	res.end("wowowow u are leet haxor");
 }
@@ -19,6 +21,132 @@ var motd = "DOWNLOAD MORE RAM";
 var serverLevels = ["ye_olde_playground"];
 
 var levelData = [{name: "ye_olde_playground", data: '{"areas":[{"x":16,"y":5,"z":-4,"xSize":10,"ySize":10,"zSize":10,"map":[[[1,1,1,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0]],[[1,1,1,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0]],[[1,1,1,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0]],[[1,1,1,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,1,0,0,0,0,0],[1,0,0,0,1,0,0,0,0,0],[1,0,0,1,0,0,0,0,0,0],[1,0,1,0,0,0,0,0,0,0],[1,1,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0]],[[1,1,1,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,1,0,0,0,0,0],[1,0,0,0,1,0,0,0,0,0],[1,0,0,1,0,0,0,0,0,0],[1,0,1,0,0,0,0,0,0,0],[1,1,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0]],[[1,1,1,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,1,0,0,0,0,0,0],[1,0,0,1,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0]],[[1,1,1,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,1,0,0,0,0,0,0,0],[1,0,1,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0]],[[1,1,1,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,1,0,0,0,0,0,0,0,0],[1,1,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0]],[[1,1,1,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0]],[[1,1,1,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0],[1,1,1,0,0,0,0,0,0,0]]],"rule":0},{"x":26,"y":7,"z":-4,"xSize":5,"ySize":5,"zSize":5,"map":[[[1,1,1,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]],[[1,1,1,0,0],[3,0,0,0,0],[3,0,0,0,0],[3,0,0,0,0],[1,0,0,0,0]],[[1,1,1,0,0],[3,0,0,0,0],[3,0,0,0,0],[3,0,0,0,0],[1,0,0,0,0]],[[1,1,1,0,0],[3,0,0,0,0],[3,0,0,0,0],[3,0,0,0,0],[1,0,0,0,0]],[[1,1,1,0,0],[1,1,1,0,0],[1,1,1,0,0],[1,0,0,0,0],[1,0,0,0,0]]],"rule":0},{"x":31,"y":9,"z":-4,"xSize":5,"ySize":5,"zSize":5,"map":[[[1,1,1,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]],[[1,1,1,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]],[[1,1,1,0,0],[1,2,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]],[[1,1,1,0,0],[1,2,2,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]],[[1,1,1,0,0],[1,1,1,0,0],[1,1,1,0,0],[1,1,1,0,0],[1,1,1,0,0]]],"rule":0},{"x":26,"y":12,"z":-4,"xSize":5,"ySize":5,"zSize":5,"map":[[[1,0,0,0,0],[1,0,0,0,0],[1,1,1,0,0],[1,1,1,0,0],[1,1,1,0,0]],[[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,0,0]],[[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,0,0]],[[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,0,0]],[[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,0,0]]],"rule":0},{"x":31,"y":14,"z":-4,"xSize":5,"ySize":5,"zSize":5,"map":[[[1,0,0,0,0],[1,0,0,0,0],[1,1,1,0,0],[1,1,1,0,0],[1,1,1,0,0]],[[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,0,0]],[[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,0,0]],[[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,0,0]],[[1,1,1,0,0],[1,1,1,0,0],[1,1,1,0,0],[1,1,1,0,0],[1,1,1,0,0]]],"rule":0}],"player":{"x":33,"y":16,"z":-3}}'}];
+
+
+
+
+
+// level stuff from client
+
+var areas = [];
+
+function ClearLevel () {
+	areas = [];
+}
+
+function Area (x, y, z, xSize, ySize, zSize, useImport, map, rule) {
+	this.x = x;
+	this.y = y;
+	this.z = z;
+	
+	this.xSize = xSize;
+	this.ySize = ySize;
+	this.zSize = zSize;
+
+	this.xMov = 0;
+	this.yMov = 0;
+	this.zMov = 0;
+	this.moveDelay = 0;
+	this.delayTime = 10;
+
+	this.rule = rule;
+	this.simulate = false;
+
+	this.name = "Area " + (areas.length + 1);
+
+	this.status = 0;
+	this.extraData = []; //[x][y][z] - object with any values
+	this.map = []; //[x][y][z] - type (number)
+	if (useImport)
+	{
+		this.map = map;
+	}
+	for (var i = 0; i < xSize; i++)
+	{
+		if (!useImport)
+		{
+			this.map.push([]);
+		}
+		this.extraData.push([]);
+		for (var j = 0; j < ySize; j++)
+		{
+			if (!useImport)
+			{
+				this.map[i].push([]);
+			}
+			this.extraData[i].push([]);
+			for (var k = 0; k < zSize; k++)
+			{
+				var tile = EMPTY;
+				if (!useImport)
+				{
+					
+				}
+				else // (useImport === true)
+				{
+					tile = this.map[i][j][k];
+				}
+				var extra;
+				switch (tile)
+				{
+					default:
+						extra = {};
+					break
+					case APPEAR_BLOCK:
+						extra = {opacity: 0};
+					break;
+					case DISAPPEAR_BLOCK:
+						extra = {opacity: 1};
+					break;
+					case PATTERN_BLOCK:
+						extra = {pattern: 0};
+					break;
+					case SIMULATION_BLOCK:
+						extra = {prevSim: 0, newSim: 0};
+						area.simulate = true;
+					break;
+					case FLUID_BLOCK:
+						extra = {prevFill: 0.1, newFill: 0.1, prevflow: [0, 0, 0, 0, 0, 0], newFlow: [0, 0, 0, 0, 0, 0]};
+						area.simulate = true;
+					break;
+				}
+				this.extraData[i][j].push(extra);
+				if (!useImport)
+				{
+					this.map[i][j].push(tile);
+				}
+			}
+		}
+	}
+}
+
+// SetStartLocation
+
+
+function ImportLevel (levelData) {
+	//import a levelData string into the current level
+	var importedData = JSON.parse(levelData);
+	if (importedData === null)
+	{
+		console.log("null levelData");
+		return;
+	}
+	ClearLevel();
+
+	for (var i = 0; i < importedData.areas.length; i++)
+	{
+		areaData = importedData.areas[i];
+		var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize, true, areaData.map);
+		areas.push(newArea);
+		drawObjects.push(newArea);
+	}
+	//player = new Entity(importedData.player.x, importedData.player.y, importedData.player.z);
+	//entities.push(player);
+}
+
+
+
+
 
 
 var playerArray = [];
@@ -120,6 +248,15 @@ io.on("connection", function(socket) {
 		// data - data of the edit information
 		// {type, area, x, y, z}
 		socket.broadcast.emit("edit", data);
+	});
+	socket.on("tileChange", function (data) {
+		socket.broadcast.emit("tileChange", data);
+	});
+	socket.on("createArea", function (data) {
+		socket.broadcast.emit("createArea", data);
+	});
+	socket.on("removeArea", function (data) {
+		socket.broadcast.emit("removeArea", data);
 	});
 
 
