@@ -6,7 +6,6 @@ console.log("starting server \\(^.^)/");
 var http = require("http");
 var socketio = require("socket.io");
 
-var levels = require("./levels.js");
 
 var listener = function (req, res) {
 	res.end("wowowow u are leet haxor");
