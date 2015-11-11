@@ -206,7 +206,6 @@ function GetAreaByName (name) {
 	return undefined;
 }
 function ActualSetTile (area, x, y, z, tile) {
-	console.log([area, x, y, z, tile].join(", "));
 	area.map[x][y][z] = tile;
 	switch (tile)
 	{
@@ -295,7 +294,6 @@ io.on("connection", function(socket) {
 	// socket.emit("chosenLevel", defaultLevelData[0]);
 	if (mainLevelNeedsExport)
 	{
-		console.log("Re-exporting level data...");
 		mainLevelData = {name: "ye_olde_playground", data: ExportLevel()};
 		socket.emit("chosenLevel", mainLevelData);
 		mainLevelNeedsExport = false;
@@ -374,15 +372,7 @@ io.on("connection", function(socket) {
 });
 
 
-/*
-fs.writeFile("test1.bine", "data data wow wow 2", function (err) {
-	if (err)
-	{
-		console.log("failed to write level data");
-	}
-});
 
-*/
 // ░░░░░░░░░░░░▄▐ 
 // ░░░░░░▄▄▄░░▄██▄ 
 // ░░░░░▐▀█▀▌░░░░▀█▄ 
