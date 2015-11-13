@@ -193,6 +193,14 @@ function ReceiveTileChange (tileChange) {
 		mainLevelNeedsExport = true;
 	}
 }
+function ReceiveCreateArea (createArea) {
+	ActualCreateArea(createArea.x, createArea.y, createArea.z, createArea.xSize, createArea.ySize, createArea.zSize);
+	mainLevelNeedsExport = true;
+}
+function ReceiveRemoveArea (removeArea) {
+	ActualRemoveAreaAt(removeArea.x, removeArea.y, removeArea.z);
+	mainLevelNeedsExport = true;
+}
 function GetAreaByName (name) {
 	for (var i = 0; i < areas.length; i++)
 	{
@@ -235,6 +243,37 @@ function ActualSetTile (area, x, y, z, tile) {
 			area.simulate = true;
 		break;
 	}
+}
+function ActualCreateArea (x, y, z, xSize, ySize, zSize) {
+	var newArea = new Area(x, y, z, xSize, ySize, zSize);
+	areas.push(newArea);
+	console.log("Actual Create Done, newArea.name is " + newArea.name);
+	return newArea;
+}
+function ActualRemoveAreaAt (x, y, z) {
+ 	for (var i = 0; i < areas.length; i++)
+ 	{
+ 		var area = areas[i];
+ 		if (LocationInArea(area, x, y, z))
+ 		{
+ 			console.log("Actual Remove Done, removed area.name is " + area.name);
+ 			areas.splice(areas.indexOf(area), 1);
+ 			return; //Only remove 1 area at a time
+ 		}
+ 	}
+}
+function LocationInArea (area, x, y, z) {
+	if (area.x <= x && x < area.x + area.xSize)
+	{
+		if (area.y <= y && y < area.y + area.ySize)
+		{
+			if (area.z <= z && z < area.z + area.zSize)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 
@@ -362,9 +401,11 @@ io.on("connection", function(socket) {
 	});
 	socket.on("createArea", function (data) {
 		socket.broadcast.emit("createArea", data);
+		ReceiveCreateArea(data);
 	});
 	socket.on("removeArea", function (data) {
 		socket.broadcast.emit("removeArea", data);
+		ReceiveRemoveArea(data);
 	});
 
 

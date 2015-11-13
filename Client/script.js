@@ -158,7 +158,10 @@ function ReceiveTileChange (tileChange) {
 	}
 }
 function ReceiveCreateArea (createArea) {
-
+	ActualCreateArea(createArea.x, createArea.y, createArea.z, createArea.xSize, createArea.ySize, createArea.zSize);
+}
+function ReceiveRemoveArea (removeArea) {
+	ActualRemoveAreaAt(removeArea.x, removeArea.y, removeArea.z);
 }
 
 // Functions to send data to server
@@ -180,6 +183,18 @@ function SendTileChange (tileChange) {
 	if (MULTI_ON)
 	{
 		socket.emit("tileChange", tileChange);
+	}
+}
+function SendCreateArea (createArea) {
+	if (MULTI_ON)
+	{
+		socket.emit("createArea", createArea);
+	}
+}
+function SendRemoveArea (removeArea) {
+	if (MULTI_ON)
+	{
+		socket.emit("removeArea", removeArea);
 	}
 }
 
@@ -2562,6 +2577,13 @@ function EditTile (editX, editY, editZ, tile) {
 }
 
 function CreateArea (x, y, z, xSize, ySize, zSize) {
+	ActualCreateArea(x, y, z, xSize, ySize, zSize);
+	if (MULTI_ON)
+	{
+		SendCreateArea({x: x, y: y, z: z, xSize: xSize, ySize: ySize, zSize: zSize});
+	}
+}
+function ActualCreateArea (x, y, z, xSize, ySize, zSize) {
 	var newArea = new Area(x, y, z, xSize, ySize, zSize);
 	areas.push(newArea);
 	drawObjects.push(newArea);
@@ -2569,6 +2591,14 @@ function CreateArea (x, y, z, xSize, ySize, zSize) {
 }
 
 function RemoveAreaAt (x, y, z) {
+	ActualRemoveAreaAt(x, y, z);
+	if (MULTI_ON)
+	{
+		SendRemoveArea({x: x, y: y, z: z});
+	}
+}
+
+function ActualRemoveAreaAt (x, y, z) {
  	for (var i = 0; i < areas.length; i++)
  	{
  		var area = areas[i];
@@ -2580,6 +2610,7 @@ function RemoveAreaAt (x, y, z) {
  		}
  	}
 }
+
 function ResizeAreaTo (x, y, z) {
  	for (var i = 0; i < areas.length; i++)
  	{
