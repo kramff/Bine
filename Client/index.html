@@ -4,31 +4,6 @@
 <title>Bine</title>
 </head>
 <body onload="Init();" bgcolor="#000000">
-
-<script>
-  window.fbAsyncInit = function() {
-    FB.init({
-      appId      : '698748266929061',
-      xfbml      : true,
-      version    : 'v2.5'
-    });
-  };
-
-  (function(d, s, id){
-     var js, fjs = d.getElementsByTagName(s)[0];
-     if (d.getElementById(id)) {return;}
-     js = d.createElement(s); js.id = id;
-     js.src = "//connect.facebook.net/en_US/sdk.js";
-     fjs.parentNode.insertBefore(js, fjs);
-   }(document, 'script', 'facebook-jssdk'));
-</script>
-<div
-  class="fb-like"
-  data-share="true"
-  data-width="450"
-  data-show-faces="true">
-</div>
-
 <canvas id="canvas" width="600" height="600" style="position:relative; left: -8px; top: -8px;"></canvas>
 <script type="text/javascript" src="pyramid60.js"></script>
 <script type="text/javascript" src="script.js"></script>
