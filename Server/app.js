@@ -54,6 +54,7 @@ function ClearLevel () {
 	areas = [];
 }
 
+var areaCounter = 0;
 function Area (x, y, z, xSize, ySize, zSize, useImport, map, rule) {
 	this.x = x;
 	this.y = y;
@@ -72,7 +73,8 @@ function Area (x, y, z, xSize, ySize, zSize, useImport, map, rule) {
 	this.rule = rule;
 	this.simulate = false;
 
-	this.name = "Area " + (areas.length + 1);
+	areaCounter ++;
+	this.name = "Area " + areaCounter;
 
 	this.status = 0;
 	this.extraData = []; //[x][y][z] - object with any values
@@ -189,7 +191,7 @@ function ReceiveTileChange (tileChange) {
 	var area = GetAreaByName(tileChange.name);
 	if (area !== undefined)
 	{
-		ActualSetTile(area, tileChange.x, tileChange.y, tileChange.z, tileChange.tile);
+		ActualSetTileB(area, tileChange.x, tileChange.y, tileChange.z, tileChange.tile);
 		mainLevelNeedsExport = true;
 	}
 }
@@ -213,6 +215,47 @@ function GetAreaByName (name) {
 	return undefined;
 }
 function ActualSetTile (area, x, y, z, tile) {
+	area.map[x][y][z] = tile;
+	switch (tile)
+	{
+		default:
+			area.extraData[x][y][z] = {};
+		break
+		case APPEAR_BLOCK:
+			area.extraData[x][y][z] = {opacity: 0};
+		break;
+		case DISAPPEAR_BLOCK:
+			area.extraData[x][y][z] = {opacity: 1};
+		break;
+		case PATTERN_BLOCK:
+			area.extraData[x][y][z] = {pattern: 0};
+		break;
+		case PATTERN_EFFECT_BLOCK:
+			area.extraData[x][y][z] = {opacity: 0};
+		break;
+		case PATTERN_HOLE_BLOCK:
+			area.extraData[x][y][z] = {opacity: 1};
+		break;
+		case SIMULATION_BLOCK:
+			area.extraData[x][y][z] = {prevSim: 0, newSim: 0};
+			area.simulate = true;
+		break;
+		case FLUID_BLOCK:
+			area.extraData[x][y][z] = {prevFill: 0.1, newFill: 0.1, prevflow: [0, 0, 0, 0, 0, 0], newFlow: [0, 0, 0, 0, 0, 0]};
+			area.simulate = true;
+		break;
+	}
+}
+function ActualSetTileB (x, y, z, tile) {
+	var areas = GetAreasAtPosition(x, y, z);
+	if (areas.length === 0)
+	{
+		return;
+	}
+	var area = areas[0];
+	x = x - area.x;
+	y = y - area.y;
+	z = z - area.z;
 	area.map[x][y][z] = tile;
 	switch (tile)
 	{
@@ -275,7 +318,32 @@ function LocationInArea (area, x, y, z) {
 	}
 	return false;
 }
-
+function GetAreasAtPosition (x, y, z, getName) {
+	var areasHere = [];
+	for (var i = 0; i < areas.length; i++)
+	{
+		var area = areas[i];
+		if (LocationInArea(area, x, y, z))
+		{
+			if (getName === true)
+			{
+				if (area === selectedArea)
+				{
+					areasHere.push("~" + area.name.toUpperCase() + "~");
+				}
+				else
+				{
+					areasHere.push(area.name);
+				}
+			}
+			else
+			{
+				areasHere.push(area);
+			}
+		}
+	}
+	return areasHere;
+}
 
 
 
@@ -340,7 +408,6 @@ io.on("connection", function(socket) {
 	{
 		socket.emit("chosenLevel", mainLevelData);
 	}
-
 
 	// When requested:
 	// - Send list of players active on a level
