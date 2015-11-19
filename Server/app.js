@@ -47,8 +47,9 @@ var FLUID_BLOCK = 10;
 // Number of tile types
 var TILE_TYPES = 11;
 
-
 var areas = [];
+// TODO: Add selectedArea feature (pass data from client?)
+var selectedArea = undefined;
 
 function ClearLevel () {
 	areas = [];
@@ -188,12 +189,8 @@ function ExportLevel () {
 }
 
 function ReceiveTileChange (tileChange) {
-	var area = GetAreaByName(tileChange.name);
-	if (area !== undefined)
-	{
-		ActualSetTileB(area, tileChange.x, tileChange.y, tileChange.z, tileChange.tile);
-		mainLevelNeedsExport = true;
-	}
+	ActualEditTile(tileChange.editX, tileChange.editY, tileChange.editZ, tileChange.tile);
+	mainLevelNeedsExport = true;
 }
 function ReceiveCreateArea (createArea) {
 	ActualCreateArea(createArea.x, createArea.y, createArea.z, createArea.xSize, createArea.ySize, createArea.zSize);
@@ -214,7 +211,13 @@ function GetAreaByName (name) {
 	}
 	return undefined;
 }
-function ActualSetTile (area, x, y, z, tile) {
+function SetTile (area, x, y, z, tile) {
+	var prevTile = area.map[x][y][z];
+	if (tile === prevTile)
+	{
+		// No change needed
+		return false;
+	}
 	area.map[x][y][z] = tile;
 	switch (tile)
 	{
@@ -246,45 +249,28 @@ function ActualSetTile (area, x, y, z, tile) {
 		break;
 	}
 }
-function ActualSetTileB (x, y, z, tile) {
-	var areas = GetAreasAtPosition(x, y, z);
-	if (areas.length === 0)
+function ActualEditTile (editX, editY, editZ, tile) {
+	var targetArea;
+	for (var i = 0; i < areas.length; i++)
 	{
-		return;
+		var area = areas[i];
+		if (LocationInArea(area, editX, editY, editZ))
+		{
+			if (area === selectedArea)
+			{
+				//Selected area: affect
+				SetTile(area, editX - area.x, editY - area.y, editZ - area.z, tile);
+				return;
+			}
+			else if (targetArea === undefined)
+			{
+				targetArea = area;
+			}
+		}
 	}
-	var area = areas[0];
-	x = x - area.x;
-	y = y - area.y;
-	z = z - area.z;
-	area.map[x][y][z] = tile;
-	switch (tile)
+	if (targetArea !== undefined)
 	{
-		default:
-			area.extraData[x][y][z] = {};
-		break
-		case APPEAR_BLOCK:
-			area.extraData[x][y][z] = {opacity: 0};
-		break;
-		case DISAPPEAR_BLOCK:
-			area.extraData[x][y][z] = {opacity: 1};
-		break;
-		case PATTERN_BLOCK:
-			area.extraData[x][y][z] = {pattern: 0};
-		break;
-		case PATTERN_EFFECT_BLOCK:
-			area.extraData[x][y][z] = {opacity: 0};
-		break;
-		case PATTERN_HOLE_BLOCK:
-			area.extraData[x][y][z] = {opacity: 1};
-		break;
-		case SIMULATION_BLOCK:
-			area.extraData[x][y][z] = {prevSim: 0, newSim: 0};
-			area.simulate = true;
-		break;
-		case FLUID_BLOCK:
-			area.extraData[x][y][z] = {prevFill: 0.1, newFill: 0.1, prevflow: [0, 0, 0, 0, 0, 0], newFlow: [0, 0, 0, 0, 0, 0]};
-			area.simulate = true;
-		break;
+		SetTile(targetArea, editX - targetArea.x, editY - targetArea.y, editZ - targetArea.z, tile);
 	}
 }
 function ActualCreateArea (x, y, z, xSize, ySize, zSize) {

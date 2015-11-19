@@ -152,10 +152,7 @@ function ReceiveChatMessage (message) {
 }
 function ReceiveTileChange (tileChange) {
 	// var area = GetAreaByName(tileChange.name);
-	if (area !== undefined)
-	{
-		ActualSetTileB(tileChange.x, tileChange.y, tileChange.z, tileChange.tile);
-	}
+	ActualEditTile(tileChange.editX, tileChange.editY, tileChange.editZ, tileChange.tile)
 }
 function ReceiveCreateArea (createArea) {
 	ActualCreateArea(createArea.x, createArea.y, createArea.z, createArea.xSize, createArea.ySize, createArea.zSize);
@@ -425,12 +422,38 @@ function SetTile (area, x, y, z, tile) {
 		// No change needed
 		return false;
 	}
-	ActualSetTile(area, x, y, z, tile);
-	if (MULTI_ON)
+	area.map[x][y][z] = tile;
+	switch (tile)
 	{
-		SendTileChange({name: area.name, x: x + area.x, y: y + area.y, z: z + area.z, tile: tile});
+		default:
+			area.extraData[x][y][z] = {};
+		break
+		case APPEAR_BLOCK:
+			area.extraData[x][y][z] = {opacity: 0};
+		break;
+		case DISAPPEAR_BLOCK:
+			area.extraData[x][y][z] = {opacity: 1};
+		break;
+		case PATTERN_BLOCK:
+			area.extraData[x][y][z] = {pattern: 0};
+		break;
+		case PATTERN_EFFECT_BLOCK:
+			area.extraData[x][y][z] = {opacity: 0};
+		break;
+		case PATTERN_HOLE_BLOCK:
+			area.extraData[x][y][z] = {opacity: 1};
+		break;
+		case SIMULATION_BLOCK:
+			area.extraData[x][y][z] = {prevSim: 0, newSim: 0};
+			area.simulate = true;
+		break;
+		case FLUID_BLOCK:
+			area.extraData[x][y][z] = {prevFill: 0.1, newFill: 0.1, prevflow: [0, 0, 0, 0, 0, 0], newFlow: [0, 0, 0, 0, 0, 0]};
+			area.simulate = true;
+		break;
 	}
 }
+
 function GetAreaByName (name) {
 	for (var i = 0; i < areas.length; i++)
 	{
@@ -442,79 +465,7 @@ function GetAreaByName (name) {
 	}
 	return undefined;
 }
-function ActualSetTile (area, x, y, z, tile) {
-	area.map[x][y][z] = tile;
-	switch (tile)
-	{
-		default:
-			area.extraData[x][y][z] = {};
-		break
-		case APPEAR_BLOCK:
-			area.extraData[x][y][z] = {opacity: 0};
-		break;
-		case DISAPPEAR_BLOCK:
-			area.extraData[x][y][z] = {opacity: 1};
-		break;
-		case PATTERN_BLOCK:
-			area.extraData[x][y][z] = {pattern: 0};
-		break;
-		case PATTERN_EFFECT_BLOCK:
-			area.extraData[x][y][z] = {opacity: 0};
-		break;
-		case PATTERN_HOLE_BLOCK:
-			area.extraData[x][y][z] = {opacity: 1};
-		break;
-		case SIMULATION_BLOCK:
-			area.extraData[x][y][z] = {prevSim: 0, newSim: 0};
-			area.simulate = true;
-		break;
-		case FLUID_BLOCK:
-			area.extraData[x][y][z] = {prevFill: 0.1, newFill: 0.1, prevflow: [0, 0, 0, 0, 0, 0], newFlow: [0, 0, 0, 0, 0, 0]};
-			area.simulate = true;
-		break;
-	}
-}
-function ActualSetTileB (x, y, z, tile) {
-	var areas = GetAreasAtPosition(x, y, z);
-	if (areas.length === 0)
-	{
-		return;
-	}
-	var area = areas[0];
-	x = x - area.x;
-	y = y - area.y;
-	z = z - area.z;
-	area.map[x][y][z] = tile;
-	switch (tile)
-	{
-		default:
-			area.extraData[x][y][z] = {};
-		break
-		case APPEAR_BLOCK:
-			area.extraData[x][y][z] = {opacity: 0};
-		break;
-		case DISAPPEAR_BLOCK:
-			area.extraData[x][y][z] = {opacity: 1};
-		break;
-		case PATTERN_BLOCK:
-			area.extraData[x][y][z] = {pattern: 0};
-		break;
-		case PATTERN_EFFECT_BLOCK:
-			area.extraData[x][y][z] = {opacity: 0};
-		break;
-		case PATTERN_HOLE_BLOCK:
-			area.extraData[x][y][z] = {opacity: 1};
-		break;
-		case SIMULATION_BLOCK:
-			area.extraData[x][y][z] = {prevSim: 0, newSim: 0};
-			area.simulate = true;
-		break;
-		case FLUID_BLOCK:
-			area.extraData[x][y][z] = {prevFill: 0.1, newFill: 0.1, prevflow: [0, 0, 0, 0, 0, 0], newFlow: [0, 0, 0, 0, 0, 0]};
-			area.simulate = true;
-		break;
-	}
-}
+
 
 function Init () {
 	window.requestAnimationFrame(Update);
@@ -2593,6 +2544,13 @@ function SelectAndJumpToNextArea () {
 
 function EditTile (editX, editY, editZ, tile) {
 	//Target area is either first area containing this tile, or the selected area if it contains this tile
+	ActualEditTile(editX, editY, editZ, tile);
+	if (MULTI_ON)
+	{
+		SendTileChange({editX:editX, editY:editY, editZ:editZ, tile:tile});
+	}
+}
+function ActualEditTile (editX, editY, editZ, tile) {
 	var targetArea;
 	for (var i = 0; i < areas.length; i++)
 	{
