@@ -195,10 +195,20 @@ function SendRemoveArea (removeArea) {
 	}
 }
 
-// Show message on screen
+// Show message on screen from a player
 function AddMessage (message) {
 	message.startTime = Date.now();
 	messages.push(message);
+	// New message object stuff
+	return;
+	var mesgObj = new Message(message)
+}
+
+
+
+function Message (text, position) {
+	// Set posType by what kind of object passed in for position
+	this.posType = undefined;
 }
 
 
@@ -217,6 +227,8 @@ var EYE_DISTANCE = 45;
 var SCALE_MULTIPLIER = 490;
 var Z_MULTIPLIER = 3.1;
 var TILE_SIZE = 5.4;
+
+var CEILING_FADE_DIST = 2;
 
 // Editor variables
 var editorActive = false;
@@ -470,7 +482,7 @@ function GetAreaByName (name) {
 function Init () {
 	window.requestAnimationFrame(Update);
 	
-
+	PrepareFirstTranspTileArray();
 	areaColors = GenerateColorPalette(100);
 
 
@@ -480,10 +492,7 @@ function Init () {
 	player = CreateEntity();
 	InitGame();
 	
-	/*setTimeout(function() {
-		ImportLevel(pyramidLevel2);
-	}, 500);
-	*/
+
 
 }
 
@@ -1547,7 +1556,7 @@ function DrawTile (x, y, scale) {
 function DrawTileInCeiling (x, y, scale) {
 	ctx.save();
 
-	ctx.globalAlpha *= 0.5;
+	ctx.globalAlpha *= 0.3;
 	ctx.fillRect(x, y, scale, scale);
 	ctx.strokeRect(x, y, scale, scale);
 	ctx.restore();
@@ -1570,12 +1579,12 @@ function UnderCeilingCheck () {
 }
 
 function GetFirstTransparentTiles () {
-	for (var i = 0; i < 3; i++)
+	for (var i = 0; i < 1 + 2 * CEILING_FADE_DIST; i++)
 	{
-		for (var j = 0; j < 3; j++)
+		for (var j = 0; j < 1 + 2 * CEILING_FADE_DIST; j++)
 		{
-			var x = player.x + i - 1;
-			var y = player.y + j - 1;
+			var x = player.x + i - CEILING_FADE_DIST;
+			var y = player.y + j - CEILING_FADE_DIST;
 			var z = player.z;
 			
 			while (IsOpaque(x, y, z))
@@ -1583,6 +1592,18 @@ function GetFirstTransparentTiles () {
 				z ++;
 			}
 			firstTransparentTilesArray[i][j] = z;
+		}
+	}
+}
+
+function PrepareFirstTranspTileArray () {
+	firstTransparentTilesArray = [];
+	for (var i = 0; i < 1 + 2 * CEILING_FADE_DIST; i++)
+	{
+		firstTransparentTilesArray.push([]);
+		for (var j = 0; j < 1 + 2* CEILING_FADE_DIST; j++)
+		{
+			firstTransparentTilesArray[i].push(99);
 		}
 	}
 }
@@ -1608,12 +1629,12 @@ function InCeiling (x, y, z) {
 		return false;
 	}
 	//Check if x, y are within 3x3 square around player
-	if (x > player.x + 1 || x < player.x - 1 || y > player.y + 1 || y < player.y - 1)
+	if (x > player.x + CEILING_FADE_DIST || x < player.x - CEILING_FADE_DIST || y > player.y + CEILING_FADE_DIST || y < player.y - CEILING_FADE_DIST)
 	{
 		return false;
 	}
 	//Check if tile is above an empty tile above the player
-	if (firstTransparentTilesArray[x - player.x + 1][y - player.y + 1] > z)
+	if (firstTransparentTilesArray[x - player.x + CEILING_FADE_DIST][y - player.y + CEILING_FADE_DIST] > z)
 	{
 		return false;
 	}
