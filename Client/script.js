@@ -172,8 +172,7 @@ function SendChatMessage (message) {
 	if (MULTI_ON)
 	{
 		socket.emit("message", message);
-		message.id = socket.id;	
-		AddMessage(message);
+		// message.id = socket.id;	
 	}
 }
 function SendTileChange (tileChange) {
@@ -196,19 +195,72 @@ function SendRemoveArea (removeArea) {
 }
 
 // Show message on screen from a player
-function AddMessage (message) {
+function AddMessage (message, targetType) {
+	if (message.target !== undefined)
+	{
+		// Target already known from local client
+		// Must be player? not sure
+		new Message(message.text, message.target, MESG_TARGET_PLAYER);
+		return;
+	}
+	else if (message.id_player !== undefined)
+	{
+		// Target not set up, but message has a player id to use
+		var target = undefined;
+		for (var i = 0; i < playerArray.length; i++)
+		{
+			var otherPlayer = playerArray[i];
+			if (otherPlayer.id === message.id_player)
+			{
+				target = otherPlayer;
+				new Message(message.text, target, MESG_TARGET_OTHER_PLAYER)
+				return;
+			}
+		}
+	}
+	else if (message.id_area !== undefined)
+	{
+		// Target is an area
+		new Message(message.text, target, MESG_TARGET_AREA);
+		return;
+	}
+	else if (message.id_entity !== undefined)
+	{
+		// Target is an entity
+		new Message(message.text, target, MESG_TARGET_ENTITY);
+		return;
+	}
+	else
+	{
+		// No target: display message without linking to an in-game element (bottom of screen or whatever)
+		new message(message.text, undefined, MESG_TARGET_NONE);
+		return;
+	}
+	/*
 	message.startTime = Date.now();
 	messages.push(message);
 	// New message object stuff
-	return;
-	var mesgObj = new Message(message)
+	*/
 }
 
 
+// Target Types
+var MESG_TARGET_PLAYER = 1;
+var MESG_TARGET_OTHER_PLAYER = 2;
+var MESG_TARGET_AREA = 3;
+var MESG_TARGET_ENTITY = 4;
+var MESG_TARGET_NONE = 5;
 
-function Message (text, position) {
-	// Set posType by what kind of object passed in for position
-	this.posType = undefined;
+function Message (text, target, targetType) {
+	// Set targetType by what kind of object passed in for target
+	this.text = text;
+	this.target = target;
+	this.targetType = targetType;
+	this.x = 300;
+	this.y = 300;
+	this.timer = 200;
+
+	messages.push(this);
 }
 
 
@@ -1145,23 +1197,22 @@ function DrawEditorButton (btnNum, text) {
 
 function DrawAllMessages () {
 	ctx.save();
-	var currentTime = Date.now();
 	ctx.fillStyle = "#FFFFFF";
 	for (var i = messages.length - 1; i >= 0; i--) {
 		var message = messages[i];
 		var x = -100;
 		var y = -100;
-		if (MULTI_ON)
+		var gotLocation = false;
+		if (message.targetType === MESG_TARGET_PLAYER)
 		{
-			if (message.id === socket.id)
+			x = GetScale(GetEntityZ(player)) * (GetEntityX(player) - xCam) + CANVAS_HALF_WIDTH;
+			y = GetScale(GetEntityZ(player)) * (GetEntityY(player) - yCam) + CANVAS_HALF_HEIGHT;
+			gotLocation = true;
+		}
+		else if (message.targetType === MESG_TARGET_OTHER_PLAYER)
+		{
+			if (MULTI_ON)
 			{
-				// Local player
-				x = GetScale(GetEntityZ(player)) * (GetEntityX(player) - xCam) + CANVAS_HALF_WIDTH;
-				y = GetScale(GetEntityZ(player)) * (GetEntityY(player) - yCam) + CANVAS_HALF_HEIGHT;
-			}
-			else
-			{
-				// Loop through network players
 				for (var np = 0; np < playerArray.length; np++)
 				{
 					var nPlayer = playerArray[np];
@@ -1169,19 +1220,19 @@ function DrawAllMessages () {
 					{
 						x = GetScale(nPlayer.z) * (nPlayer.x - xCam) + CANVAS_HALF_WIDTH;
 						y = GetScale(nPlayer.z) * (nPlayer.y - yCam) + CANVAS_HALF_HEIGHT;
+						gotLocation = true;
 					}
 				}
 			}
 		}
-		else
+		if (gotLocation)
 		{
-			// Must be local player
-			x = GetScale(GetEntityZ(player)) * (GetEntityX(player) - xCam) + CANVAS_HALF_WIDTH;
-			y = GetScale(GetEntityZ(player)) * (GetEntityY(player) - yCam) + CANVAS_HALF_HEIGHT;
+			DrawTextBox(message.text, x, y);
 		}
-		DrawTextBox(message.text, x, y - 0.02 * (currentTime - message.startTime));
 
-		if (currentTime - message.startTime > 5000)
+		// Remove messages after some time
+		message.timer --;
+		if (message.timer <= 0)
 		{
 			messages.splice(i, 1);
 		}
@@ -1196,7 +1247,28 @@ function DrawAllMessages () {
 }
 
 function DrawTextBox (text, x, y) {
-	ctx.fillText(text, x, y);
+	// ctx.fillText(text, x, y);
+	DrawTextRaw(text, "#FFFFFF", x, y);
+}
+
+// Draw a text box, given a string, color, and position
+// Does fade out stuff
+function DrawTextRaw (text, color, x, y) {
+	ctx.fillStyle = "#000000";
+	ctx.strokeStyle = color;
+	var boxWidth = text.length * 10 + 6
+	ctx.globalAlpha = 0.85;
+	ctx.fillRect(x - boxWidth / 2, y - 12, boxWidth, 16);
+	ctx.strokeRect(x - boxWidth / 2, y - 12, boxWidth, 16);
+	ctx.globalAlpha = 1;
+	ctx.fillStyle = color;
+	DrawText(text, x + 3 - boxWidth / 2, y);
+}
+
+// Draws text, after rounding to nearest x, y
+function DrawText (text, x, y)
+{
+	ctx.fillText(text, (0.5 + x) | 0, (0.5 + y) | 0);
 }
 
 //getName: if true, get the name of each area
@@ -2109,6 +2181,10 @@ function ClearAreaPattern (area) {
 }
 
 function TextToSpeech (text) {
+	if (window.SpeechSynthesisUtterance === undefined)
+	{
+		return;
+	}
 	var utterance = new SpeechSynthesisUtterance(text);
 	utterance.lang = "en-US";
 	window.speechSynthesis.speak(utterance);
@@ -2139,14 +2215,12 @@ function DoKeyPress (e) {
 				writingMessage = false;
 				return;
 			}
-			// Send message
+			// Add own message to screen
+			AddMessage({text:messageInput, target: player});
+			// Send message to server
 			if (MULTI_ON)
 			{
 				SendChatMessage({text:messageInput});
-			}
-			else
-			{
-				AddMessage({text:messageInput});
 			}
 
 			// TEXT TO SPEECH
@@ -2840,6 +2914,11 @@ function StartMapEditor () {
 }
 function EndMapEditor () {
 	editorActive = false;
+	while (IsSolidE(player))
+	{
+		// Move player up so they can stay on top of edited layer
+		player.z += 1;
+	}
 }
 
 function ClearLevel () {
