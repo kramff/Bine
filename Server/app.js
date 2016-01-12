@@ -1,7 +1,17 @@
 // Server for Bine
-// Copyright Mark Foster 2015
+// Copyright Mark Foster 2015-2016
 
 console.log("starting server \\(^.^)/");
+
+// Local or web
+var pathString = "../Isomorphic/";
+if (process.env.PORT !== undefined)
+{
+	pathString = "./Isomorphic/";
+}
+var Testo = require(pathString + "Testo.js");
+
+console.log(new Testo().foo(10) + ": should be 13");
 
 var http = require("http");
 var socketio = require("socket.io");
@@ -465,7 +475,6 @@ io.on("connection", function(socket) {
 
 
 });
-
 
 
 // ░░░░░░░░░░░░▄▐ 

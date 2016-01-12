@@ -1,6 +1,42 @@
-// Bine puzzle game copyright Mark Foster 2015
+// Bine puzzle game copyright Mark Foster 2015-2016
 
 
+
+// Load additional files
+// Path changes if using local or web version
+var isoSources = ["Testo"];
+var isoScripts = [];
+// var isoStates = [];
+var numLoadedScripts = 0;
+for (var i = 0; i < isoSources.length; i++)
+{
+	var source = isoSources[i];
+	var script = document.createElement("script");
+	isoScripts.push(script)
+	// isoStates.push(false);
+	if (location.href === "http://kramff.github.io/")
+	{
+		script.setAttribute("src", "./Isomorphic/" + source + ".js");
+	}
+	else
+	{
+		script.setAttribute("src", "../Isomorphic/" + source + ".js");
+	}
+	document.getElementsByTagName('body')[0].appendChild(script);
+	var loadFunc = (function (stateNum) {
+		return function () {
+			// isoStates[stateNum] = true;
+			numLoadedScripts ++;
+			if (numLoadedScripts >= isoSources.length)
+			{
+				console.log("all iso scripts loaded");
+				console.log(new Testo().foo(20) + ": should be 23");
+			}
+		}
+	})(i);
+	script.onreadystatechange = loadFunc;
+	script.onload = loadFunc;
+}
 
 // Server stuff
 
@@ -33,10 +69,12 @@ var MULTI_ON = false;
 var socketScript = document.createElement("script");
 if (location.href === "http://kramff.github.io/")
 {
+	// Web
 	socketScript.setAttribute("src", "https://bine-online.herokuapp.com/socket.io/socket.io.js");
 }
 else
 {
+	// Local
 	socketScript.setAttribute("src", "http://localhost:5000/socket.io/socket.io.js");
 }
 document.getElementsByTagName('body')[0].appendChild(socketScript);
@@ -110,6 +148,7 @@ function InitSocketConnection (argument) {
 	catch (err)
 	{
 		console.error("server not up");
+		console.error(err);
 		MULTI_ON = false;
 	}
 }

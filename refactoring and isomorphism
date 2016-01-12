@@ -1,0 +1,65 @@
+refactoring and isomorphism
+* = New! (Needs to be created)
+... = This and nearby similar functions
+
+Client Only Stuff
+- socket connect to server
+- deal with data from server
+- send data to server
+- Message
+- Canvas
+- Rendering, Camera
+- Control
+- Editor
+- Player
+- Initialization (main.js)
+- Client Update Loop
+- Control function
+- Render Function (Split into multiple functions)
+- Text
+- DrawAllObjects ... (to TileIsOpaque)
+- TextToSpeech
+- Screen X Y
+- Message Writing
+- Key Events
+- Mouse Events
+- Touch Events
+- Canvas Resize
+- Context Menu
+- Editor (many things)
+- Local Loading / Saving
+
+
+Server Only Stuff
+- set up multiple file server code
+* Server Update Loop
+* Server Loading / Saving
+- Server socket logic
+
+Both Client & Server Stuff (many need slight modifications to check what mode to use)
+- Tile types
+- Directions
+- Game data
+- Entity
+- Area
+- SetTile
+* GetAreaByID
+- Iso Update Loop
+- Area Update
+* Entity Update
+- Movement Rules ...
+- Area Movement
+- GetAreasAtPosition
+- GetEntityCoords
+- IsSolid ... other question functions
+- EndMovement
+- 
+
+Misc Tools & Functions (Available to both)
+- ColorBlend
+- Generate Palette
+- 
+
+Remove (to bine-unused folder)
+- Patterns
+- 
