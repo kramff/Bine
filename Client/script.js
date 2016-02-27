@@ -1,5 +1,11 @@
 // Bine puzzle game copyright Mark Foster 2015-2016
 
+"use strict";
+
+// Random stuff for game
+
+var orbsCollected = 0;
+
 
 
 // Load additional files
@@ -30,7 +36,7 @@ for (var i = 0; i < isoSources.length; i++)
 			if (numLoadedScripts >= isoSources.length)
 			{
 				console.log("all iso scripts loaded");
-				console.log(new Testo().foo(20) + ": should be 23");
+				// console.log(new Testo().foo(20) + ": should be 23");
 			}
 		}
 	})(i);
@@ -233,7 +239,8 @@ function SendRemoveArea (removeArea) {
 	}
 }
 
-// Show message on screen from a player
+// Show message on screen from a player / (or other source?)
+// Message is some weird object that has text, a target, and some kind of id perhaps? not sure
 function AddMessage (message, targetType) {
 	if (message.target !== undefined)
 	{
@@ -326,6 +333,23 @@ var editorActive = false;
 var selectedArea = undefined;
 var fakeExtra = {opacity: 1, pattern: 0, fill: 1};
 
+var editingEntity = false;
+var currentEntity = undefined;
+var E_MODE_NORMAL = 0; //Look at and click on all rules
+var E_MODE_CHOOSE_TRIGGER = 1; //Choose a new trigger to add in
+var E_MODE_CHOOSE_RULE = 2; //Choose a new rule (Condition or Result) to add in
+var E_MODE_EDIT_RULE = 3; //Edit a rule (Trigger, Condition, or Result)
+var editingEntitySpot = undefined;
+var editingEntityMode = E_MODE_NORMAL;
+var ruleHoverSpot = undefined;
+var ruleHoverMode = 0;
+var ruleHoverPossible = true;
+
+
+var choosingTrigger = false;
+var choosingRule = false;
+var editingRule = false;
+
 // Input variables
 var wKey = false;
 var aKey = false;
@@ -353,6 +377,11 @@ var xCam = 0;
 var yCam = 0;
 var zCam = 0;
 
+// Colors to use for rendering
+var COLOR_TILE = "#101010";
+var COLOR_BORDER = "#FFFFFF";
+var BACKGROUND = "#000000";
+
 // Special camera/screen manipulation
 var edgeSquareLimit = {active:false, x: 300, y: 300, xSize: 0, ySize: 0}
 
@@ -371,9 +400,10 @@ var PATTERN_EFFECT_BLOCK = 7;
 var PATTERN_HOLE_BLOCK = 8;
 var SIMULATION_BLOCK = 9;
 var FLUID_BLOCK = 10;
+var ORB_BLOCK = 11;
 
 // Number of tile types
-var TILE_TYPES = 11;
+var TILE_TYPES = 12;
 
 // Area status
 var STATUS_NORMAL = 0;
@@ -399,9 +429,9 @@ var messages = [];
 
 
 
-function CreateEntity () {
+function CreateEntity (x, y, z) {
 	//initial location
-	var newEntity = new Entity (16, 5, -4);
+	var newEntity = new Entity (x, y, z);
 	entities.push(newEntity);
 	drawObjects.push(newEntity);
 	return newEntity;
@@ -424,6 +454,14 @@ function Entity (x, y, z) {
 	//Pushed by an area: can be multiple, pushing areas stored in array
 	this.pushingAreas = [];
 
+	this.fallTime = 0;
+	this.lastSafeCoord = {x: this.x, y: this.y, z: this.z};
+
+	// Rules
+	this.rules = [];
+
+	this.isEntity = true;
+	this.isArea = false;
 }
 
 var player;
@@ -507,6 +545,9 @@ function Area (x, y, z, xSize, ySize, zSize, useImport, map, rule) {
 						extra = {prevFill: 0.1, newFill: 0.1, prevflow: [0, 0, 0, 0, 0, 0], newFlow: [0, 0, 0, 0, 0, 0]};
 						area.simulate = true;
 					break;
+					case ORB_BLOCK:
+						extra = {orbHere: true};
+					break;
 				}
 				this.extraData[i][j].push(extra);
 				if (!useImport)
@@ -516,6 +557,8 @@ function Area (x, y, z, xSize, ySize, zSize, useImport, map, rule) {
 			}
 		}
 	}
+	this.isEntity = false;
+	this.isArea = true;
 }
 
 function SetTile (area, x, y, z, tile) {
@@ -554,6 +597,9 @@ function SetTile (area, x, y, z, tile) {
 			area.extraData[x][y][z] = {prevFill: 0.1, newFill: 0.1, prevflow: [0, 0, 0, 0, 0, 0], newFlow: [0, 0, 0, 0, 0, 0]};
 			area.simulate = true;
 		break;
+		case ORB_BLOCK:
+			area.extraData[x][y][z] = {orbHere: true};
+		break;
 	}
 }
 
@@ -580,7 +626,7 @@ function Init () {
 	ResizeCanvas();
 	// StartMapEditor();
 
-	player = CreateEntity();
+	player = CreateEntity(16, 5, -4);
 	InitGame();
 	
 
@@ -588,7 +634,6 @@ function Init () {
 }
 
 function InitGame () {
-	//player = CreateEntity();
 
 	xCam = player.x + 0.5;
 	yCam = player.y + 0.5;
@@ -646,7 +691,8 @@ function Update () {
 	{
 		if (editorActive && mousePressed)
 		{
-			EditorMouseDown();
+			// EditorMouseDown();
+			EditorMouseMove();
 		}
 		if (MULTI_ON)
 		{
@@ -791,7 +837,10 @@ function Control () {
 			player.xMov = 0;
 			player.yMov = 0;
 			player.zMov = 0;
-			EndMovement(player);
+			if (!editorActive)
+			{
+				EndMovement(player);
+			}
 		}
 		else
 		{
@@ -1018,8 +1067,17 @@ function MovementZRulesCheck (entity, x, y) {
 	var levelSolid = IsSolidEOffset(entity, x, y, 0);
 	var selfAboveSolid = IsSolidEOffset(entity, 0, 0, 1);
 	
+	// There is an open space at entity's level or above (side view)
+	//     .
+	//   /
+	// E - .
 	if (!aboveSolid || !levelSolid)
 	{
+		// Entity is not boxed in (side view)
+		// 
+		// X   .
+		//   /
+		// E   X
 		if (levelSolid && selfAboveSolid)
 		{
 			return false;
@@ -1029,6 +1087,7 @@ function MovementZRulesCheck (entity, x, y) {
 	return false;
 }
 
+// Change the actual movement of the entity
 function MovementZRules (entity) {
 	var aboveSolid = IsSolidEMovOffset(entity, 0, 0, 1);
 	var levelSolid = IsSolidEMovOffset(entity, 0, 0, 0);
@@ -1132,8 +1191,8 @@ function Render () {
 	//Set standard font
 	ctx.font = "16px sans-serif";
 
-	ctx.strokeStyle = "#FFFFFF";
-	ctx.fillStyle = "#101010";
+	ctx.strokeStyle = COLOR_BORDER;
+	ctx.fillStyle = COLOR_TILE;
 
 	numSquares = 0;
 
@@ -1210,6 +1269,9 @@ function Render () {
 		DrawEditorButton(2, "Resize Area");
 		DrawEditorButton(3, "Load Level");
 		DrawEditorButton(4, "Save Level");
+		DrawEditorButton(5, "Create Entity");
+		DrawEditorButton(6, "Remove Entity");
+		DrawEditorButton(7, (editingEntity ? "Done Editing" : "Edit Entity"));
 
 		//Draw area selector top bar
 		ctx.fillStyle = "#404040";
@@ -1219,13 +1281,196 @@ function Render () {
 		ctx.fillText(infoString, 70, 30);
 
 
-		//Draw rules menu bottom bar
-		ctx.fillStyle = "#003030";
-		ctx.fillRect(70, CANVAS_HEIGHT - 100, CANVAS_WIDTH - 270, 100);
 
+
+		//Draw rules menu bottom bar if editing rules
+		if (editingEntity && currentEntity !== undefined)
+		{
+			// Draw normal box but only highlight on hover if in normal mode
+			ruleHoverPossible = (editingEntityMode === E_MODE_NORMAL);
+
+			ctx.save();
+			ctx.globalAlpha = 0.8;
+			ctx.fillStyle = "#003030";
+			ctx.fillRect(170, 150, CANVAS_WIDTH - 470, CANVAS_HEIGHT - 150);
+
+			var xPos = 180;
+			var yPos = 180;
+
+			ruleHoverMode = E_MODE_NORMAL;
+			ruleHoverSpot = undefined;
+			
+			var rules = currentEntity.rules;
+			for (var i = 0; i < rules.length; i++)
+			{
+				var rule = rules[i];
+				yPos = DrawRule(rule, xPos, yPos);
+				yPos += Y_RULE_ADJ; // Extra space between rules
+			}
+
+			DrawRuleText("+ (add trigger) ...", "#CCFFCC", xPos, yPos, rules, E_MODE_CHOOSE_TRIGGER);
+
+			// Hover highlight possible for whatever mode is on top (if any)
+			ruleHoverPossible = true;
+
+			if (editingEntityMode === E_MODE_CHOOSE_TRIGGER)
+			{
+				// Trigger
+				ctx.fillStyle = "#300000";
+				ctx.fillRect(270, 250, CANVAS_WIDTH - 670, CANVAS_HEIGHT - 250);
+				xPos = 280;
+				yPos = 280;
+				for (var trigger in TRIGGERS)
+				{
+					if (TRIGGERS.hasOwnProperty(trigger))
+					{
+						var triggerNum = TRIGGERS[trigger];
+						var tText = triggersText[triggerNum];
+						DrawRuleText(tText, "#FFCCCC", xPos, yPos, triggerNum, E_MODE_NORMAL);
+						yPos += Y_RULE_ADJ;
+					}
+				}
+			}
+			else if (editingEntityMode === E_MODE_CHOOSE_RULE)
+			{
+				var boxWidth = (CANVAS_WIDTH - 670) / 2;
+
+				// Condition
+				ctx.fillStyle = "#000030";
+				ctx.fillRect(270, 250, boxWidth / 2, CANVAS_HEIGHT - 250);
+				xPos = 280;
+				yPos = 280;
+				for (var condition in CONDITIONS)
+				{
+					if (CONDITIONS.hasOwnProperty(condition))
+					{
+						var conditionNum = CONDITIONS[condition];
+						var cText = conditionsText[conditionNum];
+						DrawRuleText(cText, "#FFCCCC", xPos, yPos, conditionNum, E_MODE_NORMAL);
+						yPos += Y_RULE_ADJ;
+					}
+				}
+
+				// Result
+				ctx.fillStyle = "#303000";
+				ctx.fillRect(270 + boxWidth / 2, 250, boxWidth / 2, CANVAS_HEIGHT - 250);
+				xPos = 280 + boxWidth;
+				yPos = 280;
+				for (var result in RESULTS)
+				{
+					if (RESULTS.hasOwnProperty(result))
+					{
+						var resultNum = RESULTS[result];
+						var rText = resultsText[resultNum];
+						DrawRuleText(rText, "#FFCCCC", xPos, yPos, resultNum, E_MODE_NORMAL);
+						yPos += Y_RULE_ADJ;
+					}
+				}
+			}
+			else if (editingEntityMode === E_MODE_EDIT_RULE)
+			{
+				var spotValues = undefined;
+				if (editingEntitySpot.trigger)
+				{
+					ctx.fillStyle = "#300000";
+					spotValues = editingEntitySpot.trigValues;
+				}
+				else if (editingEntitySpot.condition)
+				{
+					ctx.fillStyle = "#000030";
+					spotValues = editingEntitySpot.condValues;
+				}
+				else if (editingEntitySpot.result)
+				{
+					ctx.fillStyle = "#303000";
+					spotValues = editingEntitySpot.resValues;
+				}
+				ctx.fillRect(270, 250, CANVAS_WIDTH - 670, CANVAS_HEIGHT - 250);
+				xPos = 280;
+				yPos = 280;
+				for (var sValue in spotValues)
+				{
+					if (spotValues.hasOwnProperty(sValue))
+					{
+						var vText = sValue + ": " + spotValues[sValue];
+						DrawRuleText(vText, "#CCCCCC", xPos, yPos, sValue, E_MODE_NORMAL);
+					}
+				}
+			}
+
+			ctx.restore();
+		}
+	}
+} 
+var X_RULE_ADJ = 25;
+var Y_RULE_ADJ = 15;
+
+// Returns the Y dist to move
+function DrawRule (rule, xPos, yPos) {
+	var spotAvailable = false;
+	if (rule.trigger) {
+
+		DrawRuleText("When: " + triggersText[rule.trigger], "#FFCCCC", xPos, yPos, rule, E_MODE_EDIT_RULE);
+		yPos += Y_RULE_ADJ;
+	}
+	else if (rule.condition)
+	{
+		DrawRuleText("If: " + conditionsText[rule.condition] + " " + JSON.stringify(rule.condValues), "#CCCCFF", xPos, yPos, rule, E_MODE_EDIT_RULE);
+		yPos += Y_RULE_ADJ;
+		spotAvailable = true
+	}
+	else if (rule.result)
+	{
+		DrawRuleText(resultsText[rule.result] + " " + JSON.stringify(rule.resValues), "#FFFFCC", xPos, yPos, rule, E_MODE_EDIT_RULE);
+		yPos += Y_RULE_ADJ;
+		spotAvailable = true
 	}
 
+	if (rule.eventBlock)
+	{
+		for (var i = 0; i < rule.eventBlock.length; i++)
+		{
+			var innerRule = rule.eventBlock[i];
+			yPos = DrawRule(innerRule, xPos + X_RULE_ADJ, yPos);
+		}
+		DrawRuleText("+ (add rule) ...", "#CCFFCC", xPos + X_RULE_ADJ, yPos, rule.eventBlock, E_MODE_CHOOSE_RULE);
+		yPos += Y_RULE_ADJ;
+	}
+	if (rule.trueBlock)
+	{
+		DrawRuleText("Then:", "#CCCCFF", xPos, yPos, undefined, E_MODE_NORMAL);
+		yPos += Y_RULE_ADJ;
+
+		for (var i = 0; i < rule.trueBlock.length; i++)
+		{
+			var innerRule = rule.trueBlock[i];
+			yPos = DrawRule(innerRule, xPos + X_RULE_ADJ, yPos);
+		}
+		DrawRuleText("+ (add rule) ...", "#CCFFCC", xPos + X_RULE_ADJ, yPos, rule.trueBlock, E_MODE_CHOOSE_RULE);
+		yPos += Y_RULE_ADJ;
+	}
+	if (rule.falseBlock)
+	{
+		DrawRuleText("Else:", "#CCCCFF", xPos, yPos, undefined, E_MODE_NORMAL);
+		yPos += Y_RULE_ADJ;
+		for (var i = 0; i < rule.falseBlock.length; i++)
+		{
+			var innerRule = rule.falseBlock[i];
+			yPos = DrawRule(innerRule, xPos + X_RULE_ADJ, yPos);
+		}
+		DrawRuleText("+ (add rule) ...", "#CCFFCC", xPos + X_RULE_ADJ, yPos, rule.falseBlock, E_MODE_CHOOSE_RULE);
+		yPos += Y_RULE_ADJ;
+	}
+	/*if (spotAvailable)
+	{
+		DrawRuleText("+ (add rule) ...", "#CCFFCC", xPos, yPos, rule);
+		
+
+		yPos += Y_RULE_ADJ;
+	}*/
+	return yPos;
 }
+
 
 function DrawEditorButton (btnNum, text) {
 	ctx.fillStyle = "#303030";
@@ -1264,6 +1509,13 @@ function DrawAllMessages () {
 				}
 			}
 		}
+		else if (message.targetType === MESG_TARGET_ENTITY)
+		{
+			x = GetScale(message.target.z) * (message.target.x - xCam) + CANVAS_HALF_WIDTH;
+			y = GetScale(message.target.z) * (message.target.y - yCam) + CANVAS_HALF_HEIGHT;
+			gotLocation = true;
+		}
+
 		if (gotLocation)
 		{
 			DrawTextBox(message.text, x, y);
@@ -1293,15 +1545,42 @@ function DrawTextBox (text, x, y) {
 // Draw a text box, given a string, color, and position
 // Does fade out stuff
 function DrawTextRaw (text, color, x, y) {
+	ctx.save();
 	ctx.fillStyle = "#000000";
 	ctx.strokeStyle = color;
-	var boxWidth = text.length * 10 + 6
+	var boxWidth = ctx.measureText(text).width + 6;
 	ctx.globalAlpha = 0.85;
 	ctx.fillRect(x - boxWidth / 2, y - 12, boxWidth, 16);
 	ctx.strokeRect(x - boxWidth / 2, y - 12, boxWidth, 16);
 	ctx.globalAlpha = 1;
 	ctx.fillStyle = color;
 	DrawText(text, x + 3 - boxWidth / 2, y);
+	ctx.restore();
+}
+
+function DrawRuleText (text, color, x, y, hoverPoint, hoverType) {
+	ctx.save();
+	ctx.strokeStyle = color;
+	ctx.fillStyle = "#000000";
+	var boxWidth = ctx.measureText(text).width + 6;
+
+	if (ruleHoverPossible && Between(x, mouseX, x + boxWidth) && Between(y, mouseY, y + 16))
+	{
+		ctx.fillStyle = "#505050";
+
+		ruleHoverSpot = hoverPoint;
+		ruleHoverMode = hoverType;
+	}
+
+	ctx.save();
+	ctx.globalAlpha *= 0.85;
+	ctx.fillRect(x, y, boxWidth, 16);
+	ctx.strokeRect(x, y, boxWidth, 16);
+	ctx.restore();
+
+	ctx.fillStyle = color;
+	DrawText(text, x + 3, y + 12);
+	ctx.restore();
 }
 
 // Draws text, after rounding to nearest x, y
@@ -1392,10 +1671,16 @@ function DrawAllObjects () {
 		SetDrawZ(obj);
 	});
 	drawObjects.sort(function (a, b) {
-		if (a === player || b === player)
+		if (a.isEntity !== b.isEntity)
 		{
-			if (a === player) return a.drawZ + 0.1 - b.drawZ;
-			else return a.drawZ - b.drawZ - 0.1;
+			if (a.isEntity) return a.drawZ + 0.01 - b.drawZ;
+			else return a.drawZ - b.drawZ - 0.01;
+		}
+		if (a.drawZ - b.drawZ < 0.05)
+		{
+			var offsetA = (a.isEntity ? entities.indexOf(a) : (a.isArea ? areas.indexOf(a) : 0)) * 0.01;
+			var offsetB = (b.isEntity ? entities.indexOf(b) : (b.isArea ? areas.indexOf(b) : 0)) * 0.01;
+			return ((a.drawZ + offsetA) - (b.drawZ + offsetB));
 		}
 		return a.drawZ - b.drawZ;
 	});
@@ -1643,6 +1928,28 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 			ctx.strokeStyle = "#0080C0";
 			ctx.globalAlpha = extra.prevFill;
 		break;
+		case ORB_BLOCK:
+			// Draw tile but then draw circle on top
+			doDraw = false;
+			ctx.fillStyle = "#606060";
+			if (InCeiling(i, j, k))
+			{
+				DrawTileInCeiling(x, y, scale);
+			}
+			else
+			{
+				DrawTile(x, y, scale);
+			}
+			if (extra.orbHere)
+			{
+				ctx.fillStyle = "#C0C0C0";
+				ctx.beginPath();
+				ctx.arc(x + scale / 2, y + scale / 2, scale / 4, 0, 2 * Math.PI);
+				ctx.stroke();
+				ctx.fill();
+			}
+
+		break;
 	}
 	if (doDraw)
 	{
@@ -1787,6 +2094,11 @@ function DrawCharacter (character, scale, x, y) {
 				y = CANVAS_HALF_HEIGHT - scale / 2;
 			}
 		}
+		if (character !== player)
+		{
+			ctx.strokeStyle = "#80FF80";
+			ctx.fillStyle = "#208020";
+		}
 		ctx.fillRect(x, y, scale, scale);
 		ctx.strokeRect(x, y, scale, scale);
 		ctx.restore();
@@ -1855,6 +2167,10 @@ function TileIsOpaque (tile) {
 		return true;
 	}
 	if (tile === PATTERN_EFFECT_BLOCK)
+	{
+		return true;
+	}
+	if (tile === ORB_BLOCK)
 	{
 		return true;
 	}
@@ -1955,6 +2271,10 @@ function TileIsSolid (tile) {
 	{
 		return true;
 	}
+	if (tile === ORB_BLOCK)
+	{
+		return true;
+	}
 	return false;
 }
 
@@ -2010,14 +2330,90 @@ function PositionInBounds (area, i, j, k) {
 	return false;
 }
 
+function Between (a, b, c) {
+	return (a < b && b < c);
+}
+function BetweenInclusive (a, b, c) {
+	return (a <= b && b <= c);
+}
+
+function EntitiesAtCoordinates (x, y, z) {
+	var list = [];
+	for (var i = 0; i < entities.length; i++)
+	{
+		var entity = entities[i];
+		if (entity.x === x && entity.y === y && entity.z === z)
+		{
+			list.push(entity);
+		}
+	}
+	return list;
+}
+
+function EntitiesAtCoordinatesNotPlayer (x, y, z) {
+	var list = [];
+	for (var i = 0; i < entities.length; i++)
+	{
+		var entity = entities[i];
+		if (entity.x === x && entity.y === y && entity.z === z)
+		{
+			if (entity !== player)
+			{
+				list.push(entity);
+			}
+		}
+	}
+	return list;
+}
+
 function EndMovement (entity) {
 	//Multiple tiles could exist at the same location
 	
-	for (var i = 0; i < areas.length; i++) {
+	for (var i = 0; i < areas.length; i++)
+	{
 		var area = areas[i];
 		if (LocationInArea(area, entity.x, entity.y, entity.z - 1))
 		{
 			StepOnTile(entity, area, entity.x - area.x, entity.y - area.y, entity.z - 1 - area.z);
+		}
+	}
+	if (!IsSolid(entity.x, entity.y, entity.z - 1))
+	{
+		// Stepped on nothing
+		entity.fallTime ++;
+		if (editorActive)
+		{
+			entity.fallTime = 0;
+		}
+		if (entity.fallTime > 15)
+		{
+			entity.x = entity.lastSafeCoord.x;
+			entity.y = entity.lastSafeCoord.y;
+			entity.z = entity.lastSafeCoord.z + 1;
+			entity.fallTime = 0;
+			mouseTilesX = 0;
+			mouseTilesY = 0;
+		}
+	}
+	else
+	{
+		entity.fallTime = 0;
+		entity.lastSafeCoord.x = entity.x;
+		entity.lastSafeCoord.y = entity.y;
+		entity.lastSafeCoord.z = entity.z;
+	}
+	if (entity === player)
+	{
+		for (var i = 0; i < entities.length; i++)
+		{
+			var otherEntity = entities[i];
+			if (otherEntity !== entity)
+			{
+				if (IsNear(entity.x, entity.y, entity.z, otherEntity.x, otherEntity.y, otherEntity.z, 1))
+				{
+					SendTrigger(otherEntity, TRIGGERS.PLAYER_STEPS_ADJACENT);
+				}
+			}
 		}
 	}
 }
@@ -2043,6 +2439,13 @@ function StepOnTile (entity, area, x, y, z) {
 		break;
 		case PATTERN_ACTIVATE_BLOCK:
 			ActivateAreaPattern(area);
+		break;
+		case ORB_BLOCK:
+			if (extra.orbHere)
+			{
+				extra.orbHere = false;
+				orbsCollected ++;
+			}
 		break;
 	}
 }
@@ -2220,6 +2623,8 @@ function ClearAreaPattern (area) {
 }
 
 function TextToSpeech (text) {
+	// Too distracting for right now
+	return;
 	if (window.SpeechSynthesisUtterance === undefined)
 	{
 		return;
@@ -2388,6 +2793,9 @@ function DoKeyDown (e) {
 		//move areas[6] left
 
 		// BeginAreaMovement(areas[6], -1, 0, 0, 10);
+
+		//create test entity
+		testCreateEntityWithRules();
 	}
 	else if (e.keyCode === 51)
 	{
@@ -2470,8 +2878,8 @@ function DoMouseDown (e) {
 		EditorMouseDown();
 		return;
 	}
-	mouseTilesX = ScreenXToWorldX(mouseX, player.z);
-	mouseTilesY = ScreenYToWorldY(mouseY, player.z);
+	mouseTilesX = ScreenXToWorldX(mouseX, player.z - 1);
+	mouseTilesY = ScreenYToWorldY(mouseY, player.z - 1);
 	
 	mouseMovement = true;
 
@@ -2757,6 +3165,11 @@ function ResizeAreaTo (x, y, z) {
  	}
 }
 
+function RemoveEntity (entity) {
+	drawObjects.splice(drawObjects.indexOf(entity), 1);
+	entities.splice(entities.indexOf(entity), 1);
+}
+
 
 
 var lastEditedX;
@@ -2784,7 +3197,7 @@ function EditorMouseDown () {
 		}
 		return;
 	}
-	if (mouseX > CANVAS_WIDTH - 200)
+	else if (mouseX > CANVAS_WIDTH - 200)
 	{
 		//mouse is in the button menu part of screen
 		var buttonNum = Math.floor((mouseY - 5) / 60);
@@ -2807,59 +3220,175 @@ function EditorMouseDown () {
 				}
 			break;
 			case 1:
-				//Remove Area
+				// Remove Area
 				RemoveAreaAt(player.x, player.y, player.z);
 			break;
 			case 2:
-				//Resize Area
+				// Resize Area
 				ResizeAreaTo(player.x, player.y, player.z)
 			break;
 			case 3:
-				//Load Level
+				// Load Level
 				ImportLevel(LoadFromLocalStorage("level1"));
 			break;
 			case 4:
-				//Save Level
+				// Save Level
 				SaveToLocalStorage(ExportLevel(), "level1");
 			break;
+			case 5:
+				// New Entity
+				var entitiesHere = EntitiesAtCoordinatesNotPlayer(player.x, player.y, player.z);
+				if (entitiesHere.length === 0)
+				{
+					var newEntity = CreateEntity(player.x, player.y, player.z);
+				}
+				else
+				{
+					console.log("Coordinates occupied by existing entity")
+				}
+			break;
+			case 6:
+				// Remove Entity
+				var entitiesHere = EntitiesAtCoordinatesNotPlayer(player.x, player.y, player.z);
+				if (entitiesHere.length >= 1)
+				{
+					var thisEntity = entitiesHere[0];
+					if (thisEntity === currentEntity)
+					{
+						editingEntity = false;
+						currentEntity = undefined;
+					}
+					RemoveEntity(thisEntity);
+				}
+			break;
+			case 7:
+				// Edit Entity
+				if (editingEntity)
+				{
+					editingEntity = false;
+					currentEntity = undefined;
+				}
+				else
+				{
+					var entitiesHere = EntitiesAtCoordinatesNotPlayer(player.x, player.y, player.z);
+					if (entitiesHere.length >= 1)
+					{
+						var thisEntity = entitiesHere[0];
+						editingEntity = true;
+						currentEntity = thisEntity;
+					}
+				}
+			break;
+
 		}
 
 		return;
 	}
-	var editX = ScreenXToWorldX(mouseX, GetEntityZ(player)) + Math.round(GetEntityX(player));
-	var editY = ScreenYToWorldY(mouseY, GetEntityZ(player)) + Math.round(GetEntityY(player));
-	var editZ = Math.round(GetEntityZ(player));
-
-	lastEditedX = editX;
-	lastEditedY = editY;
-	lastEditedZ = editZ;
-
-	if (mButton === 1)
+	else if (editingEntity)
 	{
-		//Middle mouse drag
-		mousePressed = false;
-		middleClick = true;
-		midStartX = mouseX;
-		midStartY = mouseY;
+		// Mouse isn't on left or right side of screen and entity editor window is open
+
+		// Normal mode
+		if (editingEntityMode === E_MODE_NORMAL)
+		{
+			if (ruleHoverSpot !== undefined && ruleHoverMode !== E_MODE_NORMAL)
+			{
+				editingEntitySpot = ruleHoverSpot;
+				editingEntityMode = ruleHoverMode;
+			}
+		}
+		// Selecting a trigger to add
+		else if (editingEntityMode === E_MODE_CHOOSE_TRIGGER)
+		{
+			// Hovering over a trigger
+			if (ruleHoverSpot !== undefined)
+			{
+				// Create a trigger
+				var newTrigger = {
+					trigger: ruleHoverSpot,
+					trigValues: {},
+					eventBlock: []
+				}
+				editingEntitySpot.push(newTrigger);
+				editingEntitySpot = undefined;
+				editingEntityMode = E_MODE_NORMAL;
+			}
+		}
+		// Selecting a condition or result to add
+		else if (editingEntityMode === E_MODE_CHOOSE_RULE)
+		{
+			// Hovering over a condition or result
+			if (ruleHoverSpot !== undefined)
+			{
+				// Create a condition
+				if (conditionsText[ruleHoverSpot] !== undefined)
+				{
+					var newCondition = {
+						condition: ruleHoverSpot,
+						condValues: {orbsNeeded: Math.floor(Math.random() * 10)},
+						trueBlock: [],
+						falseBlock: []
+					};
+					editingEntitySpot.push(newCondition);
+					editingEntitySpot = undefined;
+					editingEntityMode = E_MODE_NORMAL;
+				}
+				// Create a result
+				else if (resultsText[ruleHoverSpot] !== undefined)
+				{
+					var newResult = {
+						result: ruleHoverSpot,
+						resValues: {message: "default text " + Math.floor(Math.random() * 10)}
+					};
+					editingEntitySpot.push(newResult);
+					editingEntitySpot = undefined;
+					editingEntityMode = E_MODE_NORMAL;
+				}
+			}
+		}
 	}
 	else
 	{
-		if (mButton === 0)
-		{
-			editType = editTypeL;
-		}
-		if (mButton === 2)
-		{
-			editType = editTypeR;
-		}
+		var editX = ScreenXToWorldX(mouseX, GetEntityZ(player)) + Math.round(GetEntityX(player));
+		var editY = ScreenYToWorldY(mouseY, GetEntityZ(player)) + Math.round(GetEntityY(player));
+		var editZ = Math.round(GetEntityZ(player));
 
-		EditTile(editX, editY, editZ, editType);
+		lastEditedX = editX;
+		lastEditedY = editY;
+		lastEditedZ = editZ;
+
+		if (mButton === 1)
+		{
+			//Middle mouse drag
+			mousePressed = false;
+			middleClick = true;
+			midStartX = mouseX;
+			midStartY = mouseY;
+		}
+		else
+		{
+			if (mButton === 0)
+			{
+				editType = editTypeL;
+			}
+			if (mButton === 2)
+			{
+				editType = editTypeR;
+			}
+
+			EditTile(editX, editY, editZ, editType);
+		}
 	}
+	
 	
 	
 }
 
 function EditorMouseMove () {
+	if (editingEntity)
+	{
+		return;
+	}
 	if (mButton === 1)
 	{
 		player.x = Math.round(xCam - 0.5);
@@ -2867,9 +3396,9 @@ function EditorMouseMove () {
 	}
 	if (mousePressed)
 	{
-		var editX = ScreenXToWorldX(mouseX, player.z) + player.x;
-		var editY = ScreenYToWorldY(mouseY, player.z) + player.y;
-		var editZ = player.z;
+		var editX = ScreenXToWorldX(mouseX, GetEntityZ(player)) + Math.round(GetEntityX(player));
+		var editY = ScreenYToWorldY(mouseY, GetEntityZ(player)) + Math.round(GetEntityY(player));
+		var editZ = Math.round(GetEntityZ(player));
 
 		if (lastEditedX !== editX || lastEditedY !== editY || lastEditedZ !== editZ)
 		{
@@ -2949,18 +3478,28 @@ function RandomColor () {
 }
 
 function StartMapEditor () {
+	// Uncomment to lock editing
+	// return;
 	editorActive = true;
 }
 function EndMapEditor () {
 	editorActive = false;
+	editingEntity = false;
+	currentEntity = undefined;
 	while (IsSolidE(player))
 	{
 		// Move player up so they can stay on top of edited layer
 		player.z += 1;
 	}
+	player.lastSafeCoord.x = player.x;
+	player.lastSafeCoord.y = player.y;
+	player.lastSafeCoord.z = player.z;
+	player.fallTime = -20;
 }
 
 function ClearLevel () {
+	currentEntity = undefined;
+	editingEntity = false;
 	areas = [];
 	drawObjects = [];
 	entities = [];
@@ -2982,10 +3521,17 @@ function ImportLevel (levelData) {
 
 	for (var i = 0; i < importedData.areas.length; i++)
 	{
-		areaData = importedData.areas[i];
+		var areaData = importedData.areas[i];
 		var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize, true, areaData.map);
 		areas.push(newArea);
 		drawObjects.push(newArea);
+	}
+	for (var i = 0; i < importedData.entities.length; i++) {
+		var entityData = importedData.entities[i];
+		var newEntity = new Entity(entityData.x, entityData.y, entityData.z);
+		newEntity.rules = entityData.rules;
+		entities.push(newEntity);
+		drawObjects.push(newEntity)
 	}
 	player = new Entity(importedData.player.x, importedData.player.y, importedData.player.z);
 	entities.push(player);
@@ -2995,11 +3541,11 @@ function ImportLevel (levelData) {
 
 function ExportLevel () {
 	//export the current level to a levelData string
-	var levelData = {areas:[], player:{x: player.x, y: player.y, z: player.z}};
+	var levelData = {areas:[], entities:[], player:{x: player.x, y: player.y, z: player.z}};
 	for (var i = 0; i < areas.length; i++)
 	{
 		var area = areas[i];
-		var dataObj = {
+		var areaDataObj = {
 			x: area.x,
 			y: area.y,
 			z: area.z,
@@ -3007,9 +3553,23 @@ function ExportLevel () {
 			ySize: area.ySize,
 			zSize: area.zSize,
 			map: area.map,
-			rule: 0
+			rules: 0,
 		};
-		levelData.areas.push(dataObj); 
+		levelData.areas.push(areaDataObj); 
+	}
+	for (var i = 0; i < entities.length; i++)
+	{
+		var entity = entities[i];
+		if (entity !== player)
+		{
+			var entityDataObj = {
+				x: entity.x,
+				y: entity.y,
+				z: entity.z,
+				rules: entity.rules,
+			};
+			levelData.entities.push(entityDataObj)
+		}
 	}
 	return JSON.stringify(levelData);
 }
@@ -3039,3 +3599,164 @@ function LoadFromLocalStorage (levelName) {
 // ░░░░░░█░░░░░░░░█ 
 // ░░░░░▐▌░░░░░░░░░█ 
 // ░░░░░█░░░░░░░░░░▐▌
+
+
+var TRIGGERS = {
+	PLAYER_STEPS_ADJACENT: 100,
+};
+var triggersText = {};
+triggersText[TRIGGERS.PLAYER_STEPS_ADJACENT] = "Player steps adjacent";
+
+var CONDITIONS = {
+	PLAYER_HAS_ORBS: 200,
+};
+var conditionsText = {};
+conditionsText[CONDITIONS.PLAYER_HAS_ORBS] = "Player has at least X orbs";
+
+var RESULTS = {
+	SAY_MESSAGE: 300,
+};
+var resultsText = {};
+resultsText[RESULTS.SAY_MESSAGE] = "Say a message";
+
+
+function SendTrigger (entity, triggerType) {
+	for (var i = 0; i < entity.rules.length; i++)
+	{
+		var rule = entity.rules[i]
+		if (rule.trigger === triggerType)
+		{
+			ApplyRule(entity, rule);
+		}
+	}
+}
+
+function ApplyRule (entity, rule) {
+	// Apply result if at end of chain
+	if (rule.result)
+	{
+		// rule.resValues can be undefined
+		ApplyEndResult(entity, rule.result, rule.resValues);
+		return true;
+	}
+
+	// Determine which block to go to next
+	var pendingBlock = undefined;
+	if (rule.eventBlock !== undefined)
+	{
+		pendingBlock = rule.eventBlock;
+	}
+	if (rule.condition)
+	{
+		// rule.condValues can be undefined
+		if (CheckCondition(entity, rule.condition, rule.condValues))
+		{
+			if (rule.trueBlock !== undefined)
+			{
+				pendingBlock = rule.trueBlock;
+			}
+		}
+		else
+		{
+			if (rule.falseBlock !== undefined);
+			{
+				pendingBlock = rule.falseBlock;
+			}
+		}
+	}
+	if (pendingBlock !== undefined)
+	{
+		// Go to chosen block and apply all rules inside it
+		for (var i = 0; i < pendingBlock.length; i++)
+		{
+			var pBlock = pendingBlock[i];
+			ApplyRule(entity, pBlock);
+		}
+	}
+}
+
+function CheckCondition (entity, condition, values) {
+	if (values === undefined)
+	{
+		values = {};
+	}
+	switch (condition)
+	{
+		case CONDITIONS.PLAYER_HAS_ORBS:
+			if (values.orbsNeeded === undefined)
+			{
+				throw "missing values.orbsNeeded";
+				return false;
+			}
+			if (orbsCollected >= values.orbsNeeded)
+			{
+				return true;
+			}
+		break;
+	}
+	return false;
+}
+
+function ApplyEndResult (entity, result, values) {
+	if (values === undefined)
+	{
+		values = {};
+	}
+	switch (result)
+	{
+		case RESULTS.SAY_MESSAGE:
+			if (values.message === undefined)
+			{
+				throw "missing values.message";
+				return false;
+			}
+			new Message (values.message, entity, MESG_TARGET_ENTITY);
+			return true;
+		break;
+	}
+}
+
+function testCreateEntityWithRules () {
+	var newEntity = CreateEntity(player.x + 2, player.y, player.z);
+	newEntity.rules = [
+		{
+			trigger: TRIGGERS.PLAYER_STEPS_ADJACENT,
+			trigValues: {},
+			eventBlock: [
+				{
+					condition: CONDITIONS.PLAYER_HAS_ORBS,
+					condValues: {orbsNeeded: 3},
+					trueBlock: [
+						{
+							condition: CONDITIONS.PLAYER_HAS_ORBS,
+							condValues: {orbsNeeded: 6},
+							trueBlock: [
+								{
+									result: RESULTS.SAY_MESSAGE,
+									resValues: {message: "Wow! 6 (or more) orbs!"}
+								}
+							],
+							falseBlock: [
+								{
+									result: RESULTS.SAY_MESSAGE,
+									resValues: {message: "Good job getting the orbs!"}
+								}
+							]
+						}
+					],
+					falseBlock: [
+						{
+							result: RESULTS.SAY_MESSAGE,
+							resValues: {message: "Please get 3 orbs!"}
+						},
+						{
+							result: RESULTS.SAY_MESSAGE,
+							resValues: {message: "."}
+						}
+					]
+				}
+			]
+		}
+	]
+}
+

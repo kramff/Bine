@@ -1,0 +1,57 @@
+Rules for Entities
+------------------
+Edit: Custom Variables
+
+Edit: Color (or transparent)
+
+Set up: Signals
+
+Loops ( and break loop)
+
+Exit (end event processing)
+
+Comment
+
+------------------
+
+Triggers ("When: ")
+-Get signal {listenSignal}
+-Entity's variable changed {watchVariable}
+-Player steps adjacent
+-Player says message (expecting a specific string) {message}
+-Player says message (anything)
+-Player says message (number)
+-Player uses item
+
+
+
+
+Conditions ("If: ")
+-Check a variable {variable, ><=?, value}
+-Check the player's variables {variable, ><=?, value}
+-Player has orbs {numOrbs}
+-Player within range {range}
+
+
+
+Results
+-Say a message {message}
+-Send signal {targetEntity}
+-Send signal (to all entities)
+-Start timer (send signal to self after) {time, signal}
+-Move player {position}
+-Move entity {position}
+-Camera control {changeX, changeY, changeZ}
+-Set move route
+-Erase entity
+-Screen effects
+ -Fade in/out
+ -Color screen
+-Background effects
+ -Color areas
+ -Color background
+-Set Music
+-Play Sound Effect
+
+
+
