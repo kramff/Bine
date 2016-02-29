@@ -344,6 +344,7 @@ var editingEntityMode = E_MODE_NORMAL;
 var ruleHoverSpot = undefined;
 var ruleHoverMode = 0;
 var ruleHoverPossible = true;
+var editingValueSpot = undefined;
 
 
 var choosingTrigger = false;
@@ -1337,7 +1338,7 @@ function Render () {
 
 				// Condition
 				ctx.fillStyle = "#000030";
-				ctx.fillRect(270, 250, boxWidth / 2, CANVAS_HEIGHT - 250);
+				ctx.fillRect(270, 250, boxWidth, CANVAS_HEIGHT - 250);
 				xPos = 280;
 				yPos = 280;
 				for (var condition in CONDITIONS)
@@ -1353,7 +1354,7 @@ function Render () {
 
 				// Result
 				ctx.fillStyle = "#303000";
-				ctx.fillRect(270 + boxWidth / 2, 250, boxWidth / 2, CANVAS_HEIGHT - 250);
+				ctx.fillRect(270 + boxWidth, 250, boxWidth, CANVAS_HEIGHT - 250);
 				xPos = 280 + boxWidth;
 				yPos = 280;
 				for (var result in RESULTS)
@@ -1394,8 +1395,37 @@ function Render () {
 					{
 						var vText = sValue + ": " + spotValues[sValue];
 						DrawRuleText(vText, "#CCCCCC", xPos, yPos, sValue, E_MODE_NORMAL);
+						yPos += Y_RULE_ADJ;
 					}
 				}
+			}
+
+			if (editingValueSpot !== undefined)
+			{
+				// Draw yet another box, with the value to edit's name and a box to type into
+
+				ctx.fillStyle = "#000000";
+				ctx.fillRect(290, 270, CANVAS_WIDTH - 710, CANVAS_HEIGHT - 270);
+				xPos = 310;
+				yPos = 310;
+				ruleHoverPossible = false;
+				DrawRuleText(editingValueSpot, "#CCCCCC", xPos, yPos, undefined, E_MODE_NORMAL);
+				yPos += Y_RULE_ADJ;
+				var currVal;
+				if (editingEntitySpot.trigValues)
+				{
+					currVal = editingEntitySpot.trigValues[editingValueSpot];
+				}
+				else if (editingEntitySpot.condValues)
+				{
+					currVal = editingEntitySpot.condValues[editingValueSpot];
+				}
+				else if (editingEntitySpot.resValues)
+				{
+					currVal = editingEntitySpot.resValues[editingValueSpot];
+				}
+				DrawRuleText(currVal, "#CCCCCC", xPos, yPos, undefined, E_MODE_NORMAL);
+				yPos += Y_RULE_ADJ;
 			}
 
 			ctx.restore();
@@ -3262,11 +3292,14 @@ function EditorMouseDown () {
 				}
 			break;
 			case 7:
-				// Edit Entity
+				// Edit Entity / Done Editing
 				if (editingEntity)
 				{
 					editingEntity = false;
 					currentEntity = undefined;
+					editingEntityMode = E_MODE_NORMAL;
+					editingEntitySpot = undefined;
+					editingValueSpot = undefined;
 				}
 				else
 				{
@@ -3304,14 +3337,17 @@ function EditorMouseDown () {
 			if (ruleHoverSpot !== undefined)
 			{
 				// Create a trigger
-				var newTrigger = {
-					trigger: ruleHoverSpot,
-					trigValues: {},
-					eventBlock: []
+				if (triggersValue[ruleHoverSpot])
+				{
+					var newTrigger = {
+						trigger: ruleHoverSpot,
+						trigValues: triggersValue[ruleHoverSpot],
+						eventBlock: []
+					}
+					editingEntitySpot.push(newTrigger);
+					editingEntitySpot = undefined;
+					editingEntityMode = E_MODE_NORMAL;
 				}
-				editingEntitySpot.push(newTrigger);
-				editingEntitySpot = undefined;
-				editingEntityMode = E_MODE_NORMAL;
 			}
 		}
 		// Selecting a condition or result to add
@@ -3321,11 +3357,11 @@ function EditorMouseDown () {
 			if (ruleHoverSpot !== undefined)
 			{
 				// Create a condition
-				if (conditionsText[ruleHoverSpot] !== undefined)
+				if (conditionsValue[ruleHoverSpot] !== undefined)
 				{
 					var newCondition = {
 						condition: ruleHoverSpot,
-						condValues: {orbsNeeded: Math.floor(Math.random() * 10)},
+						condValues: conditionsValue[ruleHoverSpot],
 						trueBlock: [],
 						falseBlock: []
 					};
@@ -3334,16 +3370,24 @@ function EditorMouseDown () {
 					editingEntityMode = E_MODE_NORMAL;
 				}
 				// Create a result
-				else if (resultsText[ruleHoverSpot] !== undefined)
+				else if (resultsValue[ruleHoverSpot] !== undefined)
 				{
 					var newResult = {
 						result: ruleHoverSpot,
-						resValues: {message: "default text " + Math.floor(Math.random() * 10)}
+						resValues: resultsValue[ruleHoverSpot]
 					};
 					editingEntitySpot.push(newResult);
 					editingEntitySpot = undefined;
 					editingEntityMode = E_MODE_NORMAL;
 				}
+			}
+		}
+		else if (editingEntityMode === E_MODE_EDIT_RULE)
+		{
+			// Clicked on a valid spot and not currently editing a value
+			if (ruleHoverSpot !== undefined && editingValueSpot === undefined)
+			{
+				editingValueSpot = ruleHoverSpot;
 			}
 		}
 	}
@@ -3605,19 +3649,26 @@ var TRIGGERS = {
 	PLAYER_STEPS_ADJACENT: 100,
 };
 var triggersText = {};
+var triggersValue = {};
 triggersText[TRIGGERS.PLAYER_STEPS_ADJACENT] = "Player steps adjacent";
+triggersValue[TRIGGERS.PLAYER_STEPS_ADJACENT] = {};
 
 var CONDITIONS = {
 	PLAYER_HAS_ORBS: 200,
 };
 var conditionsText = {};
+var conditionsValue = {};
 conditionsText[CONDITIONS.PLAYER_HAS_ORBS] = "Player has at least X orbs";
+conditionsValue[CONDITIONS.PLAYER_HAS_ORBS] = {orbsNeeded: 0};
 
 var RESULTS = {
 	SAY_MESSAGE: 300,
 };
 var resultsText = {};
+var resultsValue = {};
 resultsText[RESULTS.SAY_MESSAGE] = "Say a message";
+resultsValue[RESULTS.SAY_MESSAGE] = {message: "Default text"};
+
 
 
 function SendTrigger (entity, triggerType) {
@@ -3751,7 +3802,7 @@ function testCreateEntityWithRules () {
 						},
 						{
 							result: RESULTS.SAY_MESSAGE,
-							resValues: {message: "."}
+							resValues: {message: "..."}
 						}
 					]
 				}
