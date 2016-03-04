@@ -345,6 +345,7 @@ var ruleHoverSpot = undefined;
 var ruleHoverMode = 0;
 var ruleHoverPossible = true;
 var editingValueSpot = undefined;
+var editValue = undefined;
 
 
 var choosingTrigger = false;
@@ -1411,20 +1412,13 @@ function Render () {
 				ruleHoverPossible = false;
 				DrawRuleText(editingValueSpot, "#CCCCCC", xPos, yPos, undefined, E_MODE_NORMAL);
 				yPos += Y_RULE_ADJ;
-				var currVal;
-				if (editingEntitySpot.trigValues)
-				{
-					currVal = editingEntitySpot.trigValues[editingValueSpot];
-				}
-				else if (editingEntitySpot.condValues)
-				{
-					currVal = editingEntitySpot.condValues[editingValueSpot];
-				}
-				else if (editingEntitySpot.resValues)
-				{
-					currVal = editingEntitySpot.resValues[editingValueSpot];
-				}
-				DrawRuleText(currVal, "#CCCCCC", xPos, yPos, undefined, E_MODE_NORMAL);
+
+				DrawRuleText(editValue, "#CCCCCC", xPos, yPos, undefined, E_MODE_NORMAL);
+				yPos += Y_RULE_ADJ;
+				yPos += Y_RULE_ADJ;
+
+				ruleHoverPossible = true;
+				DrawRuleText("Done", "#CCCCCC", xPos, yPos, undefined, E_MODE_NORMAL);
 				yPos += Y_RULE_ADJ;
 			}
 
@@ -2680,7 +2674,14 @@ var enterPressed = false;
 document.addEventListener("keypress", DoKeyPress);
 
 function DoKeyPress (e) {
-	if (writingMessage)
+	if (editingValueSpot !== undefined)
+	{
+		var char = String.fromCharCode(e.keyCode);
+		console.log(char);
+
+		editValue = editValue + char;
+	}
+	else if (writingMessage)
 	{
 		if (e.keyCode == 13 && !enterPressed)
 		{
@@ -2719,22 +2720,37 @@ function DoKeyDown (e) {
 		//Backspace - prevent going back a page
 		e.preventDefault();
 	}
+	if (editingValueSpot !== undefined)
+	{
+		if (e.keyCode === 32)
+		{
+			//spacebar
+			editValue += " ";
+			e.preventDefault();
+		}
+		if (e.keyCode === 8)
+		{
+			//backspace
+			editValue = editValue.slice(0, editValue.length - 1);
+		}
+		return;
+	}
 	if (writingMessage)
 	{
-		if (e.keyCode == 32)
+		if (e.keyCode === 32)
 		{
 			//spacebar
 			messageInput += " ";
 			e.preventDefault();
 		}
-		if (e.keyCode == 8)
+		if (e.keyCode === 8)
 		{
 			//backspace
 			messageInput = messageInput.slice(0, messageInput.length - 1);
 		}
 		return;
 	}
-	if (e.keyCode == 13)
+	if (e.keyCode === 13)
 	{
 		if (!enterPressed)
 		{
@@ -3384,10 +3400,41 @@ function EditorMouseDown () {
 		}
 		else if (editingEntityMode === E_MODE_EDIT_RULE)
 		{
-			// Clicked on a valid spot and not currently editing a value
-			if (ruleHoverSpot !== undefined && editingValueSpot === undefined)
+			// Currently editing a value and clicked "done"
+			if (editingValueSpot !== undefined && ruleHoverMode === E_MODE_NORMAL)
+			{
+				///reverse this
+				if (editingEntitySpot.trigValues)
+				{
+					editingEntitySpot.trigValues[editingValueSpot] = editValue;
+				}
+				else if (editingEntitySpot.condValues)
+				{
+					editingEntitySpot.condValues[editingValueSpot] = editValue;
+				}
+				else if (editingEntitySpot.resValues)
+				{
+					editingEntitySpot.resValues[editingValueSpot] = editValue;
+				}
+				editingValueSpot = undefined;
+			}
+			// Clicked on a valid spot and not currently editing a value -> Start editing that value
+			else if (ruleHoverSpot !== undefined && editingValueSpot === undefined)
 			{
 				editingValueSpot = ruleHoverSpot;
+				editValue = undefined;
+				if (editingEntitySpot.trigValues)
+				{
+					editValue = editingEntitySpot.trigValues[editingValueSpot];
+				}
+				else if (editingEntitySpot.condValues)
+				{
+					editValue = editingEntitySpot.condValues[editingValueSpot];
+				}
+				else if (editingEntitySpot.resValues)
+				{
+					editValue = editingEntitySpot.resValues[editingValueSpot];
+				}
 			}
 		}
 	}
