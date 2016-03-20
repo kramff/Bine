@@ -95,7 +95,7 @@ function loadSScript () {
 socketScript.onreadystatechange = loadSScript;
 socketScript.onload = loadSScript;
 
-
+var socket = undefined;
 function InitSocketConnection (argument) {
 	try
 	{
@@ -339,6 +339,7 @@ var E_MODE_NORMAL = 0; //Look at and click on all rules
 var E_MODE_CHOOSE_TRIGGER = 1; //Choose a new trigger to add in
 var E_MODE_CHOOSE_RULE = 2; //Choose a new rule (Condition or Result) to add in
 var E_MODE_EDIT_RULE = 3; //Edit a rule (Trigger, Condition, or Result)
+var E_MODE_EDIT_VALUE = 3; //Edit a value for a rule
 var editingEntitySpot = undefined;
 var editingEntityMode = E_MODE_NORMAL;
 var ruleHoverSpot = undefined;
@@ -346,6 +347,7 @@ var ruleHoverMode = 0;
 var ruleHoverPossible = true;
 var editingValueSpot = undefined;
 var editValue = undefined;
+var editValueType = undefined
 
 
 var choosingTrigger = false;
@@ -1266,14 +1268,25 @@ function Render () {
 		ctx.fillStyle = "#303000";
 		ctx.fillRect(CANVAS_WIDTH - 200, 0, 200, CANVAS_HEIGHT);
 		//Draw area/other buttons
-		DrawEditorButton(0, "Create Area " + (shiftPressed ? "10x10x10" : "5x5x5"));
-		DrawEditorButton(1, "Remove Area");
-		DrawEditorButton(2, "Resize Area");
-		DrawEditorButton(3, "Load Level");
-		DrawEditorButton(4, "Save Level");
-		DrawEditorButton(5, "Create Entity");
-		DrawEditorButton(6, "Remove Entity");
-		DrawEditorButton(7, (editingEntity ? "Done Editing" : "Edit Entity"));
+		var eBI = 0; //Editor Button Iteration
+		DrawEditorButton(eBI, "Exit Editor");
+		eBI++;
+		DrawEditorButton(eBI, "Create Area " + (shiftPressed ? "10x10x10" : "5x5x5"));
+		eBI++;
+		DrawEditorButton(eBI, "Remove Area");
+		eBI++;
+		DrawEditorButton(eBI, "Resize Area");
+		eBI++;
+		DrawEditorButton(eBI, "Load Level");
+		eBI++;
+		DrawEditorButton(eBI, "Save Level");
+		eBI++;
+		DrawEditorButton(eBI, "Create Entity");
+		eBI++;
+		DrawEditorButton(eBI, "Remove Entity");
+		eBI++;
+		DrawEditorButton(eBI, (editingEntity ? "Done Editing" : "Edit Entity"));
+		eBI++;
 
 		//Draw area selector top bar
 		ctx.fillStyle = "#404040";
@@ -1332,6 +1345,8 @@ function Render () {
 						yPos += Y_RULE_ADJ;
 					}
 				}
+				yPos += Y_RULE_ADJ;
+				DrawRuleText("Cancel", "#CCCCCC", xPos, yPos, -1, E_MODE_NORMAL);
 			}
 			else if (editingEntityMode === E_MODE_CHOOSE_RULE)
 			{
@@ -1348,10 +1363,12 @@ function Render () {
 					{
 						var conditionNum = CONDITIONS[condition];
 						var cText = conditionsText[conditionNum];
-						DrawRuleText(cText, "#FFCCCC", xPos, yPos, conditionNum, E_MODE_NORMAL);
+						DrawRuleText(cText, "#FFCCCC", xPos, yPos, conditionNum, E_MODE_EDIT_RULE);
 						yPos += Y_RULE_ADJ;
 					}
 				}
+				yPos += Y_RULE_ADJ;
+				DrawRuleText("Cancel", "#CCCCCC", xPos, yPos, undefined, E_MODE_NORMAL);
 
 				// Result
 				ctx.fillStyle = "#303000";
@@ -1364,41 +1381,65 @@ function Render () {
 					{
 						var resultNum = RESULTS[result];
 						var rText = resultsText[resultNum];
-						DrawRuleText(rText, "#FFCCCC", xPos, yPos, resultNum, E_MODE_NORMAL);
+						DrawRuleText(rText, "#FFCCCC", xPos, yPos, resultNum, E_MODE_EDIT_RULE);
 						yPos += Y_RULE_ADJ;
 					}
 				}
+				yPos += Y_RULE_ADJ;
+				DrawRuleText("Cancel", "#CCCCCC", xPos, yPos, undefined, E_MODE_NORMAL);
 			}
 			else if (editingEntityMode === E_MODE_EDIT_RULE)
 			{
 				var spotValues = undefined;
+				var titleString = "";
 				if (editingEntitySpot.trigger)
 				{
 					ctx.fillStyle = "#300000";
 					spotValues = editingEntitySpot.trigValues;
+					titleString = "Editing Trigger: " + triggersText[editingEntitySpot.trigger];
 				}
 				else if (editingEntitySpot.condition)
 				{
 					ctx.fillStyle = "#000030";
 					spotValues = editingEntitySpot.condValues;
+					titleString = "Editing Condition: " + conditionsText[editingEntitySpot.condition];
 				}
 				else if (editingEntitySpot.result)
 				{
 					ctx.fillStyle = "#303000";
 					spotValues = editingEntitySpot.resValues;
+					titleString = "Editing Result: " + resultsText[editingEntitySpot.result];
 				}
 				ctx.fillRect(270, 250, CANVAS_WIDTH - 670, CANVAS_HEIGHT - 250);
 				xPos = 280;
 				yPos = 280;
+
+				ruleHoverPossible = false;
+				DrawRuleText(titleString, "#CCCCCC", xPos, yPos, undefined, undefined);
+				yPos += Y_RULE_ADJ;
+				yPos += Y_RULE_ADJ;
+				ruleHoverPossible = true;
+
+				var hasValue = false;
 				for (var sValue in spotValues)
 				{
 					if (spotValues.hasOwnProperty(sValue))
 					{
 						var vText = sValue + ": " + spotValues[sValue];
-						DrawRuleText(vText, "#CCCCCC", xPos, yPos, sValue, E_MODE_NORMAL);
+						DrawRuleText(vText, "#CCCCCC", xPos, yPos, sValue, E_MODE_EDIT_VALUE);
 						yPos += Y_RULE_ADJ;
+						hasValue = true;
 					}
 				}
+				if (!hasValue)
+				{
+					ruleHoverPossible = false;
+					DrawRuleText("(No values to edit)", "#CCCCCC", xPos, yPos, undefined, E_MODE_NORMAL);
+					yPos += Y_RULE_ADJ;
+					ruleHoverPossible = true;
+				}
+				yPos += Y_RULE_ADJ;
+				DrawRuleText("Done", "#CCCCCC", xPos, yPos, undefined, E_MODE_NORMAL);
 			}
 
 			if (editingValueSpot !== undefined)
@@ -1424,6 +1465,10 @@ function Render () {
 
 			ctx.restore();
 		}
+	}
+	else
+	{
+		DrawEditorButton(0, "Enter Editor");
 	}
 } 
 var X_RULE_ADJ = 25;
@@ -2677,7 +2722,6 @@ function DoKeyPress (e) {
 	if (editingValueSpot !== undefined)
 	{
 		var char = String.fromCharCode(e.keyCode);
-		console.log(char);
 
 		editValue = editValue + char;
 	}
@@ -2822,7 +2866,7 @@ function DoKeyDown (e) {
 	}
 	else if (e.keyCode === 49)
 	{
-		//1
+		// 1
 		//start map editor
 		if (editorActive)
 		{
@@ -2835,7 +2879,7 @@ function DoKeyDown (e) {
 	}
 	else if (e.keyCode === 50)
 	{
-		//2
+		// 2
 		//move areas[6] left
 
 		// BeginAreaMovement(areas[6], -1, 0, 0, 10);
@@ -2845,7 +2889,7 @@ function DoKeyDown (e) {
 	}
 	else if (e.keyCode === 51)
 	{
-		//3
+		// 3
 		//move areas[6] right
 
 		// BeginAreaMovement(areas[6], 1, 0, 0, 10);
@@ -2923,6 +2967,14 @@ function DoMouseDown (e) {
 	{
 		EditorMouseDown();
 		return;
+	}
+	else
+	{
+		var result = RegularMouseDown();
+		if (result === false)
+		{
+			return;
+		}
 	}
 	mouseTilesX = ScreenXToWorldX(mouseX, player.z - 1);
 	mouseTilesY = ScreenYToWorldY(mouseY, player.z - 1);
@@ -3216,6 +3268,21 @@ function RemoveEntity (entity) {
 	entities.splice(entities.indexOf(entity), 1);
 }
 
+function RegularMouseDown () {
+	if (mouseX > CANVAS_WIDTH - 200)
+	{
+		//mouse is in the button menu part of screen
+		var buttonNum = Math.floor((mouseY - 5) / 60);
+		switch (buttonNum)
+		{
+			case 0:
+				// Enter Editor
+				StartMapEditor();
+				return false;
+			break;
+		}
+	}
+}
 
 
 var lastEditedX;
@@ -3249,8 +3316,12 @@ function EditorMouseDown () {
 		var buttonNum = Math.floor((mouseY - 5) / 60);
 		switch (buttonNum)
 		{
-			case 0:
-				//Create Area
+			case 0: 
+				// Exit Editor
+				EndMapEditor();
+			break;
+			case 1:
+				// Create Area
 				var currentTime = Date.now()
 				if (currentTime - lastAreaTime > 1000)
 				{
@@ -3265,23 +3336,23 @@ function EditorMouseDown () {
 					lastAreaTime = currentTime;
 				}
 			break;
-			case 1:
+			case 2:
 				// Remove Area
 				RemoveAreaAt(player.x, player.y, player.z);
 			break;
-			case 2:
+			case 3:
 				// Resize Area
 				ResizeAreaTo(player.x, player.y, player.z)
 			break;
-			case 3:
+			case 4:
 				// Load Level
 				ImportLevel(LoadFromLocalStorage("level1"));
 			break;
-			case 4:
+			case 5:
 				// Save Level
 				SaveToLocalStorage(ExportLevel(), "level1");
 			break;
-			case 5:
+			case 6:
 				// New Entity
 				var entitiesHere = EntitiesAtCoordinatesNotPlayer(player.x, player.y, player.z);
 				if (entitiesHere.length === 0)
@@ -3293,7 +3364,7 @@ function EditorMouseDown () {
 					console.log("Coordinates occupied by existing entity")
 				}
 			break;
-			case 6:
+			case 7:
 				// Remove Entity
 				var entitiesHere = EntitiesAtCoordinatesNotPlayer(player.x, player.y, player.z);
 				if (entitiesHere.length >= 1)
@@ -3307,7 +3378,7 @@ function EditorMouseDown () {
 					RemoveEntity(thisEntity);
 				}
 			break;
-			case 7:
+			case 8:
 				// Edit Entity / Done Editing
 				if (editingEntity)
 				{
@@ -3349,16 +3420,21 @@ function EditorMouseDown () {
 		// Selecting a trigger to add
 		else if (editingEntityMode === E_MODE_CHOOSE_TRIGGER)
 		{
+			// Click "Cancel"
+			if (ruleHoverMode === E_MODE_NORMAL && ruleHoverSpot === -1)
+			{
+				editingEntityMode = E_MODE_NORMAL;
+			}
 			// Hovering over a trigger
-			if (ruleHoverSpot !== undefined)
+			else if (ruleHoverSpot !== undefined)
 			{
 				// Create a trigger
 				if (triggersValue[ruleHoverSpot])
 				{
 					var newTrigger = {
 						trigger: ruleHoverSpot,
-						trigValues: triggersValue[ruleHoverSpot],
-						eventBlock: []
+						trigValues: JSON.parse(JSON.stringify(triggersValue[ruleHoverSpot])),
+						eventBlock: [],
 					}
 					editingEntitySpot.push(newTrigger);
 					editingEntitySpot = undefined;
@@ -3369,17 +3445,22 @@ function EditorMouseDown () {
 		// Selecting a condition or result to add
 		else if (editingEntityMode === E_MODE_CHOOSE_RULE)
 		{
+			// Click "Cancel"
+			if (ruleHoverMode === E_MODE_NORMAL)
+			{
+				editingEntityMode = E_MODE_NORMAL;
+			}
 			// Hovering over a condition or result
-			if (ruleHoverSpot !== undefined)
+			else if (ruleHoverSpot !== undefined)
 			{
 				// Create a condition
 				if (conditionsValue[ruleHoverSpot] !== undefined)
 				{
 					var newCondition = {
 						condition: ruleHoverSpot,
-						condValues: conditionsValue[ruleHoverSpot],
+						condValues: JSON.parse(JSON.stringify(conditionsValue[ruleHoverSpot])),
 						trueBlock: [],
-						falseBlock: []
+						falseBlock: [],
 					};
 					editingEntitySpot.push(newCondition);
 					editingEntitySpot = undefined;
@@ -3390,7 +3471,7 @@ function EditorMouseDown () {
 				{
 					var newResult = {
 						result: ruleHoverSpot,
-						resValues: resultsValue[ruleHoverSpot]
+						resValues: JSON.parse(JSON.stringify(resultsValue[ruleHoverSpot])),
 					};
 					editingEntitySpot.push(newResult);
 					editingEntitySpot = undefined;
@@ -3403,7 +3484,14 @@ function EditorMouseDown () {
 			// Currently editing a value and clicked "done"
 			if (editingValueSpot !== undefined && ruleHoverMode === E_MODE_NORMAL)
 			{
-				///reverse this
+				if (editValueType === "number")
+				{
+					editValue = Number(editValue);
+					if (isNaN(editValue))
+					{
+						editValue = 0;
+					}
+				}
 				if (editingEntitySpot.trigValues)
 				{
 					editingEntitySpot.trigValues[editingValueSpot] = editValue;
@@ -3416,7 +3504,13 @@ function EditorMouseDown () {
 				{
 					editingEntitySpot.resValues[editingValueSpot] = editValue;
 				}
+				editValue = undefined
 				editingValueSpot = undefined;
+			}
+			// Not editing a value and clicked "done"
+			else if (ruleHoverMode === E_MODE_NORMAL)
+			{
+				editingEntityMode = E_MODE_NORMAL;
 			}
 			// Clicked on a valid spot and not currently editing a value -> Start editing that value
 			else if (ruleHoverSpot !== undefined && editingValueSpot === undefined)
@@ -3435,6 +3529,7 @@ function EditorMouseDown () {
 				{
 					editValue = editingEntitySpot.resValues[editingValueSpot];
 				}
+				editValueType = typeof editValue;
 			}
 		}
 	}
