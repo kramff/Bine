@@ -2,6 +2,12 @@
 
 "use strict";
 
+
+// Random css stuff
+function SetBGColor (newColor) {
+	document.getElementsByClassName("background_layer")[0].style["background-color"] = newColor;
+}
+
 // Random stuff for game
 
 var orbsCollected = 0;
@@ -72,18 +78,24 @@ var receivedMessages = [];
 // socket.io connection
 var MULTI_ON = false;
 
-var socketScript = document.createElement("script");
-if (location.href === "http://kramff.github.io/")
-{
-	// Web
-	socketScript.setAttribute("src", "https://bine-online.herokuapp.com/socket.io/socket.io.js");
+function SocketInit (argument) {
+	
+	var socketScript = document.createElement("script");
+	if (location.href === "http://kramff.github.io/")
+	{
+		// Web
+		socketScript.setAttribute("src", "https://bine-online.herokuapp.com/socket.io/socket.io.js");
+	}
+	else
+	{
+		// Local
+		socketScript.setAttribute("src", "http://localhost:5000/socket.io/socket.io.js");
+	}
+	document.getElementsByTagName('body')[0].appendChild(socketScript);
+	socketScript.onreadystatechange = loadSScript;
+	socketScript.onload = loadSScript;
 }
-else
-{
-	// Local
-	socketScript.setAttribute("src", "http://localhost:5000/socket.io/socket.io.js");
-}
-document.getElementsByTagName('body')[0].appendChild(socketScript);
+
 var ssLoaded = false;
 function loadSScript () {
 	if (!ssLoaded)
@@ -92,8 +104,6 @@ function loadSScript () {
 		InitSocketConnection();
 	}
 }
-socketScript.onreadystatechange = loadSScript;
-socketScript.onload = loadSScript;
 
 var socket = undefined;
 function InitSocketConnection (argument) {
@@ -619,8 +629,9 @@ function GetAreaByName (name) {
 	return undefined;
 }
 
-
+var gameReady = false;
 function Init () {
+	SocketInit();
 	window.requestAnimationFrame(Update);
 	
 	PrepareFirstTranspTileArray();
@@ -634,7 +645,7 @@ function Init () {
 	InitGame();
 	
 
-
+	gameReady = true;
 }
 
 function InitGame () {
