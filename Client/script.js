@@ -3,9 +3,22 @@
 "use strict";
 
 
-// Random css stuff
+// html dom manipulation stuff
 function SetBGColor (newColor) {
 	document.getElementsByClassName("background_layer")[0].style["background-color"] = newColor;
+}
+function hideAllMenus () {
+	var menus = document.getElementsByClassName("menu_container");
+	for (var i = 0; i < menus.length; i++) {
+		menus[i].style["display"] = "none";
+	}
+}
+function showMenu (menuId) {
+	var menu = document.getElementById(menuId);
+	if (menu !== undefined)
+	{
+		menu.style["display"] = "";
+	}
 }
 
 // Random stuff for game
