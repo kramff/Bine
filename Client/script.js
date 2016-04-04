@@ -3,23 +3,6 @@
 "use strict";
 
 
-// html dom manipulation stuff
-function SetBGColor (newColor) {
-	document.getElementsByClassName("background_layer")[0].style["background-color"] = newColor;
-}
-function hideAllMenus () {
-	var menus = document.getElementsByClassName("menu_container");
-	for (var i = 0; i < menus.length; i++) {
-		menus[i].style["display"] = "none";
-	}
-}
-function showMenu (menuId) {
-	var menu = document.getElementById(menuId);
-	if (menu !== undefined)
-	{
-		menu.style["display"] = "";
-	}
-}
 
 // Random stuff for game
 
@@ -105,12 +88,12 @@ function SocketInit (argument) {
 		socketScript.setAttribute("src", "http://localhost:5000/socket.io/socket.io.js");
 	}
 	document.getElementsByTagName('body')[0].appendChild(socketScript);
-	socketScript.onreadystatechange = loadSScript;
-	socketScript.onload = loadSScript;
+	socketScript.onreadystatechange = LoadSScript;
+	socketScript.onload = LoadSScript;
 }
 
 var ssLoaded = false;
-function loadSScript () {
+function LoadSScript () {
 	if (!ssLoaded)
 	{
 		ssLoaded = true;
@@ -640,25 +623,6 @@ function GetAreaByName (name) {
 		}
 	}
 	return undefined;
-}
-
-var gameReady = false;
-function Init () {
-	SocketInit();
-	window.requestAnimationFrame(Update);
-	
-	PrepareFirstTranspTileArray();
-	areaColors = GenerateColorPalette(100);
-
-
-	ResizeCanvas();
-	// StartMapEditor();
-
-	player = CreateEntity(16, 5, -4);
-	InitGame();
-	
-
-	gameReady = true;
 }
 
 function InitGame () {
@@ -3073,8 +3037,8 @@ function DoResize (e) {
 }
 
 function ResizeCanvas () {
-	canvas.width = window.innerWidth - 25;
-	canvas.height = window.innerHeight - 25;
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
 	CANVAS_WIDTH = canvas.width;
 	CANVAS_HEIGHT = canvas.height;
 	CANVAS_HALF_WIDTH = CANVAS_WIDTH / 2;

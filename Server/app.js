@@ -376,6 +376,8 @@ function RemovePlayer (player) {
 	}
 }
 
+var sessions = [];
+
 io.on("connection", function(socket) {
 	console.log("User connected with id: " + socket.id);
 
