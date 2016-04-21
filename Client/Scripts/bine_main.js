@@ -2,8 +2,48 @@
 // main code - loads and runs other scripts
 
 
+// Load additional files
+// Path changes if using local or web version
+var isoSources = ["Testo", "bine_session"];
+var isoScripts = [];
+// var isoStates = [];
+var numLoadedScripts = 0;
+function LoadIsoScripts () {
+	for (var i = 0; i < isoSources.length; i++)
+	{
+		var source = isoSources[i];
+		var script = document.createElement("script");
+		isoScripts.push(script)
+		// isoStates.push(false);
+		if (location.href === "http://kramff.github.io/")
+		{
+			script.setAttribute("src", "./Isomorphic/" + source + ".js");
+		}
+		else
+		{
+			script.setAttribute("src", "../Isomorphic/" + source + ".js");
+		}
+		document.getElementsByTagName('body')[0].appendChild(script);
+		var loadFunc = (function (stateNum) {
+			return function () {
+				// isoStates[stateNum] = true;
+				numLoadedScripts ++;
+				if (numLoadedScripts >= isoSources.length)
+				{
+					console.log("all iso scripts loaded");
+					// console.log(new Testo().foo(20) + ": should be 23");
+				}
+			}
+		})(i);
+		script.onreadystatechange = loadFunc;
+		script.onload = loadFunc;
+	}
+}
+
+
 var gameReady = false;
 function Init () {
+	LoadIsoScripts();
 	SocketInit();
 	window.requestAnimationFrame(Update);
 	

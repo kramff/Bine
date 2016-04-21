@@ -17,11 +17,13 @@ function HideAllMenus () {
 	}
 }
 
+var currentMenu = "main_menu";
+
 function ShowMenu (menuId) {
 	var menu = document.getElementById(menuId);
 	if (menu !== undefined)
 	{
-		// menu.style["display"] = "";
+		currentMenu = menuId;
 		menu.classList.add("active_menu");
 	}
 	else
@@ -43,3 +45,4 @@ function SetupButtons () {
 		}
 	}
 }
+

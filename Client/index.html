@@ -6,6 +6,9 @@
 <link rel="stylesheet" type="text/css" href="style.css">
 <script type="text/javascript" src="Scripts/bine_menu.js"></script>
 <script type="text/javascript" src="Scripts/bine_main.js"></script>
+<script type="text/javascript" src="Scripts/bine_multiplayer.js"></script>
+<script type="text/javascript" src="Scripts/bine_messages.js"></script>
+<script type="text/javascript" src="Scripts/bine_render.js"></script>
 </head>
 <body onload="Init();">
 <div class="background_container">
@@ -31,37 +34,43 @@
 		<div class="menu_title">Join a session</div>
 	</div>
 	<div class="session_box flex_row_container">
-		<div class="session">
-			<div class="session_name">example session</div>
-			<div class="session_mode">mode: playing</div>
-			<div class="level_name">sample level</div>
-			<div class="player_count">15 players</div>
-		</div>
-		<div class="session">
-			<div class="session_name">example session 2</div>
-			<div class="session_mode">mode: editing</div>
-			<div class="level_name">sample level 2</div>
-			<div class="player_count">15 players</div>
+		<div class="session_box">
+			<!-- <div class="session">
+				<div class="session_name">example session</div>
+				<div class="session_mode">mode: playing</div>
+				<div class="level_name">sample level</div>
+				<div class="player_count">15 players</div>
+			</div>
+			<div class="session">
+				<div class="session_name">example session 2</div>
+				<div class="session_mode">mode: editing</div>
+				<div class="level_name">sample level 2</div>
+				<div class="player_count">15 players</div>
+			</div> -->
 		</div>
 	</div>
 </div>
 <div class="menu_container" id="create_session">
 	<!-- Add levels to load here -->
 	<div class="level_box">
-		<div class="level">
+		<!-- <div class="level">
 			<div class="level_name">examplo level</div>
 			<div class="area_count">26 areas</div>
 		</div>
 		<div class="level">
 			<div class="level_name">examplo level 2</div>
 			<div class="area_count">43 areas</div>
-		</div>
+		</div> -->
 	</div>
 </div>
 <div class="menu_container" id="edit_level">
+	<!-- Add levels to load here -->
+	<!-- Server saved levels -->
+	<div class="level_box"></div>
+	<!-- Locally saved levels -->
+	<div class="level_box"></div>
 </div>
 <div class="menu_container" id="create_level">
-	<!-- Add levels to load here -->
 </div>
 <div class="menu_container" id="settings">
 </div>
