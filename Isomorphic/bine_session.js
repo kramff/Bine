@@ -72,16 +72,36 @@
 			}
 			return JSON.stringify(levelData);
 		}
-		var Session = function (sessionName, levelDatas) {
+		var Session = function (sessionName, worldData) {
 			// SessionName: string
 			this.sessionName = sessionName;
+
+			// worldData: {levelDatas, tileData, worldRules}
+
 			// levelDatas: [{name: string, data: string}, ...]
-			this.levelDatas = levelDatas;
+			this.levelDatas = worldData.levelDatas;
 			this.levels = [];
 			for (var i = 0; i < levelDatas.length; i++) {
 				var lData = levelDatas[i].data;
-
 			}
+			// tileData: [{name: string, solid: boolean, rules: [rules...]}, ...]
+			this.tileData = worldData.tileData;
+
+			// worldRules: [rules...]
+			this.worldRules = worldData.worldRules;
+
+			// entityTemplates: [entityTemplates...]
+			// entityTemplate: {name: string, rules: [rules...], variables: [variables...]}
+			this.entityTemplates = worldData.entityTemplates;
+
+			// areaTemplates: [areaTemplates...]
+			// areaTemplate: {name: string, rules: [rules...], variables: [variables...]}
+			this.areaTemplates = worldData.areaTemplates;
+
+			// itemData
+
+			// particleData
+
 		}
 		Session.prototype.foo = function foo(b) {
 			//...
