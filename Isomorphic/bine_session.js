@@ -1,12 +1,61 @@
 // bine_session.js
 // code for game session
-// contains a set of levels
+
+// A session has a world, which contains a set of levels and some other data
 
 (function () {
+	var IS_SERVER = false;
+	if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
+	{
+		IS_SERVER = true;
+	}
+
 	var Session = (function () {
-		var Level = function (lData) {
-			this.levelData = lData.data;
-			this.levelName = lData.name;
+		function Entity (x, y, z, style, rules, templates) {
+			this.x = x;
+			this.y = y;
+			this.z = z;
+
+			this.style = style;
+
+			this.rules = rules;
+			this.templates = templates;
+
+			this.xMov = 0;
+			this.yMov = 0;
+			this.zMov = 0;
+			this.moveDelay = 0;
+			this.delayTime = 10;
+		}
+
+		function Area (x, y, z, xSize, ySize, zSize, map, extra, style, rules, templates) {
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			
+			this.xSize = xSize;
+			this.ySize = ySize;
+			this.zSize = zSize;
+
+			this.map = map;
+			this.extra = extra;
+
+			this.style = areaStyle
+
+			this.rules = rules;
+			this.templates = templates;
+
+			this.xMov = 0;
+			this.yMov = 0;
+			this.zMov = 0;
+			this.moveDelay = 0;
+			this.delayTime = 10;
+		}
+		function Level (name, areaData, entityData) {
+			this.name = name;
+
+			this.areaData = areaData;
+			this.entityData = entityData;
 
 			this.areas = [];
 			this.areaCounter = 0;
@@ -18,21 +67,16 @@
 			this.entities = [];
 		}
 		Level.prototype.Initalize = function () {
-			var parsedData = JSON.parse(this.levelData);
-			if (parsedData === null)
+			this.Clear();
+			for (var i = 0; i < this.areaData.areas.length; i++)
 			{
-				console.error("Null leveldata!");
-			}
-			this.ClearLevel();
-			for (var i = 0; i < parsedData.areas.length; i++)
-			{
-				var areaData = importedData.areas[i];
+				var areaData = this.areaData.areas[i];
 				var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize, true, areaData.map);
 				areas.push(newArea);
 				drawObjects.push(newArea);
 			}
-			for (var i = 0; i < importedData.entities.length; i++) {
-				var entityData = importedData.entities[i];
+			for (var i = 0; i < this.entityData.entities.length; i++) {
+				var entityData = this.entityData.entities[i];
 				var newEntity = new Entity(entityData.x, entityData.y, entityData.z);
 				newEntity.rules = entityData.rules;
 				entities.push(newEntity);
@@ -81,8 +125,9 @@
 			// levelDatas: [{name: string, data: string}, ...]
 			this.levelDatas = worldData.levelDatas;
 			this.levels = [];
-			for (var i = 0; i < levelDatas.length; i++) {
-				var lData = levelDatas[i].data;
+			for (var i = 0; i < this.levelDatas.length; i++) {
+				var lData = this.levelDatas[i];
+				this.levels[i] = new Level(lData.name, lData.areaData, lData.entityData);
 			}
 			// tileData: [{name: string, solid: boolean, rules: [rules...]}, ...]
 			this.tileData = worldData.tileData;
@@ -99,8 +144,10 @@
 			this.areaTemplates = worldData.areaTemplates;
 
 			// itemData
+			this.itemData = worldData.itemData;
 
 			// particleData
+			this.particleData = worldData.particleData;
 
 		}
 		Session.prototype.foo = function foo(b) {
@@ -111,7 +158,11 @@
 	})();
 
 	if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
+	{
 		module.exports = Session;
+	}
 	else
+	{
 		window.Session = Session;
+	}
 })();
