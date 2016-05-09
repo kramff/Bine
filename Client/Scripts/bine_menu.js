@@ -17,6 +17,11 @@ function HideAllMenus () {
 	}
 }
 
+// Call this function when connected to server
+function EnableMultiplayerFeatures () {
+
+}
+
 var currentMenu = "main_menu";
 
 function ShowMenu (menuId) {
@@ -44,5 +49,49 @@ function SetupButtons () {
 			ShowMenu(this.dataset.menu);
 		}
 	}
+	var sessionBox = document.getElementsByClassName("session_box")[0];
+	sessionBox.onclick = function () {
+		var id = event.target.getAttribute("id");
+		if (id !== null)
+		{
+			// Join session with this id
+		}
+	}
 }
 
+// sessionData: [{session}]
+// session: id, name, mode, worldName, playerCount
+function FillSessionBox (sessionData) {
+	var sessionBox = document.getElementsByClassName("session_box")[0];
+	for (var i = 0; i < sessionData.length; i++) {
+		var session = sessionData[i];
+		var sessionDiv = document.createElement("div");
+		sessionDiv.className = "session";
+		var nameDiv = document.createElement("div");
+		nameDiv.appendChild(document.createTextNode(session.name));
+		var modeDiv = document.createElement("div");
+		modeDiv.appendChild(document.createTextNode(session.mode));
+		var worldNameDiv = document.createElement("div");
+		worldNameDiv.appendChild(document.createTextNode(session.worldName));
+		var playerCountDiv = document.createElement("div");
+		playerCountDiv.appendChild(document.createTextNode(session.playerCount));
+		sessionDiv.appendChild(nameDiv);
+		sessionDiv.appendChild(modeDiv);
+		sessionDiv.appendChild(worldNameDiv);
+		sessionDiv.appendChild(playerCountDiv);
+		sessionDiv.setAttribute("id", session.id);
+		// Append to session box
+		sessionBox.appendChild(sessionDiv);
+	}
+}
+
+
+function FillWorldBox (worldData) {
+	var worldBox = document.getElementsByClassName("world_box")[0];
+	for (var i = 0; i < worldData.length; i++) {
+		var world = worldData[i];
+		var worldDiv = document.createElement("div").className = "world";
+		var nameDiv = document.createElement("div").appendChild(document.createText(world.name));
+		worldDiv.appendChild(nameDiv);
+	}
+}

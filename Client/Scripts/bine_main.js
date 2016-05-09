@@ -61,4 +61,7 @@ function Init () {
 	ShowMenu("main_menu");
 	SetupButtons();
 	gameReady = true;
+
+
+	FillSessionBox([{id: "123", name: "Test Session", mode: "play", worldName: "test world", playerCount: 10}])
 }

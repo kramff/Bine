@@ -17,7 +17,7 @@ var socketio = require("socket.io");
 
 
 var listener = function (req, res) {
-	res.end("This is the Bine server - use <a>kramff.github.io</a>");
+	res.end("This is the Bine server - use kramff.github.io");
 }
 var server = http.createServer(listener)
 server.listen(process.env.PORT || 5000);
@@ -27,225 +27,12 @@ var io = socketio(server);
 var motd = "Join or create a session!";
 
 
-var levels = [];
+var worlds = [];
 var sessions = [];
-
-function ImportLevel (levelData) {
-	//import a levelData string into the current level
-	var importedData = JSON.parse(levelData);
-	if (importedData === null)
-	{
-		console.log("null levelData");
-		return;
-	}
-	ClearLevel();
-
-	for (var i = 0; i < importedData.areas.length; i++)
-	{
-		areaData = importedData.areas[i];
-		var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize, true, areaData.map);
-		areas.push(newArea);
-		// drawObjects.push(newArea);
-	}
-	//player = new Entity(importedData.player.x, importedData.player.y, importedData.player.z);
-	//entities.push(player);
-}
-
-function ExportLevel () {
-	//export the current level to a levelData string
-	var levelData = {areas:[], player:{x: 33, y: 16, z: -3}};
-	for (var i = 0; i < areas.length; i++)
-	{
-		var area = areas[i];
-		var dataObj = {
-			x: area.x,
-			y: area.y,
-			z: area.z,
-			xSize: area.xSize,
-			ySize: area.ySize,
-			zSize: area.zSize,
-			map: area.map,
-			rules: 0
-		};
-		levelData.areas.push(dataObj); 
-	}
-	return JSON.stringify(levelData);
-}
-
-function ReceiveTileChange (tileChange) {
-	ActualEditTile(tileChange.editX, tileChange.editY, tileChange.editZ, tileChange.tile);
-	mainLevelNeedsExport = true;
-}
-function ReceiveCreateArea (createArea) {
-	ActualCreateArea(createArea.x, createArea.y, createArea.z, createArea.xSize, createArea.ySize, createArea.zSize);
-	mainLevelNeedsExport = true;
-}
-function ReceiveRemoveArea (removeArea) {
-	ActualRemoveAreaAt(removeArea.x, removeArea.y, removeArea.z);
-	mainLevelNeedsExport = true;
-}
-function GetAreaByName (name) {
-	for (var i = 0; i < areas.length; i++)
-	{
-		var area = areas[i];
-		if (area.name === name)
-		{
-			return area;
-		}
-	}
-	return undefined;
-}
-function SetTile (area, x, y, z, tile) {
-	var prevTile = area.map[x][y][z];
-	if (tile === prevTile)
-	{
-		// No change needed
-		return false;
-	}
-	area.map[x][y][z] = tile;
-	switch (tile)
-	{
-		default:
-			area.extraData[x][y][z] = {};
-		break
-		case APPEAR_BLOCK:
-			area.extraData[x][y][z] = {opacity: 0};
-		break;
-		case DISAPPEAR_BLOCK:
-			area.extraData[x][y][z] = {opacity: 1};
-		break;
-		case PATTERN_BLOCK:
-			area.extraData[x][y][z] = {pattern: 0};
-		break;
-		case PATTERN_EFFECT_BLOCK:
-			area.extraData[x][y][z] = {opacity: 0};
-		break;
-		case PATTERN_HOLE_BLOCK:
-			area.extraData[x][y][z] = {opacity: 1};
-		break;
-		case SIMULATION_BLOCK:
-			area.extraData[x][y][z] = {prevSim: 0, newSim: 0};
-			area.simulate = true;
-		break;
-		case FLUID_BLOCK:
-			area.extraData[x][y][z] = {prevFill: 0.1, newFill: 0.1, prevflow: [0, 0, 0, 0, 0, 0], newFlow: [0, 0, 0, 0, 0, 0]};
-			area.simulate = true;
-		break;
-	}
-}
-function ActualEditTile (editX, editY, editZ, tile) {
-	var targetArea;
-	for (var i = 0; i < areas.length; i++)
-	{
-		var area = areas[i];
-		if (LocationInArea(area, editX, editY, editZ))
-		{
-			if (area === selectedArea)
-			{
-				//Selected area: affect
-				SetTile(area, editX - area.x, editY - area.y, editZ - area.z, tile);
-				return;
-			}
-			else if (targetArea === undefined)
-			{
-				targetArea = area;
-			}
-		}
-	}
-	if (targetArea !== undefined)
-	{
-		SetTile(targetArea, editX - targetArea.x, editY - targetArea.y, editZ - targetArea.z, tile);
-	}
-}
-function ActualCreateArea (x, y, z, xSize, ySize, zSize) {
-	var newArea = new Area(x, y, z, xSize, ySize, zSize);
-	areas.push(newArea);
-	console.log("Actual Create Done, newArea.name is " + newArea.name);
-	return newArea;
-}
-function ActualRemoveAreaAt (x, y, z) {
- 	for (var i = 0; i < areas.length; i++)
- 	{
- 		var area = areas[i];
- 		if (LocationInArea(area, x, y, z))
- 		{
- 			console.log("Actual Remove Done, removed area.name is " + area.name);
- 			areas.splice(areas.indexOf(area), 1);
- 			return; //Only remove 1 area at a time
- 		}
- 	}
-}
-function LocationInArea (area, x, y, z) {
-	if (area.x <= x && x < area.x + area.xSize)
-	{
-		if (area.y <= y && y < area.y + area.ySize)
-		{
-			if (area.z <= z && z < area.z + area.zSize)
-			{
-				return true;
-			}
-		}
-	}
-	return false;
-}
-function GetAreasAtPosition (x, y, z, getName) {
-	var areasHere = [];
-	for (var i = 0; i < areas.length; i++)
-	{
-		var area = areas[i];
-		if (LocationInArea(area, x, y, z))
-		{
-			if (getName === true)
-			{
-				if (area === selectedArea)
-				{
-					areasHere.push("~" + area.name.toUpperCase() + "~");
-				}
-				else
-				{
-					areasHere.push(area.name);
-				}
-			}
-			else
-			{
-				areasHere.push(area);
-			}
-		}
-	}
-	return areasHere;
-}
-
-
-
-
-ImportLevel(mainLevelData.data);
-
-
 
 var playerArray = [];
 var playerNum = 0;
 
-function UpdatePlayer (player) {
-	for (var i = 0; i < playerArray.length; i++)
-	{
-		if (playerArray[i].id == player.id)
-		{
-			playerArray[i] = player;
-			return;
-		}
-	}
-	playerArray.push(player);
-}
-function RemovePlayer (player) {
-	for (var i = 0; i < playerArray.length; i++)
-	{
-		if (playerArray[i].id == player.id)
-		{
-			playerArray.splice(i, 1);
-			return;
-		}
-	}
-}
 
 var sessions = [];
 
@@ -259,14 +46,17 @@ io.on("connection", function(socket) {
 
 	// For each connection:
 	// - Send the message of the day
-	// - Send serverLevels (the list of levels available and how many players are in each level)
-	// - (For now) Send an initial upate for each current player
+	// - Send the list of worlds available
+	// - Send the list of sessions available
+	// - (disabled for now) Send an initial upate for each current player
 	socket.emit("motd", motd);
-	socket.emit("serverLevels", serverLevels);
-	for (var i = 0; i < playerArray.length; i++)
+	socket.emit("worldNames", worlds.map(function (level) {return level.name;}));
+	// session data: id, name, mode, worldName, playerCount
+	socket.emit("sessionNames", sessions.map(function (session) {return {id: session.id, name: session.name, mode: session.mode, worldName: session.worldName, playerCount: session.playerCount};}));
+	/*for (var i = 0; i < playerArray.length; i++)
 	{
 		socket.emit("playerMove", playerArray[i]);
-	}
+	}*/
 
 	//Temporary main level
 	// if (mainLevelNeedsExport)
@@ -280,15 +70,26 @@ io.on("connection", function(socket) {
 		// socket.emit("chosenLevel", mainLevelData);
 	// }
 
-	// When requested:
-	// - Send list of players active on a level
+	// Functions to give requested information to clients
+	// - Send list of players active in a session
 	// - Send requested level data
 	// - Send a preview of a level (?)
-	socket.on("getLevelPlayers", function (data) {
-		// data - name of level to get current players of
+	socket.on("getSessionPlayers", function (data) {
+		// data - id of session to get current players of
+		var result = sessions.filter(function (session) {return session.id === data;});
+		if (result[0] !== undefined)
+		{
+			socket.emit("sessionPlayers", {"id": result[0].id, "players": result[0].currentPlayers});
+		}
 	});
-	socket.on("getLevelData", function (data) {
-		// data - name of level to send
+	socket.on("getWorldData", function (data) {
+		// data - id of world to send
+		var result = levels.filter(function (level) {return level.id === data;});
+		if (result[0] !== undefined)
+		{
+			socket.emit("levelData", {"id": result[0].id, "data": result[0].data})
+			return result[0].currentPlayers
+		}
 	});
 	socket.on("getLevelPreview", function (data) {
 		// data - name of level to send preivew
