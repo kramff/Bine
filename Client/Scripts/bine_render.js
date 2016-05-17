@@ -533,7 +533,7 @@ function DrawAllObjects () {
 		}
 		return a.drawZ - b.drawZ;
 	});
-	var bottomZ = drawObjects[0].drawZ;
+	var bottomZ = drawObjects[0].drawZ - 1;
 	var topZ = drawObjects[drawObjects.length - 1].drawZ;
 	var bottomI = 0;
 	for (var i = 0; i < drawObjects.length; i++)
@@ -550,11 +550,17 @@ function DrawAllObjects () {
 		var currentObject = drawObjects[i];
 
 		//Loop through objects, stopping when no more objects or next object is above currentZ
-		while (currentObject !== undefined && currentObject.drawZ <= z)
+		while (currentObject !== undefined && currentObject.drawZ - 1 <= z)
 		{
 			if (DObjInZ(currentObject, z))
 			{
-				DrawDObjZ(currentObject, z);
+				// Draw the tops of cubes
+				DrawDObjZ(currentObject, z, false);
+			}
+			if (DObjInZ(currentObject, z + 1))
+			{
+				// Draw the sides of cubes
+				DrawDObjZ(currentObject, z + 1, true);
 			}
 
 			//move bottomI up when possible
@@ -618,20 +624,42 @@ function DObjInZ (dObj, z) {
 // Entity - DrawEntity
 // Area - DrawAreaZSlice
 // Other - should be a Network Player
-function DrawDObjZ (dObj, z) {
+
+// drawSideTiles - true: draw the side tiles, false/default: draw the top
+function DrawDObjZ (dObj, z, drawSideTiles) {
 	if (dObj instanceof Entity)
 	{
-		DrawEntity(dObj);
+		if (drawSideTiles)
+		{
+
+		}
+		else
+		{
+			DrawEntity(dObj);
+		}
 	}
 	else if (dObj instanceof Area)
 	{
-		DrawAreaZSliceSideTiles(dObj, z);
-		DrawAreaZSlice(dObj, z);
+		if (drawSideTiles)
+		{
+			DrawAreaZSliceSideTiles(dObj, z);
+		}
+		else
+		{
+			DrawAreaZSlice(dObj, z);
+		}
 	}
 	else
 	{
 		// Otherwise: Network player
-		DrawNPlayer(dObj);
+		if (drawSideTiles)
+		{
+
+		}
+		else
+		{
+			DrawNPlayer(dObj);
+		}
 	}
 }
 
@@ -682,21 +710,24 @@ function DrawAreaZSlice (area, z) {
 }
 
 function DrawAreaZSliceSideTiles (area, z) {
+	var realZ = z;
 	var scale = GetScale(z + GetAreaZ(area) - area.z);
 	var scale2 = GetScale(-1 + z + GetAreaZ(area) - area.z);
 	if (scale > 0.01)
 	{
 		for (var i = 0; i < area.xSize; i++)
 		{
-			var x = scale * (i + GetAreaX(area) - xCam) + CANVAS_HALF_WIDTH;
-			var x2 = scale2 * (i + GetAreaX(area) - xCam) + CANVAS_HALF_WIDTH;
-			if (x > 0 - scale && x < CANVAS_WIDTH)
+			var realX = i + GetAreaX(area);
+			var x = scale * (realX - xCam) + CANVAS_HALF_WIDTH;
+			var x2 = scale2 * (realX - xCam) + CANVAS_HALF_WIDTH;
+			if (x2 > 0 - scale2 && x2 < CANVAS_WIDTH)
 			{
 				for (var j = 0; j < area.ySize; j++)
 				{
-					var y = scale * (j + GetAreaY(area) - yCam) + CANVAS_HALF_HEIGHT;
-					var y2 = scale2 * (j + GetAreaY(area) - yCam) + CANVAS_HALF_HEIGHT;
-					if (y > 0 - scale && y < CANVAS_HEIGHT)
+					var realY = j + GetAreaY(area)
+					var y = scale * (realY - yCam) + CANVAS_HALF_HEIGHT;
+					var y2 = scale2 * (realY - yCam) + CANVAS_HALF_HEIGHT;
+					if (y2 > 0 - scale2 && y2 < CANVAS_HEIGHT)
 					{	
 						var tile = area.map[i][j][z - area.z];
 						if (tile > 0)
@@ -714,7 +745,7 @@ function DrawAreaZSliceSideTiles (area, z) {
 								}
 								else
 								{
-									DrawTileSides(x, y, scale, x2, y2, scale2);
+									DrawTileSides(x, y, scale, x2, y2, scale2, realX, realY, realZ);
 								}
 							}
 							numSquares ++;
@@ -872,9 +903,9 @@ function DrawTile (x, y, scale) {
 
 // Just draws one side of a tile for now
 // Need to draw all sides / not draw covered sides before drawing any tiles for that layer
-function DrawTileSides (x, y, scale, x2, y2, scale2) {
+function DrawTileSides (x, y, scale, x2, y2, scale2, realX, realY, realZ) {
 	// top side
-	if (y > y2)
+	if (y > y2 && !IsSolid(realX, realY - 1, realZ))
 	{
 		ctx.beginPath();
 		ctx.moveTo(x, y);
@@ -887,7 +918,7 @@ function DrawTileSides (x, y, scale, x2, y2, scale2) {
 	}
 
 	// bottom side
-	if (y2 + scale2 > y + scale)
+	if (y2 + scale2 > y + scale && !IsSolid(realX, realY + 1, realZ))
 	{
 		ctx.beginPath();
 		ctx.moveTo(x, y + scale);
@@ -900,7 +931,7 @@ function DrawTileSides (x, y, scale, x2, y2, scale2) {
 	}
 
 	// left side
-	if (x > x2)
+	if (x > x2 && !IsSolid(realX - 1, realY, realZ))
 	{
 		ctx.beginPath();
 		ctx.moveTo(x, y);
@@ -913,7 +944,7 @@ function DrawTileSides (x, y, scale, x2, y2, scale2) {
 	}
 
 	// right side
-	if (x2 + scale2 > x + scale)
+	if (x2 + scale2 > x + scale && !IsSolid(realX + 1, realY, realZ))
 	{
 		ctx.beginPath();
 		ctx.moveTo(x + scale, y);

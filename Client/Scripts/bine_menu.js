@@ -3,6 +3,27 @@
 
 "use strict";
 
+function CreateNewDiv (parent, setClass, text, id) {
+	var newDiv = document.createElement("div");
+	if (setClass !== undefined)
+	{
+		newDiv.className = setClass;
+	}
+	if (text !== undefined)
+	{
+		newDiv.appendChild(document.createTextNode(text));
+	}
+	if (id !== undefined)
+	{
+		newDiv.setAttribute("id", id);
+	}
+	if (parent !== undefined)
+	{
+		parent.appendChild(newDiv)
+	}
+	return newDiv;
+}
+
 // html dom manipulation stuff
 function SetBGColor (newColor) {
 	document.getElementsByClassName("background_layer")[0].style["background-color"] = newColor;
@@ -59,39 +80,35 @@ function SetupButtons () {
 	}
 }
 
-// sessionData: [{session}]
+// sessionData: [{session}, ...]
 // session: id, name, mode, worldName, playerCount
 function FillSessionBox (sessionData) {
 	var sessionBox = document.getElementsByClassName("session_box")[0];
 	for (var i = 0; i < sessionData.length; i++) {
 		var session = sessionData[i];
-		var sessionDiv = document.createElement("div");
-		sessionDiv.className = "session";
-		var nameDiv = document.createElement("div");
-		nameDiv.appendChild(document.createTextNode(session.name));
-		var modeDiv = document.createElement("div");
-		modeDiv.appendChild(document.createTextNode(session.mode));
-		var worldNameDiv = document.createElement("div");
-		worldNameDiv.appendChild(document.createTextNode(session.worldName));
-		var playerCountDiv = document.createElement("div");
-		playerCountDiv.appendChild(document.createTextNode(session.playerCount));
-		sessionDiv.appendChild(nameDiv);
-		sessionDiv.appendChild(modeDiv);
-		sessionDiv.appendChild(worldNameDiv);
-		sessionDiv.appendChild(playerCountDiv);
-		sessionDiv.setAttribute("id", session.id);
-		// Append to session box
-		sessionBox.appendChild(sessionDiv);
+		// Main div
+		var sessionDiv = CreateNewDiv(sessionBox, "session", undefined, session.id);
+		// Name
+		CreateNewDiv(sessionDiv, "session_name", session.name, undefined);
+		// Mode
+		CreateNewDiv(sessionDiv, "session_mode", session.mode, undefined);
+		// World name
+		CreateNewDiv(sessionDiv, "session_world_name", session.worldName, undefined);
+		// Player count
+		CreateNewDiv(sessionDiv, "session_player_count", session.playerCount, undefined);
 	}
 }
 
-
+// 
 function FillWorldBox (worldData) {
 	var worldBox = document.getElementsByClassName("world_box")[0];
 	for (var i = 0; i < worldData.length; i++) {
-		var world = worldData[i];
-		var worldDiv = document.createElement("div").className = "world";
-		var nameDiv = document.createElement("div").appendChild(document.createText(world.name));
-		worldDiv.appendChild(nameDiv);
+		var world = worldData[i]; 
+		// Main div
+		var worldDiv = CreateNewDiv(worldBox, "world", undefined, world.id);
+		// Name
+		CreateNewDiv(worldDiv, "world_name", world.name, undefined);
+		// Level Count
+		CreateNewDiv(worldDiv, "world_level_count", world.levelCount, undefined);
 	}
 }
