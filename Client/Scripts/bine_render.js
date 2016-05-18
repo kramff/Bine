@@ -112,7 +112,7 @@ function Render () {
 				ctx.fillRect(0, i * 60, 70, 70);
 				ctx.restore();
 			}
-			DrawTileExtra(10, 10 + i * 60, 50, i, 0, 0, 0, fakeExtra);
+			DrawTileExtra(10, 10 + i * 60, 50, i, -9999, -9999, -9999, fakeExtra);
 		}
 
 		//Draw area/other menu right sidebar
@@ -664,16 +664,19 @@ function DrawDObjZ (dObj, z, drawSideTiles) {
 }
 
 function DrawAreaZSlice (area, z) {
+	var realZ = z;
 	var scale = GetScale(z + GetAreaZ(area) - area.z);
 	if (scale > 0.01)
 	{
 		for (var i = 0; i < area.xSize; i++)
 		{
+			var realX = i + GetAreaX(area);
 			var x = scale * (i + GetAreaX(area) - xCam) + CANVAS_HALF_WIDTH;
 			if (x > 0 - scale && x < CANVAS_WIDTH)
 			{
 				for (var j = 0; j < area.ySize; j++)
 				{
+					var realY = j + GetAreaY(area)
 					var y = scale * (j + GetAreaY(area) - yCam) + CANVAS_HALF_HEIGHT;
 					if (y > 0 - scale && y < CANVAS_HEIGHT)
 					{	
@@ -693,7 +696,7 @@ function DrawAreaZSlice (area, z) {
 								}
 								else
 								{
-									DrawTile(x, y, scale);
+									DrawTile(x, y, scale, realX, realY, realZ);
 								}
 							}
 							numSquares ++;
@@ -767,7 +770,7 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 	switch (tile)
 	{
 		default:
-			//DrawTile(x, y, scale);
+			
 		break;
 		case EMPTY:
 			doDraw = false;
@@ -868,7 +871,7 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 			}
 			else
 			{
-				DrawTile(x, y, scale);
+				DrawTile(x, y, scale, i, j, k);
 			}
 			if (extra.orbHere)
 			{
@@ -889,16 +892,20 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 		}
 		else
 		{
-			DrawTile(x, y, scale);
+			DrawTile(x, y, scale, i, j, k);
 		}
 	}
 	ctx.restore();
 }
 
 //i, j, k: world x, y, z position
-function DrawTile (x, y, scale) {
-	ctx.fillRect(x, y, scale, scale);
-	ctx.strokeRect(x, y, scale, scale);
+function DrawTile (x, y, scale, realX, realY, realZ) {
+	// If realX isn't passed in, don't bother doing the check
+	if ((realX === undefined) || !IsSolid(realX, realY, realZ + 1))
+	{
+		ctx.fillRect(x, y, scale, scale);
+		ctx.strokeRect(x, y, scale, scale);
+	}
 }
 
 // Just draws one side of a tile for now

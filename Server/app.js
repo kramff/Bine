@@ -58,6 +58,12 @@ io.on("connection", function(socket) {
 		socket.emit("playerMove", playerArray[i]);
 	}*/
 
+	socket.on("createSession", function (data) {
+		// data - {sessionName}
+		var emptyWorldData = {levelDatas: [], tileData: [], worldRules: [], entityTemplates: [], areaTemplates: [], itemData: [], particleData: []};
+		var newSession = new Session(data.sessionName, emptyWorldData);
+	})
+
 	//Temporary main level
 	// if (mainLevelNeedsExport)
 	// {
