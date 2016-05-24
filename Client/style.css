@@ -95,7 +95,7 @@ body {
 	padding: 10px;
 	margin: 10px;
 
-	background-color: #101010;
+	background-color: #404040;
 	border: 1px solid #FFFFFF;
 	font-size: 14px;
 }
@@ -130,26 +130,36 @@ body {
 	padding: 10px;
 	margin: 10px;
 
-	background-color: #101010;
+	background-color: #404040;
 	border: 1px solid #FFFFFF;
 	font-size: 14px;
 }
 .session:hover {
 	background-color: #202020;
 }
+.session_name,
+.session_mode,
+.session_world_name,
+.session_player_count {
+	padding: 10px;
+	padding-left: 24px;
+	background-position: 0% 50%;
+	background-size: 16px 16px;
+	background-repeat: no-repeat;
+}
 
 .session_name {
-
+	background-image: url(image/page/session_name.png);
 }
 
 .session_mode {
-
+	background-image: url(image/page/session_mode.png);
 }
 
 .session_world_name {
-
+	background-image: url(image/page/session_world_name.png);
 }
 
 .session_player_count {
-
+	background-image: url(image/page/session_player_count.png);
 }

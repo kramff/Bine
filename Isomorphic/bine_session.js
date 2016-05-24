@@ -16,6 +16,7 @@
 			this.y = y;
 			this.z = z;
 
+			// style: {color, border}
 			this.style = style;
 
 			this.rules = rules;
@@ -40,6 +41,7 @@
 			this.map = map;
 			this.extra = extra;
 
+			// style: {color, border, background}
 			this.style = areaStyle
 
 			this.rules = rules;
@@ -61,6 +63,18 @@
 			this.areaCounter = 0;
 			this.entities = [];
 			this.entityCounter = 0;
+		}
+		Level.prototype.Update = function () {
+			for (var i = 0; i < this.entities.length; i++)
+			{
+				// Update entitites
+				var entity = this.entities[i];
+			}
+			for (var i = 0; i < this.areas.length; i++)
+			{
+				// Update areas
+				var area = this.areas[i];
+			}
 		}
 		Level.prototype.Clear = function () {
 			this.areas = [];
