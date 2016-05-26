@@ -28,6 +28,9 @@
 			this.moveDelay = 0;
 			this.delayTime = 10;
 		}
+		Entity.prototype.Update = function () {
+			// 
+		}
 
 		function Area (x, y, z, xSize, ySize, zSize, map, extra, style, rules, templates) {
 			this.x = x;
@@ -53,6 +56,9 @@
 			this.moveDelay = 0;
 			this.delayTime = 10;
 		}
+		Area.prototype.Update = function () {
+			// 
+		}
 		function Level (name, areaData, entityData) {
 			this.name = name;
 
@@ -69,11 +75,13 @@
 			{
 				// Update entitites
 				var entity = this.entities[i];
+				entity.Update();
 			}
 			for (var i = 0; i < this.areas.length; i++)
 			{
 				// Update areas
 				var area = this.areas[i];
+				area.Update();
 			}
 		}
 		Level.prototype.Clear = function () {
@@ -164,9 +172,8 @@
 			this.particleData = worldData.particleData;
 
 		}
-		Session.prototype.foo = function foo(b) {
-			//...
-			return this.a + b;
+		Session.prototype.AddLevel = function () {
+			// 
 		}
 		return Session;
 	})();
