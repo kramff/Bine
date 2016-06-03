@@ -14,7 +14,6 @@ var COLOR_BORDER = "#FFFFFF";
 var BACKGROUND = "#000000";
 
 
-
 function Render () {
 
 	//Camera position

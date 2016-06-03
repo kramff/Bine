@@ -3,6 +3,9 @@
 
 // A session has a world, which contains a set of levels and some other data
 
+
+// var sessio = new Session("my session", {levelDatas: [], tileData: [], worldRules: []})
+
 (function () {
 	var IS_SERVER = false;
 	if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
@@ -11,7 +14,7 @@
 	}
 
 	var Session = (function () {
-		function Entity (x, y, z, style, rules, templates) {
+		function Entity (x, y, z, style, settings rules, templates) {
 			this.x = x;
 			this.y = y;
 			this.z = z;
@@ -19,17 +22,43 @@
 			// style: {color, border}
 			this.style = style;
 
+			// settings: {gravity, solid}
+			this.settings = settings
+
 			this.rules = rules;
 			this.templates = templates;
 
 			this.xMov = 0;
 			this.yMov = 0;
 			this.zMov = 0;
-			this.moveDelay = 0;
-			this.delayTime = 10;
+			this.moveTime = 0;
+			this.moveDuration = 10;
 		}
 		Entity.prototype.Update = function () {
-			// 
+			// Update an entity:
+			// - Input (if player-controlled)
+			// - Rules
+			// - Movement
+
+			// Input
+
+			// Rules
+
+			// Movement
+			if (this.xMov !== 0 || this.yMov !== 0 || this.zMov !== 0)
+			{
+				this.moveTime ++;
+				if (this.moveTime >= this.moveDuration)
+				{
+					this.moveTime = 0;
+					this.x += this.xMov;
+					this.y += this.yMov;
+					this.z += this.zMov;
+					this.xMov = 0;
+					this.yMov = 0;
+					this.zMov = 0;
+				}
+			}
 		}
 
 		function Area (x, y, z, xSize, ySize, zSize, map, extra, style, rules, templates) {
@@ -53,11 +82,34 @@
 			this.xMov = 0;
 			this.yMov = 0;
 			this.zMov = 0;
-			this.moveDelay = 0;
-			this.delayTime = 10;
+			this.moveTime = 0;
+			this.moveDuration = 10;
 		}
 		Area.prototype.Update = function () {
-			// 
+			// Update an area:
+			// - Rules
+			// - Movement
+			// - Simulations
+
+			// Rules
+
+			// Movement
+			if (this.xMov !== 0 || this.yMov !== 0 || this.zMov !== 0)
+			{
+				this.moveTime ++;
+				if (this.moveTime >= this.moveDuration)
+				{
+					this.moveTime = 0;
+					this.x += this.xMov;
+					this.y += this.yMov;
+					this.z += this.zMov;
+					this.xMov = 0;
+					this.yMov = 0;
+					this.zMov = 0;
+				}
+			}
+
+			// Simulations
 		}
 		function Level (name, areaData, entityData) {
 			this.name = name;
@@ -99,8 +151,8 @@
 			}
 			for (var i = 0; i < this.entityData.entities.length; i++) {
 				var entityData = this.entityData.entities[i];
-				var newEntity = new Entity(entityData.x, entityData.y, entityData.z);
-				newEntity.rules = entityData.rules;
+				var newEntity = new Entity(entityData.x, entityData.y, entityData.z, entityData.style, entityData.settings, entityData.rules, entityData.templates);
+				
 				entities.push(newEntity);
 				drawObjects.push(newEntity)
 			}
@@ -131,7 +183,10 @@
 						x: entity.x,
 						y: entity.y,
 						z: entity.z,
+						style: entity.style,
+						settings: entity.settings,
 						rules: entity.rules,
+						templates: entity.templates
 					};
 					levelData.entities.push(entityDataObj)
 				}
