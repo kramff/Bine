@@ -2,6 +2,23 @@
 // drawing things to the canvas
 
 
+function RenderSession (canvas, session, cameraX, cameraY, cameraZ) {
+	// Get Context
+	var ctx = canvas.getContext("2d");
+
+	// Clear canvas
+	canvas.width = canvas.width;
+
+	// Get basic variables
+	var CANVAS_WIDTH = canvas.width;
+	var CANVAS_HEIGHT = canvas.height;
+	var CANVAS_HALF_WIDTH = CANVAS_WIDTH / 2;
+	var CANVAS_HALF_HEIGHT = CANVAS_HEIGHT / 2;
+}
+
+
+
+
 
 // Camera
 var xCam = 0;

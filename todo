@@ -3,6 +3,11 @@ Server - Sessions
 Client - Create Session
 Client - Join Session
 
+Session - Render state
+Session - Control Player Location
+Session - Server/Client Networking
+Session - Editor
+Session - Rules
 
 
 

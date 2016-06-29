@@ -14,7 +14,11 @@
 	}
 
 	var Session = (function () {
-		function Entity (x, y, z, style, settings rules, templates) {
+		var entityIDCounter = 0;
+		function Entity (x, y, z, style, settings, rules, templates) {
+			entityIDCounter ++;
+			this.id = entityIDCounter;
+
 			this.x = x;
 			this.y = y;
 			this.z = z;
@@ -23,7 +27,7 @@
 			this.style = style;
 
 			// settings: {gravity, solid}
-			this.settings = settings
+			this.settings = settings;
 
 			this.rules = rules;
 			this.templates = templates;
@@ -33,23 +37,29 @@
 			this.zMov = 0;
 			this.moveTime = 0;
 			this.moveDuration = 10;
+
+			this.moveDirections = {up: false, down: false, left: false, right: false};
 		}
-		Entity.prototype.Update = function () {
+		Entity.prototype.SetMoveDirections = function (up, down, left, right) {
+			this.moveDirections.up = up;
+			this.moveDirections.down = down;
+			this.moveDirections.left = left;
+			this.moveDirections.right = right;
+		}
+		Entity.prototype.Update = function (levelRef) {
 			// Update an entity:
 			// - Input (if player-controlled)
 			// - Rules
 			// - Movement
 
-			// Input
 
-			// Rules
-
-			// Movement
+			// one tick of movement
 			if (this.xMov !== 0 || this.yMov !== 0 || this.zMov !== 0)
 			{
 				this.moveTime ++;
 				if (this.moveTime >= this.moveDuration)
 				{
+					// end movement if done
 					this.moveTime = 0;
 					this.x += this.xMov;
 					this.y += this.yMov;
@@ -59,9 +69,21 @@
 					this.zMov = 0;
 				}
 			}
+			else
+			{
+				// Not moving - able to start a movement
+				if (this.moveDirections.up || this.moveDirections.down || this.moveDirections.left || this.moveDirections.right)
+				{
+
+				}
+			}
 		}
 
-		function Area (x, y, z, xSize, ySize, zSize, map, extra, style, rules, templates) {
+		var areaIDCounter = 0;
+		function Area (x, y, z, xSize, ySize, zSize, settings, map, extra, style, rules, templates) {
+			areaIDCounter ++;
+			this.id = areaIDCounter;
+
 			this.x = x;
 			this.y = y;
 			this.z = z;
@@ -69,6 +91,9 @@
 			this.xSize = xSize;
 			this.ySize = ySize;
 			this.zSize = zSize;
+
+			// settings: {simulate}
+			this.settings = settings;
 
 			this.map = map;
 			this.extra = extra;
@@ -85,7 +110,7 @@
 			this.moveTime = 0;
 			this.moveDuration = 10;
 		}
-		Area.prototype.Update = function () {
+		Area.prototype.Update = function (levelRef) {
 			// Update an area:
 			// - Rules
 			// - Movement
@@ -94,6 +119,7 @@
 			// Rules
 
 			// Movement
+
 			if (this.xMov !== 0 || this.yMov !== 0 || this.zMov !== 0)
 			{
 				this.moveTime ++;
@@ -111,7 +137,11 @@
 
 			// Simulations
 		}
+		var levelIDCounter = 0;
 		function Level (name, areaData, entityData) {
+			levelIDCounter ++;
+			this.id = levelIDCounter;
+
 			this.name = name;
 
 			this.areaData = areaData;
@@ -127,13 +157,13 @@
 			{
 				// Update entitites
 				var entity = this.entities[i];
-				entity.Update();
+				entity.Update(this);
 			}
 			for (var i = 0; i < this.areas.length; i++)
 			{
 				// Update areas
 				var area = this.areas[i];
-				area.Update();
+				area.Update(this);
 			}
 		}
 		Level.prototype.Clear = function () {
@@ -229,6 +259,13 @@
 		}
 		Session.prototype.AddLevel = function () {
 			// 
+			var newLevel = new Level("level name", [], [])
+		}
+		Session.prototype.CreatePlayerEntity = function () {
+			//
+			var newPlayer = new Entity(0, 0, 0, {color: "#80FFFF", border: "#208080"}, {gravity: true, solid: true}, [], []);
+			
+			return newPlayer;
 		}
 		return Session;
 	})();

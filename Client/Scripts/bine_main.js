@@ -32,6 +32,7 @@ function LoadIsoScripts () {
 				{
 					console.log("all iso scripts loaded");
 					// console.log(new Testo().foo(20) + ": should be 23");
+					GameInit();
 				}
 			}
 		})(i);
@@ -45,6 +46,10 @@ var gameReady = false;
 function Init () {
 	LoadIsoScripts();
 	SocketInit();
+
+
+
+	// Old Shit
 	window.requestAnimationFrame(Update);
 	
 	PrepareFirstTranspTileArray();
@@ -64,4 +69,26 @@ function Init () {
 
 
 	FillSessionBox([{id: "123", name: "Test Session", mode: "play", worldName: "test world", playerCount: 10}])
+}
+
+function GameInit () {
+
+
+	// New Shit
+
+	var tempSession = new Session("my session", {levelDatas: [], tileData: [], worldRules: []});
+
+	var playerEntity = tempSession.CreatePlayerEntity();
+
+	console.log(playerEntity);
+
+	window.requestAnimationFrame(MainUpdate);
+
+
+}
+
+function MainUpdate () {
+	window.requestAnimationFrame(MainUpdate);
+
+	
 }
