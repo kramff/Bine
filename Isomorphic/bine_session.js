@@ -151,6 +151,8 @@
 			this.areaCounter = 0;
 			this.entities = [];
 			this.entityCounter = 0;
+
+			this.drawObjects = [];
 		}
 		Level.prototype.Update = function () {
 			for (var i = 0; i < this.entities.length; i++)

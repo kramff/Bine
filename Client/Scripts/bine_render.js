@@ -1,23 +1,154 @@
 // bine_render.js
 // drawing things to the canvas
 
+// Global object to use instead of passing all variables to every function
+// (And avoid creating objects every frame)
+var R = {
+	canvas: undefined,
+	ctx: undefined,
+	session: undefined,
+	levelID: undefined,
+	cameraX: undefined,
+	cameraY: undefined,
+	cameraZ: undefined,
+	CANVAS_WIDTH: undefined,
+	CANVAS_HEIGHT: undefined,
+	CANVAS_HALF_WIDTH: undefined,
+	CANVAS_HALF_HEIGHT: undefined,
 
-function RenderSession (canvas, session, cameraX, cameraY, cameraZ) {
-	// Get Context
-	var ctx = canvas.getContext("2d");
+}
+
+function RenderLevel (canvas, session, levelID, cameraX, cameraY, cameraZ) {
+	// Set up render object
+	if (R.canvas !== canvas)
+	{
+		R.canvas = canvas;
+		R.ctx = R.canvas.getContext("2d");
+	}
+	R.session = session;
+	R.levelID = levelID;
+	R.cameraX = cameraX
+	R.cameraY = cameraY;
+	R.cameraZ = cameraZ
+	R.CANVAS_WIDTH = canvas.width;
+	R.CANVAS_HEIGHT = canvas.height;
+	R.CANVAS_HALF_WIDTH = CANVAS_WIDTH / 2;
+	R.CANVAS_HALF_HEIGHT = CANVAS_HEIGHT / 2;
 
 	// Clear canvas
-	canvas.width = canvas.width;
+	R.canvas.width = R.canvas.width;
 
-	// Get basic variables
-	var CANVAS_WIDTH = canvas.width;
-	var CANVAS_HEIGHT = canvas.height;
-	var CANVAS_HALF_WIDTH = CANVAS_WIDTH / 2;
-	var CANVAS_HALF_HEIGHT = CANVAS_HEIGHT / 2;
+	// Set standard drawing values
+	R.ctx.font = "16px sans-serif";
+	R.ctx.strokeStyle = "#FFFFFF";
+	R.ctx.fillStyle = "#101010";
+	
+	// Get level to draw and draw all objects in that level 
+	for (var i = 0; i < R.session.levels.length; i++) {
+		var level = R.session.levels[i];
+		if (level.id === levelID)
+		{
+			var drawObjects = level.drawObjects;
+			drawObjects.forEach(SetDrawZ);
+			drawObjects.sort(DrawObjSortFunc);
+
+			var bottomZ = drawObjects[0].drawZ - 1;
+			var topZ = drawObjects[drawObjects.length - 1].drawZ;
+			var bottomI = 0;
+			for (var i = 0; i < drawObjects.length; i++)
+			{
+				if (drawObjects[i] instanceof Area)
+				{
+					//Only areas can have a higher z than the last object
+					topZ = Math.max(topZ, drawObjects[i].drawZ + drawObjects[i].zSize);
+				}
+			}
+			for (var z = bottomZ; z <= topZ + 1; z++)
+			{
+				var i = bottomI;
+				var currentObject = drawObjects[i];
+
+				//Loop through objects, stopping when no more objects or next object is above currentZ
+				while (currentObject !== undefined && currentObject.drawZ - 1 <= z)
+				{
+					if (DObjInZ(currentObject, z))
+					{
+						// Draw the tops of cubes
+						DrawDObjZ(currentObject, z, false);
+					}
+					if (DObjInZ(currentObject, z + 1))
+					{
+						// Draw the sides of cubes
+						DrawDObjZ(currentObject, z + 1, true);
+					}
+
+					//move bottomI up when possible
+					if (i === bottomI)
+					{
+						if (currentObject instanceof Entity)
+						{
+							if (z > currentObject.drawZ)
+							{
+								bottomI ++;
+							}
+						}
+						else if (currentObject instanceof Area)
+						{
+							if (z > currentObject.drawZ + currentObject.zSize)
+							{
+								bottomI ++;
+							}
+						}
+					}
+					
+
+
+					i ++;
+					currentObject = drawObjects[i];
+				}
+			}
+
+
+
+		}
+	}
+}
+
+function DrawObjSortFunc (a, b) {
+	if (a.isEntity !== b.isEntity)
+	{
+		if (a.isEntity) return a.drawZ + 0.01 - b.drawZ;
+		else return a.drawZ - b.drawZ - 0.01;
+	}
+	if (a.drawZ - b.drawZ < 0.05)
+	{
+		var offsetA = (a.isEntity ? entities.indexOf(a) : (a.isArea ? areas.indexOf(a) : 0)) * 0.01;
+		var offsetB = (b.isEntity ? entities.indexOf(b) : (b.isArea ? areas.indexOf(b) : 0)) * 0.01;
+		return ((a.drawZ + offsetA) - (b.drawZ + offsetB));
+	}
+	return a.drawZ - b.drawZ;
+}
+
+function SetDrawZ (dObj) {
+	if (dObj instanceof Entity)
+	{
+		dObj.drawZ = Math.ceil(GetEntityZ(dObj));
+	}
+	else if (dObj instanceof Area)
+	{
+		dObj.drawZ = dObj.z;
+	}
+	else
+	{
+		dObj.drawZ = Math.ceil(dObj.z);
+	}
 }
 
 
 
+
+
+////////////////////////// OLD SHIT
 
 
 // Camera
@@ -520,8 +651,8 @@ function DrawRuleText (text, color, x, y, hoverPoint, hoverType) {
 }
 
 // Draws text, after rounding to nearest x, y
-function DrawText (text, x, y)
-{
+function DrawText (text, x, y) {
+	// Simple rounding technique
 	ctx.fillText(text, (0.5 + x) | 0, (0.5 + y) | 0);
 }
 
@@ -606,20 +737,6 @@ function DrawAllObjects () {
 	}
 }
 
-function SetDrawZ (dObj) {
-	if (dObj instanceof Entity)
-	{
-		dObj.drawZ = Math.ceil(GetEntityZ(dObj));
-	}
-	else if (dObj instanceof Area)
-	{
-		dObj.drawZ = dObj.z;
-	}
-	else
-	{
-		dObj.drawZ = Math.ceil(dObj.z);
-	}
-}
 
 //Draw Object in Z: returns true if the object should be drawn at the given z
 function DObjInZ (dObj, z) {
