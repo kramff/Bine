@@ -225,9 +225,9 @@
 			}
 			return JSON.stringify(levelData);
 		}
-		var Session = function (sessionName, worldData) {
-			// SessionName: string
-			this.sessionName = sessionName;
+		var Session = function (name, worldData) {
+			// name: string
+			this.name = name;
 
 			// worldData: {levelDatas, tileData, worldRules}
 

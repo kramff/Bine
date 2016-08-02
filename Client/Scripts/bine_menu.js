@@ -67,7 +67,14 @@ function SetupButtons () {
 		var button = buttons[i];
 		button.onclick = function () {
 			HideAllMenus();
-			ShowMenu(this.dataset.menu);
+			if (this.dataset.menu !== undefined)
+			{
+				ShowMenu(this.dataset.menu);
+			}
+			else if (this.dataset.action !== undefined)
+			{
+				DoButtonAction(this.dataset.action);
+			}
 		}
 	}
 	var sessionBox = document.getElementsByClassName("session_box")[0];
@@ -76,7 +83,17 @@ function SetupButtons () {
 		if (id !== null)
 		{
 			// Join session with this id
+			JoinSession(id);
+			HideAllMenus();
 		}
+	}
+}
+
+function DoButtonAction (action) {
+	switch (action) {
+		case "create_session_new_world":
+			CreateSessionNewWorld();
+		break;
 	}
 }
 

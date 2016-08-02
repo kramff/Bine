@@ -1464,7 +1464,7 @@ var writingMessage = false;
 var messageInput = "";
 var enterPressed = false;
 
-document.addEventListener("keypress", DoKeyPress);
+// document.addEventListener("keypress", DoKeyPress);
 
 function DoKeyPress (e) {
 	if (editingValueSpot !== undefined)
@@ -1504,7 +1504,7 @@ function DoKeyPress (e) {
 	}
 }
 
-document.addEventListener("keydown", DoKeyDown);
+// document.addEventListener("keydown", DoKeyDown);
 
 function DoKeyDown (e) {
 	if (e.keyCode == 8)
@@ -1649,7 +1649,7 @@ function DoKeyDown (e) {
 	mouseMovement = false;
 }
 
-document.addEventListener("keyup", DoKeyUp);
+// document.addEventListener("keyup", DoKeyUp);
 
 function DoKeyUp (e) {
 	if (e.keyCode == 13)
@@ -1702,7 +1702,7 @@ function DoKeyUp (e) {
 
 var mButton;
 
-window.addEventListener("mousedown", DoMouseDown);
+// window.addEventListener("mousedown", DoMouseDown);
 
 function DoMouseDown (e) {
 	//e.preventDefault();
@@ -1731,7 +1731,7 @@ function DoMouseDown (e) {
 
 }
 
-window.addEventListener("mousemove", DoMouseMove);
+// window.addEventListener("mousemove", DoMouseMove);
 
 function DoMouseMove (e) {
 	e.preventDefault();
@@ -1745,7 +1745,7 @@ function DoMouseMove (e) {
 	}
 }
 
-window.addEventListener("mouseup", DoMouseUp);
+// window.addEventListener("mouseup", DoMouseUp);
 
 function DoMouseUp (e) {
 	e.preventDefault();
@@ -1764,7 +1764,7 @@ function DoMouseUp (e) {
 	}
 }
 
-window.addEventListener("mousewheel", DoMouseWheel);
+// window.addEventListener("mousewheel", DoMouseWheel);
 
 function DoMouseWheel (e) {
 	e.preventDefault();
@@ -1790,7 +1790,7 @@ function DoMouseWheel (e) {
 	}
 }
 
-window.addEventListener("resize", DoResize);
+// window.addEventListener("resize", DoResize);
 
 function DoResize (e) {
 	ResizeCanvas();
@@ -1805,7 +1805,7 @@ function ResizeCanvas () {
 	CANVAS_HALF_HEIGHT = CANVAS_HEIGHT / 2;
 }
 
-document.addEventListener("contextmenu", DoContextMenu);
+// document.addEventListener("contextmenu", DoContextMenu);
 
 function DoContextMenu (e) {
 	e.preventDefault();

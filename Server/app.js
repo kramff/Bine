@@ -26,22 +26,41 @@ var io = socketio(server);
 
 var motd = "Join or create a session!";
 
+// Saved worlds
+var worldArray = [];
+var worldNum = 0;
+function GetWorldByID (id) {
+	var result = worldArray.filter(function (world) {return world.id === data;});
+	if (result[0] !== undefined)
+	{
+		return result[0];
+	}
+}
 
-var worlds = [];
-var sessions = [];
+// Active sessions
+var sessionArray = [];
+var sessionNum = 0;
+function GetSessionByID (id) {
+	var result = sessionArray.filter(function (session) {return session.id === data;});
+	if (result[0] !== undefined)
+	{
+		return result[0];
+	}
+}
 
+// Connected players
 var playerArray = [];
 var playerNum = 0;
-
-
-var sessions = [];
 
 io.on("connection", function(socket) {
 	console.log("User connected with id: " + socket.id);
 
+	this.playerID = undefined;
+
 	socket.on("disconnect", function () {
 		socket.broadcast.emit("disconnection", {"id": socket.id});
-		RemovePlayer({"id": socket.id});
+		// RemovePlayer({"id": socket.id});
+		this.playerID = undefined;
 	});
 
 	// For each connection:
@@ -50,31 +69,30 @@ io.on("connection", function(socket) {
 	// - Send the list of sessions available
 	// - (disabled for now) Send an initial upate for each current player
 	socket.emit("motd", motd);
-	socket.emit("worldNames", worlds.map(function (level) {return level.name;}));
+	socket.emit("worldList", worldArray.map(function (level) {return level.name;}));
 	// session data: id, name, mode, worldName, playerCount
-	socket.emit("sessionNames", sessions.map(function (session) {return {id: session.id, name: session.name, mode: session.mode, worldName: session.worldName, playerCount: session.playerCount};}));
+	socket.emit("sessionList", sessionArray.map(function (session) {return {id: session.id, name: session.name, mode: session.mode, worldName: session.worldName, playerCount: session.playerCount};}));
 	/*for (var i = 0; i < playerArray.length; i++)
 	{
 		socket.emit("playerMove", playerArray[i]);
 	}*/
 
-	socket.on("createSession", function (data) {
-		// data - {sessionName}
+	socket.on("createSessionNewWorld", function (data) {
+		// data - {name}
 		var emptyWorldData = {levelDatas: [], tileData: [], worldRules: [], entityTemplates: [], areaTemplates: [], itemData: [], particleData: []};
-		var newSession = new Session(data.sessionName, emptyWorldData);
-	})
 
-	//Temporary main level
-	// if (mainLevelNeedsExport)
-	// {
-		// mainLevelData = {name: "cool_level", data: ExportLevel()};
-		// socket.emit("chosenLevel", mainLevelData);
-		// mainLevelNeedsExport = false;
-	// }
-	// else
-	// {
-		// socket.emit("chosenLevel", mainLevelData);
-	// }
+		// Should use data.name
+		var newSession = new Session("Session #" + sessionNum, emptyWorldData);
+		newSession.id = sessionNum;
+		console.log("New session! session name: " + newSession.name);
+		sessionArray.push(newSession);
+		sessionNum ++;
+
+		// Send player the world data for the new session
+		socket.emit("worldData", newSession.ExportLevel());
+		// Add player to session
+		newSession.CreatePlayerEntity();
+	});
 
 	// Functions to give requested information to clients
 	// - Send list of players active in a session
@@ -82,24 +100,31 @@ io.on("connection", function(socket) {
 	// - Send a preview of a level (?)
 	socket.on("getSessionPlayers", function (data) {
 		// data - id of session to get current players of
-		var result = sessions.filter(function (session) {return session.id === data;});
-		if (result[0] !== undefined)
-		{
-			socket.emit("sessionPlayers", {"id": result[0].id, "players": result[0].currentPlayers});
-		}
+		var session = GetSessionByID(data);
+		socket.emit("sessionPlayers", {"id": session.id, "players": session.currentPlayers});
 	});
 	socket.on("getWorldData", function (data) {
 		// data - id of world to send
 		var result = levels.filter(function (level) {return level.id === data;});
 		if (result[0] !== undefined)
 		{
-			socket.emit("levelData", {"id": result[0].id, "data": result[0].data})
-			return result[0].currentPlayers
+			socket.emit("worldData", {"id": result[0].id, "data": result[0].data})
+			// return result[0].currentPlayers
 		}
+		var world = GetWorldByID(data);
 	});
 	socket.on("getLevelPreview", function (data) {
 		// data - name of level to send preivew
 	});
+	socket.on("joinSession", function (data) {
+		// data - id of session to join
+		var session = GetSessionByID(data);
+		// Send world data
+		socket.emit("worldData", session.ExportLevel())
+		// Add player to session
+		session.CreatePlayerEntity();
+
+	})
 
 	// Automatically when input received from players 
 	// - Send player events (movement, etc)
@@ -114,16 +139,16 @@ io.on("connection", function(socket) {
 	// - Level events (player triggered a switch, etc) -> send to players
 	// - Editor stuff (player edits a tile/edits other stuff) -> send to players
 
-	socket.on("switchLevel", function (data) {
+	//socket.on("switchLevel", function (data) {
 		// data - name of level to switch to, or "local" if leaving multiplayer
 
 		// Join the socket.io room for that level (?)
-	});
+	//});
 	socket.on("playerMove", function (data) {
 		// data - new position of player
 		data.id = socket.id;
 		socket.broadcast.emit("playerMove", data);
-		UpdatePlayer(data);
+		// UpdatePlayer(data);
 	});
 	socket.on("message", function (data) {
 		// data - chat message sent by player

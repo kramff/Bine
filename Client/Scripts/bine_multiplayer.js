@@ -76,9 +76,17 @@ function InitSocketConnection (argument) {
 			console.log("Message of the day: " + motd);
 			// Show MOTD
 		});
-		socket.on("serverLevels", function (data) {
-			serverLevels = data;
-			console.log("Server levels: " + serverLevels);
+		// socket.on("serverLevels", function (data) {
+		// 	serverLevels = data;
+		// 	console.log("Server levels: " + serverLevels);
+		// });
+		socket.on("worldList", function (data) {
+			FillWorldBox(data);
+		});
+		socket.on("sessionList", function (data) {
+			console.log("Got Sessions!");
+			console.log(data);
+			FillSessionBox(data);
 		});
 		socket.on("playerMove", function (data) {
 			UpdatePlayer(data);
@@ -199,5 +207,18 @@ function SendRemoveArea (removeArea) {
 	if (MULTI_ON)
 	{
 		socket.emit("removeArea", removeArea);
+	}
+}
+
+function CreateSessionNewWorld () {
+	if (MULTI_ON)
+	{
+		socket.emit("createSessionNewWorld");
+	}
+}
+function JoinSession (id) {
+	if (MULTI_ON)
+	{
+		socket.emit("joinSession", id);
 	}
 }
