@@ -30,7 +30,8 @@ var motd = "Join or create a session!";
 var worldArray = [];
 var worldNum = 0;
 function GetWorldByID (id) {
-	var result = worldArray.filter(function (world) {return world.id === data;});
+	id = Number(id);
+	var result = worldArray.filter(function (world) {return world.id === id;});
 	if (result[0] !== undefined)
 	{
 		return result[0];
@@ -41,7 +42,10 @@ function GetWorldByID (id) {
 var sessionArray = [];
 var sessionNum = 0;
 function GetSessionByID (id) {
-	var result = sessionArray.filter(function (session) {return session.id === data;});
+	id = Number(id);
+	var result = sessionArray.filter(function (session) {
+		return session.id === id;
+	});
 	if (result[0] !== undefined)
 	{
 		return result[0];
@@ -89,9 +93,12 @@ io.on("connection", function(socket) {
 		sessionNum ++;
 
 		// Send player the world data for the new session
-		socket.emit("worldData", newSession.ExportLevel());
+		socket.emit("worldData", newSession.ExportWorld());
 		// Add player to session
 		newSession.CreatePlayerEntity();
+
+		// Join the socket.io room for this session
+		socket.join("session_room " + newSession.id);
 	});
 
 	// Functions to give requested information to clients
@@ -120,7 +127,7 @@ io.on("connection", function(socket) {
 		// data - id of session to join
 		var session = GetSessionByID(data);
 		// Send world data
-		socket.emit("worldData", session.ExportLevel())
+		socket.emit("worldData", session.ExportWorld())
 		// Add player to session
 		session.CreatePlayerEntity();
 

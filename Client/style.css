@@ -146,6 +146,7 @@ body {
 	background-position: 0% 50%;
 	background-size: 16px 16px;
 	background-repeat: no-repeat;
+	pointer-events: none;
 }
 
 .session_name {

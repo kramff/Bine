@@ -84,15 +84,12 @@ function InitSocketConnection (argument) {
 			FillWorldBox(data);
 		});
 		socket.on("sessionList", function (data) {
-			console.log("Got Sessions!");
-			console.log(data);
 			FillSessionBox(data);
 		});
 		socket.on("playerMove", function (data) {
 			UpdatePlayer(data);
 		});
 		socket.on("disconnection", function (data) {
-			console.log("player disconnected");
 			RemovePlayer(data);
 		});
 		socket.on("message", function (data) {
@@ -111,9 +108,15 @@ function InitSocketConnection (argument) {
 		});
 
 		//Temporary level direct download
-		socket.on("chosenLevel", function (data) {
-			console.log("got chosen level from server");
-			ImportLevel(data.data);
+		// socket.on("chosenLevel", function (data) {
+		// 	console.log("got chosen level from server");
+		// 	ImportLevel(data.data);
+		// });
+
+		// Receive world data from server
+		socket.on("worldData", function (data) {
+			console.log("Got world data from server!");
+			ReceiveWorldData(data);
 		});
 
 		
@@ -131,6 +134,9 @@ function InitSocketConnection (argument) {
 
 
 //Functions to apply incoming data to game state
+function ReceiveWorldData (worldData) {
+	// Import the world etc...
+}
 function UpdatePlayer (playerData) {
 	for (var i = 0; i < playerArray.length; i++)
 	{

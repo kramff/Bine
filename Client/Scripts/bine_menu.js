@@ -79,12 +79,15 @@ function SetupButtons () {
 	}
 	var sessionBox = document.getElementsByClassName("session_box")[0];
 	sessionBox.onclick = function () {
-		var id = event.target.getAttribute("id");
-		if (id !== null)
+		if (event.target.classList.contains("session"))
 		{
-			// Join session with this id
-			JoinSession(id);
-			HideAllMenus();
+			var id = event.target.getAttribute("session_id");
+			if (id !== null)
+			{
+				// Join session with this id
+				JoinSession(id);
+				HideAllMenus();
+			}
 		}
 	}
 }
@@ -104,7 +107,8 @@ function FillSessionBox (sessionData) {
 	for (var i = 0; i < sessionData.length; i++) {
 		var session = sessionData[i];
 		// Main div
-		var sessionDiv = CreateNewDiv(sessionBox, "session", undefined, session.id);
+		var sessionDiv = CreateNewDiv(sessionBox, "session", undefined, undefined);
+		sessionDiv.setAttribute("session_id", session.id);
 		// Name
 		CreateNewDiv(sessionDiv, "session_name", session.name, undefined);
 		// Mode

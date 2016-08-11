@@ -259,6 +259,15 @@
 			this.particleData = worldData.particleData;
 
 		}
+		Session.prototype.ExportWorld = function () {
+			var exportData = {levelDatas: [], tileData: this.tileData, worldRules: this.worldRules};
+			for (var i = 0; i < this.levels.length; i++)
+			{
+				var level = this.levels[i];
+				exportData.levelDatas.push(level.ExportLevel());
+			}
+			return JSON.stringify(exportData);
+		}
 		Session.prototype.AddLevel = function () {
 			// 
 			var newLevel = new Level("level name", [], [])
