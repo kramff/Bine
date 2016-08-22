@@ -41,15 +41,19 @@ function LoadIsoScripts () {
 	}
 }
 
-
+var mainCanvas = undefined;
 var gameReady = false;
 var inSession = false;
+var curSession = undefined;
+var inLevel = false;
+var curLevelID = undefined;
 function Init () {
 	LoadIsoScripts();
 	SocketInit();
 	ShowMenu("main_menu");
 	SetupButtons();
 	gameReady = true;
+	mainCanvas = document.getElementById("canvas");
 
 
 	// Old Shit
@@ -93,5 +97,9 @@ function GameInit () {
 function MainUpdate () {
 	window.requestAnimationFrame(MainUpdate);
 
-	
+	if (inSession & curSession !== undefined && inLevel && curLevelID !== undefined)
+	{
+		// Render frame
+		RenderLevel(mainCanvas, curSession, curLevelID, 0, 0, 0);
+	}
 }

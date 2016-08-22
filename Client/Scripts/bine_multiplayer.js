@@ -132,10 +132,13 @@ function InitSocketConnection (argument) {
 	}
 }
 
-
+var lastData = undefined;
 //Functions to apply incoming data to game state
 function ReceiveWorldData (worldData) {
+	lastData = JSON.parse(worldData);
 	// Import the world etc...
+	inSession = true;
+	curSession = new Session("The Session", lastData);
 }
 function UpdatePlayer (playerData) {
 	for (var i = 0; i < playerArray.length; i++)

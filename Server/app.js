@@ -88,11 +88,11 @@ io.on("connection", function(socket) {
 		// Should use data.name
 		var newSession = new Session("Session #" + sessionNum, emptyWorldData);
 		newSession.id = sessionNum;
-		console.log("New session! session name: " + newSession.name);
+		console.log("created session! session name: " + newSession.name);
 		sessionArray.push(newSession);
 		sessionNum ++;
 
-		// Send player the world data for the new session
+		// Send player the world data for the created session
 		socket.emit("worldData", newSession.ExportWorld());
 		// Add player to session
 		newSession.CreatePlayerEntity();
