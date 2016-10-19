@@ -32,8 +32,8 @@ function RenderLevel (canvas, session, levelID, cameraX, cameraY, cameraZ) {
 	R.cameraZ = cameraZ
 	R.CANVAS_WIDTH = canvas.width;
 	R.CANVAS_HEIGHT = canvas.height;
-	R.CANVAS_HALF_WIDTH = CANVAS_WIDTH / 2;
-	R.CANVAS_HALF_HEIGHT = CANVAS_HEIGHT / 2;
+	R.CANVAS_HALF_WIDTH = R.CANVAS_WIDTH / 2;
+	R.CANVAS_HALF_HEIGHT = R.CANVAS_HEIGHT / 2;
 
 	// Clear canvas
 	R.canvas.width = R.canvas.width;
@@ -44,17 +44,23 @@ function RenderLevel (canvas, session, levelID, cameraX, cameraY, cameraZ) {
 	R.ctx.fillStyle = "#101010";
 	
 	// Get level to draw and draw all objects in that level 
-	for (var i = 0; i < R.session.levels.length; i++) {
-		var level = R.session.levels[i];
+	for (var levelI = 0; levelI < R.session.levels.length; levelI++) {
+		var level = R.session.levels[levelI];
 		if (level.id === levelID)
 		{
 			var drawObjects = level.drawObjects;
 			drawObjects.forEach(SetDrawZ);
 			drawObjects.sort(DrawObjSortFunc);
 
-			var bottomZ = drawObjects[0].drawZ - 1;
-			var topZ = drawObjects[drawObjects.length - 1].drawZ;
+			var bottomZ = 1;
+			var topZ = -1;
 			var bottomI = 0;
+
+			if (drawObjects.length > 0)
+			{
+				bottomZ = drawObjects[0].drawZ - 1;
+				topZ = drawObjects[drawObjects.length - 1].drawZ;
+			}
 			for (var i = 0; i < drawObjects.length; i++)
 			{
 				if (drawObjects[i] instanceof Area)

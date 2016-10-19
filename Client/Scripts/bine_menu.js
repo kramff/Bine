@@ -66,9 +66,9 @@ function SetupButtons () {
 	for (var i = 0; i < buttons.length; i++) {
 		var button = buttons[i];
 		button.onclick = function () {
-			HideAllMenus();
 			if (this.dataset.menu !== undefined)
 			{
+				HideAllMenus();
 				ShowMenu(this.dataset.menu);
 			}
 			else if (this.dataset.action !== undefined)
@@ -87,6 +87,7 @@ function SetupButtons () {
 				// Join session with this id
 				JoinSession(id);
 				HideAllMenus();
+				ShowMenu("edit_world");
 			}
 		}
 	}
@@ -95,7 +96,14 @@ function SetupButtons () {
 function DoButtonAction (action) {
 	switch (action) {
 		case "create_session_new_world":
+			HideAllMenus();
 			CreateSessionNewWorld();
+			ShowMenu("edit_world");
+		break;
+		case "create_new_level":
+			HideAllMenus();
+			CreateNewLevel();
+			ShowMenu("edit_level");
 		break;
 	}
 }

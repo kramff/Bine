@@ -119,6 +119,18 @@ function InitSocketConnection (argument) {
 			ReceiveWorldData(data);
 		});
 
+
+
+
+		socket.on("newLevel", function (data) {
+			// Create new level
+			ReceiveCreateLevel(data);
+		});
+		socket.on("enterLevel", function (data) {
+			// Enter a level
+			ReceiveEnterLevel(data);
+		});
+
 		
 
 		MULTI_ON = true;
@@ -185,6 +197,13 @@ function ReceiveCreateArea (createArea) {
 function ReceiveRemoveArea (removeArea) {
 	ActualRemoveAreaAt(removeArea.x, removeArea.y, removeArea.z);
 }
+function ReceiveCreateLevel (levelID) {
+	curSession.AddLevelWithID(levelID);
+}
+function ReceiveEnterLevel (levelID) {
+	inLevel = true;
+	curLevelID = levelID;
+}
 
 // Functions to send data to server
 function SendPositionUpdate (position) {
@@ -229,5 +248,16 @@ function JoinSession (id) {
 	if (MULTI_ON)
 	{
 		socket.emit("joinSession", id);
+	}
+}
+
+function CreateNewLevel () {
+	if (MULTI_ON)
+	{
+		socket.emit("createNewLevel");
+	}
+	else
+	{
+		// create a level locally
 	}
 }

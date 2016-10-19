@@ -43,10 +43,15 @@ function LoadIsoScripts () {
 
 var mainCanvas = undefined;
 var gameReady = false;
+
 var inSession = false;
 var curSession = undefined;
+
 var inLevel = false;
 var curLevelID = undefined;
+
+var editorActive = false;
+
 function Init () {
 	LoadIsoScripts();
 	SocketInit();
@@ -78,6 +83,7 @@ function Init () {
 	// FillSessionBox([{id: "123", name: "Test Session", mode: "play", worldName: "test world", playerCount: 10}])
 }
 
+// This is run once all iso scripts are loaded
 function GameInit () {
 
 

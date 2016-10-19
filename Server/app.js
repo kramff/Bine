@@ -31,7 +31,9 @@ var worldArray = [];
 var worldNum = 0;
 function GetWorldByID (id) {
 	id = Number(id);
-	var result = worldArray.filter(function (world) {return world.id === id;});
+	var result = worldArray.filter(function (world) {
+		return world.id === id;
+	});
 	if (result[0] !== undefined)
 	{
 		return result[0];
@@ -60,6 +62,9 @@ io.on("connection", function(socket) {
 	console.log("User connected with id: " + socket.id);
 
 	this.playerID = undefined;
+	this.inSession = false;
+	this.curSession = undefined;
+	this.roomName = undefined;
 
 	socket.on("disconnect", function () {
 		socket.broadcast.emit("disconnection", {"id": socket.id});
@@ -95,10 +100,13 @@ io.on("connection", function(socket) {
 		// Send player the world data for the created session
 		socket.emit("worldData", newSession.ExportWorld());
 		// Add player to session
-		newSession.CreatePlayerEntity();
+		// newSession.CreatePlayerEntity();
 
 		// Join the socket.io room for this session
-		socket.join("session_room " + newSession.id);
+		this.roomName = "session_room " + newSession.id;
+		socket.join(this.roomName);
+		this.inSession = true;
+		this.curSession = newSession;
 	});
 
 	// Functions to give requested information to clients
@@ -112,13 +120,8 @@ io.on("connection", function(socket) {
 	});
 	socket.on("getWorldData", function (data) {
 		// data - id of world to send
-		var result = levels.filter(function (level) {return level.id === data;});
-		if (result[0] !== undefined)
-		{
-			socket.emit("worldData", {"id": result[0].id, "data": result[0].data})
-			// return result[0].currentPlayers
-		}
 		var world = GetWorldByID(data);
+		socket.emit("worldData", world);
 	});
 	socket.on("getLevelPreview", function (data) {
 		// data - name of level to send preivew
@@ -129,9 +132,23 @@ io.on("connection", function(socket) {
 		// Send world data
 		socket.emit("worldData", session.ExportWorld())
 		// Add player to session
-		session.CreatePlayerEntity();
+		// session.CreatePlayerEntity();
 
-	})
+		// Join the socket.io room for this session
+		this.roomName = "session_room " + session.id;
+		socket.join(this.roomName);
+		this.inSession = true;
+		this.curSession = session;
+	});
+	socket.on("createNewLevel", function (data) {
+		if (this.inSession)
+		{
+			var levelID = this.curSession.AddLevel();
+			//... What to do here
+			io.to(this.roomName).emit("newLevel", levelID);
+			socket.emit("enterLevel", levelID);
+		}
+	});
 
 	// Automatically when input received from players 
 	// - Send player events (movement, etc)

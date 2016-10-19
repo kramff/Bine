@@ -271,12 +271,48 @@
 		Session.prototype.AddLevel = function () {
 			// 
 			var newLevel = new Level("level name", [], [])
+			this.levels.push(newLevel);
+			return newLevel.id;
 		}
-		Session.prototype.CreatePlayerEntity = function () {
+		Session.prototype.AddLevelWithID = function (levelID) {
+			// 
+			var newLevel = new Level("level name", [], [])
+			this.levels.push(newLevel);
+			newLevel.id = levelID;
+			return newLevel.id;
+		}
+		Session.prototype.GetLevelByID = function (id) {
+			id = Number(id);
+			var result = this.levels.filter(function (level) {
+				return level.id === id;
+			});
+			if (result[0] !== undefined)
+			{
+				return result[0];
+			}
+		}
+		Session.prototype.CreatePlayerEntity = function (levelID) {
 			//
 			var newPlayer = new Entity(0, 0, 0, {color: "#80FFFF", border: "#208080"}, {gravity: true, solid: true}, [], []);
+			var level = this.GetLevelByID(levelID);
+			return newPlayer.id;
+		}
+		Session.prototype.CreateEntity = function (levelID) {
+			//
+			var newEntity = new Entity(0, 0, 0, {color: "#80FFFF", border: "#208080"}, {gravity: true, solid: true}, [], []);
 			
-			return newPlayer;
+			return newEntity.id;
+		}
+		Session.prototype.GetEntityByID = function (levelID, id) {
+			var level = this.GetLevelByID(levelID);
+			id = Number(id);
+			var result = worldArray.filter(function (world) {
+				return world.id === id;
+			});
+			if (result[0] !== undefined)
+			{
+				return result[0];
+			}
 		}
 		return Session;
 	})();

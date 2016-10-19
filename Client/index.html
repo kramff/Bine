@@ -15,8 +15,6 @@
 	<div class="background_layer"></div>
 </div>
 <canvas id="canvas" width="600" height="600"></canvas>
-<!-- <script type="text/javascript" src="script.js"></script> -->
-<!-- <script type="text/javascript" src="touch.js"></script> -->
 <div class="menu_container" id="main_menu">
 	<div class="menu_top_half flex_column_container">
 		<div class="menu_title">Bine - Main Menu</div>
@@ -24,7 +22,7 @@
 	<div class="menu_bottom_half flex_row_container">
 		<div class="button" id="button_join_session" data-menu="join_session">Join a session</div>
 		<div class="button" id="button_create_session" data-menu="create_session">Create new session</div>
-		<div class="button" id="button_edit_world" data-menu="edit_world">Edit a world</div>
+		<div class="button" id="button_load_world" data-menu="load_world">Edit a world</div>
 		<div class="button" id="button_create_world" data-menu="create_world">Create new world</div>
 		<div class="button" id="button_settings" data-menu="settings">Settings</div>
 	</div>
@@ -32,37 +30,72 @@
 <div class="menu_container" id="join_session">
 	<div class="menu_top_bar flex_column_container">
 		<div class="menu_title">Join a session</div>
+		<div class="button" data-menu="main_menu">Back</div>
 	</div>
 	<div class="session_box flex_row_container">
 	</div>
 </div>
 <div class="menu_container" id="create_session">
-	<!-- Add worlds to load here -->
 	<div class="menu_top_half flex_column_container">
 		<div class="button" data-action="create_session_new_world">Create Session with New World</div>
+		<div class="button" data-menu="main_menu">Back</div>
 	</div>
 	<div class="world_box">
-		<!-- <div class="world">
-			<div class="world_name">examplo world</div>
-			<div class="level_count">26 levels</div>
-		</div>
-		<div class="world">
-			<div class="world_name">examplo world 2</div>
-			<div class="level_count">43 levels</div>
-		</div> -->
+		<!-- Add worlds to load here -->
+	</div>
+</div>
+<div class="menu_container" id="load_world">
+	<div class="button" data-menu="main_menu">Back</div>
+	<!-- Server saved worlds -->
+	<div class="world_box">
+		<!-- Add worlds to load here -->
+		<div class="button" data-menu="edit_world">(Worlds to edit go here)</div>
+	</div>
+	<!-- Locally saved worlds -->
+	<div class="world_box">
+		<!-- Add worlds to load here -->
 	</div>
 </div>
 <div class="menu_container" id="edit_world">
-	<!-- Add worlds to load here -->
-	<!-- Server saved worlds -->
-	<div class="world_box"></div>
-	<!-- Locally saved worlds -->
-	<div class="world_box"></div>
+	<!-- <div class="button" data-menu="main_menu">Back</div> -->
+	<!-- Levels available in this world -->
+	<div class="level_box">
+		<!-- Add levels to open here -->
+		<div class="button" data-action="create_new_level">Create new level</div>
+	</div>
+	<div class="button" data-menu="edit_world_rules">World Rules and Settings</div>
+	<div class="button" data-menu="edit_level_rules">Level Rules and Templates</div>
+	<div class="button" data-menu="edit_area_rules">Area Rules and Templates</div>
+	<div class="button" data-menu="edit_tile_rules">Tile Rules</div>
+	<div class="button" data-menu="edit_entity_rules">Entity Rules and Templates</div>
+	<div class="button" data-menu="edit_player_rules">Player Rules</div>
+	<div class="button" data-menu="edit_item_rules">Item Rules and Templates</div>
+	<div class="button" data-menu="edit_particle_rules">Particle Rules and Templates</div>
 </div>
+<div class="menu_container" id="edit_world_rules"></div>
+<div class="menu_container" id="edit_level_rules"></div>
+<div class="menu_container" id="edit_area_rules"></div>
+<div class="menu_container" id="edit_tile_rules"></div>
+<div class="menu_container" id="edit_entity_rules"></div>
+<div class="menu_container" id="edit_player_rules"></div>
+<div class="menu_container" id="edit_item_rules"></div>
+<div class="menu_container" id="edit_particle_rules"></div>
+
+
+<div class="menu_container" id="edit_level">
+	<!-- <div class="button" data-menu="main_menu">Back to main menu</div> -->
+	<div class="button" data-action="create_area">Create an area</div>
+	<div class="button" data-action="test_level">Test level</div>
+</div>
+
+
 <div class="menu_container" id="create_world">
+	<div class="button" data-menu="main_menu">Back</div>
 </div>
 <div class="menu_container" id="settings">
+	<div class="button" data-menu="main_menu">Back</div>
 </div>
+
 
 </body>
 
