@@ -291,6 +291,33 @@
 				return result[0];
 			}
 		}
+
+		Session.prototype.AddArea = function(levelID, areaData) {
+			var level = this.GetLevelByID(levelID);
+			var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize);
+			level.areas.push(newArea);
+			level.drawObjects.push(newArea);
+			return newArea;
+		};
+		Session.prototype.AddAreaWithID = function(levelID, areaData, areaID) {
+			var level = this.GetLevelByID(levelID);
+			var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize);
+			level.areas.push(newArea);
+			level.drawObjects.push(newArea);
+			return newArea;
+		};
+		Session.prototype.GetAreaByID = function(levelID, areaID) {
+			var level = this.GetLevelByID(levelID);
+			var id = Number(areaID);
+			var result = level.areas.filter(function (area) {
+				return area.id === id;
+			});
+			if (result[0] !== undefined)
+			{
+				return result[0];
+			}
+		};
+
 		Session.prototype.CreatePlayerEntity = function (levelID) {
 			//
 			var newPlayer = new Entity(0, 0, 0, {color: "#80FFFF", border: "#208080"}, {gravity: true, solid: true}, [], []);

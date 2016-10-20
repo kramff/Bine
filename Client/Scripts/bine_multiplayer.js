@@ -261,3 +261,10 @@ function CreateNewLevel () {
 		// create a level locally
 	}
 }
+
+function CreateNewArea () {
+	if (MULTI_ON)
+	{
+		socket.emit("createNewArea");
+	}
+}

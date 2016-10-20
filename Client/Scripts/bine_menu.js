@@ -105,6 +105,12 @@ function DoButtonAction (action) {
 			CreateNewLevel();
 			ShowMenu("edit_level");
 		break;
+
+		case "create_area":
+			CreateNewArea();
+		break;
+		case "test_as_player":
+		break;
 	}
 }
 

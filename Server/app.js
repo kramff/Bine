@@ -66,6 +66,9 @@ io.on("connection", function(socket) {
 	this.curSession = undefined;
 	this.roomName = undefined;
 
+	this.inLevel = false;
+	this.curLevel = undefined;
+
 	socket.on("disconnect", function () {
 		socket.broadcast.emit("disconnection", {"id": socket.id});
 		// RemovePlayer({"id": socket.id});
@@ -143,6 +146,19 @@ io.on("connection", function(socket) {
 	socket.on("createNewLevel", function (data) {
 		if (this.inSession)
 		{
+			var levelID = this.curSession.AddLevel();
+			this.inLevel = true;
+			this.curLevel = levelID;
+			io.to(this.roomName).emit("newLevel", levelID);
+			socket.emit("enterLevel", levelID);
+		}
+	});
+	socket.on("createNewArea", function (data) {
+		if (this.inSession && this.inLevel)
+		{
+			var areaID = this.curSession.AddArea(this.curLevel, {x: 0, y: 0, z: 0, xSize: 1, ySize: 1, zSize: 1})
+
+
 			var levelID = this.curSession.AddLevel();
 			//... What to do here
 			io.to(this.roomName).emit("newLevel", levelID);
