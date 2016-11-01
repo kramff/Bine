@@ -99,7 +99,7 @@
 			this.extra = extra;
 
 			// style: {color, border, background}
-			this.style = areaStyle
+			this.style = style;
 
 			this.rules = rules;
 			this.templates = templates;
@@ -177,7 +177,8 @@
 			for (var i = 0; i < this.areaData.areas.length; i++)
 			{
 				var areaData = this.areaData.areas[i];
-				var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize, true, areaData.map);
+				var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize,
+					areaData.map, areaData.extra, areaData.style, areaData.rules, areaData.templates);
 				areas.push(newArea);
 				drawObjects.push(newArea);
 			}
@@ -297,14 +298,14 @@
 			var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize);
 			level.areas.push(newArea);
 			level.drawObjects.push(newArea);
-			return newArea;
+			return newArea.id;
 		};
 		Session.prototype.AddAreaWithID = function(levelID, areaData, areaID) {
 			var level = this.GetLevelByID(levelID);
 			var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize);
 			level.areas.push(newArea);
 			level.drawObjects.push(newArea);
-			return newArea;
+			return newArea.id;
 		};
 		Session.prototype.GetAreaByID = function(levelID, areaID) {
 			var level = this.GetLevelByID(levelID);
