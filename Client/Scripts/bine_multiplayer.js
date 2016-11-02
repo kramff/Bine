@@ -131,6 +131,11 @@ function InitSocketConnection (argument) {
 			ReceiveEnterLevel(data);
 		});
 
+		socket.on("newArea", function (data) {
+			// Create new area
+			ReceiveCreateArea(data);
+		});
+
 		
 
 		MULTI_ON = true;
@@ -189,13 +194,20 @@ function ReceiveChatMessage (message) {
 }
 function ReceiveTileChange (tileChange) {
 	// var area = GetAreaByName(tileChange.name);
-	ActualEditTile(tileChange.editX, tileChange.editY, tileChange.editZ, tileChange.tile)
+	// ActualEditTile(tileChange.editX, tileChange.editY, tileChange.editZ, tileChange.tile)
+	var levelID = tileChange.levelID;
+	var areaID = tileChange.areaID;
+	var tileData = tileChange.tileData;
+	curSession.EditTile(levelID, areaID, tileData);
 }
-function ReceiveCreateArea (createArea) {
-	ActualCreateArea(createArea.x, createArea.y, createArea.z, createArea.xSize, createArea.ySize, createArea.zSize);
+function ReceiveCreateArea (createAreaInLevel) {
+	var areaData = createAreaInLevel.areaData
+	var levelID = createAreaInLevel.levelID;
+	// ActualCreateArea(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize);
+	curSession.AddAreaWithID(levelID, areaData, areaData.id);
 }
 function ReceiveRemoveArea (removeArea) {
-	ActualRemoveAreaAt(removeArea.x, removeArea.y, removeArea.z);
+	// ActualRemoveAreaAt(removeArea.x, removeArea.y, removeArea.z);
 }
 function ReceiveCreateLevel (levelID) {
 	curSession.AddLevelWithID(levelID);

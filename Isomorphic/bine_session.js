@@ -303,6 +303,7 @@
 		Session.prototype.AddAreaWithID = function(levelID, areaData, areaID) {
 			var level = this.GetLevelByID(levelID);
 			var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize);
+			newArea.id = areaID;
 			level.areas.push(newArea);
 			level.drawObjects.push(newArea);
 			return newArea.id;
@@ -317,6 +318,26 @@
 			{
 				return result[0];
 			}
+		};
+		Session.prototype.ExportArea = function(levelID, areaID) {
+			var area = GetAreaByID(levelID, areaID);
+			var areaDataObj = {
+				x: area.x,
+				y: area.y,
+				z: area.z,
+				xSize: area.xSize,
+				ySize: area.ySize,
+				zSize: area.zSize,
+				map: area.map,
+				rules: 0,
+			};
+			return JSON.stringify(areaDataObj);
+		};
+
+		Session.prototype.EditTile = function(levelID, areaID, tileData) {
+			var area = GetAreaByID(levelID, areaID);
+			area.map[tileData.x][tileData.y][tileData.z] = tileData.tile;
+			// area.extra[tileData.x][tileData.y][tileData.z] = tileData.extra;
 		};
 
 		Session.prototype.CreatePlayerEntity = function (levelID) {

@@ -150,9 +150,9 @@ io.on("connection", function(socket) {
 			this.inLevel = true;
 			this.curLevel = levelID;
 			// io.to(this.roomName).emit("newLevel", levelID);
-			var levelData = this.curSession.levelSerialize(levelID);
+			var levelData = this.curSession.ExportLevel(levelID);
 			io.to(this.roomName).emit("newLevel", levelData)
-			socket.emit("enterLevel", levelda);
+			socket.emit("enterLevel", levelID);
 		}
 	});
 	socket.on("createNewArea", function (data) {
@@ -162,13 +162,12 @@ io.on("connection", function(socket) {
 
 
 			// var levelID = this.curSession.AddLevel();
-			//... What to do here
+			// ... What to do here
 			// io.to(this.roomName).emit("newLevel", levelID);
 			// socket.emit("enterLevel", levelID);
 
-			var areaData = this.curSession.areaSerialize(curLevel, areaID);
-			if.to(this.roomName).emit("newArea", areaData);
-			console.log(areaID);
+			var areaData = this.curSession.ExportArea(curLevel, areaID);
+			io.to(this.roomName).emit("newArea", {levelID: this.curLevel, areaData: areaData});
 		}
 	});
 
