@@ -16,6 +16,7 @@
 	var Session = (function () {
 		var entityIDCounter = 0;
 		function Entity (x, y, z, style, settings, rules, templates) {
+			this.type = "Entity";
 			entityIDCounter ++;
 			this.id = entityIDCounter;
 
@@ -78,9 +79,19 @@
 				}
 			}
 		}
+		Entity.prototype.GetX = function() {
+			return this.x + (this.xMov * this.moveTime / this.moveDuration);
+		};
+		Entity.prototype.GetY = function() {
+			return this.y + (this.yMov * this.moveTime / this.moveDuration);
+		};
+		Entity.prototype.GetZ = function() {
+			return this.z + (this.zMov * this.moveTime / this.moveDuration);
+		};
 
 		var areaIDCounter = 0;
 		function Area (x, y, z, xSize, ySize, zSize, settings, map, extra, style, rules, templates) {
+			this.type = "Area";
 			areaIDCounter ++;
 			this.id = areaIDCounter;
 
@@ -137,8 +148,20 @@
 
 			// Simulations
 		}
+		Area.prototype.GetX = function() {
+			return this.x + (this.xMov * this.moveTime / this.moveDuration);
+		};
+		Area.prototype.GetY = function() {
+			return this.y + (this.yMov * this.moveTime / this.moveDuration);
+		};
+		Area.prototype.GetZ = function() {
+			return this.z + (this.zMov * this.moveTime / this.moveDuration);
+		};
+
+
 		var levelIDCounter = 0;
 		function Level (name, areaData, entityData) {
+			this.type = "Level";
 			levelIDCounter ++;
 			this.id = levelIDCounter;
 
@@ -224,9 +247,11 @@
 					levelData.entities.push(entityDataObj)
 				}
 			}
-			return JSON.stringify(levelData);
+			return levelData;
+			// return JSON.stringify(levelData);
 		}
 		var Session = function (name, worldData) {
+			this.type = "Session";
 			// name: string
 			this.name = name;
 
@@ -267,7 +292,12 @@
 				var level = this.levels[i];
 				exportData.levelDatas.push(level.ExportLevel());
 			}
-			return JSON.stringify(exportData);
+			// return JSON.stringify(exportData);
+			return exportData;
+		}
+		Session.prototype.ExportLevel = function (levelID) {
+			var level = this.GetLevelByID(levelID);
+			return level.ExportLevel();
 		}
 		Session.prototype.AddLevel = function () {
 			// 
@@ -302,6 +332,8 @@
 		};
 		Session.prototype.AddAreaWithID = function(levelID, areaData, areaID) {
 			var level = this.GetLevelByID(levelID);
+			if (!level) throw "no level with id " + levelID;
+
 			var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize);
 			newArea.id = areaID;
 			level.areas.push(newArea);
@@ -320,7 +352,7 @@
 			}
 		};
 		Session.prototype.ExportArea = function(levelID, areaID) {
-			var area = GetAreaByID(levelID, areaID);
+			var area = this.GetAreaByID(levelID, areaID);
 			var areaDataObj = {
 				x: area.x,
 				y: area.y,
@@ -331,7 +363,8 @@
 				map: area.map,
 				rules: 0,
 			};
-			return JSON.stringify(areaDataObj);
+			// return JSON.stringify(areaDataObj);
+			return areaDataObj;
 		};
 
 		Session.prototype.EditTile = function(levelID, areaID, tileData) {

@@ -152,10 +152,11 @@ function InitSocketConnection (argument) {
 var lastData = undefined;
 //Functions to apply incoming data to game state
 function ReceiveWorldData (worldData) {
-	lastData = JSON.parse(worldData);
+	lastData = worldData;
 	// Import the world etc...
 	inSession = true;
-	curSession = new Session("The Session", lastData);
+	// curSession = new Session("The Session", JSON.parse(worldData));
+	curSession = new Session("The Session", worldData);
 }
 function UpdatePlayer (playerData) {
 	for (var i = 0; i < playerArray.length; i++)
@@ -209,7 +210,8 @@ function ReceiveCreateArea (createAreaInLevel) {
 function ReceiveRemoveArea (removeArea) {
 	// ActualRemoveAreaAt(removeArea.x, removeArea.y, removeArea.z);
 }
-function ReceiveCreateLevel (levelID) {
+function ReceiveCreateLevel (newLevelData) {
+	var levelID = newLevelData.levelID;
 	curSession.AddLevelWithID(levelID);
 }
 function ReceiveEnterLevel (levelID) {

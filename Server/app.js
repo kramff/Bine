@@ -133,7 +133,7 @@ io.on("connection", function(socket) {
 		// data - id of session to join
 		var session = GetSessionByID(data);
 		// Send world data
-		socket.emit("worldData", session.ExportWorld())
+		socket.emit("worldData", session.ExportWorld());
 		// Add player to session
 		// session.CreatePlayerEntity();
 
@@ -151,7 +151,7 @@ io.on("connection", function(socket) {
 			this.curLevel = levelID;
 			// io.to(this.roomName).emit("newLevel", levelID);
 			var levelData = this.curSession.ExportLevel(levelID);
-			io.to(this.roomName).emit("newLevel", levelData)
+			io.to(this.roomName).emit("newLevel", {levelID: levelID, levelData: levelData})
 			socket.emit("enterLevel", levelID);
 		}
 	});
@@ -160,13 +160,7 @@ io.on("connection", function(socket) {
 		{
 			var areaID = this.curSession.AddArea(this.curLevel, {x: 0, y: 0, z: 0, xSize: 1, ySize: 1, zSize: 1})
 
-
-			// var levelID = this.curSession.AddLevel();
-			// ... What to do here
-			// io.to(this.roomName).emit("newLevel", levelID);
-			// socket.emit("enterLevel", levelID);
-
-			var areaData = this.curSession.ExportArea(curLevel, areaID);
+			var areaData = this.curSession.ExportArea(this.curLevel, areaID);
 			io.to(this.roomName).emit("newArea", {levelID: this.curLevel, areaData: areaData});
 		}
 	});
