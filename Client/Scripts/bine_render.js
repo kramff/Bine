@@ -208,7 +208,8 @@ function DrawDObjZ (dObj, z, drawSideTiles) {
 		}
 		else
 		{
-			DrawNPlayer(dObj);
+			// DrawNPlayer(dObj);
+			DrawEntity(dObj)
 		}
 	}
 }
@@ -227,7 +228,8 @@ function DrawEntity (entity) {
 		R.ctx.save();
 		R.ctx.strokeStyle = "#80FFFF";
 		R.ctx.fillStyle = "#208080";
-		if (editorActive && character === player)
+		// if (editorActive && character === player)
+		if (false)
 		{
 			//Editor player: transparent, move with camera when middle clicking
 			R.ctx.globalAlpha = 0.5;
@@ -237,7 +239,8 @@ function DrawEntity (entity) {
 				y = R.CANVAS_HALF_HEIGHT - scale / 2;
 			}
 		}
-		if (character !== player)
+		// if (character !== player)
+		if (true)
 		{
 			R.ctx.strokeStyle = "#80FF80";
 			R.ctx.fillStyle = "#208020";
@@ -359,7 +362,8 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 			doDraw = false;
 		break;
 		case DISAPPEAR_BLOCK:
-			if (!IsNear(i, j, k, player.x, player.y, player.z, 1))
+			// if (!IsNear(i, j, k, player.x, player.y, player.z, 1))
+			if (Math.random() > 0.5)
 			{
 				extra.opacity = Math.min(1, extra.opacity + 0.07);
 			}
@@ -382,7 +386,8 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 			}
 		break;
 		case APPEAR_BLOCK:
-			if (IsNear(i, j, k, player.x, player.y, player.z, 1))
+			// if (IsNear(i, j, k, player.x, player.y, player.z, 1))
+			if (Math.random() > 0.5)
 			{
 				extra.opacity = Math.min(1, extra.opacity + 0.07);
 			}
@@ -539,6 +544,32 @@ function DrawTileSides (x, y, scale, x2, y2, scale2, realX, realY, realZ) {
 		R.ctx.fill();
 		R.ctx.stroke();
 	}
+}
+
+function DrawAreaEdges (area, scale, z) {
+	var x0 = scale * (0 + area.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var x1 = scale * (area.xSize + area.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var y0 = scale * (0 + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	var y1 = scale * (area.ySize + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	R.ctx.save();
+	// if (z === player.z - 1)
+	if (false)
+	{
+		R.ctx.fillStyle = "#000000";
+		R.ctx.globalAlpha = 0.9;
+		R.ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+	}
+	// R.ctx.strokeStyle = areaColors[areas.indexOf(area)];
+	R.ctx.strokeStyle = "#FFFFFF";
+	R.ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+	// if (z === player.z)
+	if (false)
+	{
+		R.ctx.fillStyle = "#FFFFFF";
+		R.ctx.globalAlpha = 0.2;
+		R.ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+	}
+	R.ctx.restore();
 }
 
 ////////////////////////// OLD STUFF ////////////////////////// OLD STUFF ////////////////////////// OLD STUFF //////////////////////////
