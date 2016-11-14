@@ -1,4 +1,5 @@
 // Server for Bine
+// Multiplayer level editor project
 // Copyright Mark Foster 2015-2016
 
 console.log("starting server \\(^.^)/");
