@@ -48,9 +48,9 @@ var inSession = false;
 var curSession = undefined;
 
 var inLevel = false;
-var curLevelID = undefined;
+var curLevel = undefined;
 
-var editorActive = false;
+var editorActive = true;
 
 function Init () {
 	LoadIsoScripts();
@@ -60,6 +60,8 @@ function Init () {
 	gameReady = true;
 	mainCanvas = document.getElementById("canvas");
 
+	window.onresize = ResizeFunction;
+	ResizeFunction();
 
 	// Old Shit
 	//window.requestAnimationFrame(Update);
@@ -83,6 +85,11 @@ function Init () {
 	// FillSessionBox([{id: "123", name: "Test Session", mode: "play", worldName: "test world", playerCount: 10}])
 }
 
+function ResizeFunction () {
+	mainCanvas.width = window.innerWidth;
+	mainCanvas.height = window.innerHeight;
+}
+
 // This is run once all iso scripts are loaded
 function GameInit () {
 
@@ -96,16 +103,17 @@ function GameInit () {
 	// console.log(playerEntity);
 
 	window.requestAnimationFrame(MainUpdate);
-
-
 }
 
+var frameCounter = 0;
 function MainUpdate () {
 	window.requestAnimationFrame(MainUpdate);
 
-	if (inSession & curSession !== undefined && inLevel && curLevelID !== undefined)
+	frameCounter ++;
+
+	if (inSession & curSession !== undefined && inLevel && curLevel !== undefined)
 	{
 		// Render frame
-		RenderLevel(mainCanvas, curSession, curLevelID, 0, 0, 0);
+		RenderLevel(mainCanvas, curSession, curLevel, 3, 3, Math.sin(frameCounter / 100));
 	}
 }

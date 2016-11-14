@@ -14,24 +14,19 @@
 	}
 
 	var Session = (function () {
-		var entityIDCounter = 0;
-		function Entity (x, y, z, style, settings, rules, templates) {
+		// var entityIDCounter = 0;
+		//x, y, z, style, settings, rules, templates
+		function Entity (entityData) {
 			this.type = "Entity";
-			entityIDCounter ++;
-			this.id = entityIDCounter;
 
-			this.x = x;
-			this.y = y;
-			this.z = z;
-
-			// style: {color, border}
-			this.style = style;
-
-			// settings: {gravity, solid}
-			this.settings = settings;
-
-			this.rules = rules;
-			this.templates = templates;
+			this.id = entityData.id
+			this.x = entityData.x;
+			this.y = entityData.y;
+			this.z = entityData.z;
+			this.style = entityData.style;
+			this.settings = entityData.settings;
+			this.rules = entityData.rules;
+			this.templates = entityData.templates;
 
 			this.xMov = 0;
 			this.yMov = 0;
@@ -41,12 +36,19 @@
 
 			this.moveDirections = {up: false, down: false, left: false, right: false};
 		}
-		Entity.prototype.SetMoveDirections = function (up, down, left, right) {
-			this.moveDirections.up = up;
-			this.moveDirections.down = down;
-			this.moveDirections.left = left;
-			this.moveDirections.right = right;
-		}
+		Entity.prototype.Export = function() {
+			var entityData = {
+				id: this.id,
+				x: this.x,
+				y: this.y,
+				z: this.z,
+				style: this.style,
+				settings: this.settings,
+				rules: this.rules,
+				templates: this.templates,
+			};
+			return entityData;
+		};
 		Entity.prototype.Update = function (levelRef) {
 			// Update an entity:
 			// - Input (if player-controlled)
@@ -88,32 +90,34 @@
 		Entity.prototype.GetZ = function() {
 			return this.z + (this.zMov * this.moveTime / this.moveDuration);
 		};
+		Entity.prototype.SetMoveDirections = function (up, down, left, right) {
+			this.moveDirections.up = up;
+			this.moveDirections.down = down;
+			this.moveDirections.left = left;
+			this.moveDirections.right = right;
+		}
 
-		var areaIDCounter = 0;
-		function Area (x, y, z, xSize, ySize, zSize, settings, map, extra, style, rules, templates) {
+		// var areaIDCounter = 0;
+		//x, y, z, xSize, ySize, zSize, settings, map, extra, style, rules, templates
+		function Area (areaData) {
 			this.type = "Area";
-			areaIDCounter ++;
-			this.id = areaIDCounter;
 
-			this.x = x;
-			this.y = y;
-			this.z = z;
+			this.id = areaData.id;
+
+			this.x = areaData.x;
+			this.y = areaData.y;
+			this.z = areaData.z;
 			
-			this.xSize = xSize;
-			this.ySize = ySize;
-			this.zSize = zSize;
+			this.xSize = areaData.xSize;
+			this.ySize = areaData.ySize;
+			this.zSize = areaData.zSize;
 
-			// settings: {simulate}
-			this.settings = settings;
-
-			this.map = map;
-			this.extra = extra;
-
-			// style: {color, border, background}
-			this.style = style;
-
-			this.rules = rules;
-			this.templates = templates;
+			this.settings = areaData.settings;
+			this.map = areaData.map;
+			this.extra = areaData.extra;
+			this.style = areaData.style;
+			this.rules = areaData.rules;
+			this.templates = areaData.templates;
 
 			this.xMov = 0;
 			this.yMov = 0;
@@ -121,6 +125,24 @@
 			this.moveTime = 0;
 			this.moveDuration = 10;
 		}
+		Area.prototype.Export = function() {
+			var areaData = {
+				id: this.id,
+				x: this.x,
+				y: this.y,
+				z: this.z,
+				xSize: this.xSize,
+				ySize: this.ySize,
+				zSize: this.zSize,
+				settings: this.settings,
+				map: this.map,
+				extra: this.extra,
+				style: this.style,
+				rules: this.rules,
+				templates: this.templates,
+			};
+			return areaData;
+		};
 		Area.prototype.Update = function (levelRef) {
 			// Update an area:
 			// - Rules
@@ -158,25 +180,54 @@
 			return this.z + (this.zMov * this.moveTime / this.moveDuration);
 		};
 
-
-		var levelIDCounter = 0;
-		function Level (name, areaData, entityData) {
+		function Level (levelData) {
 			this.type = "Level";
-			levelIDCounter ++;
-			this.id = levelIDCounter;
 
-			this.name = name;
-
-			this.areaData = areaData;
-			this.entityData = entityData;
-
-			this.areas = [];
-			this.areaCounter = 0;
-			this.entities = [];
-			this.entityCounter = 0;
+			this.id = levelData.id
+			this.name = levelData.name;
 
 			this.drawObjects = [];
+
+			// Prep areas
+			this.areas = [];
+			for (var i = 0; i < levelData.areaDatas.length; i++) {
+				var areaData = levelData.areaDatas[i];
+				var newArea = new Area(areaData);
+				this.areas.push(newArea);
+				drawObjects.push(newArea);
+			}
+			this.areaCounter = this.areas.length;
+
+			// Prep entities
+			this.entities = [];
+			for (var i = 0; i < levelData.entityDatas.length; i++) {
+				var entityData = levelData.entityDatas[i];
+				var newEntity = new Entity(entityData);
+				this.entities.push(newEntity);
+				drawObjects.push(newEntity)
+			}
+			this.entityCounter = this.entities.length;
+
 		}
+		Level.prototype.Export = function() {
+			var areaDatas = [];
+			for (var i = 0; i < this.areas.length; i++)
+			{
+				areaDatas.push(this.areas[i].Export());
+			}
+			var entityDatas = [];
+			for (var i = 0; i < this.entities.length; i++)
+			{
+				entityDatas.push(this.entities[i].Export());
+			}
+			var levelData = {
+				id: this.id,
+				name: this.name,
+				areaDatas: areaDatas,
+				entityDatas: entityDatas,
+			};
+			return levelData;
+		};
 		Level.prototype.Update = function () {
 			for (var i = 0; i < this.entities.length; i++)
 			{
@@ -191,11 +242,27 @@
 				area.Update(this);
 			}
 		}
-		Level.prototype.Clear = function () {
+		Level.prototype.AddArea = function(areaData) {
+			var newArea = new Area(areaData);
+			this.areas.push(newArea);
+			this.drawObjects.push(newArea);
+			return newArea;
+		};
+		Level.prototype.GetAreaByID = function(areaID) {
+			var id = Number(areaID);
+			var result = this.areas.filter(function (area) {
+				return area.id === id;
+			});
+			if (result[0] !== undefined)
+			{
+				return result[0];
+			}
+		};
+		/*Level.prototype.Clear = function () {
 			this.areas = [];
 			this.entities = [];
-		}
-		Level.prototype.Initalize = function () {
+		}*/
+		/*Level.prototype.Initalize = function () {
 			this.Clear();
 			for (var i = 0; i < this.areaData.areas.length; i++)
 			{
@@ -212,8 +279,8 @@
 				entities.push(newEntity);
 				drawObjects.push(newEntity)
 			}
-		}
-		Level.prototype.ExportLevel = function () {
+		}*/
+		/*Level.prototype.ExportLevel = function () {
 			var levelData = {areas:[], entities:[], player:{x: 0, y: 0, z: 0}};
 			for (var i = 0; i < this.areas.length; i++)
 			{
@@ -249,8 +316,8 @@
 			}
 			return levelData;
 			// return JSON.stringify(levelData);
-		}
-		var Session = function (name, worldData) {
+		}*/
+		function Session (name, worldData) {
 			this.type = "Session";
 			// name: string
 			this.name = name;
@@ -258,12 +325,14 @@
 			// worldData: {levelDatas, tileData, worldRules}
 
 			// levelDatas: [{name: string, data: string}, ...]
-			this.levelDatas = worldData.levelDatas;
+			// this.levelDatas = worldData.levelDatas;
 			this.levels = [];
-			for (var i = 0; i < this.levelDatas.length; i++) {
-				var lData = this.levelDatas[i];
-				this.levels[i] = new Level(lData.name, lData.areaData, lData.entityData);
+			for (var i = 0; i < worldData.levelDatas.length; i++) {
+				var levelData = worldData.levelDatas[i];
+				var newLevel = new Level(levelData);
+				this.levels.push(newLevel);
 			}
+			this.levelCounter = this.levels.length;
 			// tileData: [{name: string, solid: boolean, rules: [rules...]}, ...]
 			this.tileData = worldData.tileData;
 
@@ -286,32 +355,60 @@
 
 		}
 		Session.prototype.ExportWorld = function () {
-			var exportData = {levelDatas: [], tileData: this.tileData, worldRules: this.worldRules};
+			var levelDatas = [];
 			for (var i = 0; i < this.levels.length; i++)
 			{
 				var level = this.levels[i];
-				exportData.levelDatas.push(level.ExportLevel());
+				levelDatas.push(level.Export());
 			}
-			// return JSON.stringify(exportData);
-			return exportData;
+			var worldData = {
+				levelDatas: levelDatas,
+				tileData: this.tileData,
+				worldRules: this.worldRules,
+				entityTemplates: this.entityTemplates,
+				areaTemplates: this.areaTemplates,
+				itemData: this.itemData,
+				particleData: this.particleData,
+			};
+			return worldData;
 		}
-		Session.prototype.ExportLevel = function (levelID) {
+		/*Session.prototype.ExportLevel = function (levelID) {
 			var level = this.GetLevelByID(levelID);
 			return level.ExportLevel();
-		}
-		Session.prototype.AddLevel = function () {
-			// 
-			var newLevel = new Level("level name", [], [])
+		}*/
+		Session.prototype.AddLevel = function(levelData) {
+			//var newArea = new Area(areaData);
+			//this.areas.push(newArea);
+			//this.drawObjects.push(newArea);
+			//return newArea;
+			var newLevel = new Level(levelData);
 			this.levels.push(newLevel);
-			return newLevel.id;
+			return newLevel;
+		};
+		/*Session.prototype.AddLevel = function () {
+			levelIDCounter ++;
+			var blankLevelData = {
+				name: "level name",
+				id: levelIDCounter,
+				entityDatas: [],
+				areaDatas: [],
+			}
+			var newLevel = new Level(blankLevelData);
+			this.levels.push(newLevel);
+			return newLevel;
 		}
 		Session.prototype.AddLevelWithID = function (levelID) {
-			// 
-			var newLevel = new Level("level name", [], [])
+			// levelIDCounter ++;
+			var blankLevelData = {
+				name: "level name",
+				id: levelID,
+				entityDatas: [],
+				areaDatas: [],
+			}
+			var newLevel = new Level(blankLevelData);
 			this.levels.push(newLevel);
-			newLevel.id = levelID;
-			return newLevel.id;
-		}
+			return newLevel;
+		}*/
 		Session.prototype.GetLevelByID = function (id) {
 			id = Number(id);
 			var result = this.levels.filter(function (level) {
@@ -321,37 +418,42 @@
 			{
 				return result[0];
 			}
+			else
+			{
+				console.log("Couldn't find level with id: " + id);
+			}
 		}
 
-		Session.prototype.AddArea = function(levelID, areaData) {
-			var level = this.GetLevelByID(levelID);
-			var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize);
-			level.areas.push(newArea);
-			level.drawObjects.push(newArea);
-			return newArea.id;
-		};
-		Session.prototype.AddAreaWithID = function(levelID, areaData, areaID) {
+		// Session.prototype.AddArea = function(levelID, areaData) {
+		// 	var level = this.GetLevelByID(levelID);
+		// 	console.log(level);
+		// 	var newArea = new Area(areaData);
+		// 	level.areas.push(newArea);
+		// 	level.drawObjects.push(newArea);
+		// 	return newArea.id;
+		// };
+		/*Session.prototype.AddAreaWithID = function(levelID, areaData, areaID) {
 			var level = this.GetLevelByID(levelID);
 			if (!level) throw "no level with id " + levelID;
 
-			var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize);
+			var newArea = new Area(areaData);
 			newArea.id = areaID;
 			level.areas.push(newArea);
 			level.drawObjects.push(newArea);
 			return newArea.id;
-		};
-		Session.prototype.GetAreaByID = function(levelID, areaID) {
-			var level = this.GetLevelByID(levelID);
-			var id = Number(areaID);
-			var result = level.areas.filter(function (area) {
-				return area.id === id;
-			});
-			if (result[0] !== undefined)
-			{
-				return result[0];
-			}
-		};
-		Session.prototype.ExportArea = function(levelID, areaID) {
+		};*/
+		// Session.prototype.GetAreaByID = function(levelID, areaID) {
+		// 	var level = this.GetLevelByID(levelID);
+		// 	var id = Number(areaID);
+		// 	var result = level.areas.filter(function (area) {
+		// 		return area.id === id;
+		// 	});
+		// 	if (result[0] !== undefined)
+		// 	{
+		// 		return result[0];
+		// 	}
+		// };
+		/*Session.prototype.ExportArea = function(levelID, areaID) {
 			var area = this.GetAreaByID(levelID, areaID);
 			var areaDataObj = {
 				x: area.x,
@@ -362,13 +464,14 @@
 				zSize: area.zSize,
 				map: area.map,
 				rules: 0,
-			};
+			};31
 			// return JSON.stringify(areaDataObj);
 			return areaDataObj;
-		};
+		};*/
 
 		Session.prototype.EditTile = function(levelID, areaID, tileData) {
-			var area = GetAreaByID(levelID, areaID);
+			var level = this.GetLevelByID(levelID);
+			var area = level.GetAreaByID(levelID, areaID);
 			area.map[tileData.x][tileData.y][tileData.z] = tileData.tile;
 			// area.extra[tileData.x][tileData.y][tileData.z] = tileData.extra;
 		};

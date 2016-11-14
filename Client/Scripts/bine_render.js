@@ -7,7 +7,7 @@ var R = {
 	canvas: undefined,
 	ctx: undefined,
 	session: undefined,
-	levelID: undefined,
+	level: undefined,
 	cameraX: undefined,
 	cameraY: undefined,
 	cameraZ: undefined,
@@ -21,7 +21,7 @@ var R = {
 	TILE_SIZE: 5.4,
 }
 
-function RenderLevel (canvas, session, levelID, cameraX, cameraY, cameraZ) {
+function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ) {
 	// Set up render object
 	if (R.canvas !== canvas)
 	{
@@ -29,7 +29,7 @@ function RenderLevel (canvas, session, levelID, cameraX, cameraY, cameraZ) {
 		R.ctx = R.canvas.getContext("2d");
 	}
 	R.session = session;
-	R.levelID = levelID;
+	R.level = level;
 	R.cameraX = cameraX
 	R.cameraY = cameraY;
 	R.cameraZ = cameraZ
@@ -47,78 +47,69 @@ function RenderLevel (canvas, session, levelID, cameraX, cameraY, cameraZ) {
 	R.ctx.fillStyle = "#101010";
 	
 	// Get level to draw and draw all objects in that level 
-	for (var levelI = 0; levelI < R.session.levels.length; levelI++) {
-		var level = R.session.levels[levelI];
-		if (level.id === levelID)
+	var drawObjects = R.level.drawObjects;
+	drawObjects.forEach(SetDrawZ);
+	drawObjects.sort(DrawObjSortFunc);
+
+	var bottomZ = 1;
+	var topZ = -1;
+	var bottomI = 0;
+
+	if (drawObjects.length > 0)
+	{
+		bottomZ = drawObjects[0].drawZ - 1;
+		topZ = drawObjects[drawObjects.length - 1].drawZ;
+	}
+	for (var i = 0; i < drawObjects.length; i++)
+	{
+		if (drawObjects[i].type === "Area")
 		{
-			var drawObjects = level.drawObjects;
-			drawObjects.forEach(SetDrawZ);
-			drawObjects.sort(DrawObjSortFunc);
+			//Only areas can have a higher z than the last object
+			topZ = Math.max(topZ, drawObjects[i].drawZ + drawObjects[i].zSize);
+		}
+	}
+	for (var z = bottomZ; z <= topZ + 1; z++)
+	{
+		var i = bottomI;
+		var currentObject = drawObjects[i];
 
-			var bottomZ = 1;
-			var topZ = -1;
-			var bottomI = 0;
-
-			if (drawObjects.length > 0)
+		//Loop through objects, stopping when no more objects or next object is above currentZ
+		while (currentObject !== undefined && currentObject.drawZ - 1 <= z)
+		{
+			if (DObjInZ(currentObject, z))
 			{
-				bottomZ = drawObjects[0].drawZ - 1;
-				topZ = drawObjects[drawObjects.length - 1].drawZ;
+				// Draw the tops of cubes
+				DrawDObjZ(currentObject, z, false);
 			}
-			for (var i = 0; i < drawObjects.length; i++)
+			if (DObjInZ(currentObject, z + 1))
 			{
-				if (drawObjects[i].type === "Area")
+				// Draw the sides of cubes
+				DrawDObjZ(currentObject, z + 1, true);
+			}
+
+			//move bottomI up when possible
+			if (i === bottomI)
+			{
+				if (currentObject.type === "Entity")
 				{
-					//Only areas can have a higher z than the last object
-					topZ = Math.max(topZ, drawObjects[i].drawZ + drawObjects[i].zSize);
+					if (z > currentObject.drawZ)
+					{
+						bottomI ++;
+					}
+				}
+				else if (currentObject.type === "Area")
+				{
+					if (z > currentObject.drawZ + currentObject.zSize)
+					{
+						bottomI ++;
+					}
 				}
 			}
-			for (var z = bottomZ; z <= topZ + 1; z++)
-			{
-				var i = bottomI;
-				var currentObject = drawObjects[i];
-
-				//Loop through objects, stopping when no more objects or next object is above currentZ
-				while (currentObject !== undefined && currentObject.drawZ - 1 <= z)
-				{
-					if (DObjInZ(currentObject, z))
-					{
-						// Draw the tops of cubes
-						DrawDObjZ(currentObject, z, false);
-					}
-					if (DObjInZ(currentObject, z + 1))
-					{
-						// Draw the sides of cubes
-						DrawDObjZ(currentObject, z + 1, true);
-					}
-
-					//move bottomI up when possible
-					if (i === bottomI)
-					{
-						if (currentObject.type === "Entity")
-						{
-							if (z > currentObject.drawZ)
-							{
-								bottomI ++;
-							}
-						}
-						else if (currentObject.type === "Area")
-						{
-							if (z > currentObject.drawZ + currentObject.zSize)
-							{
-								bottomI ++;
-							}
-						}
-					}
-					
+			
 
 
-					i ++;
-					currentObject = drawObjects[i];
-				}
-			}
-
-
-
+			i ++;
+			currentObject = drawObjects[i];
 		}
 	}
 }

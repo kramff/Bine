@@ -146,22 +146,46 @@ io.on("connection", function(socket) {
 	socket.on("createNewLevel", function (data) {
 		if (this.inSession)
 		{
-			var levelID = this.curSession.AddLevel();
+
+			this.curSession.levelCounter ++;
+			var blankLevelData = {
+				name: "level name",
+				id: this.curSession.levelCounter,
+				entityDatas: [],
+				areaDatas: [],
+			}
+			var newLevel = this.curSession.AddLevel(blankLevelData);
 			this.inLevel = true;
-			this.curLevel = levelID;
+			this.curLevel = newLevel;
 			// io.to(this.roomName).emit("newLevel", levelID);
-			var levelData = this.curSession.ExportLevel(levelID);
-			io.to(this.roomName).emit("newLevel", {levelID: levelID, levelData: levelData})
-			socket.emit("enterLevel", levelID);
+			var levelData = newLevel.Export();
+			io.to(this.roomName).emit("newLevel", levelData)
+			socket.emit("enterLevel", newLevel.id);
 		}
 	});
 	socket.on("createNewArea", function (data) {
 		if (this.inSession && this.inLevel)
 		{
-			var areaID = this.curSession.AddArea(this.curLevel, {x: 0, y: 0, z: 0, xSize: 1, ySize: 1, zSize: 1})
+			this.curLevel.areaCounter ++;
+			var blankAreaData = {
+				id: this.curLevel.areaCounter,
+				x: 0,
+				y: 0,
+				z: 0,
+				xSize: 5,
+				ySize: 5,
+				zSize: 5,
+				settings: [],
+				map: [],
+				extra: [],
+				style: [],
+				rules: [],
+				templates: [],
+			};
+			var area = this.curLevel.AddArea(blankAreaData);
 
-			var areaData = this.curSession.ExportArea(this.curLevel, areaID);
-			io.to(this.roomName).emit("newArea", {levelID: this.curLevel, areaData: areaData});
+			var areaData = area.Export();
+			io.to(this.roomName).emit("newArea", {levelID: this.curLevel.id, areaData: areaData});
 		}
 	});
 
@@ -183,6 +207,7 @@ io.on("connection", function(socket) {
 
 		// Join the socket.io room for that level (?)
 	//});
+	/*
 	socket.on("playerMove", function (data) {
 		// data - new position of player
 		data.id = socket.id;
@@ -217,6 +242,7 @@ io.on("connection", function(socket) {
 		socket.broadcast.emit("removeArea", data);
 		ReceiveRemoveArea(data);
 	});
+	*/
 
 
 });

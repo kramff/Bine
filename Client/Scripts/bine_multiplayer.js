@@ -133,7 +133,7 @@ function InitSocketConnection (argument) {
 
 		socket.on("newArea", function (data) {
 			// Create new area
-			ReceiveCreateArea(data);
+			ReceiveCreateArea(data.levelID, data.areaData);
 		});
 
 		
@@ -157,6 +157,9 @@ function ReceiveWorldData (worldData) {
 	inSession = true;
 	// curSession = new Session("The Session", JSON.parse(worldData));
 	curSession = new Session("The Session", worldData);
+
+	// Update the levelbox to list out the available levels
+	FillLevelBox(curSession.levels);
 }
 function UpdatePlayer (playerData) {
 	for (var i = 0; i < playerArray.length; i++)
@@ -201,22 +204,24 @@ function ReceiveTileChange (tileChange) {
 	var tileData = tileChange.tileData;
 	curSession.EditTile(levelID, areaID, tileData);
 }
-function ReceiveCreateArea (createAreaInLevel) {
-	var areaData = createAreaInLevel.areaData
-	var levelID = createAreaInLevel.levelID;
+function ReceiveCreateArea (levelID, areaData) {
+	// var areaData = createAreaInLevel.areaData
+	// var levelID = createAreaInLevel.levelID;
 	// ActualCreateArea(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize);
-	curSession.AddAreaWithID(levelID, areaData, areaData.id);
+	var level = curSession.GetLevelByID(levelID);
+	level.AddArea(areaData);
 }
 function ReceiveRemoveArea (removeArea) {
 	// ActualRemoveAreaAt(removeArea.x, removeArea.y, removeArea.z);
 }
-function ReceiveCreateLevel (newLevelData) {
-	var levelID = newLevelData.levelID;
-	curSession.AddLevelWithID(levelID);
+function ReceiveCreateLevel (levelData) {
+	// var levelID = newLevelData.id;
+	// curSession.AddLevelWithID(levelID);
+	curSession.AddLevel(levelData);
 }
 function ReceiveEnterLevel (levelID) {
 	inLevel = true;
-	curLevelID = levelID;
+	curLevel = curSession.GetLevelByID(levelID);
 }
 
 // Functions to send data to server

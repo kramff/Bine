@@ -62,6 +62,7 @@ function SetupButtons () {
 	document.body.onselectstart = function () {
 		return false;
 	}
+	// Buttons for going to menus and doing actions
 	var buttons = document.getElementsByClassName("button");
 	for (var i = 0; i < buttons.length; i++) {
 		var button = buttons[i];
@@ -77,6 +78,7 @@ function SetupButtons () {
 			}
 		}
 	}
+	// Enter a session by clicking on it
 	var sessionBox = document.getElementsByClassName("session_box")[0];
 	sessionBox.onclick = function () {
 		if (event.target.classList.contains("session"))
@@ -95,6 +97,9 @@ function SetupButtons () {
 
 function DoButtonAction (action) {
 	switch (action) {
+		default:
+			console.log("No action set up for " + action);
+		break;
 		case "create_session_new_world":
 			HideAllMenus();
 			CreateSessionNewWorld();
@@ -118,6 +123,14 @@ function DoButtonAction (action) {
 // session: id, name, mode, worldName, playerCount
 function FillSessionBox (sessionData) {
 	var sessionBox = document.getElementsByClassName("session_box")[0];
+
+	// Clear out old elements
+	while (sessionBox.firstChild)
+	{
+		sessionBox.removeChild(sessionBox.firstChild);
+	}
+
+	// Create an element for each session
 	for (var i = 0; i < sessionData.length; i++) {
 		var session = sessionData[i];
 		// Main div
@@ -137,13 +150,38 @@ function FillSessionBox (sessionData) {
 // 
 function FillWorldBox (worldData) {
 	var worldBox = document.getElementsByClassName("world_box")[0];
+
+	// Clear out old elements
+	while (worldBox.firstChild)
+	{
+		worldBox.removeChild(worldBox.firstChild);
+	}
+
+	// Create an element for each world
 	for (var i = 0; i < worldData.length; i++) {
 		var world = worldData[i]; 
-		// Main div
+		// Main new div
 		var worldDiv = CreateNewDiv(worldBox, "world", undefined, world.id);
 		// Name
 		CreateNewDiv(worldDiv, "world_name", world.name, undefined);
 		// Level Count
 		CreateNewDiv(worldDiv, "world_level_count", world.levelCount, undefined);
+	}
+}
+
+function FillLevelBox (levelArray) {
+	var levelBox = document.getElementsByClassName("level_box")[0];
+
+	// Clear out old elements
+	while (levelBox.firstChild)
+	{
+		levelBox.removeChild(levelBox.firstChild);
+	}
+
+	// Create an element for each level
+	for (var i = 0; i < levelArray.length; i++) {
+		var level = levelArray[i];
+		// Main new div
+		var levelDiv = CreateNewDiv(levelBox, "level", level.name, level.id);
 	}
 }

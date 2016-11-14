@@ -164,3 +164,20 @@ body {
 .session_player_count {
 	background-image: url(image/page/session_player_count.png);
 }
+
+
+.level_box {
+
+}
+
+.level {
+	padding: 10px;
+	margin: 10px;
+
+	background-color: #404040;
+	border: 1px solid #FFFFFF;
+	font-size: 14px;
+}
+.level:hover {
+	background-color: #202020;
+}
