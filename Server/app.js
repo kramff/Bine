@@ -147,7 +147,6 @@ io.on("connection", function(socket) {
 	socket.on("createNewLevel", function (data) {
 		if (this.inSession)
 		{
-
 			this.curSession.levelCounter ++;
 			var blankLevelData = {
 				name: "level name",
@@ -162,6 +161,15 @@ io.on("connection", function(socket) {
 			var levelData = newLevel.Export();
 			io.to(this.roomName).emit("newLevel", levelData)
 			socket.emit("enterLevel", newLevel.id);
+		}
+	});
+	socket.on("joinLevel", function (data) {
+		if (this.inSession)
+		{
+			var joinedLevel = this.curSession.GetLevelByID(data);
+			socket.emit("enterLevel", joinedLevel.id);
+			this.inLevel = true;
+			this.curLevel = joinedLevel;
 		}
 	});
 	socket.on("createNewArea", function (data) {
@@ -249,20 +257,25 @@ io.on("connection", function(socket) {
 });
 
 
-// ░░░░░░░░░░░░▄▐ 
-// ░░░░░░▄▄▄░░▄██▄ 
-// ░░░░░▐▀█▀▌░░░░▀█▄ 
-// ░░░░░▐█▄█▌░░░░░░▀█▄ 
-// ░░░░░░▀▄▀░░░▄▄▄▄▄▀▀ 
-// ░░░░▄▄▄██▀▀▀▀ 
-// ░░░█▀▄▄▄█░▀▀ 
-// ░░░▌░▄▄▄▐▌▀▀▀ 
-// ▄░▐░░░▄▄░█░▀▀ U HAVE BEEN SPOOKED BY THE 
-// ▀█▌░░░▄░▀█▀░▀ 
-// ░░░░░░░▄▄▐▌▄▄ 
-// ░░░░░░░▀███▀█░▄ 
-// ░░░░░░▐▌▀▄▀▄▀▐▄ SPOOKY SKILENTON 
-// ░░░░░░▐▀░░░░░░▐▌ 
-// ░░░░░░█░░░░░░░░█ 
-// ░░░░░▐▌░░░░░░░░░█ 
-// ░░░░░█░░░░░░░░░░▐▌
+if (Math.random() > 0.9)
+{	
+	console.log("\x1b[36m");
+	console.log("░░░░░░░░░░░░▄▐ ");
+	console.log("░░░░░░▄▄▄░░▄██▄ ");
+	console.log("░░░░░▐▀█▀▌░░░░▀█▄ ");
+	console.log("░░░░░▐█▄█▌░░░░░░▀█▄ ");
+	console.log("░░░░░░▀▄▀░░░▄▄▄▄▄▀▀ ");
+	console.log("░░░░▄▄▄██▀▀▀▀ ");
+	console.log("░░░█▀▄▄▄█░▀▀ ");
+	console.log("░░░▌░▄▄▄▐▌▀▀▀ ");
+	console.log("▄░▐░░░▄▄░█░▀▀ U HAVE BEEN SPOOKED BY THE ");
+	console.log("▀█▌░░░▄░▀█▀░▀ ");
+	console.log("░░░░░░░▄▄▐▌▄▄ ");
+	console.log("░░░░░░░▀███▀█░▄ ");
+	console.log("░░░░░░▐▌▀▄▀▄▀▐▄ SPOOKY SKILENTON ");
+	console.log("░░░░░░▐▀░░░░░░▐▌ ");
+	console.log("░░░░░░█░░░░░░░░█ ");
+	console.log("░░░░░▐▌░░░░░░░░░█ ");
+	console.log("░░░░░█░░░░░░░░░░▐▌");
+	console.log('\x1b[0m')
+}

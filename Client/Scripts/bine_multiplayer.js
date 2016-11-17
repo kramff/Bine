@@ -281,6 +281,17 @@ function CreateNewLevel () {
 	}
 }
 
+function JoinLevel (levelID) {
+	if (MULTI_ON)
+	{
+		socket.emit("joinLevel", levelID);
+	}
+	else
+	{
+		//
+	}
+}
+
 function CreateNewArea () {
 	if (MULTI_ON)
 	{

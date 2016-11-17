@@ -194,7 +194,7 @@
 				var areaData = levelData.areaDatas[i];
 				var newArea = new Area(areaData);
 				this.areas.push(newArea);
-				drawObjects.push(newArea);
+				this.drawObjects.push(newArea);
 			}
 			this.areaCounter = this.areas.length;
 
@@ -204,7 +204,7 @@
 				var entityData = levelData.entityDatas[i];
 				var newEntity = new Entity(entityData);
 				this.entities.push(newEntity);
-				drawObjects.push(newEntity)
+				this.drawObjects.push(newEntity)
 			}
 			this.entityCounter = this.entities.length;
 

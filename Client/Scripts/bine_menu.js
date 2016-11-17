@@ -83,13 +83,28 @@ function SetupButtons () {
 	sessionBox.onclick = function () {
 		if (event.target.classList.contains("session"))
 		{
-			var id = event.target.getAttribute("session_id");
-			if (id !== null)
+			var sessionID = event.target.getAttribute("session_id");
+			if (sessionID !== null)
 			{
 				// Join session with this id
-				JoinSession(id);
+				JoinSession(sessionID);
 				HideAllMenus();
 				ShowMenu("edit_world");
+			}
+		}
+	}
+	// Enter a level by clicking on it
+	var levelBox = document.getElementsByClassName("level_box")[0];
+	levelBox.onclick = function () {
+		if (event.target.classList.contains("level"))
+		{
+			var levelID = event.target.getAttribute("level_id");
+			if (levelID !== null)
+			{
+				// Enter level with this id
+				JoinLevel(levelID);
+				HideAllMenus();
+				ShowMenu("edit_level");
 			}
 		}
 	}
@@ -183,5 +198,6 @@ function FillLevelBox (levelArray) {
 		var level = levelArray[i];
 		// Main new div
 		var levelDiv = CreateNewDiv(levelBox, "level", level.name, level.id);
+		levelDiv.setAttribute("level_id", level.id);
 	}
 }
