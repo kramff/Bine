@@ -130,6 +130,10 @@ function DoButtonAction (action) {
 			CreateNewArea();
 		break;
 		case "test_as_player":
+			TestAsPlayer();
+		break;
+		case "exit_level":
+			ExitLevel();
 		break;
 	}
 }

@@ -258,6 +258,22 @@
 				return result[0];
 			}
 		};
+		Level.prototype.AddEntity = function(entityData) {
+			var newEntity = new Entity(entityData);
+			this.entities.push(newEntity);
+			this.drawObjects.push(newEntity);
+			return newEntity;
+		};
+		Level.prototype.GetEntityByID = function(entityID) {
+			var id = Number(entityID);
+			var result = this.entities.filter(function (entity) {
+				return entity.id === id;
+			});
+			if (result[0] !== undefined)
+			{
+				return result[0];
+			}
+		};
 		/*Level.prototype.Clear = function () {
 			this.areas = [];
 			this.entities = [];

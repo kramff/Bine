@@ -197,6 +197,27 @@ io.on("connection", function(socket) {
 			io.to(this.roomName).emit("newArea", {levelID: this.curLevel.id, areaData: areaData});
 		}
 	});
+	socket.on("testAsPlayer", function () {
+		if (this.inSession && this.inLevel)
+		{
+			this.curLevel.entityCounter ++;
+			var newPlayerData = {
+				id: this.curLevel.entityCounter,
+				x: 0,
+				y: 0,
+				z: 0,
+				style: [],
+				settings: [],
+				rules: [],
+				templates: [],
+			}
+			var newPlayer = this.curLevel.AddEntity(newPlayerData);
+		}
+	});
+	socket.on("exitLevel", function () {
+		this.inLevel = false;
+		this.curLevel = undefined;
+	});
 
 	// Automatically when input received from players 
 	// - Send player events (movement, etc)

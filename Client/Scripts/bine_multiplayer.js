@@ -298,3 +298,17 @@ function CreateNewArea () {
 		socket.emit("createNewArea");
 	}
 }
+
+function TestAsPlayer () {
+	if (MULTI_ON)
+	{
+		socket.emit("testAsPlayer");
+	}
+}
+
+function ExitLevel () {
+	if (MULTI_ON)
+	{
+		socket.emit("exitLevel");
+	}
+}
