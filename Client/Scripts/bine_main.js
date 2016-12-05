@@ -114,6 +114,6 @@ function MainUpdate () {
 	if (inSession & curSession !== undefined && inLevel && curLevel !== undefined)
 	{
 		// Render frame
-		RenderLevel(mainCanvas, curSession, curLevel, 3, 3, Math.sin(frameCounter / 100));
+		RenderLevel(mainCanvas, curSession, curLevel, 3, 3, 3 + Math.sin(frameCounter / 100));
 	}
 }

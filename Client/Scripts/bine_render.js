@@ -207,8 +207,8 @@ function DrawDObjZ (dObj, z, drawSideTiles) {
 
 function DrawEntity (entity) {
 	var scale = GetScale(entity.GetZ());
-	var x = scale * (entity.GetX() - xCam) + CANVAS_HALF_WIDTH;
-	var y = scale * (entity.GetY() - yCam) + CANVAS_HALF_HEIGHT;
+	var x = scale * (entity.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var y = scale * (entity.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
 
 	if (scale < 0)
 	{
@@ -250,13 +250,13 @@ function DrawAreaZSlice (area, z) {
 		for (var i = 0; i < area.xSize; i++)
 		{
 			var realX = i + area.GetX();
-			var x = scale * (i + area.GetX() - R.xCam) + R.CANVAS_HALF_WIDTH;
+			var x = scale * (i + area.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
 			if (x > 0 - scale && x < R.CANVAS_WIDTH)
 			{
 				for (var j = 0; j < area.ySize; j++)
 				{
 					var realY = j + area.GetY();
-					var y = scale * (j + area.GetY() - R.yCam) + R.CANVAS_HALF_HEIGHT;
+					var y = scale * (j + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
 					if (y > 0 - scale && y < R.CANVAS_HEIGHT)
 					{	
 						var tile = area.map[i][j][z - area.z];
@@ -299,15 +299,15 @@ function DrawAreaZSliceSideTiles (area, z) {
 		for (var i = 0; i < area.xSize; i++)
 		{
 			var realX = i + area.GetX();
-			var x = scale * (realX - R.xCam) + R.CANVAS_HALF_WIDTH;
-			var x2 = scale2 * (realX - R.xCam) + R.CANVAS_HALF_WIDTH;
+			var x = scale * (realX - R.cameraX) + R.CANVAS_HALF_WIDTH;
+			var x2 = scale2 * (realX - R.cameraX) + R.CANVAS_HALF_WIDTH;
 			if (x2 > 0 - scale2 && x2 < R.CANVAS_WIDTH)
 			{
 				for (var j = 0; j < area.ySize; j++)
 				{
 					var realY = j + area.GetY()
-					var y = scale * (realY - R.yCam) + R.CANVAS_HALF_HEIGHT;
-					var y2 = scale2 * (realY - R.yCam) + R.CANVAS_HALF_HEIGHT;
+					var y = scale * (realY - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+					var y2 = scale2 * (realY - R.cameraY) + R.CANVAS_HALF_HEIGHT;
 					if (y2 > 0 - scale2 && y2 < R.CANVAS_HEIGHT)
 					{	
 						var tile = area.map[i][j][z - area.z];

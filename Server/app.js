@@ -198,6 +198,7 @@ io.on("connection", function(socket) {
 		}
 	});
 	socket.on("testAsPlayer", function () {
+		console.log("player testing start")
 		if (this.inSession && this.inLevel)
 		{
 			this.curLevel.entityCounter ++;
@@ -212,12 +213,18 @@ io.on("connection", function(socket) {
 				templates: [],
 			}
 			var newPlayer = this.curLevel.AddEntity(newPlayerData);
+			io.to(this.roomName).emit("newEntity", {levelID: this.curLevel.id, entityData: newPlayerData})
+			socket.emit("assignPlayerEntity", newPlayer.id);
 		}
 	});
 	socket.on("exitLevel", function () {
 		this.inLevel = false;
 		this.curLevel = undefined;
 	});
+	socket.on("exitSession", function () {
+		this.inSession = false;
+		this.curSession = undefined;
+	})
 
 	// Automatically when input received from players 
 	// - Send player events (movement, etc)

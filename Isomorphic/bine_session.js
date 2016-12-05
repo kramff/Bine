@@ -119,6 +119,28 @@
 			this.rules = areaData.rules;
 			this.templates = areaData.templates;
 
+			// Fill in with empty if map isn't exported
+			if (areaData.map === undefined || areaData.map.length === 0)
+			{
+				this.map = [];
+				for (var i = 0; i < this.xSize; i++)
+				{
+					var xLayer = [];
+					for (var j = 0; j < this.ySize; j++)
+					{
+						var yLayer = [];
+						for (var k = 0; k < this.zSize; k++)
+						{
+							// Fill with 0 for empty
+							var zLayer = 0;
+							yLayer.push(zLayer);
+						}
+						xLayer.push(yLayer)
+					}
+					this.map.push(xLayer);
+				}
+			}
+
 			this.xMov = 0;
 			this.yMov = 0;
 			this.zMov = 0;

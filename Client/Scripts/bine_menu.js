@@ -135,6 +135,9 @@ function DoButtonAction (action) {
 		case "exit_level":
 			ExitLevel();
 		break;
+		case "exit_session":
+			ExitSession();
+		break;
 	}
 }
 

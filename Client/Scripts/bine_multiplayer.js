@@ -132,8 +132,16 @@ function InitSocketConnection (argument) {
 		});
 
 		socket.on("newArea", function (data) {
-			// Create new area
+			// Create a new area
 			ReceiveCreateArea(data.levelID, data.areaData);
+		});
+
+		socket.on("newEntity", function (data) {
+			// Create a new entity
+			ReceiveCreateEntity(data.levelID, data.entityData);
+		});
+		socket.on("assignPlayerEntity", function (data) {
+			// Set the curPlayer to the given entity
 		});
 
 		
@@ -224,6 +232,11 @@ function ReceiveEnterLevel (levelID) {
 	curLevel = curSession.GetLevelByID(levelID);
 }
 
+function ReceiveCreateEntity (levelID, entityData) {
+	var level = curSession.GetLevelByID(levelID);
+	level.AddEntity(entityData);
+}
+
 // Functions to send data to server
 function SendPositionUpdate (position) {
 	if (MULTI_ON)
@@ -310,5 +323,12 @@ function ExitLevel () {
 	if (MULTI_ON)
 	{
 		socket.emit("exitLevel");
+	}
+}
+
+function ExitSession () {
+	if (MULTI_ON)
+	{
+		socket.emit("exitSession");
 	}
 }
