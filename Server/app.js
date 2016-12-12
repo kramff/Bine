@@ -63,12 +63,16 @@ io.on("connection", function(socket) {
 	console.log("User connected with id: " + socket.id);
 
 	this.playerID = undefined;
+	this.roomName = undefined;
+
 	this.inSession = false;
 	this.curSession = undefined;
-	this.roomName = undefined;
 
 	this.inLevel = false;
 	this.curLevel = undefined;
+
+	this.inPlayer = false;
+	this.curPlayer = undefined;
 
 	socket.on("disconnect", function () {
 		socket.broadcast.emit("disconnection", {"id": socket.id});
@@ -215,6 +219,17 @@ io.on("connection", function(socket) {
 			var newPlayer = this.curLevel.AddEntity(newPlayerData);
 			io.to(this.roomName).emit("newEntity", {levelID: this.curLevel.id, entityData: newPlayerData})
 			socket.emit("assignPlayerEntity", newPlayer.id);
+			this.inPlayer = true;
+			this.curPlayer = newPlayer;
+		}
+	});
+	socket.on("stopTestingPlayer", function () {
+		console.log("player stop testing");
+		if (this.inSession && this.inLevel && this.inPlayer)
+		{
+			io.to(this.roomName).emit("removeEntity", {levelID: this.curLevel.id, entityData: newPlayerData})
+			this.inPlayer = false;
+			this.curPlayer = undefined;
 		}
 	});
 	socket.on("exitLevel", function () {
@@ -224,7 +239,7 @@ io.on("connection", function(socket) {
 	socket.on("exitSession", function () {
 		this.inSession = false;
 		this.curSession = undefined;
-	})
+	});
 
 	// Automatically when input received from players 
 	// - Send player events (movement, etc)

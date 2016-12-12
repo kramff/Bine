@@ -116,4 +116,9 @@ function MainUpdate () {
 		// Render frame
 		RenderLevel(mainCanvas, curSession, curLevel, 3, 3, 3 + Math.sin(frameCounter / 100));
 	}
+	else
+	{
+		// Animation for when not in a game
+		ClearCanvas(mainCanvas);
+	}
 }

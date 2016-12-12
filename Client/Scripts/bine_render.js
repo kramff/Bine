@@ -21,6 +21,10 @@ var R = {
 	TILE_SIZE: 5.4,
 }
 
+function ClearCanvas (canvas) {
+	canvas.width = canvas.width;
+}
+
 function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ) {
 	// Set up render object
 	if (R.canvas !== canvas)

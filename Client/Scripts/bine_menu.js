@@ -116,13 +116,13 @@ function DoButtonAction (action) {
 			console.log("No action set up for " + action);
 		break;
 		case "create_session_new_world":
-			HideAllMenus();
 			CreateSessionNewWorld();
+			HideAllMenus();
 			ShowMenu("edit_world");
 		break;
 		case "create_new_level":
-			HideAllMenus();
 			CreateNewLevel();
+			HideAllMenus();
 			ShowMenu("edit_level");
 		break;
 
@@ -134,9 +134,17 @@ function DoButtonAction (action) {
 		break;
 		case "exit_level":
 			ExitLevel();
+			HideAllMenus();
+			ShowMenu("edit_world")
+			inLevel = false;
+			curLevel = undefined;
 		break;
 		case "exit_session":
 			ExitSession();
+			HideAllMenus();
+			ShowMenu("main_menu");
+			inSession = false;
+			curSession = undefined;
 		break;
 	}
 }

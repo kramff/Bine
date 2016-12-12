@@ -53,10 +53,12 @@ body {
 
 	transition: transform 0.5s ease;
 	transform: translate(0, 100%);
+	pointer-events: none;
 }
 
 .menu_container.active_menu {
 	transform: translate(0, 0);
+	pointer-events: auto;
 }
 
 .menu_top_half {
