@@ -121,6 +121,10 @@ function InitSocketConnection (argument) {
 
 
 
+		socket.on("newSession", function (data) {
+			// Create new session (Add it to the list of sessions to join)
+			AddSingleSessionToBox(data);
+		});
 
 		socket.on("newLevel", function (data) {
 			// Create new level
@@ -225,7 +229,8 @@ function ReceiveRemoveArea (removeArea) {
 function ReceiveCreateLevel (levelData) {
 	// var levelID = newLevelData.id;
 	// curSession.AddLevelWithID(levelID);
-	curSession.AddLevel(levelData);
+	var newLevel = curSession.AddLevel(levelData);
+	AddSingleLevelToBox(newLevel);
 }
 function ReceiveEnterLevel (levelID) {
 	inLevel = true;

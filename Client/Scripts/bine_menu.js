@@ -177,6 +177,20 @@ function FillSessionBox (sessionData) {
 	}
 }
 
+function AddSingleSessionToBox (session) {
+	var sessionBox = document.getElementsByClassName("session_box")[0];
+	var sessionDiv = CreateNewDiv(sessionBox, "session", undefined, undefined);
+	sessionDiv.setAttribute("session_id", session.id);
+	// Name
+	CreateNewDiv(sessionDiv, "session_name", session.name, undefined);
+	// Mode
+	CreateNewDiv(sessionDiv, "session_mode", session.mode, undefined);
+	// World name
+	CreateNewDiv(sessionDiv, "session_world_name", session.worldName, undefined);
+	// Player count
+	CreateNewDiv(sessionDiv, "session_player_count", session.playerCount, undefined);
+}
+
 // 
 function FillWorldBox (worldData) {
 	var worldBox = document.getElementsByClassName("world_box")[0];
@@ -215,4 +229,10 @@ function FillLevelBox (levelArray) {
 		var levelDiv = CreateNewDiv(levelBox, "level", level.name, level.id);
 		levelDiv.setAttribute("level_id", level.id);
 	}
+}
+
+function AddSingleLevelToBox (level) {
+	var levelBox = document.getElementsByClassName("level_box")[0];
+	var levelDiv = CreateNewDiv(levelBox, "level", level.name, level.id);
+	levelDiv.setAttribute("level_id", level.id);
 }

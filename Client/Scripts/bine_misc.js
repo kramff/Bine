@@ -9,3 +9,12 @@ function IsNear (x1, y1, z1, x2, y2, z2, dist) {
 	}
 	return false;
 }
+
+// Determine game coordinates from screen coordinates
+function ScreenCoorToGameCoord (screenX, screenY, inputZ, cameraX, cameraY, cameraZ, renderSettings) {
+	var scale = -(renderSettings.TILE_SIZE / (renderSettings.Z_MULTIPLIER * (inputZ - cameraZ) - renderSettings.EYE_DISTANCE)) * renderSettings.SCALE_MULTIPLIER;
+	var gameX = Math.floor((screenX - renderSettings.CANVAS_HALF_WIDTH) / scale + cameraX);
+	var gameY = Math.floor((screenY - renderSettings.CANVAS_HALF_HEIGHT) / scale + cameraY);
+	var gameZ = inputZ;
+	return {x: gameX, y: gameY, z: gameZ};
+}

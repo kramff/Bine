@@ -115,6 +115,9 @@ io.on("connection", function(socket) {
 		socket.join(this.roomName);
 		this.inSession = true;
 		this.curSession = newSession;
+
+		// Notify all connected users of new session
+		io.emit("newSession", {id: newSession.id, name: newSession.name, mode: newSession.mode, worldName: newSession.worldName, playerCount: newSession.playerCount});
 	});
 
 	// Functions to give requested information to clients
@@ -239,6 +242,19 @@ io.on("connection", function(socket) {
 	socket.on("exitSession", function () {
 		this.inSession = false;
 		this.curSession = undefined;
+	});
+
+	socket.on("tileChange", function (data) {
+		console.log("tile edit " + data);
+		if (this.inSession && this.inLevel)
+		{
+			var levelID = data.levelID;
+			var areaID = data.areaID;
+			var tileData = data.tileData;
+			this.curSession.EditTile(levelID, areaID, tileData);
+			io.to(this.roomName).emit("tileChange", data);
+		}
+		socket.broadcast.emit("tileChange", data);
 	});
 
 	// Automatically when input received from players 

@@ -52,6 +52,28 @@ var curLevel = undefined;
 
 var editorActive = true;
 
+// Keyboards
+var wKey = false;
+var aKey = false;
+var sKey = false;
+var dKey = false;
+var qKey = false;
+var eKey = false;
+
+// Editor camera position
+var editCamX = 3;
+var editCamY = 3;
+var editCamZ = 3;
+var editMovX = 0;
+var editMovY = 0;
+var editMovZ = 0;
+var editMovTime = 0;
+
+// Editor interaction
+var editMouseDown = false;
+var editMouseX = 0;
+var editMouseY = 0;
+
 function Init () {
 	LoadIsoScripts();
 	SocketInit();
@@ -60,8 +82,17 @@ function Init () {
 	gameReady = true;
 	mainCanvas = document.getElementById("canvas");
 
-	window.onresize = ResizeFunction;
+	// Resizing the window, and do initial resizing
+	window.addEventListener("resize", ResizeFunction);
 	ResizeFunction();
+
+	// Keyboard input
+	window.addEventListener("keydown", DoKeyDown);
+	window.addEventListener("keyup", DoKeyUp);
+
+	// Mouse input
+	window.addEventListener("mousedown", DoMouseDown);
+	window.addEventListener("mouseup", DoMouseUp);
 
 	// Old Shit
 	//window.requestAnimationFrame(Update);
@@ -113,12 +144,154 @@ function MainUpdate () {
 
 	if (inSession & curSession !== undefined && inLevel && curLevel !== undefined)
 	{
-		// Render frame
-		RenderLevel(mainCanvas, curSession, curLevel, 3, 3, 3 + Math.sin(frameCounter / 100));
+		// Editor mode
+		if (editorActive)
+		{
+			// Move camera around
+			if (editMovX === 0 && editMovY === 0 && editMovZ === 0)
+			{
+				// Set camera movement
+				editMovX = (aKey ? -1 : 0) + (dKey ? 1 : 0);
+				editMovY = (wKey ? -1 : 0) + (sKey ? 1 : 0);
+				editMovZ = (eKey ? -1 : 0) + (qKey ? 1 : 0);
+				editMovTime = 10;
+			}
+			editCamX = editCamX + editMovX * 0.1;
+			editCamY = editCamY + editMovY * 0.1;
+			editCamZ = editCamZ + editMovZ * 0.1;
+			editMovTime -= 1;
+			if (editMovTime <= 0)
+			{
+				editMovTime = 0;
+				editMovX = 0;
+				editMovY = 0;
+				editMovZ = 0;
+			}
+			// Render frame
+			RenderLevel(mainCanvas, curSession, curLevel, editCamX, editCamY, editCamZ);
+		}
+		else
+		{
+			// Player mode
+			RenderLevel(mainCanvas, curSession, curLevel, 3, 3, 3 + Math.sin(frameCounter * 0.01));
+		}
 	}
 	else
 	{
 		// Animation for when not in a game
 		ClearCanvas(mainCanvas);
 	}
+}
+
+function DoKeyDown (event) {
+	if (event.keyCode === 87)
+	{
+		wKey = true;
+	}
+	else if (event.keyCode === 65)
+	{
+		aKey = true;
+	}
+	else if (event.keyCode === 83)
+	{
+		sKey = true;
+	}
+	else if (event.keyCode === 68)
+	{
+		dKey = true;
+	}
+	else if (event.keyCode === 81)
+	{
+		qKey = true;
+	}
+	else if (event.keyCode === 69)
+	{
+		eKey = true;
+	}
+}
+
+function DoKeyUp (event) {
+	if (event.keyCode === 87)
+	{
+		wKey = false;
+	}
+	else if (event.keyCode === 65)
+	{
+		aKey = false;
+	}
+	else if (event.keyCode === 83)
+	{
+		sKey = false;
+	}
+	else if (event.keyCode === 68)
+	{
+		dKey = false;
+	}
+	else if (event.keyCode === 81)
+	{
+		qKey = false;
+	}
+	else if (event.keyCode === 69)
+	{
+		eKey = false;
+	}
+}
+
+function DoMouseDown (event) {
+	if (!inSession || !inLevel)
+	{
+		// Don't do anything if not in a session + level
+		return;
+	}
+	if (editorActive)
+	{
+		EditorMouseDown(event);
+	}
+	else
+	{
+		GameplayMouseDown(event);
+	}
+}
+
+function DoMouseUp (event) {
+	if (!inSession || !inLevel)
+	{
+		// Don't do anything if not in a session + level
+		return;
+	}
+	if (editorActive)
+	{
+		EditorMouseUp(event);
+	}
+	else
+	{
+		GameplayMouseUp(event);
+	}
+}
+
+function EditorMouseDown (event) {
+	// console.log(event);
+	editMouseDown = true;
+
+	var gameCoords = ScreenCoorToGameCoord(event.x, event.y, Math.round(editCamZ - 3), editCamX, editCamY, editCamZ, R);
+	// console.log(gameCoords);
+
+	// Use coords as data object
+	gameCoords.tile = 1;
+
+	// Need to determine which area was clicked on
+	// curSession.EditTile(curLevel.id, 1, gameCoords)
+	SendTileChange ({levelID: curLevel.id, areaID: 1, tileData: gameCoords});
+}
+
+function EditorMouseUp (event) {
+	editMouseDown = false;
+}
+
+function GameplayMouseDown (event) {
+
+}
+
+function GameplayMouseUp (event) {
+
 }

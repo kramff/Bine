@@ -282,7 +282,7 @@ function DrawAreaZSlice (area, z) {
 									DrawTile(x, y, scale, realX, realY, realZ);
 								}
 							}
-							numSquares ++;
+							// numSquares ++;
 						}
 					}
 				}
@@ -333,7 +333,7 @@ function DrawAreaZSliceSideTiles (area, z) {
 									DrawTileSides(x, y, scale, x2, y2, scale2, realX, realY, realZ);
 								}
 							}
-							numSquares ++;
+							// numSquares ++;
 						}
 					}
 				}
@@ -566,6 +566,70 @@ function DrawAreaEdges (area, scale, z) {
 	}
 	R.ctx.restore();
 }
+
+function InCeiling () {
+	// re-implement this feature later
+	return false;
+}
+/*function InCeiling (x, y, z) {
+	//Check if player is under a ceiling
+	if (!underCeiling)
+	{
+		return false;
+	}
+	//Check if z is above player
+	if (z <= player.z)
+	{
+		return false;
+	}
+	//Check if x, y are within 3x3 square around player
+	if (x > player.x + CEILING_FADE_DIST || x < player.x - CEILING_FADE_DIST || y > player.y + CEILING_FADE_DIST || y < player.y - CEILING_FADE_DIST)
+	{
+		return false;
+	}
+	//Check if tile is above an empty tile above the player
+	if (firstTransparentTilesArray[x - player.x + CEILING_FADE_DIST][y - player.y + CEILING_FADE_DIST] > z)
+	{
+		return false;
+	}
+	return true;
+}*/
+
+function IsSolid () {
+	return false;
+}
+/*function IsSolid (x, y, z) {
+	for (var i = 0; i < areas.length; i++)
+	{
+		var area = areas[i];
+		if (x >= area.x && x < area.x + area.xSize &&
+			y >= area.y && y < area.y + area.ySize &&
+			z >= area.z && z < area.z + area.zSize)
+		{
+			//Within area's bounds
+			var tile = area.map[x - area.x][y - area.y][z - area.z];
+			if (TileIsSolid(tile))
+			{
+				return true;
+			}
+		}
+		if (area.xMov !== 0 || area.yMov !== 0 || area.zMov !== 0)
+		{
+			//Area is moving: check new bounds
+			if (x >= area.x + area.xMov && x < area.x + area.xMov + area.xSize &&
+				y >= area.y + area.yMov && y < area.y + area.yMov + area.ySize &&
+				z >= area.z + area.zMov && z < area.z + area.zMov + area.zSize)
+			{
+				var tile = area.map[x - area.x - area.xMov][y - area.y - area.yMov][z - area.z - area.zMov];
+				if (TileIsSolid(tile))
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}*/
 
 ////////////////////////// OLD STUFF ////////////////////////// OLD STUFF ////////////////////////// OLD STUFF //////////////////////////
 if (false) {
