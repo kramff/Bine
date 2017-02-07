@@ -18,3 +18,18 @@ function ScreenCoorToGameCoord (screenX, screenY, inputZ, cameraX, cameraY, came
 	var gameZ = inputZ;
 	return {x: gameX, y: gameY, z: gameZ};
 }
+
+// Evaluate whether the given coordinate is inside the area
+function PositionInBounds (area, i, j, k) {
+	if (0 <= i && i < area.xSize)
+	{
+		if (0 <= j && j < area.ySize)
+		{
+			if (0 <= k && k < area.zSize)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}

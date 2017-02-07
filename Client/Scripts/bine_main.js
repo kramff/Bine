@@ -279,9 +279,17 @@ function EditorMouseDown (event) {
 	// Use coords as data object
 	gameCoords.tile = 1;
 
-	// Need to determine which area was clicked on
-	// curSession.EditTile(curLevel.id, 1, gameCoords)
-	SendTileChange ({levelID: curLevel.id, areaID: 1, tileData: gameCoords});
+	if (curLevel.areas.length >= 1)
+	{
+		if (PositionInBounds(curLevel.areas[0], gameCoords.x, gameCoords.y, gameCoords.z))
+		{
+			// Need to determine which area was clicked on
+			// curSession.EditTile(curLevel.id, 1, gameCoords)
+			SendTileChange ({levelID: curLevel.id, areaID: 1, tileData: gameCoords});
+		}
+	}
+
+
 }
 
 function EditorMouseUp (event) {
