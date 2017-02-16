@@ -208,7 +208,10 @@
 			this.id = levelData.id
 			this.name = levelData.name;
 
-			this.drawObjects = [];
+			if (!IS_SERVER)
+			{
+				this.drawObjects = [];
+			}
 
 			// Prep areas
 			this.areas = [];
@@ -216,7 +219,10 @@
 				var areaData = levelData.areaDatas[i];
 				var newArea = new Area(areaData);
 				this.areas.push(newArea);
-				this.drawObjects.push(newArea);
+				if (!IS_SERVER)
+				{
+					this.drawObjects.push(newArea);
+				}
 			}
 			this.areaCounter = this.areas.length;
 
@@ -226,7 +232,10 @@
 				var entityData = levelData.entityDatas[i];
 				var newEntity = new Entity(entityData);
 				this.entities.push(newEntity);
-				this.drawObjects.push(newEntity)
+				if (!IS_SERVER)
+				{
+					this.drawObjects.push(newEntity);
+				}
 			}
 			this.entityCounter = this.entities.length;
 
@@ -267,7 +276,10 @@
 		Level.prototype.AddArea = function(areaData) {
 			var newArea = new Area(areaData);
 			this.areas.push(newArea);
-			this.drawObjects.push(newArea);
+			if (!IS_SERVER)
+			{
+				this.drawObjects.push(newArea);
+			}
 			return newArea;
 		};
 		Level.prototype.GetAreaByID = function(areaID) {
@@ -283,7 +295,10 @@
 		Level.prototype.AddEntity = function(entityData) {
 			var newEntity = new Entity(entityData);
 			this.entities.push(newEntity);
-			this.drawObjects.push(newEntity);
+			if (!IS_SERVER)
+			{
+				this.drawObjects.push(newEntity);
+			}
 			return newEntity;
 		};
 		Level.prototype.GetEntityByID = function(entityID) {
@@ -415,10 +430,6 @@
 			return level.ExportLevel();
 		}*/
 		Session.prototype.AddLevel = function(levelData) {
-			//var newArea = new Area(areaData);
-			//this.areas.push(newArea);
-			//this.drawObjects.push(newArea);
-			//return newArea;
 			var newLevel = new Level(levelData);
 			this.levels.push(newLevel);
 			return newLevel;
