@@ -146,6 +146,7 @@ function InitSocketConnection (argument) {
 		});
 		socket.on("assignPlayerEntity", function (data) {
 			// Set the curPlayer to the given entity
+			ReceiveAssignPlayer(data);
 		});
 
 		
@@ -240,6 +241,14 @@ function ReceiveEnterLevel (levelID) {
 function ReceiveCreateEntity (levelID, entityData) {
 	var level = curSession.GetLevelByID(levelID);
 	level.AddEntity(entityData);
+}
+
+function ReceiveAssignPlayer (playerID) {
+	inPlayer = true;
+	curPlayer = playerID;
+	editorActive = false;
+	HideAllMenus();
+	ShowMenu("test_level");
 }
 
 // Functions to send data to server

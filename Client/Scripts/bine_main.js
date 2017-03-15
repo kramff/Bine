@@ -50,6 +50,9 @@ var curSession = undefined;
 var inLevel = false;
 var curLevel = undefined;
 
+var inPlayer = true;
+var curPlayer = undefined;
+
 var editorActive = true;
 
 // Keyboards
@@ -170,10 +173,11 @@ function MainUpdate () {
 			// Render frame
 			RenderLevel(mainCanvas, curSession, curLevel, editCamX, editCamY, editCamZ);
 		}
-		else
+		else if (inPlayer)
 		{
 			// Player mode
-			RenderLevel(mainCanvas, curSession, curLevel, 3, 3, 3 + Math.sin(frameCounter * 0.01));
+			var player = curLevel.GetEntityByID(curPlayer);
+			RenderLevel(mainCanvas, curSession, curLevel, player.x, player.y, 3 + player.z);
 		}
 	}
 	else

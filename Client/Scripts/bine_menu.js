@@ -146,6 +146,13 @@ function DoButtonAction (action) {
 			inSession = false;
 			curSession = undefined;
 		break;
+		case "stop_testing":
+			inPlayer = false;
+			curPlayer = undefined;
+			editorActive = true;
+			HideAllMenus();
+			ShowMenu("edit_level");
+		break;
 	}
 }
 
