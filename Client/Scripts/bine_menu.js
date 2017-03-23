@@ -148,7 +148,7 @@ function DoButtonAction (action) {
 		break;
 		case "stop_testing":
 			inPlayer = false;
-			curPlayer = undefined;
+			curPlayerID = undefined;
 			editorActive = true;
 			HideAllMenus();
 			ShowMenu("edit_level");

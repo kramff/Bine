@@ -51,7 +51,7 @@ var inLevel = false;
 var curLevel = undefined;
 
 var inPlayer = true;
-var curPlayer = undefined;
+var curPlayerID = undefined;
 
 var editorActive = true;
 
@@ -62,6 +62,13 @@ var sKey = false;
 var dKey = false;
 var qKey = false;
 var eKey = false;
+
+var inputChanged = false;
+
+// Gameplay camera position
+var xCam = 0;
+var yCam = 0;
+var zCam = 0;
 
 // Editor camera position
 var editCamX = 3;
@@ -176,8 +183,21 @@ function MainUpdate () {
 		else if (inPlayer)
 		{
 			// Player mode
-			var player = curLevel.GetEntityByID(curPlayer);
-			RenderLevel(mainCanvas, curSession, curLevel, player.x, player.y, 3 + player.z);
+			var player = curLevel.GetEntityByID(curPlayerID);
+			if (inputChanged)
+			{
+				player.SetMoveDirections(wKey, sKey, aKey, dKey);
+				// Todo: Send to server's session as well
+			}
+			// Update the level
+			curLevel.Update();
+			// Todo: determine how to sync with server's session
+
+			// Camera movement
+			xCam = (xCam * 4 + player.GetX() + 0.5) * 0.2;
+			yCam = (yCam * 4 + player.GetY() + 0.5) * 0.2;
+			zCam = (zCam * 4 + player.GetZ() + 0.5 + 3) * 0.2;
+			RenderLevel(mainCanvas, curSession, curLevel, xCam, yCam, zCam);
 		}
 	}
 	else
@@ -212,6 +232,12 @@ function DoKeyDown (event) {
 	{
 		eKey = true;
 	}
+	else
+	{
+		// Input not used
+		return;
+	}
+	inputChanged = true;
 }
 
 function DoKeyUp (event) {
@@ -239,6 +265,12 @@ function DoKeyUp (event) {
 	{
 		eKey = false;
 	}
+	else
+	{
+		// Input not used
+		return;
+	}
+	inputChanged = true;
 }
 
 function DoMouseDown (event) {

@@ -220,7 +220,7 @@ io.on("connection", function(socket) {
 				templates: [],
 			}
 			var newPlayer = this.curLevel.AddEntity(newPlayerData);
-			io.to(this.roomName).emit("newEntity", {levelID: this.curLevel.id, entityData: newPlayerData})
+			io.to(this.roomName).emit("newEntity", {levelID: this.curLevel.id, entityData: newPlayerData});
 			socket.emit("assignPlayerEntity", newPlayer.id);
 			this.inPlayer = true;
 			this.curPlayer = newPlayer;
@@ -230,7 +230,8 @@ io.on("connection", function(socket) {
 		console.log("player stop testing");
 		if (this.inSession && this.inLevel && this.inPlayer)
 		{
-			io.to(this.roomName).emit("removeEntity", {levelID: this.curLevel.id, entityData: newPlayerData})
+			io.to(this.roomName).emit("removeEntity", {levelID: this.curLevel.id, entityID: this.curPlayer.id});
+			this.curSession.removeEntity(this.curLevel.id, this.curPlayer.id)
 			this.inPlayer = false;
 			this.curPlayer = undefined;
 		}

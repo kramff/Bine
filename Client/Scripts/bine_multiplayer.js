@@ -145,8 +145,12 @@ function InitSocketConnection (argument) {
 			ReceiveCreateEntity(data.levelID, data.entityData);
 		});
 		socket.on("assignPlayerEntity", function (data) {
-			// Set the curPlayer to the given entity
+			// Set the curPlayerID and curPlayer to the given entity
 			ReceiveAssignPlayer(data);
+		});
+		socket.on("removeEntity", function (data) {
+			// Remove the entity from the session
+			ReceiveRemoveEntity(data.levelID, data.entityID);
 		});
 
 		
@@ -245,10 +249,14 @@ function ReceiveCreateEntity (levelID, entityData) {
 
 function ReceiveAssignPlayer (playerID) {
 	inPlayer = true;
-	curPlayer = playerID;
+	curPlayerID = playerID;
+	curPlayer = curLevel.GetEntityByID(curPlayerID);
 	editorActive = false;
 	HideAllMenus();
 	ShowMenu("test_level");
+}
+function ReceiveRemoveEntity (levelID, entityID) {
+	curSession.RemoveEntity(levelID, entityID);
 }
 
 // Functions to send data to server
