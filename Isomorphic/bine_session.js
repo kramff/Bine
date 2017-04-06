@@ -149,6 +149,12 @@ var Session = (function () {
 					}
 				}
 			}
+			// Player falls down
+			else
+			{
+				this.moveDuration = 3;
+				this.zMov = -1;
+			}
 		}
 	}
 	Entity.prototype.GetX = function() {

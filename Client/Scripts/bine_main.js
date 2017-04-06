@@ -186,8 +186,10 @@ function MainUpdate () {
 			var player = curLevel.GetEntityByID(curPlayerID);
 			if (inputChanged)
 			{
+				inputChanged = false;
 				player.SetMoveDirections(wKey, sKey, aKey, dKey);
 				// Todo: Send to server's session as well
+				SendInputUpdate(player.moveDirections);
 			}
 			// Update the level
 			curLevel.Update();

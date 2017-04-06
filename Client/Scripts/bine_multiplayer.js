@@ -291,6 +291,12 @@ function SendRemoveArea (removeArea) {
 		socket.emit("removeArea", removeArea);
 	}
 }
+function SendInputUpdate (inputData) {
+	if (MULTI_ON)
+	{
+		socket.emit("inputUpdate", inputData);
+	}
+}
 
 function CreateSessionNewWorld () {
 	if (MULTI_ON)
@@ -337,7 +343,7 @@ function CreateNewArea () {
 function TestAsPlayer () {
 	if (MULTI_ON)
 	{
-		socket.emit("testAsPlayer");
+		socket.emit("testAsPlayer", {x: Math.round(editCamX), y: Math.round(editCamY), z: Math.round(editCamZ)});
 	}
 }
 

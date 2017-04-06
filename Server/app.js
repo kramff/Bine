@@ -204,16 +204,16 @@ io.on("connection", function(socket) {
 			io.to(this.roomName).emit("newArea", {levelID: this.curLevel.id, areaData: areaData});
 		}
 	});
-	socket.on("testAsPlayer", function () {
+	socket.on("testAsPlayer", function (data) {
 		console.log("player testing start")
 		if (this.inSession && this.inLevel)
 		{
 			this.curLevel.entityCounter ++;
 			var newPlayerData = {
 				id: this.curLevel.entityCounter,
-				x: 0,
-				y: 0,
-				z: 0,
+				x: data.x,
+				y: data.y,
+				z: data.z,
 				style: [],
 				settings: [],
 				rules: [],
@@ -256,6 +256,14 @@ io.on("connection", function(socket) {
 			io.to(this.roomName).emit("tileChange", data);
 		}
 		socket.broadcast.emit("tileChange", data);
+	});
+
+	socket.on("inputUpdate", function (data) {
+		// Player has changed their input keys
+		if (this.inSession && this.inLevel && this.inPlayer)
+		{
+			this.curPlayer.SetMoveDirections(data.up, data.down, data.left, data.right);
+		}
 	});
 
 	// Automatically when input received from players 
@@ -315,6 +323,19 @@ io.on("connection", function(socket) {
 
 
 });
+
+// Gameplay loop
+function MainUpdate () {
+	setTimeout(MainUpdate, 16);
+
+	for (var i = 0; i < sessionArray.length; i++) {
+		var session = sessionArray[i];
+		for (var i = 0; i < session.levels.length; i++) {
+			var level = session.levels[i]
+			level.Update();
+		}
+	}
+}
 
 
 if (Math.random() > 0.9)
