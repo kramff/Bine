@@ -638,7 +638,7 @@ var Session = (function () {
 
 	Session.prototype.EditTile = function(levelID, areaID, tileData) {
 		var level = this.GetLevelByID(levelID);
-		var area = level.GetAreaByID(levelID, areaID);
+		var area = level.GetAreaByID(areaID);
 		area.map[tileData.x][tileData.y][tileData.z] = tileData.tile;
 		// area.extra[tileData.x][tileData.y][tileData.z] = tileData.extra;
 	};

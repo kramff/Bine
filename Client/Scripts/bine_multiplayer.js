@@ -153,6 +153,12 @@ function InitSocketConnection (argument) {
 			ReceiveRemoveEntity(data.levelID, data.entityID);
 		});
 
+		socket.on("inputUpdate", function (data) {
+			var level = curSession.GetLevelByID(data.levelID);
+			var entity = level.GetEntityByID(data.entityID);
+			entity.SetMoveDirections(data.up, data.down, data.left, data.right);
+		});
+
 		
 
 		MULTI_ON = true;

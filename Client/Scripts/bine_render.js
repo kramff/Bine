@@ -19,13 +19,14 @@ var R = {
 	SCALE_MULTIPLIER: 490,
 	Z_MULTIPLIER: 3.1,
 	TILE_SIZE: 5.4,
+	EDIT_MODE: false,
 }
 
 function ClearCanvas (canvas) {
 	canvas.width = canvas.width;
 }
 
-function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ) {
+function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMode) {
 	// Set up render object
 	if (R.canvas !== canvas)
 	{
@@ -41,6 +42,7 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ) {
 	R.CANVAS_HEIGHT = canvas.height;
 	R.CANVAS_HALF_WIDTH = R.CANVAS_WIDTH / 2;
 	R.CANVAS_HALF_HEIGHT = R.CANVAS_HEIGHT / 2;
+	R.EDIT_MODE = editMode || false;
 
 	// Clear canvas
 	R.canvas.width = R.canvas.width;
@@ -114,6 +116,15 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ) {
 
 			i ++;
 			currentObject = drawObjects[i];
+		}
+		// Draw outline where player could be placed if in edit mode
+		if (R.EDIT_MODE && z === Math.round(R.cameraZ))
+		{
+			R.ctx.save();
+			var size = GetScale(z);
+			R.ctx.strokeStyle = "#40FF80";
+			R.ctx.strokeRect(R.CANVAS_HALF_WIDTH, R.CANVAS_HALF_HEIGHT, size, size);
+			R.ctx.restore();
 		}
 	}
 }

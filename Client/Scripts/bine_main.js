@@ -178,7 +178,7 @@ function MainUpdate () {
 				editMovZ = 0;
 			}
 			// Render frame
-			RenderLevel(mainCanvas, curSession, curLevel, editCamX, editCamY, editCamZ);
+			RenderLevel(mainCanvas, curSession, curLevel, editCamX, editCamY, editCamZ, true);
 		}
 		else if (inPlayer)
 		{

@@ -246,7 +246,6 @@ io.on("connection", function(socket) {
 	});
 
 	socket.on("tileChange", function (data) {
-		console.log("tile edit " + data);
 		if (this.inSession && this.inLevel)
 		{
 			var levelID = data.levelID;
@@ -255,7 +254,6 @@ io.on("connection", function(socket) {
 			this.curSession.EditTile(levelID, areaID, tileData);
 			io.to(this.roomName).emit("tileChange", data);
 		}
-		socket.broadcast.emit("tileChange", data);
 	});
 
 	socket.on("inputUpdate", function (data) {
@@ -263,6 +261,9 @@ io.on("connection", function(socket) {
 		if (this.inSession && this.inLevel && this.inPlayer)
 		{
 			this.curPlayer.SetMoveDirections(data.up, data.down, data.left, data.right);
+			data.entityID = this.curPlayer.id;
+			data.levelID = this.curLevel.id;
+			io.to(this.roomName).emit("inputUpdate", data);
 		}
 	});
 
@@ -330,12 +331,14 @@ function MainUpdate () {
 
 	for (var i = 0; i < sessionArray.length; i++) {
 		var session = sessionArray[i];
-		for (var i = 0; i < session.levels.length; i++) {
-			var level = session.levels[i]
+		for (var j = 0; j < session.levels.length; j++) {
+			var level = session.levels[j];
 			level.Update();
+			// console.log("level update" + i + j);
 		}
 	}
 }
+MainUpdate();
 
 
 if (Math.random() > 0.9)
