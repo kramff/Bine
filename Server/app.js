@@ -338,7 +338,10 @@ function MainUpdate () {
 		}
 	}
 }
-MainUpdate();
+if (false)
+{
+	MainUpdate();
+}
 
 
 if (Math.random() > 0.9)

@@ -346,6 +346,19 @@ function CreateNewArea () {
 	}
 }
 
+function RemoveArea () {
+	if (MULTI_ON)
+	{
+		
+	}
+}
+function EditArea () {
+	if (MULTI_ON)
+	{
+		
+	}
+}
+
 function TestAsPlayer () {
 	if (MULTI_ON)
 	{

@@ -129,6 +129,13 @@ function DoButtonAction (action) {
 		case "create_area":
 			CreateNewArea();
 		break;
+		case "remove_area":
+			RemoveArea();
+		break;
+		case "edit_area":
+			EditArea();
+		break;
+
 		case "test_as_player":
 			TestAsPlayer();
 		break;
