@@ -185,9 +185,9 @@ io.on("connection", function(socket) {
 			this.curLevel.areaCounter ++;
 			var blankAreaData = {
 				id: this.curLevel.areaCounter,
-				x: 0,
-				y: 0,
-				z: 0,
+				x: data.x,
+				y: data.y,
+				z: data.z,
 				xSize: 5,
 				ySize: 5,
 				zSize: 5,

@@ -127,13 +127,22 @@ function DoButtonAction (action) {
 		break;
 
 		case "create_area":
-			CreateNewArea();
+			CreateNewArea(editCamX, editCamY, editCamZ);
 		break;
 		case "remove_area":
 			RemoveArea();
 		break;
 		case "edit_area":
-			EditArea();
+			var areaSelected = GetCurrentArea(editCamX, editCamY, editCamZ);
+			if (areaSelected !== undefined)
+			{
+				inArea = true;
+				curArea = areaSelected;
+				HideAllMenus();
+				ShowMenu("edit_area");
+			}
+			
+
 		break;
 
 		case "test_as_player":

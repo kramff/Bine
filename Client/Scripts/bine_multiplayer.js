@@ -339,10 +339,10 @@ function JoinLevel (levelID) {
 	}
 }
 
-function CreateNewArea () {
+function CreateNewArea (createX, createY, createZ) {
 	if (MULTI_ON)
 	{
-		socket.emit("createNewArea");
+		socket.emit("createNewArea", {x: createX, y: createY, z: createZ});
 	}
 }
 

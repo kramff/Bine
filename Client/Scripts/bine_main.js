@@ -53,6 +53,9 @@ var curLevel = undefined;
 var inPlayer = true;
 var curPlayerID = undefined;
 
+var inArea = false;
+var curArea = undefined;
+
 var editorActive = true;
 
 // Keyboards
@@ -166,19 +169,19 @@ function MainUpdate () {
 				editMovZ = (eKey ? -1 : 0) + (qKey ? 1 : 0);
 				editMovTime = 10;
 			}
-			editCamX = editCamX + editMovX * 0.1;
-			editCamY = editCamY + editMovY * 0.1;
-			editCamZ = editCamZ + editMovZ * 0.1;
 			editMovTime -= 1;
 			if (editMovTime <= 0)
 			{
+				editCamX = editCamX + editMovX;
+				editCamY = editCamY + editMovY;
+				editCamZ = editCamZ + editMovZ;
 				editMovTime = 0;
 				editMovX = 0;
 				editMovY = 0;
 				editMovZ = 0;
 			}
 			// Render frame
-			RenderLevel(mainCanvas, curSession, curLevel, editCamX, editCamY, editCamZ, true);
+			RenderLevel(mainCanvas, curSession, curLevel, editCamX + editMovX * (1 - 0.1 * editMovTime), editCamY + editMovY * (1 - 0.1 * editMovTime), editCamZ + editMovZ * (1 - 0.1 * editMovTime), true);
 		}
 		else if (inPlayer)
 		{
