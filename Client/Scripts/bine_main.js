@@ -68,15 +68,21 @@ var eKey = false;
 
 var inputChanged = false;
 
+// Mouse
+var mouseX = 0;
+var mouseY = 0;
+var mousePressed = false;
+var mouseButton = 0;
+
 // Gameplay camera position
 var xCam = 0;
 var yCam = 0;
 var zCam = 0;
 
 // Editor camera position
-var editCamX = 3;
-var editCamY = 3;
-var editCamZ = 3;
+var editCamX = 0;
+var editCamY = 0;
+var editCamZ = 0;
 var editMovX = 0;
 var editMovY = 0;
 var editMovZ = 0;
@@ -105,7 +111,9 @@ function Init () {
 
 	// Mouse input
 	window.addEventListener("mousedown", DoMouseDown);
+	window.addEventListener("mousemove", DoMouseMove);
 	window.addEventListener("mouseup", DoMouseUp);
+	window.addEventListener("contextmenu", DoContextMenu);
 
 	// Old Shit
 	//window.requestAnimationFrame(Update);
@@ -201,7 +209,7 @@ function MainUpdate () {
 			// Camera movement
 			xCam = (xCam * 4 + player.GetX() + 0.5) * 0.2;
 			yCam = (yCam * 4 + player.GetY() + 0.5) * 0.2;
-			zCam = (zCam * 4 + player.GetZ() + 0.5 + 3) * 0.2;
+			zCam = (zCam * 4 + player.GetZ() + 0.5) * 0.2;
 			RenderLevel(mainCanvas, curSession, curLevel, xCam, yCam, zCam);
 		}
 	}
@@ -279,6 +287,11 @@ function DoKeyUp (event) {
 }
 
 function DoMouseDown (event) {
+	mouseX = event.clientX;
+	mouseY = event.clientY;
+	mousePressed = true;
+	mouseButton = event.button;
+
 	if (!inSession || !inLevel)
 	{
 		// Don't do anything if not in a session + level
@@ -286,15 +299,24 @@ function DoMouseDown (event) {
 	}
 	if (editorActive)
 	{
-		EditorMouseDown(event);
+		EditorMouseDown();
 	}
 	else
 	{
-		GameplayMouseDown(event);
+		GameplayMouseDown();
 	}
+}
+function DoMouseMove (event) {
+	mouseX = event.clientX;
+	mouseY = event.clientY;
 }
 
 function DoMouseUp (event) {
+	mouseX = event.clientX;
+	mouseY = event.clientY;
+	mousePressed = false;
+	mouseButton = event.button;
+
 	if (!inSession || !inLevel)
 	{
 		// Don't do anything if not in a session + level
@@ -302,45 +324,63 @@ function DoMouseUp (event) {
 	}
 	if (editorActive)
 	{
-		EditorMouseUp(event);
+		EditorMouseUp();
 	}
 	else
 	{
-		GameplayMouseUp(event);
+		GameplayMouseUp();
 	}
 }
 
-function EditorMouseDown (event) {
-	// console.log(event);
+function DoContextMenu (event) {
+	event.preventDefault();
+}
+
+function EditorMouseDown () {
 	editMouseDown = true;
 
-	var gameCoords = ScreenCoorToGameCoord(event.x, event.y, Math.round(editCamZ - 3), editCamX, editCamY, editCamZ, R);
+	var gameCoords = ScreenCoordToGameCoord(mouseX, mouseY, Math.round(editCamZ), editCamX, editCamY, editCamZ, R);
 	// console.log(gameCoords);
 
 	// Use coords as data object
 	gameCoords.tile = 1;
 
+	if (mouseButton === 2)
+	{
+		gameCoords.tile = 0;
+	}
+
 	if (curLevel.areas.length >= 1)
 	{
-		if (PositionInBounds(curLevel.areas[0], gameCoords.x, gameCoords.y, gameCoords.z))
-		{
-			// Need to determine which area was clicked on
-			// curSession.EditTile(curLevel.id, 1, gameCoords)
-			SendTileChange ({levelID: curLevel.id, areaID: 1, tileData: gameCoords});
+		for (var i = 0; i < curLevel.areas.length; i++) {
+			var curArea = curLevel.areas[i];
+			var relativeX = gameCoords.x - curArea.x;
+			var relativeY = gameCoords.y - curArea.y;
+			var relativeZ = gameCoords.z - curArea.z;
+			if (PositionInBounds(curArea, relativeX, relativeY, relativeZ))
+			{
+				gameCoords.x = relativeX;
+				gameCoords.y = relativeY;
+				gameCoords.z = relativeZ;
+				// Need to determine which area was clicked on
+				// curSession.EditTile(curLevel.id, 1, gameCoords)
+				SendTileChange ({levelID: curLevel.id, areaID: curArea.id, tileData: gameCoords});
+				break;
+			}
 		}
 	}
 
 
 }
 
-function EditorMouseUp (event) {
+function EditorMouseUp () {
 	editMouseDown = false;
 }
 
-function GameplayMouseDown (event) {
+function GameplayMouseDown () {
 
 }
 
-function GameplayMouseUp (event) {
+function GameplayMouseUp () {
 
 }
