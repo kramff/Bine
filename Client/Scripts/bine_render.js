@@ -566,7 +566,16 @@ function DrawAreaEdges (area, scale, z) {
 		R.ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
 	}
 	// R.ctx.strokeStyle = areaColors[areas.indexOf(area)];
-	R.ctx.strokeStyle = "#FFFFFF";
+	// Only in editior
+	if (area === curArea)
+	{
+		R.ctx.strokeStyle = "#00FFFF";
+		R.ctx.lineWidth = 2;
+	}
+	else
+	{
+		R.ctx.strokeStyle = "#FFFFFF";
+	}
 	R.ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
 	// if (z === player.z)
 	if (false)

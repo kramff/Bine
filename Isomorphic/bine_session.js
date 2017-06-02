@@ -422,6 +422,20 @@ var Session = (function () {
 	Level.prototype.CheckRelativeLocationSolid = function(entity, x, y, z) {
 		return this.CheckLocationSolid(entity.x + x, entity.y + y, entity.z + z);
 	};
+	Level.prototype.GetAreaAtLocation = function(x, y, z) {
+		for (var i = 0; i < this.areas.length; i++)
+		{
+			var area = this.areas[i];
+			if (x >= area.x && x < area.x + area.xSize &&
+				y >= area.y && y < area.y + area.ySize &&
+				z >= area.z && z < area.z + area.zSize)
+			{
+				//Within area's bounds
+				return area;
+			}
+		}
+		return undefined;
+	};
 	function TileIsSolid(tile) {
 		if (tile !== 0)
 		{

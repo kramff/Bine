@@ -88,10 +88,10 @@ var editMovY = 0;
 var editMovZ = 0;
 var editMovTime = 0;
 
-// Editor interaction
-var editMouseDown = false;
-var editMouseX = 0;
-var editMouseY = 0;
+// Editor last tile changed position
+var lastEditX = undefined;
+var lastEditY = undefined;
+var lastEditZ = undefined;
 
 function Init () {
 	LoadIsoScripts();
@@ -169,13 +169,21 @@ function MainUpdate () {
 		if (editorActive)
 		{
 			// Move camera around
-			if (editMovX === 0 && editMovY === 0 && editMovZ === 0)
+			if (editMovX === 0 && editMovY === 0 && editMovZ === 0 && (aKey || dKey || wKey || sKey || eKey || qKey))
 			{
 				// Set camera movement
 				editMovX = (aKey ? -1 : 0) + (dKey ? 1 : 0);
 				editMovY = (wKey ? -1 : 0) + (sKey ? 1 : 0);
 				editMovZ = (eKey ? -1 : 0) + (qKey ? 1 : 0);
 				editMovTime = 10;
+			}
+			// If mouse is held down, check for doing mouse-move tile editing
+			if (mousePressed)
+			{
+				if (editMovX !== 0 || editMovY !== 0 || editMovZ !== 0)
+				{
+					EditTileIfNewCoord();
+				}
 			}
 			editMovTime -= 1;
 			if (editMovTime <= 0)
@@ -187,6 +195,12 @@ function MainUpdate () {
 				editMovX = 0;
 				editMovY = 0;
 				editMovZ = 0;
+
+				// Also check for mouse-move tile editing here, because of Z movement not getting checked earlierif (mousePressed)
+				if (mousePressed)
+				{
+					EditTileIfNewCoord();
+				}
 			}
 			// Render frame
 			RenderLevel(mainCanvas, curSession, curLevel, editCamX + editMovX * (1 - 0.1 * editMovTime), editCamY + editMovY * (1 - 0.1 * editMovTime), editCamZ + editMovZ * (1 - 0.1 * editMovTime), true);
@@ -309,6 +323,20 @@ function DoMouseDown (event) {
 function DoMouseMove (event) {
 	mouseX = event.clientX;
 	mouseY = event.clientY;
+
+	if (!inSession || !inLevel)
+	{
+		// Don't do anything if not in a session + level
+		return;
+	}
+	if (editorActive)
+	{
+		EditorMouseMove();
+	}
+	else
+	{
+		GameplayMouseMove();
+	}
 }
 
 function DoMouseUp (event) {
@@ -337,9 +365,45 @@ function DoContextMenu (event) {
 }
 
 function EditorMouseDown () {
-	editMouseDown = true;
+	EditTileIfNewCoord();
+	
+}
 
-	var gameCoords = ScreenCoordToGameCoord(mouseX, mouseY, Math.round(editCamZ), editCamX, editCamY, editCamZ, R);
+function EditorMouseMove() {
+	if (mousePressed)
+	{
+		// Potentially edit a tile if hovering over a new coordinate
+		EditTileIfNewCoord();
+	}
+}
+
+function EditorMouseUp () {
+	// Forget about last edited tile
+	lastEditX = undefined;
+	lastEditY = undefined;
+	lastEditZ = undefined;
+}
+
+function GameplayMouseDown () {
+
+}
+
+function GameplayMouseMove () {
+
+}
+
+function GameplayMouseUp () {
+
+}
+
+function EditTileIfNewCoord () {
+	var gameCoords = ScreenCoordToGameCoord(mouseX, mouseY, Math.round(editCamZ), editCamX + editMovX * (1 - 0.1 * editMovTime), editCamY + editMovY * (1 - 0.1 * editMovTime), editCamZ + editMovZ * (1 - 0.1 * editMovTime), R);
+
+	if (gameCoords.x === lastEditX && gameCoords.y === lastEditY && gameCoords.z === lastEditZ)
+	{
+		// Skip because exact same coords as last edited location
+		return;
+	}
 	// console.log(gameCoords);
 
 	// Use coords as data object
@@ -359,6 +423,12 @@ function EditorMouseDown () {
 			var relativeZ = gameCoords.z - curArea.z;
 			if (PositionInBounds(curArea, relativeX, relativeY, relativeZ))
 			{
+				// Keep track of last edited tile coordinates
+				lastEditX = gameCoords.x;
+				lastEditY = gameCoords.y;
+				lastEditZ = gameCoords.z;
+
+				// Prepare data (Use relative XYZ when sending message to server)
 				gameCoords.x = relativeX;
 				gameCoords.y = relativeY;
 				gameCoords.z = relativeZ;
@@ -369,18 +439,4 @@ function EditorMouseDown () {
 			}
 		}
 	}
-
-
-}
-
-function EditorMouseUp () {
-	editMouseDown = false;
-}
-
-function GameplayMouseDown () {
-
-}
-
-function GameplayMouseUp () {
-
 }

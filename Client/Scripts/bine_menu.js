@@ -133,16 +133,19 @@ function DoButtonAction (action) {
 			RemoveArea();
 		break;
 		case "edit_area":
-			var areaSelected = GetCurrentArea(editCamX, editCamY, editCamZ);
+			var areaSelected = curLevel.GetAreaAtLocation(editCamX, editCamY, editCamZ);
 			if (areaSelected !== undefined)
 			{
 				inArea = true;
 				curArea = areaSelected;
 				HideAllMenus();
 				ShowMenu("edit_area");
+				console.log("An area was selected");
 			}
-			
-
+			else
+			{
+				console.log("No area was selected");
+			}
 		break;
 
 		case "test_as_player":
