@@ -172,6 +172,22 @@ function DoButtonAction (action) {
 			HideAllMenus();
 			ShowMenu("edit_level");
 		break;
+
+		// Area menu
+		case "stop_edit_area":
+			inArea = false;
+			curArea = undefined;
+			HideAllMenus();
+			ShowMenu("edit_level");
+		break;
+		case "resize_area":
+		break;
+		case "move_area":
+		break;
+		case "set_rules_area":
+		break;
+		case "delete_area":
+		break;
 	}
 }
 
