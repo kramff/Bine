@@ -37,6 +37,10 @@ function SocketInit (argument) {
 		// Web
 		socketScript.setAttribute("src", "https://bine-online.herokuapp.com/socket.io/socket.io.js");
 	}
+	else if (location.href.indexOf("http://www.kramff.com/Bine/") !== -1)
+	{
+		socketScript.setAttribute("src", "https://bine.nfshost.com/socket.io/socket.io.js");
+	}
 	else
 	{
 		// Local
@@ -63,6 +67,10 @@ function InitSocketConnection (argument) {
 		if (location.href === "http://kramff.github.io/")
 		{
 			socket = io("bine-online.herokuapp.com")
+		}
+		else if (location.href.indexOf("http://www.kramff.com/Bine/") !== -1)
+		{
+			socket = io("bine.nfshost.com");
 		}
 		else
 		{
