@@ -166,6 +166,7 @@ function DoButtonAction (action) {
 			curSession = undefined;
 		break;
 		case "stop_testing":
+			StopTestingPlayer();
 			inPlayer = false;
 			curPlayerID = undefined;
 			editorActive = true;

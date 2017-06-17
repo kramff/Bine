@@ -674,7 +674,10 @@ var Session = (function () {
 		var level = this.GetLevelByID(levelID);
 		var entity = level.GetEntityByID(entityID);
 
-		level.drawObjects.splice(level.drawObjects.indexOf(entity), 1);
+		if (!IS_SERVER)
+		{
+			level.drawObjects.splice(level.drawObjects.indexOf(entity), 1);
+		}
 		level.entities.splice(level.entities.indexOf(entity), 1);
 	}
 	Session.prototype.GetEntityByID = function (levelID, id) {

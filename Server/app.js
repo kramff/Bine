@@ -231,7 +231,7 @@ io.on("connection", function(socket) {
 		if (this.inSession && this.inLevel && this.inPlayer)
 		{
 			io.to(this.roomName).emit("removeEntity", {levelID: this.curLevel.id, entityID: this.curPlayer.id});
-			this.curSession.removeEntity(this.curLevel.id, this.curPlayer.id)
+			this.curSession.RemoveEntity(this.curLevel.id, this.curPlayer.id)
 			this.inPlayer = false;
 			this.curPlayer = undefined;
 		}

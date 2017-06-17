@@ -387,3 +387,10 @@ function ExitSession () {
 		socket.emit("exitSession");
 	}
 }
+
+function StopTestingPlayer () {
+	if (MULTI_ON)
+	{
+		socket.emit("stopTestingPlayer");
+	}
+}
