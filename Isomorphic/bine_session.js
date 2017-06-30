@@ -36,6 +36,16 @@ var Session = (function () {
 		this.moveDuration = 10;
 
 		this.moveDirections = {up: false, down: false, left: false, right: false};
+
+		this.xCorrection = 0;
+		this.yCorrection = 0;
+		this.zCorrection = 0;
+		this.needCorrection = false;
+		this.xMovCorrection = 0;
+		this.yMovCorrection = 0;
+		this.zMovCorrection = 0;
+		this.moveTimeCorrection = 0;
+		this.moveDurationCorrection = 10;
 	}
 	Entity.prototype.Export = function() {
 		var entityData = {
@@ -56,6 +66,19 @@ var Session = (function () {
 		// - Rules
 		// - Movement
 
+		// Position Correction (Needs to be smoother)
+		if (this.needCorrection)
+		{
+			this.needCorrection = false;
+			this.x = this.xCorrection;
+			this.y = this.yCorrection;
+			this.z = this.zCorrection;
+			this.xMov = this.xMovCorrection;
+			this.yMov = this.yMovCorrection;
+			this.zMov = this.zMovCorrection;
+			this.moveTime = this.moveTimeCorrection;
+			this.moveDuration = this.moveDurationCorrection;
+		}
 
 		// one tick of movement
 		if (this.xMov !== 0 || this.yMov !== 0 || this.zMov !== 0)
@@ -172,6 +195,17 @@ var Session = (function () {
 		this.moveDirections.left = left;
 		this.moveDirections.right = right;
 	}
+	Entity.prototype.SetLocationCorrection = function(x, y, z, xMov, yMov, zMov, moveTime, moveDuration) {
+		this.xCorrection = x;
+		this.yCorrection = y;
+		this.zCorrection = z;
+		this.xMovCorrection = xMov;
+		this.yMovCorrection = yMov;
+		this.zMovCorrection = zMov;
+		this.moveTimeCorrection = moveTime;
+		this.moveDurationCorrection = moveDuration;
+		this.needCorrection = true;
+	};
 
 	// var areaIDCounter = 0;
 	//x, y, z, xSize, ySize, zSize, settings, map, extra, style, rules, templates

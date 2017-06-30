@@ -152,19 +152,19 @@ body {
 }
 
 .session_name {
-	background-image: url(image/page/session_name.png);
+	background-image: url(Image/Page/session_name.png);
 }
 
 .session_mode {
-	background-image: url(image/page/session_mode.png);
+	background-image: url(Image/Page/session_mode.png);
 }
 
 .session_world_name {
-	background-image: url(image/page/session_world_name.png);
+	background-image: url(Image/Page/session_world_name.png);
 }
 
 .session_player_count {
-	background-image: url(image/page/session_player_count.png);
+	background-image: url(Image/Page/session_player_count.png);
 }
 
 

@@ -74,7 +74,9 @@ io.on("connection", function(socket) {
 	this.inPlayer = false;
 	this.curPlayer = undefined;
 
-	socket.on("disconnect", function () {
+	socket.on("disconnect", function (reason) {
+		console.log("User disconnected with id: " + socket.id + ", and reason: " + reason);
+		ExitPlayer(this);
 		socket.broadcast.emit("disconnection", {"id": socket.id});
 		// RemovePlayer({"id": socket.id});
 		this.playerID = undefined;
@@ -228,13 +230,7 @@ io.on("connection", function(socket) {
 	});
 	socket.on("stopTestingPlayer", function () {
 		console.log("player stop testing");
-		if (this.inSession && this.inLevel && this.inPlayer)
-		{
-			io.to(this.roomName).emit("removeEntity", {levelID: this.curLevel.id, entityID: this.curPlayer.id});
-			this.curSession.RemoveEntity(this.curLevel.id, this.curPlayer.id)
-			this.inPlayer = false;
-			this.curPlayer = undefined;
-		}
+		ExitPlayer(this);
 	});
 	socket.on("exitLevel", function () {
 		this.inLevel = false;
@@ -263,7 +259,19 @@ io.on("connection", function(socket) {
 			this.curPlayer.SetMoveDirections(data.up, data.down, data.left, data.right);
 			data.entityID = this.curPlayer.id;
 			data.levelID = this.curLevel.id;
-			io.to(this.roomName).emit("inputUpdate", data);
+			socket.broadcast.to(this.roomName).emit("inputUpdate", data);
+		}
+	});
+
+	socket.on("locationCorrection", function (data) {
+		// Player sends a location correction periodically (every few seconds)
+		// Smoothly adjust player's location to the correction location
+		if (this.inSession && this.inLevel && this.inPlayer)
+		{
+			this.curPlayer.SetLocationCorrection(data.x, data.y, data.z, data.xMov, data.yMov, data.zMov, data.moveTime, data.moveDuration);
+			data.entityID = this.curPlayer.id;
+			data.levelID = this.curLevel.id;
+			socket.broadcast.to(this.roomName).emit("locationCorrection", data);
 		}
 	});
 
@@ -324,6 +332,18 @@ io.on("connection", function(socket) {
 
 
 });
+
+// Functions for client to call
+function ExitPlayer (client) {
+	if (client.inSession && client.inLevel && client.inPlayer)
+	{
+		io.to(client.roomName).emit("removeEntity", {levelID: client.curLevel.id, entityID: client.curPlayer.id});
+		client.curSession.RemoveEntity(client.curLevel.id, client.curPlayer.id)
+		client.inPlayer = false;
+		client.curPlayer = undefined;
+	}
+}
+
 
 // Gameplay loop
 function MainUpdate () {

@@ -167,6 +167,12 @@ function InitSocketConnection (argument) {
 			entity.SetMoveDirections(data.up, data.down, data.left, data.right);
 		});
 
+		socket.on("locationCorrection", function (data) {
+			var level = curSession.GetLevelByID(data.levelID);
+			var entity = level.GetEntityByID(data.entityID);
+			entity.SetLocationCorrection(data.x, data.y, data.z, data.xMov, data.yMov, data.zMov, data.moveTime, data.moveDuration);
+		});
+
 		
 
 		MULTI_ON = true;
@@ -309,6 +315,12 @@ function SendInputUpdate (inputData) {
 	if (MULTI_ON)
 	{
 		socket.emit("inputUpdate", inputData);
+	}
+}
+function SendLocationCorrection (correctionData) {
+	if (MULTI_ON)
+	{
+		socket.emit("locationCorrection", correctionData);
 	}
 }
 

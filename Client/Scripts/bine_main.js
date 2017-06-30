@@ -101,6 +101,8 @@ function Init () {
 	gameReady = true;
 	mainCanvas = document.getElementById("canvas");
 
+	SetupSound();
+
 	// Resizing the window, and do initial resizing
 	window.addEventListener("resize", ResizeFunction);
 	ResizeFunction();
@@ -208,23 +210,29 @@ function MainUpdate () {
 		else if (inPlayer)
 		{
 			// Player mode
-			var player = curLevel.GetEntityByID(curPlayerID);
+			// var player = curLevel.GetEntityByID(curPlayerID);
 			if (inputChanged)
 			{
 				inputChanged = false;
-				player.SetMoveDirections(wKey, sKey, aKey, dKey);
+				curPlayer.SetMoveDirections(wKey, sKey, aKey, dKey);
 				// Todo: Send to server's session as well
-				SendInputUpdate(player.moveDirections);
+				SendInputUpdate(curPlayer.moveDirections);
 			}
 			// Update the level
 			curLevel.Update();
 			// Todo: determine how to sync with server's session
 
 			// Camera movement
-			xCam = (xCam * 4 + player.GetX() + 0.5) * 0.2;
-			yCam = (yCam * 4 + player.GetY() + 0.5) * 0.2;
-			zCam = (zCam * 4 + player.GetZ() + 0.5) * 0.2;
+			xCam = (xCam * 4 + curPlayer.GetX() + 0.5) * 0.2;
+			yCam = (yCam * 4 + curPlayer.GetY() + 0.5) * 0.2;
+			zCam = (zCam * 4 + curPlayer.GetZ() + 0.5) * 0.2;
 			RenderLevel(mainCanvas, curSession, curLevel, xCam, yCam, zCam);
+
+			// Every few seconds, send a location correction
+			if (frameCounter % 300 === 0)
+			{
+				SendLocationCorrection({x: curPlayer.x, y: curPlayer.y, z: curPlayer.z, xMov: curPlayer.xMov, yMov: curPlayer.yMov, zMov: curPlayer.zMov, moveTime: curPlayer.moveTime, moveDuration: curPlayer.moveDuration});
+			}
 		}
 	}
 	else
