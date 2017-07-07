@@ -205,7 +205,7 @@ function MainUpdate () {
 				}
 			}
 			// Render frame
-			RenderLevel(mainCanvas, curSession, curLevel, editCamX + editMovX * (1 - 0.1 * editMovTime), editCamY + editMovY * (1 - 0.1 * editMovTime), editCamZ + editMovZ * (1 - 0.1 * editMovTime), true);
+			RenderLevel(mainCanvas, curSession, curLevel, editCamX + editMovX * (1 - 0.1 * editMovTime) + 0.5, editCamY + editMovY * (1 - 0.1 * editMovTime) + 0.5, editCamZ + editMovZ * (1 - 0.1 * editMovTime) + 0.5, true);
 		}
 		else if (inPlayer)
 		{
@@ -405,7 +405,7 @@ function GameplayMouseUp () {
 }
 
 function EditTileIfNewCoord () {
-	var gameCoords = ScreenCoordToGameCoord(mouseX, mouseY, Math.round(editCamZ), editCamX + editMovX * (1 - 0.1 * editMovTime), editCamY + editMovY * (1 - 0.1 * editMovTime), editCamZ + editMovZ * (1 - 0.1 * editMovTime), R);
+	var gameCoords = ScreenCoordToGameCoord(mouseX, mouseY, Math.round(editCamZ), editCamX + editMovX * (1 - 0.1 * editMovTime) + 0.5, editCamY + editMovY * (1 - 0.1 * editMovTime) + 0.5, editCamZ + editMovZ * (1 - 0.1 * editMovTime) + 0.5, R);
 
 	if (gameCoords.x === lastEditX && gameCoords.y === lastEditY && gameCoords.z === lastEditZ)
 	{

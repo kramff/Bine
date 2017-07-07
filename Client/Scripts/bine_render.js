@@ -61,6 +61,7 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	var topZ = -1;
 	var bottomI = 0;
 
+
 	if (drawObjects.length > 0)
 	{
 		bottomZ = drawObjects[0].drawZ - 1;
@@ -73,6 +74,10 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 			//Only areas can have a higher z than the last object
 			topZ = Math.max(topZ, drawObjects[i].drawZ + drawObjects[i].zSize);
 		}
+	}
+	if (R.EDIT_MODE && bottomZ > Math.round(R.cameraZ))
+	{
+		DrawEditOutline(Math.round(R.cameraZ));
 	}
 	for (var z = bottomZ; z <= topZ + 1; z++)
 	{
@@ -120,13 +125,21 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 		// Draw outline where player could be placed if in edit mode
 		if (R.EDIT_MODE && z === Math.round(R.cameraZ))
 		{
-			R.ctx.save();
-			var size = GetScale(z);
-			R.ctx.strokeStyle = "#40FF80";
-			R.ctx.strokeRect(R.CANVAS_HALF_WIDTH, R.CANVAS_HALF_HEIGHT, size, size);
-			R.ctx.restore();
+			DrawEditOutline(z);
 		}
 	}
+	if (R.EDIT_MODE && topZ < Math.round(R.cameraZ))
+	{
+		DrawEditOutline(Math.round(R.cameraZ));
+	}
+}
+
+function DrawEditOutline (z) {
+	R.ctx.save();
+	var size = GetScale(z);
+	R.ctx.strokeStyle = "#40FF80";
+	R.ctx.strokeRect(R.CANVAS_HALF_WIDTH - size / 2, R.CANVAS_HALF_HEIGHT - size / 2, size, size);
+	R.ctx.restore();
 }
 
 function DrawObjSortFunc (a, b) {

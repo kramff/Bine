@@ -274,6 +274,9 @@ function ReceiveAssignPlayer (playerID) {
 	editorActive = false;
 	HideAllMenus();
 	ShowMenu("test_level");
+	xCam = curPlayer.GetX() + 0.5;
+	yCam = curPlayer.GetY() + 0.5;
+	zCam = curPlayer.GetZ() + 0.5;
 }
 function ReceiveRemoveEntity (levelID, entityID) {
 	curSession.RemoveEntity(levelID, entityID);
@@ -382,7 +385,12 @@ function EditArea () {
 function TestAsPlayer () {
 	if (MULTI_ON)
 	{
-		socket.emit("testAsPlayer", {x: Math.round(editCamX), y: Math.round(editCamY), z: Math.round(editCamZ)});
+		var zAdj = 0;
+		if (curLevel.CheckLocationSolid(Math.round(editCamX), Math.round(editCamY), Math.round(editCamZ)))
+		{
+			zAdj = 1
+		}
+		socket.emit("testAsPlayer", {x: Math.round(editCamX), y: Math.round(editCamY), z: Math.round(editCamZ + zAdj)});
 	}
 }
 
