@@ -3,6 +3,10 @@
 
 // A session has a world, which contains a set of levels and some other data
 
+var FALL_SPEED_START = 5;
+var FALL_SPEED_MIN = 2;
+var MOVE_CANCEL_TIME = 3;
+var MOVE_SPEED = 10;
 
 // var sessio = new Session("my session", {levelDatas: [], tileData: [], worldRules: []})
 
@@ -33,9 +37,12 @@ var Session = (function () {
 		this.yMov = 0;
 		this.zMov = 0;
 		this.moveTime = 0;
-		this.moveDuration = 10;
+		this.moveDuration = MOVE_SPEED;
 
-		this.moveDirections = {up: false, down: false, left: false, right: false};
+		this.falling = false;
+		this.fallSpeed = FALL_SPEED_START;
+
+		this.moveDirections = {up: false, down: false, left: false, right: false, changed: false};
 
 		this.xCorrection = 0;
 		this.yCorrection = 0;
@@ -45,7 +52,7 @@ var Session = (function () {
 		this.yMovCorrection = 0;
 		this.zMovCorrection = 0;
 		this.moveTimeCorrection = 0;
-		this.moveDurationCorrection = 10;
+		this.moveDurationCorrection = MOVE_SPEED;
 	}
 	Entity.prototype.Export = function() {
 		var entityData = {
@@ -97,19 +104,26 @@ var Session = (function () {
 			}
 		}
 		// Not moving - able to start a movement
-		else
+		// OR started moving ~3 or fewer frames ago, able to cancel into other movements
+		if ((this.xMov === 0 && this.yMov === 0 && this.zMov === 0) || (this.moveTime < MOVE_CANCEL_TIME && this.moveDirections.changed))
 		{
+			var floorSolid = levelRef.CheckRelativeLocationSolid(this, 0, 0, -1);
 			// Solid ground below player (Floor): Can move if solid
-			if (levelRef.CheckRelativeLocationSolid(this, 0, 0, -1))
+			if (floorSolid)
 			{
+				this.moveDirections.changed = false;
+				this.falling = false;
+				this.fallSpeed = FALL_SPEED_START
 				// Input for movement
 				if (this.moveDirections.up || this.moveDirections.down || this.moveDirections.left || this.moveDirections.right)
 				{
 					// Set movement based on input
 					this.xMov = (this.moveDirections.left ? -1 : 0) + (this.moveDirections.right ? 1 : 0);
 					this.yMov = (this.moveDirections.up ? -1 : 0) + (this.moveDirections.down ? 1 : 0);
-					this.moveDuration = 10;
+					this.zMov = 0;
+					this.moveDuration = MOVE_SPEED;
 
+					var ceilSolid = levelRef.CheckRelativeLocationSolid(this, 0, 0, 1);
 					// Adjust movement for walls/other obstacles
 					// If player is moving diagonally, check if the x or y aspect is blocked
 					if (this.xMov !== 0 && this.yMov !== 0)
@@ -128,7 +142,6 @@ var Session = (function () {
 						var xAboveSolid = levelRef.CheckRelativeLocationSolid(this, this.xMov, 0, 1);
 						var yAboveSolid = levelRef.CheckRelativeLocationSolid(this, 0, this.yMov, 1);
 						// Space directly above the entity
-						var ceilSolid = levelRef.CheckRelativeLocationSolid(this, 0, 0, 1);
 
 						// Check if X direction is blocked
 						if (xSpaceSolid && (xAboveSolid || ceilSolid))
@@ -157,6 +170,8 @@ var Session = (function () {
 								// Blocked off
 								this.xMov = 0;
 								this.yMov = 0;
+								this.zMov = 0;
+								this.moveTime = 0;
 							}
 							else
 							{
@@ -170,13 +185,34 @@ var Session = (function () {
 							this.zMov = -1;
 						}
 					}
+					// Stop movement
+					else
+					{
+						this.xMov = 0;
+						this.yMov = 0;
+						this.zMov = 0;
+						this.moveTime = 0;
+					}
+				}
+				// Stop movement
+				else
+				{
+					this.xMov = 0;
+					this.yMov = 0;
+					this.zMov = 0;
+					this.moveTime = 0;
 				}
 			}
 			// Player falls down
 			else
 			{
-				this.moveDuration = 3;
+				this.moveDuration = this.fallSpeed;
 				this.zMov = -1;
+				if (this.falling && this.fallSpeed > FALL_SPEED_MIN)
+				{
+					this.fallSpeed --;
+				}
+				this.falling = true;
 			}
 		}
 	}
@@ -194,6 +230,7 @@ var Session = (function () {
 		this.moveDirections.down = down;
 		this.moveDirections.left = left;
 		this.moveDirections.right = right;
+		this.moveDirections.changed = true;
 	}
 	Entity.prototype.SetLocationCorrection = function(x, y, z, xMov, yMov, zMov, moveTime, moveDuration) {
 		this.xCorrection = x;
@@ -255,7 +292,7 @@ var Session = (function () {
 		this.yMov = 0;
 		this.zMov = 0;
 		this.moveTime = 0;
-		this.moveDuration = 10;
+		this.moveDuration = MOVE_SPEED;
 	}
 	Area.prototype.Export = function() {
 		var areaData = {
