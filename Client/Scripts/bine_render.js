@@ -315,6 +315,7 @@ function DrawAreaZSlice (area, z) {
 		if (editorActive)
 		{
 			DrawAreaEdges(area, scale, z);
+
 		}
 	}
 }
@@ -571,11 +572,12 @@ function DrawAreaEdges (area, scale, z) {
 	var y0 = scale * (0 + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
 	var y1 = scale * (area.ySize + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
 	R.ctx.save();
-	// if (z === player.z - 1)
-	if (false)
+
+	// Dark cover over tiles below the edit level
+	if (R.EDIT_MODE && z === Math.floor(R.cameraZ) - 1)
 	{
 		R.ctx.fillStyle = "#000000";
-		R.ctx.globalAlpha = 0.9;
+		R.ctx.globalAlpha = 0.7;
 		R.ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
 	}
 	// R.ctx.strokeStyle = areaColors[areas.indexOf(area)];
@@ -590,11 +592,12 @@ function DrawAreaEdges (area, scale, z) {
 		R.ctx.strokeStyle = "#FFFFFF";
 	}
 	R.ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
-	// if (z === player.z)
-	if (false)
+
+	// Light cover over tiles at the current edit level
+	if (R.EDIT_MODE && z === Math.floor(R.cameraZ))
 	{
 		R.ctx.fillStyle = "#FFFFFF";
-		R.ctx.globalAlpha = 0.2;
+		R.ctx.globalAlpha = 0.15;
 		R.ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
 	}
 	R.ctx.restore();
