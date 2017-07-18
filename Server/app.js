@@ -275,6 +275,15 @@ io.on("connection", function(socket) {
 		}
 	});
 
+	socket.on("deleteArea", function (data) {
+		if (this.inSession && this.inLevel)
+		{
+			var level = this.curSession.GetLevelByID(data.levelID);
+			level.RemoveArea(data.areaID);
+			io.to(this.roomName).emit("deleteArea", data);
+		}
+	});
+
 	// Automatically when input received from players 
 	// - Send player events (movement, etc)
 	// - Send level events (areas move, NPC's do actions)

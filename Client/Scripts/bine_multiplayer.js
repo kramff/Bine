@@ -111,8 +111,8 @@ function InitSocketConnection (argument) {
 		socket.on("createArea", function (data) {
 			ReceiveCreateArea(data);
 		});
-		socket.on("removeArea", function (data) {
-			ReceiveRemoveArea(data);
+		socket.on("deleteArea", function (data) {
+			ReceiveDeleteArea(data.levelID, data.areaID);
 		});
 
 		//Temporary level direct download
@@ -248,8 +248,9 @@ function ReceiveCreateArea (levelID, areaData) {
 	var level = curSession.GetLevelByID(levelID);
 	level.AddArea(areaData);
 }
-function ReceiveRemoveArea (removeArea) {
-	// ActualRemoveAreaAt(removeArea.x, removeArea.y, removeArea.z);
+function ReceiveDeleteArea (levelID, areaID) {
+	var level = curSession.GetLevelByID(levelID);
+	curLevel.RemoveArea(areaID);
 }
 function ReceiveCreateLevel (levelData) {
 	// var levelID = newLevelData.id;
@@ -412,5 +413,12 @@ function StopTestingPlayer () {
 	if (MULTI_ON)
 	{
 		socket.emit("stopTestingPlayer");
+	}
+}
+
+function DeleteArea () {
+	if (MULTI_ON)
+	{
+		socket.emit("deleteArea", {levelID: curLevel.id, areaID: curArea.id});
 	}
 }

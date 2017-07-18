@@ -129,9 +129,6 @@ function DoButtonAction (action) {
 		case "create_area":
 			CreateNewArea(editCamX, editCamY, editCamZ);
 		break;
-		case "remove_area":
-			RemoveArea();
-		break;
 		case "edit_area":
 			var areaSelected = curLevel.GetAreaAtLocation(editCamX, editCamY, editCamZ);
 			if (areaSelected !== undefined)
@@ -188,6 +185,11 @@ function DoButtonAction (action) {
 		case "set_rules_area":
 		break;
 		case "delete_area":
+			DeleteArea();
+			inArea = false;
+			curArea = undefined;
+			HideAllMenus();
+			ShowMenu("edit_level");
 		break;
 	}
 }
