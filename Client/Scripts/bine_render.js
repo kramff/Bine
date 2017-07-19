@@ -75,6 +75,10 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 			topZ = Math.max(topZ, drawObjects[i].drawZ + drawObjects[i].zSize);
 		}
 	}
+	// Limit bottomZ to 100 below the player, limit topZ to 100 above the player
+	bottomZ = Math.max(bottomZ, Math.round(cameraZ) - 100);
+	topZ = Math.min(topZ, Math.round(cameraZ) + 100);
+
 	if (R.EDIT_MODE && bottomZ > Math.round(R.cameraZ))
 	{
 		DrawEditOutline(Math.round(R.cameraZ));
