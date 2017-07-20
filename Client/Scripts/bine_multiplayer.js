@@ -34,17 +34,23 @@ function SocketInit (argument) {
 	var socketScript = document.createElement("script");
 	if (location.href === "http://kramff.github.io/")
 	{
-		// Web
+		// Web for github.io
 		socketScript.setAttribute("src", "https://bine-online.herokuapp.com/socket.io/socket.io.js");
 	}
 	else if (location.href.indexOf("http://www.kramff.com/Bine/") !== -1)
 	{
+		// Web for kramff.com
 		socketScript.setAttribute("src", "https://bine.nfshost.com/socket.io/socket.io.js");
 	}
-	else
+	else if (location.href.indexOf("file:/") !== -1)
 	{
 		// Local
 		socketScript.setAttribute("src", "http://localhost:5000/socket.io/socket.io.js");
+	}
+	else
+	{
+		// Hosting off some dumb custom server
+		socketScript.setAttribute("src", location.href.replace("8080/Client", "5000/socket.io/socket.io.js"));
 	}
 	document.getElementsByTagName('body')[0].appendChild(socketScript);
 	socketScript.onreadystatechange = LoadSScript;
@@ -72,9 +78,13 @@ function InitSocketConnection (argument) {
 		{
 			socket = io("bine.nfshost.com");
 		}
-		else
+		else if (location.href.indexOf("file:/") !== -1)
 		{
 			socket = io("http://localhost:5000");
+		}
+		else
+		{
+			socket = io(location.href.replace("8080/Client", "5000"));
 		}
 		socket.on("connect", function (data) {
 			console.log("Connected to server with id: " + socket.id);

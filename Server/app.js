@@ -18,7 +18,7 @@ var socketio = require("socket.io");
 
 
 var listener = function (req, res) {
-	res.end("This is the Bine server - use kramff.github.io");
+	res.end("This is the Bine server - use kramff.com/Bine/Client");
 }
 var server = http.createServer(listener)
 server.listen(process.env.PORT || 5000);
