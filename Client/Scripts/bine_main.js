@@ -44,17 +44,26 @@ function LoadIsoScripts () {
 var mainCanvas = undefined;
 var gameReady = false;
 
+// In a session? Keep reference
 var inSession = false;
 var curSession = undefined;
 
+// In a level? Keep reference
 var inLevel = false;
 var curLevel = undefined;
 
+// In a player? (Currently playing) Keep reference
 var inPlayer = true;
 var curPlayerID = undefined;
+var curPlayer = undefined;
 
+// In an area? (Editing an area) Keep reference
 var inArea = false;
 var curArea = undefined;
+
+// In an entity? (Editing an entity) Keep reference
+var inEntity = false;
+var curEntity = undefined;
 
 var editorActive = true;
 

@@ -370,16 +370,10 @@ function CreateNewArea (createX, createY, createZ) {
 	}
 }
 
-function RemoveArea () {
+function CreateNewEntity (createX, createY, createZ) {
 	if (MULTI_ON)
 	{
-		
-	}
-}
-function EditArea () {
-	if (MULTI_ON)
-	{
-		
+		socket.emit("createNewEntity", {x: createX, y: createY, z: createZ});
 	}
 }
 

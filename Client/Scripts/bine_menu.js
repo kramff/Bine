@@ -137,11 +137,20 @@ function DoButtonAction (action) {
 				curArea = areaSelected;
 				HideAllMenus();
 				ShowMenu("edit_area");
-				console.log("An area was selected");
 			}
-			else
+		break;
+
+		case "create_entity":
+			CreateNewEntity(editCamX, editCamY, editCamZ);
+		break;
+		case "edit_entity":
+			var entitySelected = curLevel.GetEntityAtLocation(editCamX, editCamY, editCamZ);
+			if (entitySelected !== undefined)
 			{
-				console.log("No area was selected");
+				inEntity = true;
+				curEntity = entitySelected;
+				HideAllMenus();
+				ShowMenu("edit_entity");
 			}
 		break;
 
@@ -167,6 +176,14 @@ function DoButtonAction (action) {
 			inPlayer = false;
 			curPlayerID = undefined;
 			editorActive = true;
+			HideAllMenus();
+			ShowMenu("edit_level");
+		break;
+
+		// Entity menu
+		case "stop_edit_entity":
+			inEntity = false;
+			curEntity = undefined;
 			HideAllMenus();
 			ShowMenu("edit_level");
 		break;

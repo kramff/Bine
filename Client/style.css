@@ -92,6 +92,10 @@ body {
 	align-content: center;
 }
 
+.submenu_container {
+	border: 1px solid #FFFFFF;
+	background-color: #404040;
+}
 
 .button {
 	padding: 10px;
@@ -182,4 +186,8 @@ body {
 }
 .level:hover {
 	background-color: #202020;
+}
+
+.simple_text {
+	font-size: 14px;
 }

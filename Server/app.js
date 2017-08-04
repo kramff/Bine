@@ -206,6 +206,26 @@ io.on("connection", function(socket) {
 			io.to(this.roomName).emit("newArea", {levelID: this.curLevel.id, areaData: areaData});
 		}
 	});
+	socket.on("createNewEntity", function (data) {
+		if (this.inSession && this.inLevel)
+		{
+			this.curLevel.entityCounter ++;
+			var blankEntityData = {
+				id: this.curLevel.entityCounter,
+				x: data.x,
+				y: data.y,
+				z: data.z,
+				settings: [],
+				style: [],
+				rules: [],
+				templates: [],
+			};
+			var entity = this.curLevel.AddEntity(blankEntityData);
+
+			var entityData = entity.Export();
+			io.to(this.roomName).emit("newEntity", {levelID: this.curLevel.id, entityData: entityData});
+		}
+	});
 	socket.on("testAsPlayer", function (data) {
 		console.log("player testing start")
 		if (this.inSession && this.inLevel)
