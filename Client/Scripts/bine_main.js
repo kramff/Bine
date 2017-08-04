@@ -126,6 +126,11 @@ function Init () {
 	window.addEventListener("mouseup", DoMouseUp);
 	window.addEventListener("contextmenu", DoContextMenu);
 
+	// Touch input (for phones)
+	window.addEventListener("touchstart", DoTouchStart);
+	window.addEventListener("touchend", DoTouchEnd);
+	window.addEventListener("touchmove", DoTouchMove);
+
 	// Old Shit
 	//window.requestAnimationFrame(Update);
 	
@@ -379,6 +384,16 @@ function DoMouseUp (event) {
 
 function DoContextMenu (event) {
 	event.preventDefault();
+}
+
+function DoTouchStart (event) {
+	console.log(event.touches);
+}
+function DoTouchEnd (event) {
+	console.log(event.touches);
+}
+function DoTouchMove (event) {
+	console.log(event.touches);
 }
 
 function EditorMouseDown () {
