@@ -44,17 +44,26 @@ function LoadIsoScripts () {
 var mainCanvas = undefined;
 var gameReady = false;
 
+// In a session? Keep reference
 var inSession = false;
 var curSession = undefined;
 
+// In a level? Keep reference
 var inLevel = false;
 var curLevel = undefined;
 
+// In a player? (Currently playing) Keep reference
 var inPlayer = true;
 var curPlayerID = undefined;
+var curPlayer = undefined;
 
+// In an area? (Editing an area) Keep reference
 var inArea = false;
 var curArea = undefined;
+
+// In an entity? (Editing an entity) Keep reference
+var inEntity = false;
+var curEntity = undefined;
 
 var editorActive = true;
 
@@ -116,6 +125,11 @@ function Init () {
 	window.addEventListener("mousemove", DoMouseMove);
 	window.addEventListener("mouseup", DoMouseUp);
 	window.addEventListener("contextmenu", DoContextMenu);
+
+	// Touch input (for phones)
+	window.addEventListener("touchstart", DoTouchStart);
+	window.addEventListener("touchend", DoTouchEnd);
+	window.addEventListener("touchmove", DoTouchMove);
 
 	// Old Shit
 	//window.requestAnimationFrame(Update);
@@ -370,6 +384,16 @@ function DoMouseUp (event) {
 
 function DoContextMenu (event) {
 	event.preventDefault();
+}
+
+function DoTouchStart (event) {
+	console.log(event.touches);
+}
+function DoTouchEnd (event) {
+	console.log(event.touches);
+}
+function DoTouchMove (event) {
+	console.log(event.touches);
 }
 
 function EditorMouseDown () {

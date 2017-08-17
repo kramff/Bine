@@ -34,17 +34,23 @@ function SocketInit (argument) {
 	var socketScript = document.createElement("script");
 	if (location.href === "http://kramff.github.io/")
 	{
-		// Web
+		// Web for github.io
 		socketScript.setAttribute("src", "https://bine-online.herokuapp.com/socket.io/socket.io.js");
 	}
 	else if (location.href.indexOf("http://www.kramff.com/Bine/") !== -1)
 	{
+		// Web for kramff.com
 		socketScript.setAttribute("src", "https://bine.nfshost.com/socket.io/socket.io.js");
 	}
-	else
+	else if (location.href.indexOf("file:/") !== -1)
 	{
 		// Local
 		socketScript.setAttribute("src", "http://localhost:5000/socket.io/socket.io.js");
+	}
+	else
+	{
+		// Hosting off some dumb custom server
+		socketScript.setAttribute("src", location.href.replace("8080/Client", "5000/socket.io/socket.io.js"));
 	}
 	document.getElementsByTagName('body')[0].appendChild(socketScript);
 	socketScript.onreadystatechange = LoadSScript;
@@ -72,9 +78,13 @@ function InitSocketConnection (argument) {
 		{
 			socket = io("bine.nfshost.com");
 		}
-		else
+		else if (location.href.indexOf("file:/") !== -1)
 		{
 			socket = io("http://localhost:5000");
+		}
+		else
+		{
+			socket = io(location.href.replace("8080/Client", "5000"));
 		}
 		socket.on("connect", function (data) {
 			console.log("Connected to server with id: " + socket.id);
@@ -111,8 +121,8 @@ function InitSocketConnection (argument) {
 		socket.on("createArea", function (data) {
 			ReceiveCreateArea(data);
 		});
-		socket.on("removeArea", function (data) {
-			ReceiveRemoveArea(data);
+		socket.on("deleteArea", function (data) {
+			ReceiveDeleteArea(data.levelID, data.areaID);
 		});
 
 		//Temporary level direct download
@@ -248,8 +258,9 @@ function ReceiveCreateArea (levelID, areaData) {
 	var level = curSession.GetLevelByID(levelID);
 	level.AddArea(areaData);
 }
-function ReceiveRemoveArea (removeArea) {
-	// ActualRemoveAreaAt(removeArea.x, removeArea.y, removeArea.z);
+function ReceiveDeleteArea (levelID, areaID) {
+	var level = curSession.GetLevelByID(levelID);
+	curLevel.RemoveArea(areaID);
 }
 function ReceiveCreateLevel (levelData) {
 	// var levelID = newLevelData.id;
@@ -369,16 +380,10 @@ function CreateNewArea (createX, createY, createZ) {
 	}
 }
 
-function RemoveArea () {
+function CreateNewEntity (createX, createY, createZ) {
 	if (MULTI_ON)
 	{
-		
-	}
-}
-function EditArea () {
-	if (MULTI_ON)
-	{
-		
+		socket.emit("createNewEntity", {x: createX, y: createY, z: createZ});
 	}
 }
 
@@ -412,5 +417,12 @@ function StopTestingPlayer () {
 	if (MULTI_ON)
 	{
 		socket.emit("stopTestingPlayer");
+	}
+}
+
+function DeleteArea () {
+	if (MULTI_ON)
+	{
+		socket.emit("deleteArea", {levelID: curLevel.id, areaID: curArea.id});
 	}
 }

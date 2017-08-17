@@ -129,9 +129,6 @@ function DoButtonAction (action) {
 		case "create_area":
 			CreateNewArea(editCamX, editCamY, editCamZ);
 		break;
-		case "remove_area":
-			RemoveArea();
-		break;
 		case "edit_area":
 			var areaSelected = curLevel.GetAreaAtLocation(editCamX, editCamY, editCamZ);
 			if (areaSelected !== undefined)
@@ -140,11 +137,20 @@ function DoButtonAction (action) {
 				curArea = areaSelected;
 				HideAllMenus();
 				ShowMenu("edit_area");
-				console.log("An area was selected");
 			}
-			else
+		break;
+
+		case "create_entity":
+			CreateNewEntity(editCamX, editCamY, editCamZ);
+		break;
+		case "edit_entity":
+			var entitySelected = curLevel.GetEntityAtLocation(editCamX, editCamY, editCamZ);
+			if (entitySelected !== undefined)
 			{
-				console.log("No area was selected");
+				inEntity = true;
+				curEntity = entitySelected;
+				HideAllMenus();
+				ShowMenu("edit_entity");
 			}
 		break;
 
@@ -174,6 +180,14 @@ function DoButtonAction (action) {
 			ShowMenu("edit_level");
 		break;
 
+		// Entity menu
+		case "stop_edit_entity":
+			inEntity = false;
+			curEntity = undefined;
+			HideAllMenus();
+			ShowMenu("edit_level");
+		break;
+
 		// Area menu
 		case "stop_edit_area":
 			inArea = false;
@@ -188,6 +202,11 @@ function DoButtonAction (action) {
 		case "set_rules_area":
 		break;
 		case "delete_area":
+			DeleteArea();
+			inArea = false;
+			curArea = undefined;
+			HideAllMenus();
+			ShowMenu("edit_level");
 		break;
 	}
 }

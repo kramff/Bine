@@ -75,6 +75,10 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 			topZ = Math.max(topZ, drawObjects[i].drawZ + drawObjects[i].zSize);
 		}
 	}
+	// Limit bottomZ to 100 below the player, limit topZ to 100 above the player
+	bottomZ = Math.max(bottomZ, Math.round(cameraZ) - 100);
+	topZ = Math.min(topZ, Math.round(cameraZ) + 100);
+
 	if (R.EDIT_MODE && bottomZ > Math.round(R.cameraZ))
 	{
 		DrawEditOutline(Math.round(R.cameraZ));
@@ -245,21 +249,31 @@ function DrawEntity (entity) {
 	if (x > 0 - scale && x < R.CANVAS_WIDTH && y > 0 - scale && y < R.CANVAS_HEIGHT)
 	{
 		R.ctx.save();
-		R.ctx.strokeStyle = "#80FFFF";
-		R.ctx.fillStyle = "#208080";
 		// if (editorActive && character === player)
-		if (false)
+		// if (false)
+		// {
+		// 	//Editor player: transparent, move with camera when middle clicking
+		// 	R.ctx.globalAlpha = 0.5;
+		// 	if (middleClick)
+		// 	{
+		// 		x = R.CANVAS_HALF_WIDTH - scale / 2;
+		// 		y = R.CANVAS_HALF_HEIGHT - scale / 2;
+		// 	}
+		// }
+
+		// Entity is player
+		if (entity === curPlayer)
 		{
-			//Editor player: transparent, move with camera when middle clicking
-			R.ctx.globalAlpha = 0.5;
-			if (middleClick)
-			{
-				x = R.CANVAS_HALF_WIDTH - scale / 2;
-				y = R.CANVAS_HALF_HEIGHT - scale / 2;
-			}
+			R.ctx.strokeStyle = "#60C0C0";
+			R.ctx.fillStyle = "#208080";
 		}
-		// if (character !== player)
-		if (true)
+		// Entity is being edited
+		else if (entity === curEntity)
+		{
+			R.ctx.strokeStyle = "#B03080";
+			R.ctx.fillStyle = "#802060";
+		}
+		else
 		{
 			R.ctx.strokeStyle = "#80FF80";
 			R.ctx.fillStyle = "#208020";

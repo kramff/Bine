@@ -439,6 +439,14 @@ var Session = (function () {
 			return result[0];
 		}
 	};
+	Level.prototype.RemoveArea = function(areaID) {
+		var area = this.GetAreaByID(areaID);
+		if (!IS_SERVER)
+		{
+			this.drawObjects.splice(this.drawObjects.indexOf(area), 1);
+		}
+		this.areas.splice(this.areas.indexOf(area), 1);
+	};
 	Level.prototype.AddEntity = function(entityData) {
 		var newEntity = new Entity(entityData);
 		this.entities.push(newEntity);
@@ -503,6 +511,20 @@ var Session = (function () {
 			{
 				//Within area's bounds
 				return area;
+			}
+		}
+		return undefined;
+	};
+	Level.prototype.GetEntityAtLocation = function(x, y, z) {
+		for (var i = 0; i < this.entities.length; i++)
+		{
+			var entity = this.entities[i];
+			if (x === entity.x &&
+				y === entity.y &&
+				z === entity.z)
+			{
+				// On entity's location
+				return entity;
 			}
 		}
 		return undefined;

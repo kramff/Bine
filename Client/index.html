@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Bine</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0,"> 
 <!-- Bine puzzle game copyright Mark Foster 2015-2016 -->
 <link rel="stylesheet" type="text/css" href="style.css">
 <script type="text/javascript" src="Scripts/bine_main.js"></script>
@@ -88,8 +89,9 @@
 <div class="menu_container" id="edit_level">
 	<div class="button" data-action="exit_level">Back to world overview</div>
 	<div class="button" data-action="create_area">Create an area</div>
-	<!-- <div class="button" data-action="remove_area">Remove an area</div> -->
 	<div class="button" data-action="edit_area">Edit an area (Resize, Move, Set Rules, etc)</div>
+	<div class="button" data-action="create_entity">Create an Entity</div>
+	<div class="button" data-action="edit_entity">Edit an Entity(Appearance, Rules)</div>
 	<div class="button" data-action="test_as_player">Test as player</div>
 </div>
 
@@ -101,8 +103,21 @@
 	<div class="button" data-action="stop_edit_area">Stop editing this area</div>
 	<div class="button" data-action="resize_area">Resize this area</div>
 	<div class="button" data-action="move_area">Move this area</div>
-	<div class="button" data-action="set_rules_area">Set the rules of this area</div>
 	<div class="button" data-action="delete_area">Delete this area</div>
+	<div class="submenu_container">
+		<div class="simple_text">Change appearance ("style")</div>
+		<div class="simple_text">Change rules</div>
+	</div>
+</div>
+
+<div class="menu_container" id="edit_entity">
+	<div class="button" data-action="stop_edit_entity">Stop editing this entity</div>
+	<div class="button" data-action="move_entity">Move this entity</div>
+	<div class="button" data-action="delete_entity">Delete this entity</div>
+	<div class="submenu_container">
+		<div class="simple_text">Change appearance ("style")</div>
+		<div class="simple_text">Change rules</div>
+	</div>
 </div>
 
 <div class="menu_container" id="create_world">

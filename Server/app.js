@@ -18,7 +18,7 @@ var socketio = require("socket.io");
 
 
 var listener = function (req, res) {
-	res.end("This is the Bine server - use kramff.github.io");
+	res.end("This is the Bine server - use kramff.com/Bine/Client");
 }
 var server = http.createServer(listener)
 server.listen(process.env.PORT || 5000);
@@ -206,6 +206,26 @@ io.on("connection", function(socket) {
 			io.to(this.roomName).emit("newArea", {levelID: this.curLevel.id, areaData: areaData});
 		}
 	});
+	socket.on("createNewEntity", function (data) {
+		if (this.inSession && this.inLevel)
+		{
+			this.curLevel.entityCounter ++;
+			var blankEntityData = {
+				id: this.curLevel.entityCounter,
+				x: data.x,
+				y: data.y,
+				z: data.z,
+				settings: [],
+				style: [],
+				rules: [],
+				templates: [],
+			};
+			var entity = this.curLevel.AddEntity(blankEntityData);
+
+			var entityData = entity.Export();
+			io.to(this.roomName).emit("newEntity", {levelID: this.curLevel.id, entityData: entityData});
+		}
+	});
 	socket.on("testAsPlayer", function (data) {
 		console.log("player testing start")
 		if (this.inSession && this.inLevel)
@@ -272,6 +292,15 @@ io.on("connection", function(socket) {
 			data.entityID = this.curPlayer.id;
 			data.levelID = this.curLevel.id;
 			socket.broadcast.to(this.roomName).emit("locationCorrection", data);
+		}
+	});
+
+	socket.on("deleteArea", function (data) {
+		if (this.inSession && this.inLevel)
+		{
+			var level = this.curSession.GetLevelByID(data.levelID);
+			level.RemoveArea(data.areaID);
+			io.to(this.roomName).emit("deleteArea", data);
 		}
 	});
 
