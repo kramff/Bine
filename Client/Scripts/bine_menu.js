@@ -38,6 +38,25 @@ function HideAllMenus () {
 	}
 }
 
+function HideAllOverMenus () {
+	var menus = document.getElementsByClassName("over_menu");
+	for (var i = 0; i < menus.length; i++) {
+		// menus[i].style["display"] = "none";
+		var menu = menus[i];
+		menu.classList.remove("active_menu");
+	}
+}
+
+function ShowDarkCover () {
+	var darkCover = document.getElementById("dark_cover");
+	darkCover.classList.add("active_cover");
+}
+
+function HideDarkCover () {
+	var darkCover = document.getElementById("dark_cover");
+	darkCover.classList.remove("active_cover");
+}
+
 // Call this function when connected to server
 function EnableMultiplayerFeatures () {
 
@@ -151,6 +170,7 @@ function DoButtonAction (action) {
 				curEntity = entitySelected;
 				HideAllMenus();
 				ShowMenu("edit_entity");
+				SetupEntityEditingMenu();
 			}
 		break;
 
@@ -207,6 +227,18 @@ function DoButtonAction (action) {
 			curArea = undefined;
 			HideAllMenus();
 			ShowMenu("edit_level");
+		break;
+		case "close_over_menu":
+			HideAllOverMenus();
+			HideDarkCover();
+		break;
+		case "add_entity_variable":
+			ShowDarkCover();
+			ShowMenu("add_entity_variable")
+		break;
+		case "add_entity_trigger":
+			ShowDarkCover();
+			ShowMenu("add_entity_trigger")
 		break;
 	}
 }
@@ -297,4 +329,12 @@ function AddSingleLevelToBox (level) {
 	var levelBox = document.getElementsByClassName("level_box")[0];
 	var levelDiv = CreateNewDiv(levelBox, "level", level.name, level.id);
 	levelDiv.setAttribute("level_id", level.id);
+}
+
+function SetupEntityEditingMenu () {
+	var colorInput = document.getElementById("entity_color_input");
+	if (curEntity.style.color !== undefined)
+	{
+		colorInput.value = curEntity.style.color;
+	}
 }

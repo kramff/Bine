@@ -67,6 +67,7 @@
 	</div>
 	<div class="button" data-action="create_new_level">Create new level</div>
 	<div class="button" data-action="exit_session">Exit Session</div>
+	<div class="button" data-action="edit_templates">Edit Entity Templates</div>
 	<!-- <div class="button" data-menu="edit_world_rules">World Rules and Settings</div> -->
 	<!-- <div class="button" data-menu="edit_level_rules">Level Rules and Templates</div> -->
 	<!-- <div class="button" data-menu="edit_area_rules">Area Rules and Templates</div> -->
@@ -90,6 +91,7 @@
 	<div class="button" data-action="exit_level">Back to world overview</div>
 	<div class="button" data-action="create_area">Create an area</div>
 	<div class="button" data-action="edit_area">Edit an area (Resize, Move, Set Rules, etc)</div>
+	<div class="button" data-action="select_template">Select Template to use for entities</div>
 	<div class="button" data-action="create_entity">Create an Entity</div>
 	<div class="button" data-action="edit_entity">Edit an Entity(Appearance, Rules)</div>
 	<div class="button" data-action="test_as_player">Test as player</div>
@@ -106,6 +108,7 @@
 	<div class="button" data-action="delete_area">Delete this area</div>
 	<div class="submenu_container">
 		<div class="simple_text">Change appearance ("style")</div>
+		<input type="color" class="color_input area_color_input">
 		<div class="simple_text">Change rules</div>
 	</div>
 </div>
@@ -115,9 +118,62 @@
 	<div class="button" data-action="move_entity">Move this entity</div>
 	<div class="button" data-action="delete_entity">Delete this entity</div>
 	<div class="submenu_container">
-		<div class="simple_text">Change appearance ("style")</div>
-		<div class="simple_text">Change rules</div>
+		<!-- <div class="simple_text">Select Template</div> -->
+		<!-- <div class="template_list"></div> -->
+
+		<div class="simple_text">Appearance:</div>
+		<div class="setting_box">
+			<input type="color" id="entity_color_input">
+			<label for="entity_color_input">Color</label>
+		</div>
+		<div class="simple_text">General Settings:</div>
+		<div class="setting_box">
+			<input type="checkbox" id="entity_solid" checked>
+			<label for="entity_solid">Solid</label>
+		</div>
+		<div class="setting_box">
+			<input type="checkbox" id="entity_standable">
+			<label for="entity_standable">Standable</label>
+		</div>
+		<div class="setting_box">
+			<input type="checkbox" id="entity_pushable">
+			<label for="entity_pushable">Pushable</label>
+		</div>
+		<div class="setting_box">
+			<input type="checkbox" id="entity_gravity" checked>
+			<label for="entity_gravity">Gravity</label>
+		</div>
+		<div class="setting_box">
+			<input type="number" id="entity_move_speed" value="10">
+			<label for="entity_move_speed">Move Speed</label>
+		</div>
+		<div class="setting_box">
+			<input type="number" id="entity_fall_speed" value="10">
+			<label for="entity_fall_speed">Fall Speed</label>
+		</div>
+
+		<div class="simple_text">Variables:</div>
+		<div class="variable_box"></div>
+		<div class="button" data-action="add_entity_variable">Add Entity Variable</div>
+
+		<div class="simple_text">Rules:</div>
+		<div class="rules_box"></div>
+		<div class="button" data-action="add_entity_trigger">Add Trigger</div>
+<!-- 		<div class="simple_text">Triggers</div>
+
+		<div class="simple_text">Conditions</div>
+
+		<div class="simple_text">Effects</div>
+
+		<div class="simple_text">Misc</div> -->
+
 	</div>
+</div>
+<div class="menu_container over_menu" id="add_entity_variable">
+	<div class="button" data-action="close_over_menu">Cancel</div>
+</div>
+<div class="menu_container over_menu" id="add_entity_trigger">
+	<div class="button" data-action="close_over_menu">Cancel</div>
 </div>
 
 <div class="menu_container" id="create_world">
@@ -127,6 +183,8 @@
 	<div class="button" data-menu="main_menu">Back</div>
 </div>
 
+
+<div class="dark_cover" id="dark_cover"></div>
 
 </body>
 
