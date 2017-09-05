@@ -93,7 +93,14 @@ function SetupButtons () {
 			}
 			else if (this.dataset.action !== undefined)
 			{
-				DoButtonAction(this.dataset.action);
+				if (this.dataset.extra !== undefined)
+				{
+					DoButtonAction(this.dataset.action, this.dataset.extra);
+				}
+				else
+				{
+					DoButtonAction(this.dataset.action);
+				}
 			}
 		}
 	}
@@ -129,7 +136,7 @@ function SetupButtons () {
 	}
 }
 
-function DoButtonAction (action) {
+function DoButtonAction (action, extra) {
 	switch (action) {
 		default:
 			console.log("No action set up for " + action);
@@ -239,6 +246,12 @@ function DoButtonAction (action) {
 		case "add_entity_trigger":
 			ShowDarkCover();
 			ShowMenu("add_entity_trigger")
+		break;
+		case "select_trigger":
+			curEntity.rules.push({trigger: extra, block: []});
+		break;
+		case "select_effect":
+			curBlock.push({effect: extra, variables: []})
 		break;
 	}
 }

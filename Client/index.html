@@ -157,7 +157,13 @@
 		<div class="button" data-action="add_entity_variable">Add Entity Variable</div>
 
 		<div class="simple_text">Rules:</div>
-		<div class="rules_box"></div>
+		<div class="rules_box">
+			<div class="rule_object">
+				<div class="rule_remove"></div>
+				<div class="rule_title"></div>
+				<div class="rule_block"></div>
+			</div>
+		</div>
 		<div class="button" data-action="add_entity_trigger">Add Trigger</div>
 <!-- 		<div class="simple_text">Triggers</div>
 
@@ -174,6 +180,15 @@
 </div>
 <div class="menu_container over_menu" id="add_entity_trigger">
 	<div class="button" data-action="close_over_menu">Cancel</div>
+	<div class="choice_box">
+		<div class="button" data-action="select_trigger" data-extra="entity_steps_adjacent">Entity Steps Adjacent -> [Entity]</div>
+	</div>
+</div>
+<div class="menu_container over_menu" id="add_entity_effect">
+	<div class="button" data-action="close_over_menu">Cancel</div>
+	<div class="choice_box">
+		<div class="button" data-action="select_effect" data-extra="say_message">Say Message</div>
+	</div>
 </div>
 
 <div class="menu_container" id="create_world">
