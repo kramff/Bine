@@ -25,8 +25,8 @@
 	<div class="menu_bottom_half flex_row_container">
 		<div class="button" id="button_join_session" data-menu="join_session">Join a session</div>
 		<div class="button" id="button_create_session" data-menu="create_session">Create new session</div>
-		<div class="button" id="button_load_world" data-menu="load_world">Edit a world</div>
-		<div class="button" id="button_create_world" data-menu="create_world">Create new world</div>
+		<!-- <div class="button" id="button_load_world" data-menu="load_world">Edit a world</div> -->
+		<!-- <div class="button" id="button_create_world" data-menu="create_world">Create new world</div> -->
 		<div class="button" id="button_settings" data-menu="settings">Settings</div>
 	</div>
 </div>
@@ -67,7 +67,8 @@
 	</div>
 	<div class="button" data-action="create_new_level">Create new level</div>
 	<div class="button" data-action="exit_session">Exit Session</div>
-	<div class="button" data-action="edit_templates">Edit Entity Templates</div>
+	<!-- <div class="button" data-action="edit_templates">Edit Entity Templates</div> -->
+	
 	<!-- <div class="button" data-menu="edit_world_rules">World Rules and Settings</div> -->
 	<!-- <div class="button" data-menu="edit_level_rules">Level Rules and Templates</div> -->
 	<!-- <div class="button" data-menu="edit_area_rules">Area Rules and Templates</div> -->
@@ -89,11 +90,15 @@
 
 <div class="menu_container" id="edit_level">
 	<div class="button" data-action="exit_level">Back to world overview</div>
-	<div class="button" data-action="create_area">Create an area</div>
-	<div class="button" data-action="edit_area">Edit an area (Resize, Move, Set Rules, etc)</div>
-	<div class="button" data-action="select_template">Select Template to use for entities</div>
-	<div class="button" data-action="create_entity">Create an Entity</div>
-	<div class="button" data-action="edit_entity">Edit an Entity(Appearance, Rules)</div>
+	<div class="flex_row_container">
+		<div class="button" data-action="create_area">Create an area</div>
+		<div class="button" data-action="edit_area">Edit an area</div>
+	</div>
+	<!-- <div class="button" data-action="select_template">Select Template to use for entities</div> -->
+	<div class="flex_row_container">
+		<div class="button" data-action="create_entity">Create an Entity</div>
+		<div class="button" data-action="edit_entity">Edit an Entity</div>
+	</div>
 	<div class="button" data-action="test_as_player">Test as player</div>
 </div>
 
@@ -201,6 +206,7 @@
 
 <div class="dark_cover" id="dark_cover"></div>
 
+<div class="debug_zone" id="debug_zone"></div>
 </body>
 
 </html>

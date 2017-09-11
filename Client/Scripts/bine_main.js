@@ -188,42 +188,98 @@ function MainUpdate () {
 		// Editor mode
 		if (editorActive)
 		{
-			// Move camera around
-			if (editMovX === 0 && editMovY === 0 && editMovZ === 0 && (aKey || dKey || wKey || sKey || eKey || qKey))
-			{
-				// Set camera movement
-				editMovX = (aKey ? -1 : 0) + (dKey ? 1 : 0);
-				editMovY = (wKey ? -1 : 0) + (sKey ? 1 : 0);
-				editMovZ = (eKey ? -1 : 0) + (qKey ? 1 : 0);
-				editMovTime = 10;
-			}
-			// If mouse is held down, check for doing mouse-move tile editing
-			if (mousePressed)
+			// Touch movement rules
+			if (touchEventsActive)
 			{
 				if (editMovX !== 0 || editMovY !== 0 || editMovZ !== 0)
 				{
-					EditTileIfNewCoord();
+					editMovTime += 1;
+					if (editMovTime >= 10)
+					{
+						editMovTime = 0;
+						editMovX = 0;
+						editMovY = 0;
+						editMovZ = 0;
+					}
 				}
 			}
-			editMovTime -= 1;
-			if (editMovTime <= 0)
+			// Normal movement rules
+			else
 			{
-				editCamX = editCamX + editMovX;
-				editCamY = editCamY + editMovY;
-				editCamZ = editCamZ + editMovZ;
-				editMovTime = 0;
-				editMovX = 0;
-				editMovY = 0;
-				editMovZ = 0;
-
-				// Also check for mouse-move tile editing here, because of Z movement not getting checked earlierif (mousePressed)
+				// Move camera around
+				if (editMovX === 0 && editMovY === 0 && editMovZ === 0 && (aKey || dKey || wKey || sKey || eKey || qKey))
+				{
+					// Set camera movement
+					editMovX = (aKey ? -1 : 0) + (dKey ? 1 : 0);
+					editMovY = (wKey ? -1 : 0) + (sKey ? 1 : 0);
+					editMovZ = (eKey ? -1 : 0) + (qKey ? 1 : 0);
+					editMovTime = 10;
+				}
+				// If mouse is held down, check for doing mouse-move tile editing
 				if (mousePressed)
 				{
-					EditTileIfNewCoord();
+					if (editMovX !== 0 || editMovY !== 0 || editMovZ !== 0)
+					{
+						EditTileIfNewCoord();
+					}
+				}
+				editMovTime -= 1;
+				if (editMovTime <= 0)
+				{
+					editCamX = editCamX + editMovX;
+					editCamY = editCamY + editMovY;
+					editCamZ = editCamZ + editMovZ;
+					editMovTime = 0;
+					editMovX = 0;
+					editMovY = 0;
+					editMovZ = 0;
+
+					// Also check for mouse-move tile editing here, because of Z movement not getting checked earlierif (mousePressed)
+					if (mousePressed)
+					{
+						EditTileIfNewCoord();
+					}
 				}
 			}
-			// Render frame
-			RenderLevel(mainCanvas, curSession, curLevel, editCamX + editMovX * (1 - 0.1 * editMovTime) + 0.5, editCamY + editMovY * (1 - 0.1 * editMovTime) + 0.5, editCamZ + editMovZ * (1 - 0.1 * editMovTime) + 0.5, true);
+
+			// Render frame while moving with touches
+			if (touchEventsActive && touchMode === TOUCH_MODE_DOUBLE)
+			{
+				// Only change touch offset xyz if both touches are still on
+				if (firstTouch !== undefined && secondTouch !== undefined)
+				{
+					var curTouchCenterX = (firstTouch.clientX + secondTouch.clientX) / 2;
+					var curTouchCenterY = (firstTouch.clientY + secondTouch.clientY) / 2;
+
+					// Using estimated tile size of 60 - fix later to use actual tile size
+					touchOffsetX = (touchCenterX - curTouchCenterX) / 60;
+					touchOffsetY = (touchCenterY - curTouchCenterY) / 60;
+
+					distX = (firstTouch.clientX - secondTouch.clientX);
+					distY = (firstTouch.clientY - secondTouch.clientY);
+					curTouchDistance = Math.sqrt(distX * distX + distY * distY);
+
+					// Not sure what makes sense to use here, 60 or some other number
+					touchOffsetZ = (touchDistance - curTouchDistance) / 30;
+					if (Math.abs(touchOffsetZ) < 1) {
+						touchOffsetZ = 0;
+					}
+					else if (touchOffsetZ > 0)
+					{
+						touchOffsetZ -= 1;
+					}
+					else if (touchOffsetZ < 0)
+					{
+						touchOffsetZ += 1;
+					}
+				}
+				RenderLevel(mainCanvas, curSession, curLevel, editCamX + touchOffsetX + 0.5, editCamY + touchOffsetY + 0.5, editCamZ + touchOffsetZ + 0.5, true);
+			}
+			else
+			{
+				// Render frame normally
+				RenderLevel(mainCanvas, curSession, curLevel, editCamX + editMovX * (1 - 0.1 * editMovTime) + 0.5, editCamY + editMovY * (1 - 0.1 * editMovTime) + 0.5, editCamZ + editMovZ * (1 - 0.1 * editMovTime) + 0.5, true);
+			}
 		}
 		else if (inPlayer)
 		{
@@ -327,6 +383,10 @@ function DoKeyUp (event) {
 }
 
 function DoMouseDown (event) {
+	if (touchEventsActive)
+	{
+		return;
+	}
 	mouseX = event.clientX;
 	mouseY = event.clientY;
 	mousePressed = true;
@@ -347,6 +407,10 @@ function DoMouseDown (event) {
 	}
 }
 function DoMouseMove (event) {
+	if (touchEventsActive)
+	{
+		return;
+	}
 	mouseX = event.clientX;
 	mouseY = event.clientY;
 
@@ -366,6 +430,10 @@ function DoMouseMove (event) {
 }
 
 function DoMouseUp (event) {
+	if (touchEventsActive)
+	{
+		return;
+	}
 	mouseX = event.clientX;
 	mouseY = event.clientY;
 	mousePressed = false;
@@ -390,14 +458,116 @@ function DoContextMenu (event) {
 	event.preventDefault();
 }
 
+var TOUCH_MODE_NONE = 0;
+var TOUCH_MODE_SINGLE = 1;
+var TOUCH_MODE_DOUBLE = 2;
+
+var TOUCH_DELAY_LIMIT = 300;
+var touchMode = TOUCH_MODE_NONE
+var firstTouch = undefined;
+var firstTouchTime = undefined;
+var secondTouch = undefined;
+var touchCenterX = 0;
+var touchCenterY = 0;
+var touchDistance = 0;
+
+var touchEventsActive = false;
+
+// Values updated each frame while dragging / zooming
+var touchOffsetX = 0;
+var touchOffsetY = 0;
+var touchOffsetZ = 0;
+var distX = 0;
+var distY = 0;
+var curTouchDistance = 0;
+
 function DoTouchStart (event) {
-	console.log(event.touches);
+	touchEventsActive = true;
+
+	var newTouch = event.changedTouches.item(0);
+	if (touchMode === TOUCH_MODE_NONE)
+	{
+		firstTouch = newTouch;
+		touchMode = TOUCH_MODE_SINGLE;
+		firstTouchTime = Date.now();
+	}
+	else if (touchMode === TOUCH_MODE_SINGLE)
+	{
+		if (Date.now() - firstTouchTime < TOUCH_DELAY_LIMIT)
+		{
+			secondTouch = newTouch;
+			touchMode = TOUCH_MODE_DOUBLE;
+			touchCenterX = (firstTouch.clientX + secondTouch.clientX) / 2;
+			touchCenterY = (firstTouch.clientY + secondTouch.clientY) / 2;
+			var distX = (firstTouch.clientX - secondTouch.clientX);
+			var distY = (firstTouch.clientY - secondTouch.clientY);
+			touchDistance = Math.sqrt(distX * distX + distY * distY);
+		}
+		else
+		{
+			// Do nothing... too slow
+		}
+	}
+	else if (touchMode === TOUCH_MODE_DOUBLE)
+	{
+		// Do nothing... too many touches
+	}
 }
 function DoTouchEnd (event) {
-	console.log(event.touches);
+	for (var i = 0; i < event.changedTouches.length; i++) {
+		var curTouch = event.changedTouches[i];
+
+		if (firstTouch !== undefined && curTouch.identifier === firstTouch.identifier)
+		{
+			firstTouch = undefined;
+		}
+		else if (secondTouch !== undefined && curTouch.identifier === secondTouch.identifier)
+		{
+			secondTouch = undefined;
+		}
+	}
+	if (touchMode === TOUCH_MODE_NONE)
+	{
+		// Do nothing
+	}
+	else if (touchMode === TOUCH_MODE_SINGLE)
+	{
+		if (firstTouch === undefined)
+		{
+			touchMode = TOUCH_MODE_NONE;
+		}
+	}
+	else if (touchMode === TOUCH_MODE_DOUBLE)
+	{
+		if (firstTouch === undefined && secondTouch === undefined)
+		{
+			touchMode = TOUCH_MODE_NONE;
+
+			editCamX = editCamX + Math.round(touchOffsetX);
+			editCamY = editCamY + Math.round(touchOffsetY);
+			editCamZ = editCamZ + Math.round(touchOffsetZ);
+
+			editMovX = (touchOffsetX - Math.round(touchOffsetX)) / 2;
+			editMovY = (touchOffsetY - Math.round(touchOffsetY)) / 2;
+			editMovZ = (touchOffsetZ - Math.round(touchOffsetZ)) / 2;
+			editMovTime = -10;
+		}
+	}
 }
 function DoTouchMove (event) {
-	console.log(event.touches);
+	for (var i = 0; i < event.changedTouches.length; i++) {
+		var curTouch = event.changedTouches[i];
+
+		if (firstTouch !== undefined && curTouch.identifier === firstTouch.identifier)
+		{
+			firstTouch = curTouch;
+		}
+		else if (secondTouch !== undefined && curTouch.identifier === secondTouch.identifier)
+		{
+			secondTouch = curTouch;
+		}
+
+	}
 }
 
 function EditorMouseDown () {
