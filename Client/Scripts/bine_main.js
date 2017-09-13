@@ -482,6 +482,11 @@ var distY = 0;
 var curTouchDistance = 0;
 
 function DoTouchStart (event) {
+	if (!editorActive)
+	{
+		GameplayTouchStart(event);
+		return;
+	}
 	touchEventsActive = true;
 
 	var newTouch = event.changedTouches.item(0);
@@ -514,8 +519,13 @@ function DoTouchStart (event) {
 	}
 }
 function DoTouchEnd (event) {
+	if (!editorActive)
+	{
+		GameplayTouchEnd(event);
+		return;
+	}
 	for (var i = 0; i < event.changedTouches.length; i++) {
-		var curTouch = event.changedTouches[i];
+		var curTouch = event.changedTouches.item(i);
 
 		if (firstTouch !== undefined && curTouch.identifier === firstTouch.identifier)
 		{
@@ -555,8 +565,13 @@ function DoTouchEnd (event) {
 	}
 }
 function DoTouchMove (event) {
+	if (!editorActive)
+	{
+		GameplayTouchMove(event);
+		return;
+	}
 	for (var i = 0; i < event.changedTouches.length; i++) {
-		var curTouch = event.changedTouches[i];
+		var curTouch = event.changedTouches.item(i);
 
 		if (firstTouch !== undefined && curTouch.identifier === firstTouch.identifier)
 		{
@@ -568,6 +583,29 @@ function DoTouchMove (event) {
 		}
 
 	}
+}
+
+var touchWalk = false;
+var touchScreenX = 0;
+var touchScreenY = 0;
+var touchGoalX = 0;
+var touchGoalY = 0;
+
+function GameplayTouchStart (event) {
+	touchWalk = true;
+	var newTouch = event.changedTouches.item(0);
+	touchScreenX = newTouch.clientX;
+	touchScreenY = newTouch.clientY;
+}
+
+function GameplayTouchEnd (event) {
+	touchWalk = false;
+}
+
+function GameplayTouchMove (event) {
+	var newTouch = event.changedTouches.item(0);
+	touchScreenX = newTouch.clientX;
+	touchScreenY = newTouch.clientY;
 }
 
 function EditorMouseDown () {
