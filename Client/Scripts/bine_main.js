@@ -635,6 +635,35 @@ function DoTouchMove (event) {
 	}
 }
 
+var touchTilesEdited = [];
+
+// Add a tile to the touchTilesEdited list if it isn't already in
+// Use screen coordinates
+// Terrible algorithm?? Wow
+function editScreenTile (screenX, screenY) {
+	var newTileX = 0;
+	var newTileY = 0;
+	var newTileZ = 0;
+	
+	var toBeAdded = true;
+	// Loop through list and see if we already have that tile
+	for (var i = 0; i < touchTilesEdited.length; i++)
+	{
+		var tile = touchTilesEdited[i];
+		if (tile.x === newTileX && tile.y === newTileY && tile.z === newTileZ)
+		{
+			toBeAdded = false;
+			break;
+		{
+	{
+	if (toBeAdded)
+	{
+		touchTilesEdited.push({x: newTileX, y: newTileY, z: newTileZ});
+	}
+}
+
+
+
 var touchWalk = false;
 var touchScreenX = 0;
 var touchScreenY = 0;
