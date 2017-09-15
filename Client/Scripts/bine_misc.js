@@ -2,7 +2,7 @@
 // Various Miscellanious functions
 
 // Show debug message on screen
-function debug (text) {
+function Debug (text) {
 	debug_zone.textContent = text;
 }
 

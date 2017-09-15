@@ -285,6 +285,56 @@ function MainUpdate () {
 		{
 			// Player mode
 			// var player = curLevel.GetEntityByID(curPlayerID);
+			if (touchEventsActive)
+			{
+				if (touchWalk) {
+					touchChanged = false;
+					var coords = ScreenCoordToGameCoord(touchScreenX, touchScreenY, Math.round(zCam), xCam, yCam, zCam, R);
+					touchGoalX = coords.x;
+					touchGoalY = coords.y;
+				}
+				var prevWKey = wKey;
+				var prevAKey = aKey;
+				var prevSKey = sKey;
+				var prevDKey = dKey;
+				// X axis
+				if (touchGoalX > curPlayer.x)
+				{
+					dKey = true;
+					aKey = false;
+				}
+				else if (touchGoalX < curPlayer.x)
+				{
+					dKey = false;
+					aKey = true;
+				}
+				else
+				{
+					dKey = false;
+					aKey = false;
+				}
+				// Y axis
+				if (touchGoalY > curPlayer.y)
+				{
+					sKey = true;
+					wKey = false;
+				}
+				else if (touchGoalY < curPlayer.y)
+				{
+					sKey = false;
+					wKey = true;
+				}
+				else
+				{
+					sKey = false;
+					wKey = false;
+				}
+				// Determine if input has changed
+				if (prevWKey !== wKey || prevAKey !== aKey || prevSKey !== sKey || prevDKey !== dKey)
+				{
+					inputChanged = true;
+				}
+			}
 			if (inputChanged)
 			{
 				inputChanged = false;
@@ -588,6 +638,7 @@ function DoTouchMove (event) {
 var touchWalk = false;
 var touchScreenX = 0;
 var touchScreenY = 0;
+var touchChanged = false;
 var touchGoalX = 0;
 var touchGoalY = 0;
 
@@ -596,6 +647,7 @@ function GameplayTouchStart (event) {
 	var newTouch = event.changedTouches.item(0);
 	touchScreenX = newTouch.clientX;
 	touchScreenY = newTouch.clientY;
+	touchChanged = true;
 }
 
 function GameplayTouchEnd (event) {
@@ -606,6 +658,7 @@ function GameplayTouchMove (event) {
 	var newTouch = event.changedTouches.item(0);
 	touchScreenX = newTouch.clientX;
 	touchScreenY = newTouch.clientY;
+	touchChanged = true;
 }
 
 function EditorMouseDown () {
