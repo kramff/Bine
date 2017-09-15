@@ -134,27 +134,6 @@ function Init () {
 	window.addEventListener("touchstart", DoTouchStart);
 	window.addEventListener("touchend", DoTouchEnd);
 	window.addEventListener("touchmove", DoTouchMove);
-
-	// Old Shit
-	//window.requestAnimationFrame(Update);
-	
-	// PrepareFirstTranspTileArray();
-	// areaColors = GenerateColorPalette(100);
-
-
-	// ResizeCanvas();
-	// StartMapEditor();
-
-	// player = CreateEntity(16, 5, -4);
-	// InitGame();
-	
-	// ImportLevel('{"areas":[{"x":0,"y":0,"z":0,"xSize":5,"ySize":5,"zSize":5,"map":[[[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]],[[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]],[[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]],[[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]],[[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]]],"rules":0}],"entities":[],"player":{"x":2,"y":2,"z":1}}');
-	// ShowMenu("main_menu");
-	// SetupButtons();
-	// gameReady = true;
-
-
-	// FillSessionBox([{id: "123", name: "Test Session", mode: "play", worldName: "test world", playerCount: 10}])
 }
 
 function ResizeFunction () {
@@ -220,7 +199,7 @@ function MainUpdate () {
 				{
 					if (editMovX !== 0 || editMovY !== 0 || editMovZ !== 0)
 					{
-						EditTileIfNewCoord();
+						EditTileIfNewCoord(mouseX, mouseY);
 					}
 				}
 				editMovTime -= 1;
@@ -237,7 +216,7 @@ function MainUpdate () {
 					// Also check for mouse-move tile editing here, because of Z movement not getting checked earlierif (mousePressed)
 					if (mousePressed)
 					{
-						EditTileIfNewCoord();
+						EditTileIfNewCoord(mouseX, mouseY);
 					}
 				}
 			}
@@ -512,10 +491,14 @@ var TOUCH_MODE_NONE = 0;
 var TOUCH_MODE_SINGLE = 1;
 var TOUCH_MODE_DOUBLE = 2;
 
+var touchDrawing = false;
+
 var TOUCH_DELAY_LIMIT = 300;
 var touchMode = TOUCH_MODE_NONE
 var firstTouch = undefined;
 var firstTouchTime = undefined;
+var firstTouchX = 0;
+var firstTouchY = 0;
 var secondTouch = undefined;
 var touchCenterX = 0;
 var touchCenterY = 0;
@@ -545,8 +528,10 @@ function DoTouchStart (event) {
 		firstTouch = newTouch;
 		touchMode = TOUCH_MODE_SINGLE;
 		firstTouchTime = Date.now();
+		firstTouchX = firstTouch.clientX;
+		firstTouchY = firstTouch.clientY;
 	}
-	else if (touchMode === TOUCH_MODE_SINGLE)
+	else if (touchMode === TOUCH_MODE_SINGLE && !touchDrawing)
 	{
 		if (Date.now() - firstTouchTime < TOUCH_DELAY_LIMIT)
 		{
@@ -595,6 +580,7 @@ function DoTouchEnd (event) {
 		if (firstTouch === undefined)
 		{
 			touchMode = TOUCH_MODE_NONE;
+			touchDrawing = false;
 		}
 	}
 	else if (touchMode === TOUCH_MODE_DOUBLE)
@@ -631,37 +617,28 @@ function DoTouchMove (event) {
 		{
 			secondTouch = curTouch;
 		}
-
+	}
+	if (touchMode === TOUCH_MODE_SINGLE)
+	{
+		// Already drawing, so edit tile
+		if (touchDrawing)
+		{
+			// Change tile 
+		}
+		// Consider editing tile if moved far enough. Also edit starting tile if that's the case
+		else
+		{
+			// Check distance (Either X or Y greater than 1 tile's distance moved)
+			// TODO: use actual tile size instead of 60
+			if (Math.abs(firstTouchX - firstTouch.clientX) > 60 || Math.abs(firstTouchY - firstTouch.clientY) > 60)
+			{
+				touchDrawing = true;
+				// Change tile
+				// Change starting tile
+			}
+		}
 	}
 }
-
-var touchTilesEdited = [];
-
-// Add a tile to the touchTilesEdited list if it isn't already in
-// Use screen coordinates
-// Terrible algorithm?? Wow
-function editScreenTile (screenX, screenY) {
-	var newTileX = 0;
-	var newTileY = 0;
-	var newTileZ = 0;
-	
-	var toBeAdded = true;
-	// Loop through list and see if we already have that tile
-	for (var i = 0; i < touchTilesEdited.length; i++)
-	{
-		var tile = touchTilesEdited[i];
-		if (tile.x === newTileX && tile.y === newTileY && tile.z === newTileZ)
-		{
-			toBeAdded = false;
-			break;
-		{
-	{
-	if (toBeAdded)
-	{
-		touchTilesEdited.push({x: newTileX, y: newTileY, z: newTileZ});
-	}
-}
-
 
 
 var touchWalk = false;
@@ -691,7 +668,7 @@ function GameplayTouchMove (event) {
 }
 
 function EditorMouseDown () {
-	EditTileIfNewCoord();
+	EditTileIfNewCoord(mouseX, mouseY);
 	
 }
 
@@ -699,7 +676,7 @@ function EditorMouseMove() {
 	if (mousePressed)
 	{
 		// Potentially edit a tile if hovering over a new coordinate
-		EditTileIfNewCoord();
+		EditTileIfNewCoord(mouseX, mouseY);
 	}
 }
 
@@ -722,8 +699,8 @@ function GameplayMouseUp () {
 
 }
 
-function EditTileIfNewCoord () {
-	var gameCoords = ScreenCoordToGameCoord(mouseX, mouseY, Math.round(editCamZ), editCamX + editMovX * (1 - 0.1 * editMovTime) + 0.5, editCamY + editMovY * (1 - 0.1 * editMovTime) + 0.5, editCamZ + editMovZ * (1 - 0.1 * editMovTime) + 0.5, R);
+function EditTileIfNewCoord (x, y) {
+	var gameCoords = ScreenCoordToGameCoord(x, y, Math.round(editCamZ), editCamX + editMovX * (1 - 0.1 * editMovTime) + 0.5, editCamY + editMovY * (1 - 0.1 * editMovTime) + 0.5, editCamZ + editMovZ * (1 - 0.1 * editMovTime) + 0.5, R);
 
 	if (gameCoords.x === lastEditX && gameCoords.y === lastEditY && gameCoords.z === lastEditZ)
 	{
@@ -766,3 +743,4 @@ function EditTileIfNewCoord () {
 		}
 	}
 }
+
