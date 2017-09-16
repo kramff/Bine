@@ -579,6 +579,7 @@ function DoTouchEnd (event) {
 	{
 		if (firstTouch === undefined)
 		{
+			EditTileIfNewCoord(firstTouchX, firstTouchY);
 			touchMode = TOUCH_MODE_NONE;
 			touchDrawing = false;
 		}
@@ -623,7 +624,8 @@ function DoTouchMove (event) {
 		// Already drawing, so edit tile
 		if (touchDrawing)
 		{
-			// Change tile 
+			// Change tile
+			EditTileIfNewCoord(firstTouch.clientX, firstTouch.clientY);
 		}
 		// Consider editing tile if moved far enough. Also edit starting tile if that's the case
 		else
@@ -634,7 +636,9 @@ function DoTouchMove (event) {
 			{
 				touchDrawing = true;
 				// Change tile
+				EditTileIfNewCoord(firstTouch.clientX, firstTouch.clientY);
 				// Change starting tile
+				EditTileIfNewCoord(firstTouchX, firstTouchY);
 			}
 		}
 	}
