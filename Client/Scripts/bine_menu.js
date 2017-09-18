@@ -351,3 +351,16 @@ function SetupEntityEditingMenu () {
 		colorInput.value = curEntity.style.color;
 	}
 }
+
+function SetupEntityRules () {
+	// Get rules box
+	var rulesBox = document.getElementById("entity_rules_box");
+	// Clear rules box
+	//...
+	// Recurse through rules and make divs based on the structure
+	CreateEntityRuleElementsRecurse(curEntity.rules, rulesBox);
+}
+
+function CreateEntityRuleElementsRecurse (rules, container) {
+	
+}
