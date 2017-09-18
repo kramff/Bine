@@ -2,7 +2,7 @@
 // Multiplayer level editor project
 // Copyright Mark Foster 2015-2016
 
-console.log("starting server \\(^.^)/");
+TimeLog("starting server \\(^.^)/");
 
 // Local or web
 var pathString = "../Isomorphic/";
@@ -16,6 +16,9 @@ var Session = require(pathString + "bine_session.js");
 var http = require("http");
 var socketio = require("socket.io");
 
+function TimeLog (text) {
+	console.log("[" + (new Date().toUTCString()) + "] " + text);
+}
 
 var listener = function (req, res) {
 	res.end("This is the Bine server - use kramff.com/Bine/Client");
@@ -60,7 +63,7 @@ var playerArray = [];
 var playerNum = 0;
 
 io.on("connection", function(socket) {
-	console.log("User connected with id: " + socket.id);
+	TimeLog("User connected with id: " + socket.id);
 
 	this.playerID = undefined;
 	this.roomName = undefined;
@@ -75,7 +78,7 @@ io.on("connection", function(socket) {
 	this.curPlayer = undefined;
 
 	socket.on("disconnect", function (reason) {
-		console.log("User disconnected with id: " + socket.id + ", and reason: " + reason);
+		TimeLog("User disconnected with id: " + socket.id + ", and reason: " + reason);
 		ExitPlayer(this);
 		socket.broadcast.emit("disconnection", {"id": socket.id});
 		// RemovePlayer({"id": socket.id});
@@ -103,7 +106,7 @@ io.on("connection", function(socket) {
 		// Should use data.name
 		var newSession = new Session("Session #" + sessionNum, emptyWorldData);
 		newSession.id = sessionNum;
-		console.log("created session! session name: " + newSession.name);
+		TimeLog("created session! session name: " + newSession.name);
 		sessionArray.push(newSession);
 		sessionNum ++;
 
@@ -227,7 +230,6 @@ io.on("connection", function(socket) {
 		}
 	});
 	socket.on("testAsPlayer", function (data) {
-		console.log("player testing start")
 		if (this.inSession && this.inLevel)
 		{
 			this.curLevel.entityCounter ++;
@@ -249,7 +251,6 @@ io.on("connection", function(socket) {
 		}
 	});
 	socket.on("stopTestingPlayer", function () {
-		console.log("player stop testing");
 		ExitPlayer(this);
 	});
 	socket.on("exitLevel", function () {
@@ -383,7 +384,6 @@ function MainUpdate () {
 		for (var j = 0; j < session.levels.length; j++) {
 			var level = session.levels[j];
 			level.Update();
-			// console.log("level update" + i + j);
 		}
 	}
 }
@@ -395,23 +395,23 @@ if (false)
 
 if (Math.random() > 0.9)
 {	
-	console.log("\x1b[36m");
-	console.log("░░░░░░░░░░░░▄▐ ");
-	console.log("░░░░░░▄▄▄░░▄██▄ ");
-	console.log("░░░░░▐▀█▀▌░░░░▀█▄ ");
-	console.log("░░░░░▐█▄█▌░░░░░░▀█▄ ");
-	console.log("░░░░░░▀▄▀░░░▄▄▄▄▄▀▀ ");
-	console.log("░░░░▄▄▄██▀▀▀▀ ");
-	console.log("░░░█▀▄▄▄█░▀▀ ");
-	console.log("░░░▌░▄▄▄▐▌▀▀▀ ");
-	console.log("▄░▐░░░▄▄░█░▀▀ U HAVE BEEN SPOOKED BY THE ");
-	console.log("▀█▌░░░▄░▀█▀░▀ ");
-	console.log("░░░░░░░▄▄▐▌▄▄ ");
-	console.log("░░░░░░░▀███▀█░▄ ");
-	console.log("░░░░░░▐▌▀▄▀▄▀▐▄ SPOOKY SKILENTON ");
-	console.log("░░░░░░▐▀░░░░░░▐▌ ");
-	console.log("░░░░░░█░░░░░░░░█ ");
-	console.log("░░░░░▐▌░░░░░░░░░█ ");
-	console.log("░░░░░█░░░░░░░░░░▐▌");
-	console.log('\x1b[0m')
+	TimeLog("\x1b[36m");
+	TimeLog("░░░░░░░░░░░░▄▐ ");
+	TimeLog("░░░░░░▄▄▄░░▄██▄ ");
+	TimeLog("░░░░░▐▀█▀▌░░░░▀█▄ ");
+	TimeLog("░░░░░▐█▄█▌░░░░░░▀█▄ ");
+	TimeLog("░░░░░░▀▄▀░░░▄▄▄▄▄▀▀ ");
+	TimeLog("░░░░▄▄▄██▀▀▀▀ ");
+	TimeLog("░░░█▀▄▄▄█░▀▀ ");
+	TimeLog("░░░▌░▄▄▄▐▌▀▀▀ ");
+	TimeLog("▄░▐░░░▄▄░█░▀▀ U HAVE BEEN SPOOKED BY THE ");
+	TimeLog("▀█▌░░░▄░▀█▀░▀ ");
+	TimeLog("░░░░░░░▄▄▐▌▄▄ ");
+	TimeLog("░░░░░░░▀███▀█░▄ ");
+	TimeLog("░░░░░░▐▌▀▄▀▄▀▐▄ SPOOKY SKILENTON ");
+	TimeLog("░░░░░░▐▀░░░░░░▐▌ ");
+	TimeLog("░░░░░░█░░░░░░░░█ ");
+	TimeLog("░░░░░▐▌░░░░░░░░░█ ");
+	TimeLog("░░░░░█░░░░░░░░░░▐▌");
+	TimeLog('\x1b[0m')
 }
