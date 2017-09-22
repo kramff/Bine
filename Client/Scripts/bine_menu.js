@@ -368,7 +368,7 @@ function SetupEntityRules () {
 function CreateEntityRuleElementsRecurse (rules, container, nesting) {
 	// Loop through rules array
 	// Create div for each and possibly recurse through sub-blocks
-	for (var i = 0; i < rules.lengthi; i++)
+	for (var i = 0; i < rules.length; i++)
 	{
 		var rule = rules[i];
 		var ruleDiv = CreateNewDiv(container, "rule", GetRuleText(rule), "rule_" + nesting + i);
