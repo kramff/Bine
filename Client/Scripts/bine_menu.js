@@ -350,17 +350,36 @@ function SetupEntityEditingMenu () {
 	{
 		colorInput.value = curEntity.style.color;
 	}
+	SetupEntityRules();
 }
 
 function SetupEntityRules () {
 	// Get rules box
 	var rulesBox = document.getElementById("entity_rules_box");
 	// Clear rules box
-	//...
+	while (rulesBox.firstChild)
+	{
+		rulesBox.removeChild(rulesBox.firstChild);
+	}
 	// Recurse through rules and make divs based on the structure
-	CreateEntityRuleElementsRecurse(curEntity.rules, rulesBox);
+	CreateEntityRuleElementsRecurse(curEntity.rules, rulesBox, "");
 }
 
-function CreateEntityRuleElementsRecurse (rules, container) {
-	
+function CreateEntityRuleElementsRecurse (rules, container, nesting) {
+	// Loop through rules array
+	// Create div for each and possibly recurse through sub-blocks
+	for (var i = 0; i < rules.lengthi; i++)
+	{
+		var rule = rules[i];
+		var ruleDiv = CreateNewDiv(container, "rule", GetRuleText(rule), "rule_" + nesting + i);
+		if (rule.block !== undefined)
+		{
+			CreateEntityRuleElementsRecurse(rule.block, ruleDiv, nesting + i + "_");
+		}
+	}
 }
+
+function GetRuleText (rule) {
+	return "Rule Text Here";
+}
+
