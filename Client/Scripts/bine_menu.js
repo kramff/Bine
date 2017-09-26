@@ -371,9 +371,15 @@ function CreateEntityRuleElementsRecurse (rules, container, nesting) {
 	for (var i = 0; i < rules.length; i++)
 	{
 		var rule = rules[i];
-		var ruleDiv = CreateNewDiv(container, "rule", GetRuleText(rule), "rule_" + nesting + i);
+		var ruleDiv = CreateNewDiv(container, "rule", undefined, "rule_" + nesting + i);
+		// Trigger: "T: ", Condition: "?: ", Effect: 
+		var symbol = (rule.trigger !== undefined ? "T: " : (rule.condition !== undefined ? "?: " : "-"))
+		var ruleSymbol = CreateNewDiv(ruleDiv, "rule_symbol", symbol, undefined);
+		var ruleTitle = CreateNewDiv(ruleDiv, "rule_title", GetRuleText(rule), undefined);
+		var ruleClose = CreateNewDiv(ruleDiv, "rule_close", "X", undefined);
 		if (rule.block !== undefined)
 		{
+			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block", undefined, undefined);
 			CreateEntityRuleElementsRecurse(rule.block, ruleDiv, nesting + i + "_");
 		}
 	}
