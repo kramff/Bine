@@ -77,6 +77,25 @@ function ShowMenu (menuId) {
 	}
 }
 
+function ButtonClick () {
+	if (this.dataset.menu !== undefined)
+	{
+		HideAllMenus();
+		ShowMenu(this.dataset.menu);
+	}
+	else if (this.dataset.action !== undefined)
+	{
+		if (this.dataset.extra !== undefined)
+		{
+			DoButtonAction(this.dataset.action, this.dataset.extra);
+		}
+		else
+		{
+			DoButtonAction(this.dataset.action);
+		}
+	}
+}
+
 function SetupButtons () {
 	document.body.onselectstart = function () {
 		return false;
@@ -85,24 +104,7 @@ function SetupButtons () {
 	var buttons = document.getElementsByClassName("button");
 	for (var i = 0; i < buttons.length; i++) {
 		var button = buttons[i];
-		button.onclick = function () {
-			if (this.dataset.menu !== undefined)
-			{
-				HideAllMenus();
-				ShowMenu(this.dataset.menu);
-			}
-			else if (this.dataset.action !== undefined)
-			{
-				if (this.dataset.extra !== undefined)
-				{
-					DoButtonAction(this.dataset.action, this.dataset.extra);
-				}
-				else
-				{
-					DoButtonAction(this.dataset.action);
-				}
-			}
-		}
+		button.onclick = ButtonClick;
 	}
 	// Enter a session by clicking on it
 	var sessionBox = document.getElementsByClassName("session_box")[0];
@@ -131,6 +133,30 @@ function SetupButtons () {
 				JoinLevel(levelID);
 				HideAllMenus();
 				ShowMenu("edit_level");
+			}
+		}
+	}
+	// Add a sub-rule (Effect or Condition) by clicking on the buttons placed in each rule block.
+	var rules_box = document.getElementsByClassName("rules_box")[0];
+	rules_box.onclick = function () {
+		if (event.target.classList.contains("add_sub_rule"))
+		{
+			var nesting = event.target.getAttribute("data-nesting");
+			if (nesting !== null)
+			{
+				// Pull open the menu to pick a sub rule, and keep track of the nesting point
+				ShowDarkCover();
+				ShowMenu("add_entity_sub_rule")
+			}
+		}
+		else if (event.target.classList.contains("rule_remove"))
+		{
+			// Remove the selected rule
+			var ruleParent = event.target.parentElement;
+			var nesting = ruleParent.getAttribute("data-nesting");
+			if (nesting !== null)
+			{
+				// Remove the rule at that nesting point
 			}
 		}
 	}
@@ -248,7 +274,11 @@ function DoButtonAction (action, extra) {
 			ShowMenu("add_entity_trigger")
 		break;
 		case "select_trigger":
+			// Select new trigger based on data-extra
 			curEntity.rules.push({trigger: extra, block: []});
+			HideAllOverMenus();
+			HideDarkCover();
+			SetupEntityRules();
 		break;
 		case "select_effect":
 			curBlock.push({effect: extra, variables: []})
@@ -362,10 +392,10 @@ function SetupEntityRules () {
 		rulesBox.removeChild(rulesBox.firstChild);
 	}
 	// Recurse through rules and make divs based on the structure
-	CreateEntityRuleElementsRecurse(curEntity.rules, rulesBox, "");
+	CreateEntityRuleElementsRecurse(rulesBox, curEntity.rules, "");
 }
 
-function CreateEntityRuleElementsRecurse (rules, container, nesting) {
+function CreateEntityRuleElementsRecurse (container, rules, nesting) {
 	// Loop through rules array
 	// Create div for each and possibly recurse through sub-blocks
 	for (var i = 0; i < rules.length; i++)
@@ -376,16 +406,27 @@ function CreateEntityRuleElementsRecurse (rules, container, nesting) {
 		var symbol = (rule.trigger !== undefined ? "T: " : (rule.condition !== undefined ? "?: " : "-"))
 		var ruleSymbol = CreateNewDiv(ruleDiv, "rule_symbol", symbol, undefined);
 		var ruleTitle = CreateNewDiv(ruleDiv, "rule_title", GetRuleText(rule), undefined);
-		var ruleClose = CreateNewDiv(ruleDiv, "rule_close", "X", undefined);
+		var ruleClose = CreateNewDiv(ruleDiv, "rule_remove", "X", undefined);
 		if (rule.block !== undefined)
 		{
 			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block", undefined, undefined);
-			CreateEntityRuleElementsRecurse(rule.block, ruleDiv, nesting + i + "_");
+			CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nesting + i + "_");
+			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined)
+			// addSubRuleButton.setAttribute("data-action", "add_entity_sub_rule");
+			addSubRuleButton.setAttribute("data-nesting", nesting + i);
 		}
 	}
 }
 
+var ruleData = {
+	"entity_steps_adjacent": "Entity Steps Adjacent",
+}
+
 function GetRuleText (rule) {
+	if (ruleData[rule] !== undefined)
+	{
+		return ruleData[rule];
+	}
 	return "Rule Text Here";
 }
 

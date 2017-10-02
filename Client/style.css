@@ -129,7 +129,7 @@ body {
 	background-color: #404040;
 }
 
-.button {
+.button, .add_sub_rule {
 	padding: 10px;
 	margin: 10px;
 
@@ -137,7 +137,7 @@ body {
 	border: 1px solid #FFFFFF;
 	font-size: 16px;
 }
-.button:hover {
+.button:hover, .add_sub_rule:hover, .rule_remove:hover {
 	background-color: #202020;
 }
 
@@ -239,4 +239,42 @@ body {
 	margin: 10px;
 	border: 1px solid #FFFFFF;
 	overflow: auto;
+}
+
+.rule {
+	position: relative;
+	margin: 10px;
+	border: 1px solid #FFFFFF;
+	padding: 10px;
+	background: #606060;
+}
+
+.rule_symbol {
+	display: inline-block;
+	border: 1px solid white;
+	padding-left: 3px;
+	padding-right: 3px;
+}
+
+.rule_title {
+	display: inline-block;
+	border: 1px solid white;
+	padding-left: 3px;
+	padding-right: 3px;
+}
+
+.rule_remove {
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	padding: 6px 8px;
+	border: 1px solid white;
+	background: #404040;
+}
+
+.rule_block {
+	border: 1px solid white;
+	padding: 10px;
+	margin-top: 21px;
+	background-color: #404040;
 }
