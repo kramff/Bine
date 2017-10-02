@@ -38,3 +38,13 @@ function PositionInBounds (area, i, j, k) {
 	}
 	return false;
 }
+
+// 
+function GetRuleAtNestLocation (rules, nesting) {
+	var nestingSplit = nesting.split("_");
+	//...
+}
+
+function RemoveRuleFromNestLocation (rules, rule, nesting) {
+	
+}

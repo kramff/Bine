@@ -146,7 +146,11 @@ function SetupButtons () {
 			{
 				// Pull open the menu to pick a sub rule, and keep track of the nesting point
 				ShowDarkCover();
-				ShowMenu("add_entity_sub_rule")
+				ShowMenu("add_entity_sub_rule");
+				
+				var ruleParent = event.target.parentElement;
+				var nesting = ruleParent.getAttribute("data-nesting");
+				curNestingPoint = nesting;
 			}
 		}
 		else if (event.target.classList.contains("rule_remove"))
@@ -156,7 +160,9 @@ function SetupButtons () {
 			var nesting = ruleParent.getAttribute("data-nesting");
 			if (nesting !== null)
 			{
-				// Remove the rule at that nesting point
+				// Remove the rule at that nesting point;
+				var rule = GetRuleAtNestLocation(curEntity.rules, nesting);
+				RemoveRuleFromNestLocation(curEntity.rules, rule, nesting);
 			}
 		}
 	}

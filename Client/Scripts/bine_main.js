@@ -65,6 +65,10 @@ var curArea = undefined;
 var inEntity = false;
 var curEntity = undefined;
 
+// In a rule nest? (Editing a nested rule) Keep reference
+var inNestingPoint = false;
+var curNestingPoint = undefined;
+
 // In a block? (Editing a rule block) Keep reference
 var inBlock = false;
 var curBlock = undefined;
