@@ -148,9 +148,12 @@ function SetupButtons () {
 				ShowDarkCover();
 				ShowMenu("add_entity_sub_rule");
 				
-				var ruleParent = event.target.parentElement;
-				var nesting = ruleParent.getAttribute("data-nesting");
+				// var ruleParent = event.target.parentElement;
+				// curNestingPoint = ruleParent.getAttribute("data-nesting");
 				curNestingPoint = nesting;
+				inNestingPoint = true;
+				curBlock = GetRuleAtNestLocation(curEntity.rules, curNestingPoint);
+				inBlock = true;
 			}
 		}
 		else if (event.target.classList.contains("rule_remove"))
@@ -287,7 +290,10 @@ function DoButtonAction (action, extra) {
 			SetupEntityRules();
 		break;
 		case "select_effect":
-			curBlock.push({effect: extra, variables: []})
+			curBlock.push({effect: extra, variables: []});
+		break;
+		case "select_condition":
+			curBlock.push({condition: extra, variables: [], trueBlock: [], falseBlock: []});
 		break;
 	}
 }
@@ -416,10 +422,23 @@ function CreateEntityRuleElementsRecurse (container, rules, nesting) {
 		if (rule.block !== undefined)
 		{
 			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block", undefined, undefined);
-			CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nesting + i + "_");
-			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined)
-			// addSubRuleButton.setAttribute("data-action", "add_entity_sub_rule");
-			addSubRuleButton.setAttribute("data-nesting", nesting + i);
+			CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nesting + i + "_block_");
+			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
+			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_block_");
+		}
+		if (rule.trueBlock !== undefined)
+		{
+			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block", undefined, undefined);
+			CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nesting + i + "_trueblock_");
+			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
+			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_trueblock_");
+		}
+		if (rule.falseBlock !== undefined)
+		{
+			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block", undefined, undefined);
+			CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nesting + i + "_falseblock_");
+			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
+			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_falseblock_");
 		}
 	}
 }

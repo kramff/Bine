@@ -42,7 +42,19 @@ function PositionInBounds (area, i, j, k) {
 // 
 function GetRuleAtNestLocation (rules, nesting) {
 	var nestingSplit = nesting.split("_");
-	//...
+	var curRuleData = rules;
+	for (var i = 0; i < nestingSplit.length; i++) {
+		var curNestPoint = nestingSplit[i];
+		if (curNestPoint !== "")
+		{
+			curRuleData = curRuleData[curNestPoint];
+		}
+		else
+		{
+			return curRuleData;
+		}
+	}
+	return curRuleData;
 }
 
 function RemoveRuleFromNestLocation (rules, rule, nesting) {
