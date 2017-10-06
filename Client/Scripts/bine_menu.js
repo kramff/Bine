@@ -429,16 +429,16 @@ function CreateEntityRuleElementsRecurse (container, rules, nesting) {
 		if (rule.trueBlock !== undefined)
 		{
 			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block", undefined, undefined);
-			CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nesting + i + "_trueblock_");
+			CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nesting + i + "_trueBlock_");
 			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
-			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_trueblock_");
+			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_trueBlock_");
 		}
 		if (rule.falseBlock !== undefined)
 		{
 			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block", undefined, undefined);
-			CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nesting + i + "_falseblock_");
+			CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nesting + i + "_falseBlock_");
 			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
-			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_falseblock_");
+			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_falseBlock_");
 		}
 	}
 }

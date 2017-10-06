@@ -84,7 +84,7 @@ function InitSocketConnection (argument) {
 		}
 		else
 		{
-			socket = io(location.href.replace((/\d+\/$/, "5000"));
+			socket = io(location.href.replace(/\d+\/$/, "5000"));
 		}
 		socket.on("connect", function (data) {
 			console.log("Connected to server with id: " + socket.id);
