@@ -291,9 +291,28 @@ function DoButtonAction (action, extra) {
 		break;
 		case "select_effect":
 			curBlock.push({effect: extra, variables: []});
+			SetupEntityRules();
+			curNestingPoint = undefined;
+			inNestingPoint = false;
+			curBlock = undefined;
+			inBlock = undefined;
+			HideAllOverMenus();
 		break;
 		case "select_condition":
 			curBlock.push({condition: extra, variables: [], trueBlock: [], falseBlock: []});
+                        curNestingPoint = undefined;
+                        inNestingPoint = false;
+                        curBlock = undefined;
+                        inBlock = undefined;
+			SetupEntityRules();
+			HideAllOverMenu();
+		break;
+		case "change_variable":
+			// Get variable from variable edit window
+			// Determine rule to edit from nesting point / curRule or something
+			// Set the variable
+			// Close the window
+			// Clean up
 		break;
 	}
 }
