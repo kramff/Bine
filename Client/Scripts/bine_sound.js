@@ -1,10 +1,29 @@
 // bine_sound.js
 // Sound: Sound Effects, Music, etc.
 
+var audioSources = {
+	footsteps: {
+		concrete: {n: 10},
+		wood: {n: 0},
+		rug: {n: 0},
+		sticks: {n: 5},
+		leaves: {n: 0},
+		sand: {n: 0},
+		dirt: {n: 5},
+		snow: {n: 0},
+	},
+}
+
+var audioData = {};
 
 var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioCtx = new AudioContext();
 
+function LoadAllSound () {
+	audioCtx.decodeAudioData("test").then(UseDecodedAudio);
+}
+function UseDecodedAudio (decodedData) {
+}
 
 // var oscillator = undefined;
 // var gainNode = undefined;
