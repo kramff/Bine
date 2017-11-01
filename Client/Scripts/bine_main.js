@@ -15,14 +15,15 @@ function LoadIsoScripts () {
 		var script = document.createElement("script");
 		isoScripts.push(script)
 		// isoStates.push(false);
-		if (location.href === "http://kramff.github.io/")
-		{
-			script.setAttribute("src", "./Isomorphic/" + source + ".js");
-		}
-		else
-		{
-			script.setAttribute("src", "../Isomorphic/" + source + ".js");
-		}
+		// if (location.href === "http://kramff.github.io/")
+		// {
+		// 	script.setAttribute("src", "./Isomorphic/" + source + ".js");
+		// }
+		// else
+		// {
+		// 	script.setAttribute("src", "../Isomorphic/" + source + ".js");
+		// }
+		script.setAttribute("src", "./Isomorphic/" + source + ".js");
 		document.getElementsByTagName('body')[0].appendChild(script);
 		var loadFunc = (function (stateNum) {
 			return function () {

@@ -285,27 +285,30 @@ function DoButtonAction (action, extra) {
 		case "select_trigger":
 			// Select new trigger based on data-extra
 			curEntity.rules.push({trigger: extra, block: []});
+			SetupEntityRules();
 			HideAllOverMenus();
 			HideDarkCover();
-			SetupEntityRules();
 		break;
 		case "select_effect":
 			curBlock.push({effect: extra, variables: []});
-			SetupEntityRules();
 			curNestingPoint = undefined;
 			inNestingPoint = false;
 			curBlock = undefined;
 			inBlock = undefined;
+			SetupEntityRules();
 			HideAllOverMenus();
+			HideDarkCover();
+			
 		break;
 		case "select_condition":
 			curBlock.push({condition: extra, variables: [], trueBlock: [], falseBlock: []});
-                        curNestingPoint = undefined;
-                        inNestingPoint = false;
-                        curBlock = undefined;
-                        inBlock = undefined;
+			curNestingPoint = undefined;
+			inNestingPoint = false;
+			curBlock = undefined;
+			inBlock = undefined;
 			SetupEntityRules();
-			HideAllOverMenu();
+			HideAllOverMenus();
+			HideDarkCover();
 		break;
 		case "change_variable":
 			// Get variable from variable edit window
@@ -448,14 +451,14 @@ function CreateEntityRuleElementsRecurse (container, rules, nesting) {
 		if (rule.trueBlock !== undefined)
 		{
 			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block", undefined, undefined);
-			CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nesting + i + "_trueBlock_");
+			CreateEntityRuleElementsRecurse(ruleBlock, rule.trueBlock, nesting + i + "_trueBlock_");
 			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
 			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_trueBlock_");
 		}
 		if (rule.falseBlock !== undefined)
 		{
 			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block", undefined, undefined);
-			CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nesting + i + "_falseBlock_");
+			CreateEntityRuleElementsRecurse(ruleBlock, rule.falseBlock, nesting + i + "_falseBlock_");
 			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
 			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_falseBlock_");
 		}
