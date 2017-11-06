@@ -164,8 +164,9 @@ function SetupButtons () {
 			if (nesting !== null)
 			{
 				// Remove the rule at that nesting point;
-				var rule = GetRuleAtNestLocation(curEntity.rules, nesting);
-				RemoveRuleFromNestLocation(curEntity.rules, rule, nesting);
+				// var rule = GetRuleAtNestLocation(curEntity.rules, nesting);
+				RemoveRuleFromNestLocation(curEntity.rules, nesting);
+				SetupEntityRules();
 			}
 		}
 	}
@@ -435,7 +436,8 @@ function CreateEntityRuleElementsRecurse (container, rules, nesting) {
 	for (var i = 0; i < rules.length; i++)
 	{
 		var rule = rules[i];
-		var ruleDiv = CreateNewDiv(container, "rule", undefined, "rule_" + nesting + i);
+		var ruleDiv = CreateNewDiv(container, "rule", undefined, undefined);
+		ruleDiv.setAttribute("data-nesting", nesting + i);
 		// Trigger: "T: ", Condition: "?: ", Effect: 
 		var symbol = (rule.trigger !== undefined ? "T: " : (rule.condition !== undefined ? "?: " : "-"))
 		var ruleSymbol = CreateNewDiv(ruleDiv, "rule_symbol", symbol, undefined);
@@ -450,14 +452,14 @@ function CreateEntityRuleElementsRecurse (container, rules, nesting) {
 		}
 		if (rule.trueBlock !== undefined)
 		{
-			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block", undefined, undefined);
+			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block trueBlock", undefined, undefined);
 			CreateEntityRuleElementsRecurse(ruleBlock, rule.trueBlock, nesting + i + "_trueBlock_");
 			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
 			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_trueBlock_");
 		}
 		if (rule.falseBlock !== undefined)
 		{
-			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block", undefined, undefined);
+			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block falseBlock", undefined, undefined);
 			CreateEntityRuleElementsRecurse(ruleBlock, rule.falseBlock, nesting + i + "_falseBlock_");
 			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
 			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_falseBlock_");

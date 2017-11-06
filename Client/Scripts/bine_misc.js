@@ -57,6 +57,23 @@ function GetRuleAtNestLocation (rules, nesting) {
 	return curRuleData;
 }
 
-function RemoveRuleFromNestLocation (rules, rule, nesting) {
-	
+function RemoveRuleFromNestLocation (rules, nesting) {
+	var nestingSplit = nesting.split("_");
+	var curRuleData = rules;
+	var prevRuleData = rules;
+	// Use same formula but keep track of previous rule data as well
+	for (var i = 0; i < nestingSplit.length; i++) {
+		prevRuleData = curRuleData;
+		var curNestPoint = nestingSplit[i];
+		if (curNestPoint !== "")
+		{
+			curRuleData = curRuleData[curNestPoint];
+		}
+		else
+		{
+			break;
+		}
+	}
+	// Remove curRuleData (rule entry) from prevRuleData (should be list)
+	prevRuleData.splice(prevRuleData.indexOf(curRuleData), 1);
 }
