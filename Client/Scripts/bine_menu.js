@@ -245,6 +245,7 @@ function DoButtonAction (action, extra) {
 
 		// Entity menu
 		case "stop_edit_entity":
+			SendEntityChange();
 			inEntity = false;
 			curEntity = undefined;
 			HideAllMenus();

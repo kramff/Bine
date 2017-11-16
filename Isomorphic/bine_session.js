@@ -101,6 +101,7 @@ var Session = (function () {
 				this.xMov = 0;
 				this.yMov = 0;
 				this.zMov = 0;
+				this.TriggerStepEnd(levelRef);
 			}
 		}
 		// Not moving - able to start a movement
@@ -232,7 +233,7 @@ var Session = (function () {
 		this.moveDirections.right = right;
 		this.moveDirections.changed = true;
 	}
-	Entity.prototype.SetLocationCorrection = function(x, y, z, xMov, yMov, zMov, moveTime, moveDuration) {
+	Entity.prototype.SetLocationCorrection = function (x, y, z, xMov, yMov, zMov, moveTime, moveDuration) {
 		this.xCorrection = x;
 		this.yCorrection = y;
 		this.zCorrection = z;
@@ -242,6 +243,69 @@ var Session = (function () {
 		this.moveTimeCorrection = moveTime;
 		this.moveDurationCorrection = moveDuration;
 		this.needCorrection = true;
+	};
+	// Triggers
+
+	// Is this funcion needed? May only need version that immediately runs rules if they're present
+	Entity.prototype.CheckHaveTrigger = function (triggerType) {
+		// Could be improved to not have to loop through all rules every time
+		for (var i = 0; i < this.rules.length; i++)
+		{
+			var rule = this.rules[i];
+			if (rule.trigger !== undefined && rule.trigger === triggerType)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	// If the entity has the specified trigger type, run that rule
+	// extra - anything else that needs to be passed to rule
+	Entity.prototype.FireTrigger = function (triggerType, extra, levelRef) {
+		for (var i = 0; i < this.rules.length; i++)
+		{
+			var rule = this.rules[i];
+			if (rule.trigger !== undefined && rule.trigger === triggerType)
+			{
+				this.ExecuteRule(rule, extra, levelRef);
+				// Only executes first instance of rule... is this correct?
+				return;
+			}
+		}
+		return;
+	};
+	// Step adjacent trigger
+	Entity.prototype.TriggerStepEnd = function (levelRef) {
+		for (var i = 0; i < levelRef.entities.length; i++)
+		{
+			var otherEntity = levelRef.entities[i];
+			if (IsNear(this.x, this.y, this.z, otherEntity.x, otherEntity.y, otherEntity.z, 1))
+			{
+				// No need to check if rule exists before running it?
+				// if (otherEntity.CheckHaveTrigger("entity_steps_adjacent"))
+				// {
+				// }
+				otherEntity.FireTrigger("entity_steps_adjacent", this, levelRef)
+			}
+		}
+	};
+	// Execute an entity's rule
+	Entity.prototype.ExecuteRule = function(rule, extra, levelRef) {
+		if (rule.trigger)
+		{
+			// Trigger - Go ahead and run the rule block.
+		}
+		else if (rule.condition)
+		{
+			// Condition - Check the condition, then run the true or false block
+		}
+		else if (rule.effect)
+		{
+			// Effect - Do something. (End result)
+		}
+	};
+	Entity.prototype.ExecuteBlock = function(ruleBlock, extra, levelRef) {
+		// Loop through the block and execute each rule in it
 	};
 
 	// var areaIDCounter = 0;

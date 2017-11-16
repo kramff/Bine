@@ -183,6 +183,10 @@ function InitSocketConnection (argument) {
 			entity.SetLocationCorrection(data.x, data.y, data.z, data.xMov, data.yMov, data.zMov, data.moveTime, data.moveDuration);
 		});
 
+		socket.on("entityChange", function (data) {
+			RecieveEntityChange(data.levelID, data.entityID, data.entityData);
+		});
+
 		
 
 		MULTI_ON = true;
@@ -289,11 +293,20 @@ function ReceiveAssignPlayer (playerID) {
 	yCam = curPlayer.GetY() + 0.5;
 	zCam = curPlayer.GetZ() + 0.5;
 }
+
 function ReceiveRemoveEntity (levelID, entityID) {
 	curSession.RemoveEntity(levelID, entityID);
 }
 
+function RecieveEntityChange (levelID, entityID, entityData) {
+	curSession.ChangeEntity(levelID, entityID, entityData);
+}
+
+
+// ~~~~~~~~~~~
 // Functions to send data to server
+
+
 function SendPositionUpdate (position) {
 	if (MULTI_ON)
 	{
@@ -424,5 +437,12 @@ function DeleteArea () {
 	if (MULTI_ON)
 	{
 		socket.emit("deleteArea", {levelID: curLevel.id, areaID: curArea.id});
+	}
+}
+
+function SendEntityChange () {
+	if (MULTI_ON)
+	{
+		socket.emit("entityChange", {levelID: curLevel.id, entityID: curEntity.id, entityData: curEntity.Export()});
 	}
 }

@@ -305,6 +305,13 @@ io.on("connection", function(socket) {
 		}
 	});
 
+	socket.on("entityChange", function () {
+		if (this.inSession && this.inLevel)
+		{
+			io.to(this.roomName).emit("entityChange", data);
+		}
+	});
+
 	// Automatically when input received from players 
 	// - Send player events (movement, etc)
 	// - Send level events (areas move, NPC's do actions)
