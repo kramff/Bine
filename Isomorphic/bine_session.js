@@ -18,7 +18,46 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
 	IS_SERVER = true;
 }
 
+// Turn on to debug events
+var EVENT_DEBUGGING = false;
+
 var Session = (function () {
+
+	// Events: triggers, conditions, effects
+	var triggers = {
+
+		// When a different entity steps adjacent to this one
+		entity_steps_adjacent: {
+			text: "Entity Steps Adjacent -> [Entity]",
+			createVariables: [
+				{
+					name: "adjacent_entity",
+					type: "entity",
+				},
+			],
+		},
+	};
+	var conditions = {
+		variable_condition: {
+			text: "Variable Meets Criteria",
+			requiredVariables: ["value", "comparison", "value"],
+			conditionFunction: function (variables, levelRef, entityRef, useVariables) {
+				console.log("variable_condition condition happened");
+				return true;
+			},
+		}
+	}
+	var effects = {
+		say_message: {
+			text: "Say Message",
+			requiredVariables: ["text"],
+			effectFunction: function (variables, levelRef, entityRef, useVariables) {
+				console.log("say_message effect happened");
+
+			},
+		}
+	};
+
 	// var entityIDCounter = 0;
 	//x, y, z, style, settings, rules, templates
 	function Entity (entityData) {
@@ -53,6 +92,9 @@ var Session = (function () {
 		this.zMovCorrection = 0;
 		this.moveTimeCorrection = 0;
 		this.moveDurationCorrection = MOVE_SPEED;
+
+		this.tempMessageString = "";
+		this.tempMessageTime = 0;
 	}
 	Entity.prototype.Export = function() {
 		var entityData = {
@@ -72,6 +114,15 @@ var Session = (function () {
 		// - Input (if player-controlled)
 		// - Rules
 		// - Movement
+
+		if (this.tempMessageTime > 0)
+		{
+			this.tempMessageTime -= 1;
+		}
+		else
+		{
+			this.tempMessageString = "";
+		}
 
 		// Position Correction (Needs to be smoother)
 		if (this.needCorrection)
@@ -244,8 +295,7 @@ var Session = (function () {
 		this.moveDurationCorrection = moveDuration;
 		this.needCorrection = true;
 	};
-	// Triggers
-
+	// Event handling
 	// Is this funcion needed? May only need version that immediately runs rules if they're present
 	Entity.prototype.CheckHaveTrigger = function (triggerType) {
 		// Could be improved to not have to loop through all rules every time
@@ -290,22 +340,56 @@ var Session = (function () {
 		}
 	};
 	// Execute an entity's rule
-	Entity.prototype.ExecuteRule = function(rule, extra, levelRef) {
+	Entity.prototype.ExecuteRule = function(rule, variables, levelRef) {
 		if (rule.trigger)
 		{
 			// Trigger - Go ahead and run the rule block.
+			var trigger = triggers[rule.trigger];
+			if (EVENT_DEBUGGING)
+			{
+				console.log(trigger.text);
+			}
+			this.ExecuteBlock(rule.block, variables, levelRef);
 		}
 		else if (rule.condition)
 		{
 			// Condition - Check the condition, then run the true or false block
+			var condition = conditions[rule.condition];
+			if (EVENT_DEBUGGING)
+			{
+				console.log(condition.text);
+			}
+			var result = condition.conditionFunction(variables, levelRef, entityRef, condition.useVariables);
+			if (result === true)
+			{
+				this.ExecuteBlock(rule.trueBlock, variables, levelRef);
+			}
+			// False by default?
+			else
+			{
+				this.ExecuteBlock(rule.falseBlock, variables, levelRef);
+			}
 		}
 		else if (rule.effect)
 		{
 			// Effect - Do something. (End result)
+			var effect = effects[rule.effect];
+			if (EVENT_DEBUGGING)
+			{
+				console.log(effect.text);
+			}
+			// Is there a result from an effect????
+			// Should just be "side effects"
+			var result = effect.effectFunction(variables, levelRef, entityRef, trigger.useVariables);
 		}
 	};
-	Entity.prototype.ExecuteBlock = function(ruleBlock, extra, levelRef) {
+	Entity.prototype.ExecuteBlock = function(ruleBlock, variables, levelRef) {
 		// Loop through the block and execute each rule in it
+		for (var i = 0; i < ruleBlock.length; i++)
+		{
+			var rule = ruleBlock[i];
+			this.ExecuteRule(rule, variables, levelRef);
+		}
 	};
 
 	// var areaIDCounter = 0;
@@ -449,7 +533,6 @@ var Session = (function () {
 			}
 		}
 		this.entityCounter = this.entities.length;
-
 	}
 	Level.prototype.Export = function() {
 		var areaDatas = [];
@@ -600,74 +683,10 @@ var Session = (function () {
 		}
 		return false;
 	}
-	/*Level.prototype.Clear = function () {
-		this.areas = [];
-		this.entities = [];
-	}*/
-	/*Level.prototype.Initalize = function () {
-		this.Clear();
-		for (var i = 0; i < this.areaData.areas.length; i++)
-		{
-			var areaData = this.areaData.areas[i];
-			var newArea = new Area(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize,
-				areaData.map, areaData.extra, areaData.style, areaData.rules, areaData.templates);
-			areas.push(newArea);
-			drawObjects.push(newArea);
-		}
-		for (var i = 0; i < this.entityData.entities.length; i++) {
-			var entityData = this.entityData.entities[i];
-			var newEntity = new Entity(entityData.x, entityData.y, entityData.z, entityData.style, entityData.settings, entityData.rules, entityData.templates);
-			
-			entities.push(newEntity);
-			drawObjects.push(newEntity)
-		}
-	}*/
-	/*Level.prototype.ExportLevel = function () {
-		var levelData = {areas:[], entities:[], player:{x: 0, y: 0, z: 0}};
-		for (var i = 0; i < this.areas.length; i++)
-		{
-			var area = this.areas[i];
-			var areaDataObj = {
-				x: area.x,
-				y: area.y,
-				z: area.z,
-				xSize: area.xSize,
-				ySize: area.ySize,
-				zSize: area.zSize,
-				map: area.map,
-				rules: 0,
-			};
-			levelData.areas.push(areaDataObj); 
-		}
-		for (var i = 0; i < this.entities.length; i++)
-		{
-			var entity = this.entities[i];
-			if (entity !== player)
-			{
-				var entityDataObj = {
-					x: entity.x,
-					y: entity.y,
-					z: entity.z,
-					style: entity.style,
-					settings: entity.settings,
-					rules: entity.rules,
-					templates: entity.templates
-				};
-				levelData.entities.push(entityDataObj)
-			}
-		}
-		return levelData;
-		// return JSON.stringify(levelData);
-	}*/
 	function Session (name, worldData) {
 		this.type = "Session";
 		// name: string
 		this.name = name;
-
-		// worldData: {levelDatas, tileData, worldRules}
-
-		// levelDatas: [{name: string, data: string}, ...]
-		// this.levelDatas = worldData.levelDatas;
 		this.levels = [];
 		for (var i = 0; i < worldData.levelDatas.length; i++) {
 			var levelData = worldData.levelDatas[i];
@@ -694,7 +713,6 @@ var Session = (function () {
 
 		// particleData
 		this.particleData = worldData.particleData;
-
 	}
 	Session.prototype.ExportWorld = function () {
 		var levelDatas = [];
@@ -714,39 +732,11 @@ var Session = (function () {
 		};
 		return worldData;
 	}
-	/*Session.prototype.ExportLevel = function (levelID) {
-		var level = this.GetLevelByID(levelID);
-		return level.ExportLevel();
-	}*/
 	Session.prototype.AddLevel = function(levelData) {
 		var newLevel = new Level(levelData);
 		this.levels.push(newLevel);
 		return newLevel;
 	};
-	/*Session.prototype.AddLevel = function () {
-		levelIDCounter ++;
-		var blankLevelData = {
-			name: "level name",
-			id: levelIDCounter,
-			entityDatas: [],
-			areaDatas: [],
-		}
-		var newLevel = new Level(blankLevelData);
-		this.levels.push(newLevel);
-		return newLevel;
-	}
-	Session.prototype.AddLevelWithID = function (levelID) {
-		// levelIDCounter ++;
-		var blankLevelData = {
-			name: "level name",
-			id: levelID,
-			entityDatas: [],
-			areaDatas: [],
-		}
-		var newLevel = new Level(blankLevelData);
-		this.levels.push(newLevel);
-		return newLevel;
-	}*/
 	Session.prototype.GetLevelByID = function (id) {
 		id = Number(id);
 		var result = this.levels.filter(function (level) {
@@ -761,59 +751,12 @@ var Session = (function () {
 			console.log("Couldn't find level with id: " + id);
 		}
 	}
-
-	// Session.prototype.AddArea = function(levelID, areaData) {
-	// 	var level = this.GetLevelByID(levelID);
-	// 	console.log(level);
-	// 	var newArea = new Area(areaData);
-	// 	level.areas.push(newArea);
-	// 	level.drawObjects.push(newArea);
-	// 	return newArea.id;
-	// };
-	/*Session.prototype.AddAreaWithID = function(levelID, areaData, areaID) {
-		var level = this.GetLevelByID(levelID);
-		if (!level) throw "no level with id " + levelID;
-
-		var newArea = new Area(areaData);
-		newArea.id = areaID;
-		level.areas.push(newArea);
-		level.drawObjects.push(newArea);
-		return newArea.id;
-	};*/
-	// Session.prototype.GetAreaByID = function(levelID, areaID) {
-	// 	var level = this.GetLevelByID(levelID);
-	// 	var id = Number(areaID);
-	// 	var result = level.areas.filter(function (area) {
-	// 		return area.id === id;
-	// 	});
-	// 	if (result[0] !== undefined)
-	// 	{
-	// 		return result[0];
-	// 	}
-	// };
-	/*Session.prototype.ExportArea = function(levelID, areaID) {
-		var area = this.GetAreaByID(levelID, areaID);
-		var areaDataObj = {
-			x: area.x,
-			y: area.y,
-			z: area.z,
-			xSize: area.xSize,
-			ySize: area.ySize,
-			zSize: area.zSize,
-			map: area.map,
-			rules: 0,
-		};31
-		// return JSON.stringify(areaDataObj);
-		return areaDataObj;
-	};*/
-
 	Session.prototype.EditTile = function(levelID, areaID, tileData) {
 		var level = this.GetLevelByID(levelID);
 		var area = level.GetAreaByID(areaID);
 		area.map[tileData.x][tileData.y][tileData.z] = tileData.tile;
 		// area.extra[tileData.x][tileData.y][tileData.z] = tileData.extra;
 	};
-
 	Session.prototype.CreatePlayerEntity = function (levelID) {
 		//
 		var newPlayer = new Entity(0, 0, 0, {color: "#FFFFFF", border: "#208080"}, {gravity: true, solid: true}, [], []);
