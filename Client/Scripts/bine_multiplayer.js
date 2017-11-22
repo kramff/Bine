@@ -206,11 +206,13 @@ function ReceiveWorldData (worldData) {
 	lastData = worldData;
 	// Import the world etc...
 	inSession = true;
-	// curSession = new Session("The Session", JSON.parse(worldData));
 	curSession = new Session("The Session", worldData);
 
 	// Update the levelbox to list out the available levels
 	FillLevelBox(curSession.levels);
+
+	// Use the session to fill in the rule option buttons
+	FillRuleOptions(curSession);
 }
 function UpdatePlayer (playerData) {
 	for (var i = 0; i < playerArray.length; i++)

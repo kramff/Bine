@@ -791,6 +791,15 @@ var Session = (function () {
 			return result[0];
 		}
 	}
+	Session.prototype.ExportTriggerData = function () {
+		return triggers;
+	}
+	Session.prototype.ExportConditionData = function () {
+		return conditions;
+	}
+	Session.prototype.ExportEffectData = function () {
+		return effects;
+	}
 	return Session;
 })();
 

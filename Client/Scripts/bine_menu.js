@@ -410,6 +410,16 @@ function AddSingleLevelToBox (level) {
 	levelDiv.setAttribute("level_id", level.id);
 }
 
+function FillRuleOptions (sessionRef) {
+	var triggerData = sessionRef.ExportTriggerData();
+	var conditionData = sessionRef.ExportConditionData();
+	var effectData = sessionRef.ExportEffectData();
+
+	var triggerMenu = document.getElementById("add_entity_trigger").getElementsByClassName("choice_box");
+	var condEffMenu = document.getElementById("add_entity_sub_rule").getElementsByClassName("choice_box");
+
+}
+
 function SetupEntityEditingMenu () {
 	var colorInput = document.getElementById("entity_color_input");
 	if (curEntity.style.color !== undefined)
