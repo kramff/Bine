@@ -400,13 +400,6 @@ function FillLevelBox (levelArray) {
 		var level = levelArray[i];
 		// Main new div
 		var levelDiv = CreateNewDiv(levelBox, "level", level.name, level.id);
-		levelDiv.setAttribute("level_id", level.id);
-	}
-}
-
-function AddSingleLevelToBox (level) {
-	var levelBox = document.getElementsByClassName("level_box")[0];
-	var levelDiv = CreateNewDiv(levelBox, "level", level.name, level.id);
 	levelDiv.setAttribute("level_id", level.id);
 }
 
@@ -418,6 +411,19 @@ function FillRuleOptions (sessionRef) {
 	var triggerMenu = document.getElementById("add_entity_trigger").getElementsByClassName("choice_box");
 	var condEffMenu = document.getElementById("add_entity_sub_rule").getElementsByClassName("choice_box");
 
+	// Clear the menus (Is this necessary?)
+
+	// Loop through the exported rule data and create rule buttons for each
+	for (var i = 0; i < triggerData.length; i ++)
+	{
+		var triggerRule = triggerData[i];
+		CreateRuleOption(triggerMenu, "trigger", triggerRule);
+	}
+}
+
+function CreateRuleOption (parent, type, ruleData) {
+	var ruleElement = CreateNewDiv(parent, type, undefined, undefined);
+	
 }
 
 function SetupEntityEditingMenu () {
