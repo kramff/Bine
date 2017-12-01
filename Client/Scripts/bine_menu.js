@@ -400,6 +400,13 @@ function FillLevelBox (levelArray) {
 		var level = levelArray[i];
 		// Main new div
 		var levelDiv = CreateNewDiv(levelBox, "level", level.name, level.id);
+		levelDiv.setAttribute("level_id", level.id);
+	}
+}
+
+function AddSingleLevelToBox (level) {
+	var levelBox = document.getElementsByClassName("level_box")[0];
+	var levelDiv = CreateNewDiv(levelBox, "level", level.name, level.id);
 	levelDiv.setAttribute("level_id", level.id);
 }
 
@@ -486,7 +493,7 @@ function CreateEntityRuleElementsRecurse (container, rules, nesting) {
 
 var ruleData = {
 	"entity_steps_adjacent": "Entity Steps Adjacent",
-}
+};
 
 function GetRuleText (rule) {
 	if (ruleData[rule] !== undefined)
