@@ -21,7 +21,7 @@ function TimeLog (text) {
 }
 
 var listener = function (req, res) {
-	res.end("This is the Bine server - use kramff.com/Bine/Client");
+	res.end("This is the Bine session server - use kramff.com/Bine");
 }
 var server = http.createServer(listener)
 server.listen(process.env.PORT || 5000);

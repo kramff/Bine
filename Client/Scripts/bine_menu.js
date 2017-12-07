@@ -77,21 +77,21 @@ function ShowMenu (menuId) {
 	}
 }
 
-function ButtonClick () {
-	if (this.dataset.menu !== undefined)
+function ButtonClick (button) {
+	if (button.dataset.menu !== undefined)
 	{
 		HideAllMenus();
-		ShowMenu(this.dataset.menu);
+		ShowMenu(button.dataset.menu);
 	}
-	else if (this.dataset.action !== undefined)
+	else if (button.dataset.action !== undefined)
 	{
-		if (this.dataset.extra !== undefined)
+		if (button.dataset.extra !== undefined)
 		{
-			DoButtonAction(this.dataset.action, this.dataset.extra);
+			DoButtonAction(button.dataset.action, button.dataset.extra);
 		}
 		else
 		{
-			DoButtonAction(this.dataset.action);
+			DoButtonAction(button.dataset.action);
 		}
 	}
 }
@@ -101,11 +101,18 @@ function SetupButtons () {
 		return false;
 	}
 	// Buttons for going to menus and doing actions
-	var buttons = document.getElementsByClassName("button");
-	for (var i = 0; i < buttons.length; i++) {
-		var button = buttons[i];
-		button.onclick = ButtonClick;
+	document.body.onclick = function () {
+		if (event.target.classList.contains("button"))
+		{
+			ButtonClick(event.target)
+		}
 	}
+	// var buttons = document.getElementsByClassName("button");
+	// for (var i = 0; i < buttons.length; i++) {
+	// 	var button = buttons[i];
+	// 	button.onclick = ButtonClick;
+	// }
+
 	// Enter a session by clicking on it
 	var sessionBox = document.getElementsByClassName("session_box")[0];
 	sessionBox.onclick = function () {
@@ -415,22 +422,34 @@ function FillRuleOptions (sessionRef) {
 	var conditionData = sessionRef.ExportConditionData();
 	var effectData = sessionRef.ExportEffectData();
 
-	var triggerMenu = document.getElementById("add_entity_trigger").getElementsByClassName("choice_box");
-	var condEffMenu = document.getElementById("add_entity_sub_rule").getElementsByClassName("choice_box");
+	var triggerChoiceBox = document.getElementById("triggers_choice_box")
+	var effectChoiceBox = document.getElementById("effects_choice_box")
+	var conditionChoiceBox = document.getElementById("conditions_choice_box")
 
 	// Clear the menus (Is this necessary?)
 
 	// Loop through the exported rule data and create rule buttons for each
-	for (var i = 0; i < triggerData.length; i ++)
+	for (var triggerAbbrv in triggerData)
 	{
-		var triggerRule = triggerData[i];
-		CreateRuleOption(triggerMenu, "trigger", triggerRule);
+		var triggerRule = triggerData[triggerAbbrv];
+		CreateRuleOption(triggerChoiceBox, "trigger", triggerRule, triggerAbbrv);
+	}
+
+	for (var effectAbbrv in effectData) {
+		var effectRule = effectData[effectAbbrv];
+		CreateRuleOption(effectChoiceBox, "effect", effectRule, effectAbbrv);
+	}
+
+	for (var conditionAbbrv in conditionData) {
+		var conditionRule = conditionData[conditionAbbrv];
+		CreateRuleOption(conditionChoiceBox, "condition", conditionRule, conditionAbbrv);
 	}
 }
 
-function CreateRuleOption (parent, type, ruleData) {
-	var ruleElement = CreateNewDiv(parent, type, undefined, undefined);
-	
+function CreateRuleOption (parent, type, ruleData, ruleAbbrv) {
+	var ruleElement = CreateNewDiv(parent, "button", ruleData.text, undefined);
+	ruleElement.setAttribute("data-action", "select_" + type);
+	ruleElement.setAttribute("data-extra", ruleAbbrv);
 }
 
 function SetupEntityEditingMenu () {
