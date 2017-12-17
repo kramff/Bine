@@ -66,26 +66,26 @@ function LoadSScript () {
 	}
 }
 
-var wsOption = {transports: ["websocket"]};
+//var wsOption = {transports: ["websocket"]};
 var socket = undefined;
 function InitSocketConnection (argument) {
 	try
 	{
 		if (location.href === "http://kramff.github.io/")
 		{
-			socket = io("ws://bine-online.herokuapp.com", wsOption);
+			socket = io("http://bine-online.herokuapp.com");
 		}
 		else if (location.href.indexOf("http://www.kramff.com/Bine/") !== -1)
 		{
-			socket = io("ws://bine.nfshost.com", wsOption);
+			socket = io("http://bine.nfshost.com");
 		}
 		else if (location.href.indexOf("file:/") !== -1)
 		{
-			socket = io("ws://localhost:5000", wsOption);
+			socket = io("http://localhost:5000");
 		}
 		else
 		{
-			socket = io(location.href.replace(/\d+\/$/, "5000").replace("http://", "ws://"), wsOption);
+			socket = io(location.href.replace(/\d+\/$/, "5000"));
 		}
 		socket.on("connect", function (data) {
 			console.log("Connected to server with id: " + socket.id);
