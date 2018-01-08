@@ -1,8 +1,10 @@
 # Bine
 BINE: Blockomancy INtegrated Editor
 
-Controls: WASD or arrow keys or mouse
+A multiplayer game engine and editor for top-down tile based games.
+
+kramff.com/Bine
 
 WORK IN PROGRESS
 
-Copyright Mark "kramff" Foster 2015-2017
+Copyright Mark "kramff" Foster 2015-2018
