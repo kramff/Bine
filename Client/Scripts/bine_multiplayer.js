@@ -32,9 +32,8 @@ var MULTI_ON = false;
 function SocketInit (argument) {
 
 	// Skipping this step
-	InitSocketConnection();
-
-	return;
+	// InitSocketConnection();
+	// return;
 	
 	var socketScript = document.createElement("script");
 	if (location.href === "http://kramff.github.io/")
@@ -71,27 +70,32 @@ function LoadSScript () {
 	}
 }
 
+// Currently: using http and not websockets
 var wsOption = {transports: ["websocket"]};
+var noOption = {};
 var wsProtocol = "ws://";
+var httpProtocol = "http://";
+
+
 var socket = undefined;
 function InitSocketConnection () {
 	try
 	{
 		if (location.href === "http://kramff.github.io/")
 		{
-			socket = io(wsProtocol + "bine-online.herokuapp.com", wsOption);
+			socket = io(httpProtocol + "bine-online.herokuapp.com", noOption);
 		}
 		else if (location.href.indexOf("http://www.kramff.com/Bine/") !== -1)
 		{
-			socket = io(wsProtocol + "bine.nfshost.com", wsOption);
+			socket = io(httpProtocol + "bine.nfshost.com", noOption);
 		}
 		else if (location.href.indexOf("file:/") !== -1)
 		{
-			socket = io(wsProtocol + "localhost:5000", wsOption);
+			socket = io(httpProtocol + "localhost:5000", noOption);
 		}
 		else
 		{
-			socket = io(location.href.replace(/\d+\/$/, "5000").replace("http://", wsProtocol), wsOption);
+			socket = io(location.href.replace(/\d+\/$/, "5000").replace("http://", httpProtocol), noOption);
 		}
 		socket.on("connect", function (data) {
 			console.log("Connected to server with id: " + socket.id);

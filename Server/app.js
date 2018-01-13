@@ -28,7 +28,8 @@ server.listen(process.env.PORT || 5000);
 
 var io = socketio(server);
 
-io.set("transports", ["websocket"]);
+// Currently using http and not ws exclusively
+//io.set("transports", ["websocket"]);
 
 var motd = "Join or create a session!";
 
