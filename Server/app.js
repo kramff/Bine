@@ -28,6 +28,8 @@ server.listen(process.env.PORT || 5000);
 
 var io = socketio(server);
 
+io.set("transports", ["websocket"]);
+
 var motd = "Join or create a session!";
 
 // Saved worlds
@@ -400,7 +402,7 @@ if (false)
 }
 
 
-if (Math.random() > 0.9)
+if (Math.random() > 0.99)
 {	
 	TimeLog("\x1b[36m");
 	TimeLog("░░░░░░░░░░░░▄▐ ");
