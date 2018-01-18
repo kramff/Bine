@@ -417,10 +417,13 @@ function AddSingleLevelToBox (level) {
 	levelDiv.setAttribute("level_id", level.id);
 }
 
+var triggerData;
+var conditionData;
+var effectData;
 function FillRuleOptions (sessionRef) {
-	var triggerData = sessionRef.ExportTriggerData();
-	var conditionData = sessionRef.ExportConditionData();
-	var effectData = sessionRef.ExportEffectData();
+	triggerData = sessionRef.ExportTriggerData();
+	conditionData = sessionRef.ExportConditionData();
+	effectData = sessionRef.ExportEffectData();
 
 	var triggerChoiceBox = document.getElementById("triggers_choice_box")
 	var effectChoiceBox = document.getElementById("effects_choice_box")
@@ -482,9 +485,9 @@ function CreateEntityRuleElementsRecurse (container, rules, nesting) {
 		var ruleDiv = CreateNewDiv(container, "rule", undefined, undefined);
 		ruleDiv.setAttribute("data-nesting", nesting + i);
 		// Trigger: "T: ", Condition: "?: ", Effect: 
-		var symbol = (rule.trigger !== undefined ? "T: " : (rule.condition !== undefined ? "?: " : "-"))
-		var ruleSymbol = CreateNewDiv(ruleDiv, "rule_symbol", symbol, undefined);
-		var ruleTitle = CreateNewDiv(ruleDiv, "rule_title", GetRuleText(rule), undefined);
+		var symbol = (rule.trigger !== undefined ? "rule_trigger" : (rule.condition !== undefined ? "rule_condition" : "rule_effect"))
+		var ruleSymbol = CreateNewDiv(ruleDiv, "rule_symbol " + symbol, undefined, undefined);
+		var ruleTitle = CreateNewDiv(ruleDiv, "rule_title", GetRuleText(rule, symbol), undefined);
 		var ruleClose = CreateNewDiv(ruleDiv, "rule_remove", "X", undefined);
 		if (rule.block !== undefined)
 		{
@@ -510,15 +513,19 @@ function CreateEntityRuleElementsRecurse (container, rules, nesting) {
 	}
 }
 
-var ruleData = {
-	"entity_steps_adjacent": "Entity Steps Adjacent",
-};
-
-function GetRuleText (rule) {
-	if (ruleData[rule] !== undefined)
+function GetRuleText (rule, ruleType) {
+	if (ruleType === "rule_trigger")
 	{
-		return ruleData[rule];
+		return triggerData[rule.trigger].text;
 	}
-	return "Rule Text Here";
+	else if (ruleType === "rule_condition")
+	{
+		return conditionData[rule.condition].text;
+	}
+	else if (ruleType === "rule_effect")
+	{
+		return effectData[rule.effect].text;
+	}
+	return "missing rule text for " + rule;
 }
 
