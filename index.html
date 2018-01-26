@@ -185,16 +185,31 @@
 </div>
 <div class="menu_container over_menu" id="add_entity_variable">
 	<div class="button" data-action="close_over_menu">Cancel</div>
-	<div class="choice_box" id="add_entity_variable_choice_box">
-		<div class="button" data-action="add_entity_variable" data-extra="string">String</div>
-		<div class="button" data-action="add_entity_variable" data-extra="number">Number</div>
-		<div class="button" data-action="add_entity_variable" data-extra="entity">Entity</div>
-		<div class="button" data-action="add_entity_variable" data-extra="area">Area</div>
-		<div class="button" data-action="add_entity_variable" data-extra="level">Level</div>
-		<div class="button" data-action="add_entity_variable" data-extra="tile">Tile</div>
-		<div class="button" data-action="add_entity_variable" data-extra="coordinates">Coordinates</div>
+	<div class="choice_box" id="select_entity_variable_choice_box">
+		<div class="button" data-action="select_entity_variable" data-extra="string">String</div>
+		<div class="button" data-action="select_entity_variable" data-extra="number">Number</div>
+		<div class="button" data-action="select_entity_variable" data-extra="entity">Entity</div>
+		<div class="button" data-action="select_entity_variable" data-extra="area">Area</div>
+		<div class="button" data-action="select_entity_variable" data-extra="level">Level</div>
+		<div class="button" data-action="select_entity_variable" data-extra="tile">Tile</div>
+		<div class="button" data-action="select_entity_variable" data-extra="coordinates">Coordinates</div>
 	</div>
 </div>
+<div class="menu_container over_menu_2" id="input_variable_string">
+	<div class="button" data-action="close_over_menu_2">Cancel</div>
+	<div class="input_box">
+		<input type="text" name="input_string">
+	</div>
+</div>
+<div class="menu_container over_menu_2" id="input_variable_number">
+	<div class="button" data-action="close_over_menu_2">Cancel</div>
+	<div class="input_box">
+		<input type="number" name="input_number">
+	</div>
+</div>
+
+
+
 <div class="menu_container over_menu" id="setup_entity_variable">
 	<div class="button" data-action="close_over_menu">Cancel</div>
 	<div>Setting up a String variable...</div>
@@ -235,6 +250,7 @@
 
 
 <div class="dark_cover" id="dark_cover"></div>
+<div class="dark_cover dark_cover_2" id="dark_cover_2"></div>
 
 <div class="debug_zone" id="debug_zone"></div>
 </body>

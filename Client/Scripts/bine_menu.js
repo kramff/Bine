@@ -41,9 +41,16 @@ function HideAllMenus () {
 function HideAllOverMenus () {
 	var menus = document.getElementsByClassName("over_menu");
 	for (var i = 0; i < menus.length; i++) {
-		// menus[i].style["display"] = "none";
 		var menu = menus[i];
 		menu.classList.remove("active_menu");
+	}
+}
+
+function HideAllOverMenu2s () {
+	var menu2s = document.getElementsByClassName("over_menu_2");
+	for (var i = 0; i < menu2s.length; i++) {
+		var menu2 = menu2s[i];
+		menu2.classList.remove("active_menu");
 	}
 }
 
@@ -55,6 +62,16 @@ function ShowDarkCover () {
 function HideDarkCover () {
 	var darkCover = document.getElementById("dark_cover");
 	darkCover.classList.remove("active_cover");
+}
+
+function ShowDarkCover2 () {
+	var darkCover2 = document.getElementById("dark_cover_2");
+	darkCover2.classList.add("active_cover");
+}
+
+function HideDarkCover2 () {
+	var darkCover2 = document.getElementById("dark_cover_2");
+	darkCover2.classList.remove("active_cover");
 }
 
 // Call this function when connected to server
@@ -283,13 +300,17 @@ function DoButtonAction (action, extra) {
 			HideAllOverMenus();
 			HideDarkCover();
 		break;
+		case "close_over_menu_2":
+			HideAllOverMenu2s();
+			HideDarkCover2();
+		break;
 		case "add_entity_variable":
 			ShowDarkCover();
-			ShowMenu("add_entity_variable")
+			ShowMenu("add_entity_variable");
 		break;
 		case "add_entity_trigger":
 			ShowDarkCover();
-			ShowMenu("add_entity_trigger")
+			ShowMenu("add_entity_trigger");
 		break;
 		case "select_trigger":
 			// Select new trigger based on data-extra
@@ -318,6 +339,37 @@ function DoButtonAction (action, extra) {
 			SetupEntityRules();
 			HideAllOverMenus();
 			HideDarkCover();
+		break;
+		case "select_entity_variable":
+			ShowDarkCover2();
+			if (extra === "string")
+			{
+				ShowMenu("input_variable_string");
+			}
+			if (extra === "number")
+			{
+				ShowMenu("input_variable_number");
+			}
+			if (extra === "entity")
+			{
+
+			}
+			if (extra === "area")
+			{
+
+			}
+			if (extra === "level")
+			{
+
+			}
+			if (extra === "tile")
+			{
+
+			}
+			if (extra === "coordinates")
+			{
+
+			}
 		break;
 		case "change_variable":
 			// Get variable from variable edit window

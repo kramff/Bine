@@ -73,6 +73,10 @@ body {
 	z-index: 20;
 }
 
+.menu_container.over_menu_2 {
+	z-index: 40;
+}
+
 .dark_cover {
 	position: fixed;
 	top: 0;
@@ -89,6 +93,9 @@ body {
 .dark_cover.active_cover {
 	opacity: 0.9;
 	pointer-events: auto;
+}
+.dark_cover.dark_cover_2 {
+	z-index: 30;
 }
 
 .menu_top_half {
