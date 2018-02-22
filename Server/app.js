@@ -223,6 +223,7 @@ io.on("connection", function(socket) {
 				z: data.z,
 				settings: [],
 				style: [],
+				variables: [],
 				rules: [],
 				templates: [],
 			};
@@ -243,6 +244,7 @@ io.on("connection", function(socket) {
 				z: data.z,
 				style: [],
 				settings: [],
+				variables: [],
 				rules: [],
 				templates: [],
 			}

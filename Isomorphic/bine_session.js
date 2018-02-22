@@ -69,6 +69,7 @@ var Session = (function () {
 		this.z = entityData.z;
 		this.style = entityData.style;
 		this.settings = entityData.settings;
+		this.variables = entityData.variables;
 		this.rules = entityData.rules;
 		this.templates = entityData.templates;
 
@@ -104,6 +105,7 @@ var Session = (function () {
 			z: this.z,
 			style: this.style,
 			settings: this.settings,
+			variables: this.variables,
 			rules: this.rules,
 			templates: this.templates,
 		};

@@ -378,6 +378,55 @@ function DoButtonAction (action, extra) {
 			// Close the window
 			// Clean up
 		break;
+		case "make_new_variable":
+			if (extra === "string")
+			{
+				var varName = document.getElementsByName("input_string_name");
+				var varValue = document.getElementsByName("input_string");
+				var variableObj = {
+					name: varName,
+					value: varValue,
+					type: "string",
+				}
+				curEntity.variables.push(variableObj);
+			}
+			if (extra === "number")
+			{
+				var varName = document.getElementsByName("input_number_name");
+				var varValue = document.getElementsByName("input_number");
+				var variableObj = {
+					name: varName,
+					value: varValue,
+					type: "number",
+				}
+				curEntity.variables.push(variableObj);
+			}
+			if (extra === "entity")
+			{
+
+			}
+			if (extra === "area")
+			{
+
+			}
+			if (extra === "level")
+			{
+
+			}
+			if (extra === "tile")
+			{
+
+			}
+			if (extra === "coordinates")
+			{
+
+			}
+			HideAllOverMenu2s();
+			HideDarkCover2();
+			HideAllOverMenus();
+			HideDarkCover();
+			// *** Update entity variable html display
+		break;
 	}
 }
 
