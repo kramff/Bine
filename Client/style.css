@@ -302,3 +302,11 @@ body {
 	margin-top: 21px;
 	background-color: #404040;
 }
+
+.variable {
+	position: relative;
+	margin: 10px;
+	border: 1px solid #FFFFFF;
+	padding: 10px;
+	background: #606060;
+}

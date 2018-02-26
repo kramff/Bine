@@ -426,6 +426,7 @@ function DoButtonAction (action, extra) {
 			HideAllOverMenus();
 			HideDarkCover();
 			// *** Update entity variable html display
+			SetupEntityVariables();
 		break;
 	}
 }
@@ -526,9 +527,9 @@ function FillRuleOptions (sessionRef) {
 	conditionData = sessionRef.ExportConditionData();
 	effectData = sessionRef.ExportEffectData();
 
-	var triggerChoiceBox = document.getElementById("triggers_choice_box")
-	var effectChoiceBox = document.getElementById("effects_choice_box")
-	var conditionChoiceBox = document.getElementById("conditions_choice_box")
+	var triggerChoiceBox = document.getElementById("triggers_choice_box");
+	var effectChoiceBox = document.getElementById("effects_choice_box");
+	var conditionChoiceBox = document.getElementById("conditions_choice_box");
 
 	// Clear the menus (Is this necessary?)
 
@@ -562,6 +563,7 @@ function SetupEntityEditingMenu () {
 	{
 		colorInput.value = curEntity.style.color;
 	}
+	SetupEntityVariables();
 	SetupEntityRules();
 }
 
@@ -630,3 +632,24 @@ function GetRuleText (rule, ruleType) {
 	return "missing rule text for " + rule;
 }
 
+function SetupEntityVariables () {
+	// Get variables box
+	var variablesBox = document.getElementById("entity_variables_box");
+	// Clear variables box
+	while (variablesBox.firstChild)
+	{
+		variablesBox.removeChild(variablesBox.firstChild);
+	}
+	// Loop through variables and make divs based on the structure
+	CreateEntityVariableElements(variablesBox, curEntity.variables, "");
+}
+
+function CreateEntityVariableElements (container, variables) {
+	for (var i = 0; i < variables.length; i++) {
+		var variable = variables[i];
+		var variableDiv = CreateNewDiv(container, "variable", undefined, undefined);
+		var varType = CreateNewDiv(variableDiv, "variable_type variable_" + variable.type, undefined, undefined);
+		var varName = CreateNewDiv(variableDiv, "variable_name", variable.name, undefined);
+		var varValue = CreateNewDiv(variableDiv, "variable_value", variable.value, undefined);
+	}
+}
