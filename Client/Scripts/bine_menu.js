@@ -381,8 +381,8 @@ function DoButtonAction (action, extra) {
 		case "make_new_variable":
 			if (extra === "string")
 			{
-				var varName = document.getElementsByName("input_string_name");
-				var varValue = document.getElementsByName("input_string");
+				var varName = document.getElementById("input_string_name").value;
+				var varValue = document.getElementById("input_string").value;
 				var variableObj = {
 					name: varName,
 					value: varValue,
@@ -392,8 +392,8 @@ function DoButtonAction (action, extra) {
 			}
 			if (extra === "number")
 			{
-				var varName = document.getElementsByName("input_number_name");
-				var varValue = document.getElementsByName("input_number");
+				var varName = document.getElementById("input_number_name").value;
+				var varValue = document.getElementById("input_number").value;
 				var variableObj = {
 					name: varName,
 					value: varValue,

@@ -133,7 +133,7 @@
 	],
 	"find":
 	{
-		"height": 40.0
+		"height": 26.0
 	},
 	"find_in_files":
 	{
@@ -316,8 +316,8 @@
 						"selection":
 						[
 							[
-								4453,
-								4453
+								4535,
+								4535
 							]
 						],
 						"settings":
