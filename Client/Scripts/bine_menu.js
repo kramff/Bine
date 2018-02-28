@@ -87,6 +87,23 @@ function ShowMenu (menuId) {
 	{
 		currentMenu = menuId;
 		menu.classList.add("active_menu");
+
+		if (menu.classList.contains("allow_camera_controls"))
+		{
+			cameraControlsEnabled = true;
+		}
+		else
+		{
+			cameraControlsEnabled = false;
+		}
+		if (menu.classList.contains("allow_edit_tiles"))
+		{
+			tileEditingEnabled = true;
+		}
+		else
+		{
+			tileEditingEnabled = false;
+		}
 	}
 	else
 	{

@@ -76,6 +76,9 @@ var curBlock = undefined;
 
 var editorActive = true;
 
+var cameraControlsEnabled = false;
+var tileEditingEnabled = false;
+
 // Keyboards
 var wKey = false;
 var aKey = false;
@@ -191,7 +194,7 @@ function MainUpdate () {
 			else
 			{
 				// Move camera around
-				if (editMovX === 0 && editMovY === 0 && editMovZ === 0 && (aKey || dKey || wKey || sKey || eKey || qKey))
+				if (editMovX === 0 && editMovY === 0 && editMovZ === 0 && (aKey || dKey || wKey || sKey || eKey || qKey) && cameraControlsEnabled)
 				{
 					// Set camera movement
 					editMovX = (aKey ? -1 : 0) + (dKey ? 1 : 0);
@@ -525,6 +528,10 @@ function DoTouchStart (event) {
 		GameplayTouchStart(event);
 		return;
 	}
+	if (!cameraControlsEnabled)
+	{
+		return;
+	}
 	touchEventsActive = true;
 
 	var newTouch = event.changedTouches.item(0);
@@ -562,6 +569,10 @@ function DoTouchEnd (event) {
 	if (!editorActive)
 	{
 		GameplayTouchEnd(event);
+		return;
+	}
+	if (!cameraControlsEnabled)
+	{
 		return;
 	}
 	for (var i = 0; i < event.changedTouches.length; i++) {
@@ -610,6 +621,10 @@ function DoTouchMove (event) {
 	if (!editorActive)
 	{
 		GameplayTouchMove(event);
+		return;
+	}
+	if (!cameraControlsEnabled)
+	{
 		return;
 	}
 	for (var i = 0; i < event.changedTouches.length; i++) {
@@ -709,6 +724,10 @@ function GameplayMouseUp () {
 }
 
 function EditTileIfNewCoord (x, y) {
+	if (!tileEditingEnabled)
+	{
+		return;
+	}
 	var gameCoords = ScreenCoordToGameCoord(x, y, Math.round(editCamZ), editCamX + editMovX * (1 - 0.1 * editMovTime) + 0.5, editCamY + editMovY * (1 - 0.1 * editMovTime) + 0.5, editCamZ + editMovZ * (1 - 0.1 * editMovTime) + 0.5, R);
 
 	if (gameCoords.x === lastEditX && gameCoords.y === lastEditY && gameCoords.z === lastEditZ)
