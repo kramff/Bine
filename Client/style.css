@@ -310,3 +310,27 @@ body {
 	padding: 10px;
 	background: #606060;
 }
+
+.variable_type {
+
+}
+
+.variable_name {
+
+}
+
+.variable_value {
+
+}
+
+.variable_edit {
+	border: 1px solid white;
+	margin: 10px;
+	padding: 10px;
+}
+
+.variable_remove {
+	border: 1px solid white;
+	margin: 10px;
+	padding: 10px;
+}

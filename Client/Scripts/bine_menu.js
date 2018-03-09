@@ -668,5 +668,7 @@ function CreateEntityVariableElements (container, variables) {
 		var varType = CreateNewDiv(variableDiv, "variable_type variable_" + variable.type, undefined, undefined);
 		var varName = CreateNewDiv(variableDiv, "variable_name", variable.name, undefined);
 		var varValue = CreateNewDiv(variableDiv, "variable_value", variable.value, undefined);
+		var varEdit = CreateNewDiv(variableDiv, "variable_edit", "Edit", undefined);
+		var varRemove = CreateNewDiv(variableDiv, "variable_remove", "Remove", undefined);
 	}
 }
