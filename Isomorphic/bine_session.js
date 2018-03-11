@@ -766,13 +766,11 @@ var Session = (function () {
 		return newPlayer.id;
 	}
 	Session.prototype.CreateEntity = function (levelID) {
-		//
 		var newEntity = new Entity(0, 0, 0, {color: "#FF80FF", border: "#2080F0"}, {gravity: true, solid: true}, [], []);
 		
 		return newEntity.id;
 	}
 	Session.prototype.RemoveEntity = function (levelID, entityID) {
-		//
 		var level = this.GetLevelByID(levelID);
 		var entity = level.GetEntityByID(entityID);
 
@@ -782,6 +780,21 @@ var Session = (function () {
 		}
 		level.entities.splice(level.entities.indexOf(entity), 1);
 	}
+	Session.prototype.ChangeEntity = function(levelID, entityID, entityData) {
+		var level = this.GetLevelByID(levelID);
+		var entity = level.GetEntityByID(entityID);
+
+		// Update all values to the ones passed in, except for ID
+		// entity.id = entityData.id
+		entity.x = entityData.x;
+		entity.y = entityData.y;
+		entity.z = entityData.z;
+		entity.style = entityData.style;
+		entity.settings = entityData.settings;
+		entity.variables = entityData.variables;
+		entity.rules = entityData.rules;
+		entity.templates = entityData.templates;
+	};
 	Session.prototype.GetEntityByID = function (levelID, id) {
 		var level = this.GetLevelByID(levelID);
 		id = Number(id);

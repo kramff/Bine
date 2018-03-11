@@ -310,10 +310,11 @@ io.on("connection", function(socket) {
 		}
 	});
 
-	socket.on("entityChange", function () {
+	socket.on("entityChange", function (data) {
 		if (this.inSession && this.inLevel)
 		{
 			io.to(this.roomName).emit("entityChange", data);
+			this.curSession.ChangeEntity(data.levelID, data.entityID, data.entityData);
 		}
 	});
 
