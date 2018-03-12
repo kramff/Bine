@@ -211,6 +211,17 @@ function SetupButtons () {
 			}
 		}
 	}
+	var variableBox = document.getElementByClassName("variable_box");
+	variableBox.onClick = function () {
+		if (event.target.classList.contains("variable_edit"))
+		{
+			// Edit variable
+		}
+		else if (event.target.classList.contains("variable_remove"))
+		{
+			// Remove variable
+		}
+	}
 }
 
 function DoButtonAction (action, extra) {
@@ -665,6 +676,7 @@ function CreateEntityVariableElements (container, variables) {
 	for (var i = 0; i < variables.length; i++) {
 		var variable = variables[i];
 		var variableDiv = CreateNewDiv(container, "variable", undefined, undefined);
+		variableDiv.setAttribute("data-variable-id", variable.id);
 		var varType = CreateNewDiv(variableDiv, "variable_type variable_" + variable.type, undefined, undefined);
 		var varName = CreateNewDiv(variableDiv, "variable_name", variable.name, undefined);
 		var varValue = CreateNewDiv(variableDiv, "variable_value", variable.value, undefined);
@@ -672,3 +684,4 @@ function CreateEntityVariableElements (container, variables) {
 		var varRemove = CreateNewDiv(variableDiv, "variable_remove", "Remove", undefined);
 	}
 }
+
