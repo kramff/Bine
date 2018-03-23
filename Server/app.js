@@ -226,6 +226,7 @@ io.on("connection", function(socket) {
 				variables: [],
 				rules: [],
 				templates: [],
+				variableCounter: 0,
 			};
 			var entity = this.curLevel.AddEntity(blankEntityData);
 

@@ -211,7 +211,7 @@ function SetupButtons () {
 			}
 		}
 	}
-	var variableBox = document.getElementByClassName("variable_box");
+	var variableBox = document.getElementsByClassName("variable_box")[0];
 	variableBox.onClick = function () {
 		if (event.target.classList.contains("variable_edit"))
 		{
@@ -407,47 +407,55 @@ function DoButtonAction (action, extra) {
 			// Clean up
 		break;
 		case "make_new_variable":
+			var varName;
+			var varValue;
+			var variableObj;
 			if (extra === "string")
 			{
-				var varName = document.getElementById("input_string_name").value;
-				var varValue = document.getElementById("input_string").value;
-				var variableObj = {
+				varName = document.getElementById("input_string_name").value;
+				varValue = document.getElementById("input_string").value;
+				variableObj = {
 					name: varName,
 					value: varValue,
 					type: "string",
 				}
-				curEntity.variables.push(variableObj);
 			}
-			if (extra === "number")
+			else if (extra === "number")
 			{
-				var varName = document.getElementById("input_number_name").value;
-				var varValue = document.getElementById("input_number").value;
-				var variableObj = {
+				varName = document.getElementById("input_number_name").value;
+				varValue = document.getElementById("input_number").value;
+				variableObj = {
 					name: varName,
 					value: varValue,
 					type: "number",
 				}
+			}
+			else if (extra === "entity")
+			{
+
+			}
+			else if (extra === "area")
+			{
+
+			}
+			else if (extra === "level")
+			{
+
+			}
+			else if (extra === "tile")
+			{
+
+			}
+			else if (extra === "coordinates")
+			{
+
+			}
+			// Check if variable created correctly
+			if (variableObj !== undefined)
+			{
+				curEntity.variableCounter ++;
+				variableObj.ID = curEntity.variableCounter;
 				curEntity.variables.push(variableObj);
-			}
-			if (extra === "entity")
-			{
-
-			}
-			if (extra === "area")
-			{
-
-			}
-			if (extra === "level")
-			{
-
-			}
-			if (extra === "tile")
-			{
-
-			}
-			if (extra === "coordinates")
-			{
-
 			}
 			HideAllOverMenu2s();
 			HideDarkCover2();

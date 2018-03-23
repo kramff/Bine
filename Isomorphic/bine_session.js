@@ -45,7 +45,7 @@ var Session = (function () {
 				console.log("variable_condition condition happened");
 				return true;
 			},
-		}
+		},
 	}
 	var effects = {
 		say_message: {
@@ -53,9 +53,8 @@ var Session = (function () {
 			requiredVariables: ["text"],
 			effectFunction: function (variables, levelRef, entityRef, useVariables) {
 				console.log("say_message effect happened");
-
 			},
-		}
+		},
 	};
 
 	// var entityIDCounter = 0;
@@ -72,6 +71,7 @@ var Session = (function () {
 		this.variables = entityData.variables;
 		this.rules = entityData.rules;
 		this.templates = entityData.templates;
+		this.variableCounter = entityData.variableCounter;
 
 		this.xMov = 0;
 		this.yMov = 0;
@@ -106,6 +106,7 @@ var Session = (function () {
 			style: this.style,
 			settings: this.settings,
 			variables: this.variables,
+			variableCounter: this.variableCounter,
 			rules: this.rules,
 			templates: this.templates,
 		};
@@ -343,6 +344,7 @@ var Session = (function () {
 	};
 	// Execute an entity's rule
 	Entity.prototype.ExecuteRule = function(rule, variables, levelRef) {
+		var entityRef = this;
 		if (rule.trigger)
 		{
 			// Trigger - Go ahead and run the rule block.
@@ -381,8 +383,8 @@ var Session = (function () {
 				console.log(effect.text);
 			}
 			// Is there a result from an effect????
-			// Should just be "side effects"
-			var result = effect.effectFunction(variables, levelRef, entityRef, trigger.useVariables);
+			// Should just be "side effects"?
+			var result = effect.effectFunction(variables, levelRef, entityRef, effect.useVariables);
 		}
 	};
 	Entity.prototype.ExecuteBlock = function(ruleBlock, variables, levelRef) {
@@ -759,17 +761,17 @@ var Session = (function () {
 		area.map[tileData.x][tileData.y][tileData.z] = tileData.tile;
 		// area.extra[tileData.x][tileData.y][tileData.z] = tileData.extra;
 	};
-	Session.prototype.CreatePlayerEntity = function (levelID) {
-		//
-		var newPlayer = new Entity(0, 0, 0, {color: "#FFFFFF", border: "#208080"}, {gravity: true, solid: true}, [], []);
-		var level = this.GetLevelByID(levelID);
-		return newPlayer.id;
-	}
-	Session.prototype.CreateEntity = function (levelID) {
-		var newEntity = new Entity(0, 0, 0, {color: "#FF80FF", border: "#2080F0"}, {gravity: true, solid: true}, [], []);
+	// Session.prototype.CreatePlayerEntity = function (levelID) {
+	// 	//
+	// 	var newPlayer = new Entity(0, 0, 0, {color: "#FFFFFF", border: "#208080"}, {gravity: true, solid: true}, [], []);
+	// 	var level = this.GetLevelByID(levelID);
+	// 	return newPlayer.id;
+	// }
+	// Session.prototype.CreateEntity = function (levelID) {
+	// 	var newEntity = new Entity(0, 0, 0, {color: "#FF80FF", border: "#2080F0"}, {gravity: true, solid: true}, [], []);
 		
-		return newEntity.id;
-	}
+	// 	return newEntity.id;
+	// }
 	Session.prototype.RemoveEntity = function (levelID, entityID) {
 		var level = this.GetLevelByID(levelID);
 		var entity = level.GetEntityByID(entityID);
@@ -794,6 +796,7 @@ var Session = (function () {
 		entity.variables = entityData.variables;
 		entity.rules = entityData.rules;
 		entity.templates = entityData.templates;
+		entity.variableCounter = entityData.variableCounter;
 	};
 	Session.prototype.GetEntityByID = function (levelID, id) {
 		var level = this.GetLevelByID(levelID);
