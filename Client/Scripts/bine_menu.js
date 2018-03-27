@@ -624,32 +624,40 @@ function CreateEntityRuleElementsRecurse (container, rules, nesting) {
 		var ruleDiv = CreateNewDiv(container, "rule", undefined, undefined);
 		ruleDiv.setAttribute("data-nesting", nesting + i);
 		// Trigger: "T: ", Condition: "?: ", Effect: 
-		var symbol = (rule.trigger !== undefined ? "rule_trigger" : (rule.condition !== undefined ? "rule_condition" : "rule_effect"))
-		var ruleSymbol = CreateNewDiv(ruleDiv, "rule_symbol " + symbol, undefined, undefined);
-		var ruleTitle = CreateNewDiv(ruleDiv, "rule_title", GetRuleText(rule, symbol), undefined);
+		var ruleType = (rule.trigger !== undefined ? "rule_trigger" : (rule.condition !== undefined ? "rule_condition" : "rule_effect"))
+		// Create elements
+		var ruleSymbol = CreateNewDiv(ruleDiv, "rule_symbol " + ruleType, undefined, undefined);
+		var ruleTitle = CreateNewDiv(ruleDiv, "rule_title", GetRuleText(rule, ruleType), undefined);
 		var ruleClose = CreateNewDiv(ruleDiv, "rule_remove", "X", undefined);
+		// Create additional options (variables, etc)
+		AddRuleOptions(ruleDiv, rule, ruleType);
+		// If the rule has a sub-block, recursively create those
 		if (rule.block !== undefined)
 		{
-			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block", undefined, undefined);
-			CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nesting + i + "_block_");
-			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
-			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_block_");
+			var nestingString = nesting + i + "_block_";
+			var divClass = "rule_block";
+			CreateRuleBlock(ruleDiv, rule, nestingString, divClass);
 		}
 		if (rule.trueBlock !== undefined)
 		{
-			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block trueBlock", undefined, undefined);
-			CreateEntityRuleElementsRecurse(ruleBlock, rule.trueBlock, nesting + i + "_trueBlock_");
-			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
-			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_trueBlock_");
+			var nestingString = nesting + i + "_trueBlock_";
+			var divClass = "rule_block trueBlock";
+			CreateRuleBlock(ruleDiv, rule, nestingString, divClass);
 		}
 		if (rule.falseBlock !== undefined)
 		{
-			var ruleBlock = CreateNewDiv(ruleDiv, "rule_block falseBlock", undefined, undefined);
-			CreateEntityRuleElementsRecurse(ruleBlock, rule.falseBlock, nesting + i + "_falseBlock_");
-			var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
-			addSubRuleButton.setAttribute("data-nesting", nesting + i + "_falseBlock_");
+			var nestingString = nesting + i + "_falseBlock_";
+			var divClass = "rule_block falseBlock";
+			CreateRuleBlock(ruleDiv, rule, nestingString, divClass);
 		}
 	}
+}
+
+function CreateRuleBlock (ruleDiv, rule, nestingString, divClass) {
+	var ruleBlock = CreateNewDiv(ruleDiv, divClass, undefined, undefined);
+	CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nestingString);
+	var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
+	addSubRuleButton.setAttribute("data-nesting", nestingString);
 }
 
 function GetRuleText (rule, ruleType) {
@@ -666,6 +674,51 @@ function GetRuleText (rule, ruleType) {
 		return effectData[rule.effect].text;
 	}
 	return "missing rule text for " + rule;
+}
+
+// Make the options needed to describe the rule. (Variables)
+function AddRuleOptions (ruleDiv, rule, ruleType) {
+	var ruleData;
+	if (ruleType === "rule_trigger")
+	{
+		ruleData = triggerData[rule.trigger];
+	}
+	else if (ruleType === "rule_condition")
+	{
+		ruleData = conditionData[rule.condition];
+	}
+	else if (ruleType === "rule_effect")
+	{
+		ruleData = effectData[rule.effect];
+	}
+	else
+	{
+		console.log("missing rule options for " + rule);
+		return;
+	}
+	// For each created variable, make a element that lets the user name the new variable
+	if (ruleData.createdVariables !== undefined)
+	{
+		for (var i = 0; i < ruleData.createdVariables.length; i++) {
+			var createdVariable = ruleData.createdVariables[i];
+			// createdVariable.name (default name)
+			// createdVariable.type
+			CreateNewDiv(ruleDiv, "created_variable", "Make var: " + createdVariable.name + "(" + createdVariable.type + ")", "created_variable_" + i);
+		}
+	}
+	// For each required variable, make an element that lets the user pick a variable to use
+	if (ruleData.requiredVariables !== undefined)
+	{
+		for (var i = 0; i < ruleData.requiredVariables.length; i++) {
+			var requiredVariable = ruleData.requiredVariables[i];
+			// requiredVariable is just a type string ("number", "string", "entity", etc)
+			CreateNewDiv(ruleDiv, "required_variable", "Need var: " + "(" + requiredVariable + ")", "required_variable_" + i);
+		}
+	}
+}
+
+function GetRuleRequiredVariables (ruleType, rule) {
+
 }
 
 function SetupEntityVariables () {

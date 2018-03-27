@@ -29,7 +29,7 @@ var Session = (function () {
 		// When a different entity steps adjacent to this one
 		entity_steps_adjacent: {
 			text: "Entity Steps Adjacent -> [Entity]",
-			createVariables: [
+			createdVariables: [
 				{
 					name: "adjacent_entity",
 					type: "entity",
