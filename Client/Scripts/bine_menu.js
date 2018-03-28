@@ -636,26 +636,27 @@ function CreateEntityRuleElementsRecurse (container, rules, nesting) {
 		{
 			var nestingString = nesting + i + "_block_";
 			var divClass = "rule_block";
-			CreateRuleBlock(ruleDiv, rule, nestingString, divClass);
+			CreateRuleBlock(ruleDiv, rule, nestingString, divClass, "block");
 		}
 		if (rule.trueBlock !== undefined)
 		{
 			var nestingString = nesting + i + "_trueBlock_";
 			var divClass = "rule_block trueBlock";
-			CreateRuleBlock(ruleDiv, rule, nestingString, divClass);
+			CreateRuleBlock(ruleDiv, rule, nestingString, divClass, "trueBlock");
 		}
 		if (rule.falseBlock !== undefined)
 		{
 			var nestingString = nesting + i + "_falseBlock_";
 			var divClass = "rule_block falseBlock";
-			CreateRuleBlock(ruleDiv, rule, nestingString, divClass);
+			CreateRuleBlock(ruleDiv, rule, nestingString, divClass, "falseBlock");
 		}
 	}
 }
 
-function CreateRuleBlock (ruleDiv, rule, nestingString, divClass) {
+function CreateRuleBlock (ruleDiv, rule, nestingString, divClass, blockMode) {
 	var ruleBlock = CreateNewDiv(ruleDiv, divClass, undefined, undefined);
-	CreateEntityRuleElementsRecurse(ruleBlock, rule.block, nestingString);
+	var ruleBlock;
+	CreateEntityRuleElementsRecurse(ruleBlock, rule[blockMode], nestingString);
 	var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
 	addSubRuleButton.setAttribute("data-nesting", nestingString);
 }
