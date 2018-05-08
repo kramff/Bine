@@ -342,7 +342,7 @@ function DoButtonAction (action, extra) {
 		break;
 		case "select_trigger":
 			// Select new trigger based on data-extra
-			curEntity.rules.push({trigger: extra, block: []});
+			curEntity.AddTrigger(extra);
 			SetupEntityRules();
 			HideAllOverMenus();
 			HideDarkCover();

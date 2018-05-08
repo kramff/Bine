@@ -298,6 +298,34 @@ var Session = (function () {
 		this.moveDurationCorrection = moveDuration;
 		this.needCorrection = true;
 	};
+	// Add a trigger and any needed variables
+	Entity.prototype.AddTrigger = function(triggerType) {
+		// Create the trigger object Add it to the rule array
+		var rulesObj = {
+			trigger: triggerType,
+			block: [],
+			connectedVariables: [],
+		};
+		this.rules.push(rulesObj);
+		// Check if any variables need to be created
+		var triggerData = triggers[triggerType];
+		if (triggerData.createdVariables.length > 0)
+		{
+			for (var i = 0; i < triggerData.createdVariables.length; i++) {
+				var varToCreate = triggerData.createdVariables[i]
+				var variableObj = {
+					name: varToCreate.name,
+					value: undefined,
+					type: varToCreate.type,
+					local: true,
+				};
+				this.variableCounter += 1;
+				variableObj.ID = this.variableCounter;
+				this.variables.push(variableObj);
+				rulesObj.connectedVariables.push(variableObj.ID);
+			}
+		}
+	};
 	// Event handling
 	// Is this funcion needed? May only need version that immediately runs rules if they're present
 	Entity.prototype.CheckHaveTrigger = function (triggerType) {
