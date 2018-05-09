@@ -210,6 +210,10 @@ function SetupButtons () {
 				SetupEntityRules();
 			}
 		}
+		else if (event.target.classList.contains("required_variable"))
+		{
+			// TODO: Set this up
+		}
 	}
 	var variableBox = document.getElementsByClassName("variable_box")[0];
 	variableBox.onClick = function () {

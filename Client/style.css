@@ -137,7 +137,7 @@ body {
 	background-color: #404040;
 }
 
-.button, .add_sub_rule {
+.button, .add_sub_rule, .required_variable {
 	padding: 10px;
 	margin: 10px;
 
@@ -145,7 +145,7 @@ body {
 	border: 1px solid #FFFFFF;
 	font-size: 16px;
 }
-.button:hover, .add_sub_rule:hover, .rule_remove:hover {
+.button:hover, .add_sub_rule:hover, .rule_remove:hover, .required_variable:hover {
 	background-color: #202020;
 }
 
@@ -334,4 +334,8 @@ body {
 	border: 1px solid white;
 	margin: 10px;
 	padding: 10px;
+}
+
+.required_variable {
+	max-width: 110px;
 }
