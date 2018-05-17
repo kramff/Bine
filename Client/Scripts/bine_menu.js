@@ -213,6 +213,10 @@ function SetupButtons () {
 		else if (event.target.classList.contains("required_variable"))
 		{
 			// TODO: Set this up
+			// TODO: Pass in the selected variable slot and associated rule
+			FillVariableSelection();
+			ShowDarkCover();
+			ShowMenu("select_variable");
 		}
 	}
 	var variableBox = document.getElementsByClassName("variable_box")[0];
@@ -738,7 +742,9 @@ function SetupEntityVariables () {
 	CreateEntityVariableElements(variablesBox, curEntity.variables, "");
 }
 
+// Make variable elements for listing on main entity menu
 function CreateEntityVariableElements (container, variables) {
+	// TODO: Skip Non-Global variables, or mark them as local somehow?
 	for (var i = 0; i < variables.length; i++) {
 		var variable = variables[i];
 		var variableDiv = CreateNewDiv(container, "variable", undefined, undefined);
@@ -751,3 +757,65 @@ function CreateEntityVariableElements (container, variables) {
 	}
 }
 
+// Make variable elements for selecting a variable to put into a rule's variable slot
+function CreateEntityVariableElementsForSelection (container, variables) {
+	for (var i = 0; i < variables.length; i++) {
+		var variable = variables[i];
+		var variableDiv = CreateNewDiv(container, "variable", undefined, undefined);
+		variableDiv.setAttribute("data-variable-id", variable.id);
+		var varName = CreateNewDiv(variableDiv, "variable_name", variable.name, undefined);
+		// Should value be included?
+		// var varValue = CreateNewDiv(variableDiv, "variable_value", variable.value, undefined);
+	}
+}
+
+// Fill in the options for selecting a variable to put into a slot
+function FillVariableSelection () {
+	var globalsBox = document.getElementById("select_variable_global_variables_box");
+	while (globalsBox.firstChild)
+	{
+		globalsBox.removeChild(globalsBox.firstChild);
+	}
+	var localsBox = document.getElementById("select_variable_local_variables_box");
+	while (localsBox.firstChild)
+	{
+		localsBox.removeChild(localsBox.firstChild);
+	}
+	var globalVars = GetEntityGlobalVariablesOfType(curEntity, "string");
+	var localVars = GetEntityLocalVariablesOfType(curEntity, "string");
+	CreateEntityVariableElementsForSelection(globalsBox, globalVars);
+	CreateEntityVariableElementsForSelection(localsBox, localVars);
+}
+
+function GetEntityGlobalVariablesOfType (entity, type) {
+	var varList = [];
+	for (var i = 0; i < entity.variables.length; i++) {
+		var curVar = entity.variables[i];
+		if (!curVar.local)
+		{
+			if (curVar.type === type)
+			{
+				varList.push(curVar);
+			}
+		}
+	}
+	return varList;
+}
+
+function GetEntityLocalVariablesOfType (entity, type) {
+	// TODO: Need to check if local variable is actually local to the rule in question
+	// May need to come at this from the other angle
+	// follow rule tree upwards from target rule and keep track of variables along the way
+	var varList = [];
+	for (var i = 0; i < entity.variables.length; i++) {
+		var curVar = entity.variables[i];
+		if (curVar.local)
+		{
+			if (curVar.type === type)
+			{
+				varList.push(curVar);
+			}
+		}
+	}
+	return varList;
+}
