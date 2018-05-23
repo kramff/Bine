@@ -219,6 +219,7 @@ function SetupButtons () {
 			ShowMenu("select_variable");
 		}
 	}
+	// Edit or remove a global variable
 	var variableBox = document.getElementsByClassName("variable_box")[0];
 	variableBox.onClick = function () {
 		if (event.target.classList.contains("variable_edit"))
@@ -228,6 +229,21 @@ function SetupButtons () {
 		else if (event.target.classList.contains("variable_remove"))
 		{
 			// Remove variable
+		}
+	}
+	// Select a variable (Global or Local) to use in a rule's variable slot
+	var selectGlobalVariablesBox = document.getElementsByClassName("select_variable_global_variables_box")[0];
+	var selectLocalVariablesBox = document.getElementsByClassName("select_variable_local_variables_box")[0];
+	selectGlobalVariablesBox.onClick = function () {
+		if (event.target.classList.contains("selectable_variable"))
+		{
+
+		}
+	}
+	selectLocalVariablesBox.onClick = function () {
+		if (event.target.classList.contains("selectable_variable"))
+		{
+
 		}
 	}
 }
@@ -739,21 +755,24 @@ function SetupEntityVariables () {
 		variablesBox.removeChild(variablesBox.firstChild);
 	}
 	// Loop through variables and make divs based on the structure
-	CreateEntityVariableElements(variablesBox, curEntity.variables, "");
+	CreateEntityVariableElementsForMainList(variablesBox, curEntity.variables, "");
 }
 
 // Make variable elements for listing on main entity menu
-function CreateEntityVariableElements (container, variables) {
-	// TODO: Skip Non-Global variables, or mark them as local somehow?
+function CreateEntityVariableElementsForMainList (container, variables) {
 	for (var i = 0; i < variables.length; i++) {
 		var variable = variables[i];
-		var variableDiv = CreateNewDiv(container, "variable", undefined, undefined);
-		variableDiv.setAttribute("data-variable-id", variable.id);
-		var varType = CreateNewDiv(variableDiv, "variable_type variable_" + variable.type, undefined, undefined);
-		var varName = CreateNewDiv(variableDiv, "variable_name", variable.name, undefined);
-		var varValue = CreateNewDiv(variableDiv, "variable_value", variable.value, undefined);
-		var varEdit = CreateNewDiv(variableDiv, "variable_edit", "Edit", undefined);
-		var varRemove = CreateNewDiv(variableDiv, "variable_remove", "Remove", undefined);
+		// Skip Non-Global variables
+		if (!variable.local)
+		{
+			var variableDiv = CreateNewDiv(container, "variable", undefined, undefined);
+			variableDiv.setAttribute("data-variable-id", variable.id);
+			var varType = CreateNewDiv(variableDiv, "variable_type variable_" + variable.type, undefined, undefined);
+			var varName = CreateNewDiv(variableDiv, "variable_name", variable.name, undefined);
+			var varValue = CreateNewDiv(variableDiv, "variable_value", variable.value, undefined);
+			var varEdit = CreateNewDiv(variableDiv, "variable_edit", "Edit", undefined);
+			var varRemove = CreateNewDiv(variableDiv, "variable_remove", "Remove", undefined);
+		}
 	}
 }
 
@@ -761,29 +780,30 @@ function CreateEntityVariableElements (container, variables) {
 function CreateEntityVariableElementsForSelection (container, variables) {
 	for (var i = 0; i < variables.length; i++) {
 		var variable = variables[i];
-		var variableDiv = CreateNewDiv(container, "variable", undefined, undefined);
+		var variableDiv = CreateNewDiv(container, "selectable_variable", undefined, undefined);
 		variableDiv.setAttribute("data-variable-id", variable.id);
 		var varName = CreateNewDiv(variableDiv, "variable_name", variable.name, undefined);
-		// Should value be included?
-		// var varValue = CreateNewDiv(variableDiv, "variable_value", variable.value, undefined);
+		// Only show name, value is dynamic
 	}
 }
 
 // Fill in the options for selecting a variable to put into a slot
 function FillVariableSelection () {
+	// Global variables
 	var globalsBox = document.getElementById("select_variable_global_variables_box");
 	while (globalsBox.firstChild)
 	{
 		globalsBox.removeChild(globalsBox.firstChild);
 	}
+	var globalVars = GetEntityGlobalVariablesOfType(curEntity, "string");
+	CreateEntityVariableElementsForSelection(globalsBox, globalVars);
+	// Local variables
 	var localsBox = document.getElementById("select_variable_local_variables_box");
 	while (localsBox.firstChild)
 	{
 		localsBox.removeChild(localsBox.firstChild);
 	}
-	var globalVars = GetEntityGlobalVariablesOfType(curEntity, "string");
 	var localVars = GetEntityLocalVariablesOfType(curEntity, "string");
-	CreateEntityVariableElementsForSelection(globalsBox, globalVars);
 	CreateEntityVariableElementsForSelection(localsBox, localVars);
 }
 

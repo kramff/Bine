@@ -145,7 +145,7 @@ body {
 	border: 1px solid #FFFFFF;
 	font-size: 16px;
 }
-.button:hover, .add_sub_rule:hover, .rule_remove:hover, .required_variable:hover {
+.button:hover, .add_sub_rule:hover, .rule_remove:hover, .required_variable:hover, .selected_variable:hover {
 	background-color: #202020;
 }
 
@@ -305,6 +305,14 @@ body {
 }
 
 .variable {
+	position: relative;
+	margin: 10px;
+	border: 1px solid #FFFFFF;
+	padding: 10px;
+	background: #606060;
+}
+
+.selectable_variable {
 	position: relative;
 	margin: 10px;
 	border: 1px solid #FFFFFF;
