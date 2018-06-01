@@ -70,4 +70,16 @@ function Message (text, target, targetType) {
 	this.timer = 200;
 
 	messages.push(this);
+
+	this.mesgCanvas = document.createElement("canvas");
+	this.mesgCtx = this.mesgCanvas.getContext("2d");
+	// this.mesgCtx.font = "10px sans-serif";
+
+	this.mesgTextMetrics = this.mesgCtx.measureText(text);
+	this.mesgCanvas.width = this.mesgTextMetrics.width;
+	this.mesgCanvas.height = 10;
+
+	this.mesgCtx.fillStyle = "#FFFFFF";
+	this.mesgCtx.fillText(text, 0, 0);
 }
+
