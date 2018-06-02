@@ -70,6 +70,10 @@ var curEntity = undefined;
 var inNestingPoint = false;
 var curNestingPoint = undefined;
 
+// In a variable slot? (Selecting a variable to put into a variable slot) Keep reference
+var inVariableSlot = false;
+var curVariableSlot = undefined;
+
 // In a block? (Editing a rule block) Keep reference
 var inBlock = false;
 var curBlock = undefined;

@@ -214,6 +214,12 @@ function SetupButtons () {
 		{
 			// TODO: Set this up
 			// TODO: Pass in the selected variable slot and associated rule
+			var ruleParent = event.target.parentElement;
+			var nesting = ruleParent.getAttribute("data-nesting");
+			var varSlot = event.target.getAttribute("data-variable-slot");
+
+			inVariableSlot = true;
+			curVariableSlot = varSlot;
 			FillVariableSelection();
 			ShowDarkCover();
 			ShowMenu("select_variable");
@@ -232,18 +238,19 @@ function SetupButtons () {
 		}
 	}
 	// Select a variable (Global or Local) to use in a rule's variable slot
-	var selectGlobalVariablesBox = document.getElementsByClassName("select_variable_global_variables_box")[0];
-	var selectLocalVariablesBox = document.getElementsByClassName("select_variable_local_variables_box")[0];
+	var selectGlobalVariablesBox = document.getElementById("select_variable_global_variables_box");
+	var selectLocalVariablesBox = document.getElementById("select_variable_local_variables_box");
 	selectGlobalVariablesBox.onClick = function () {
 		if (event.target.classList.contains("selectable_variable"))
 		{
-
+			// TODO: Set this and the below function up
+			// Picked a variable to use in the earlier selected variable slot
 		}
 	}
 	selectLocalVariablesBox.onClick = function () {
 		if (event.target.classList.contains("selectable_variable"))
 		{
-
+			// Picked a variable to use in the earlier selected variable slot
 		}
 	}
 }
@@ -728,7 +735,8 @@ function AddRuleOptions (ruleDiv, rule, ruleType) {
 			var createdVariable = ruleData.createdVariables[i];
 			// createdVariable.name (default name)
 			// createdVariable.type
-			CreateNewDiv(ruleDiv, "created_variable", "Make var: " + createdVariable.name + "(" + createdVariable.type + ")", "created_variable_" + i);
+			var createdVarDiv = CreateNewDiv(ruleDiv, "created_variable", "Make var: " + createdVariable.name + "(" + createdVariable.type + ")", undefined);
+			createdVarDiv.setAttribute("data-created-variable", i);
 		}
 	}
 	// For each required variable, make an element that lets the user pick a variable to use
@@ -737,7 +745,8 @@ function AddRuleOptions (ruleDiv, rule, ruleType) {
 		for (var i = 0; i < ruleData.requiredVariables.length; i++) {
 			var requiredVariable = ruleData.requiredVariables[i];
 			// requiredVariable is just a type string ("number", "string", "entity", etc)
-			CreateNewDiv(ruleDiv, "required_variable", "Need var: " + "(" + requiredVariable + ")", "required_variable_" + i);
+			var reqVarDiv = CreateNewDiv(ruleDiv, "required_variable", "Need var: " + "(" + requiredVariable + ")", undefined);
+			reqVarDiv.setAttribute("data-variable-slot", i);
 		}
 	}
 }

@@ -50,7 +50,7 @@
 			"file": "Client/Scripts/bine_menu.js",
 			"settings":
 			{
-				"buffer_size": 23204,
+				"buffer_size": 23493,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -175,6 +175,10 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"required_variable",
+			"TODO",
+			"required_variable",
+			"// Picked a variable to use in the earlier selected variable slot",
 			"required_variable",
 			"ButtonClick",
 			"rules_box",
@@ -359,8 +363,8 @@
 						"selection":
 						[
 							[
-								7046,
-								7046
+								10490,
+								10526
 							]
 						],
 						"settings":
@@ -369,10 +373,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 2732.0,
+						"translation.y": 4940.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -410,7 +414,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 23204,
+						"buffer_size": 23493,
 						"regions":
 						{
 							"bookmarks":
@@ -426,8 +430,8 @@
 						"selection":
 						[
 							[
-								5255,
-								5255
+								5055,
+								5055
 							]
 						],
 						"settings":
@@ -436,7 +440,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 3701.0,
+						"translation.y": 3675.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -468,7 +472,7 @@
 						"translation.y": 5747.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
