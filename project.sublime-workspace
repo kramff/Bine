@@ -32,7 +32,7 @@
 			"file": "index.html",
 			"settings":
 			{
-				"buffer_size": 12495,
+				"buffer_size": 12579,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -50,7 +50,7 @@
 			"file": "Client/Scripts/bine_menu.js",
 			"settings":
 			{
-				"buffer_size": 23493,
+				"buffer_size": 23769,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -68,7 +68,7 @@
 			"file": "Client/Scripts/bine_main.js",
 			"settings":
 			{
-				"buffer_size": 17595,
+				"buffer_size": 17746,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -83,11 +83,10 @@
 			}
 		},
 		{
-			"file": "http-server.bat",
+			"file": "Client/Scripts/bine_misc.js",
 			"settings":
 			{
-				"buffer_size": 19,
-				"encoding": "UTF-8",
+				"buffer_size": 2153,
 				"line_ending": "Windows"
 			}
 		}
@@ -131,9 +130,9 @@
 	],
 	"file_history":
 	[
+		"/C/Users/kramf/Desktop/GameDevelopment/Bine/http-server.bat",
 		"/C/Users/kramf/Desktop/GameDevelopment/Bine/Client/index.html",
 		"/C/Users/kramf/Desktop/GameDevelopment/Bine/http_server.bat",
-		"/C/Users/kramf/Desktop/GameDevelopment/Bine/http-server.bat",
 		"/C/Users/kramf/Desktop/GameDevelopment/Bine/.gitignore",
 		"/C/Users/kramf/Desktop/GameDevelopment/Bine/local_server.bat",
 		"/C/Users/kramf/Desktop/GameDevelopment/Bine/.git/config",
@@ -160,7 +159,7 @@
 	],
 	"find":
 	{
-		"height": 40.0
+		"height": 28.0
 	},
 	"find_in_files":
 	{
@@ -175,6 +174,11 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"data-variable-slot",
+			"data-nesting",
+			"required_variable_",
+			"required_variable",
+			"ClassName",
 			"required_variable",
 			"TODO",
 			"required_variable",
@@ -297,10 +301,7 @@
 			"wsProtocol",
 			"io(\"http://",
 			"http://",
-			"'",
-			"io(",
-			"initSocketCOnne",
-			"Init"
+			"'"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -318,7 +319,7 @@
 	"groups":
 	[
 		{
-			"selected": 3,
+			"selected": 1,
 			"sheets":
 			[
 				{
@@ -347,7 +348,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
@@ -356,15 +357,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 12495,
+						"buffer_size": 12579,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								10490,
-								10526
+								5361,
+								5404
 							]
 						],
 						"settings":
@@ -373,10 +374,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 4940.0,
+						"translation.y": 831.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
@@ -405,7 +406,7 @@
 						"translation.y": 2599.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -414,7 +415,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 23493,
+						"buffer_size": 23769,
 						"regions":
 						{
 							"bookmarks":
@@ -423,6 +424,10 @@
 								"icon": "bookmark",
 								"regions":
 								[
+									[
+										20296,
+										20296
+									]
 								],
 								"scope": "bookmarks"
 							}
@@ -430,8 +435,8 @@
 						"selection":
 						[
 							[
-								5055,
-								5055
+								6021,
+								6021
 							]
 						],
 						"settings":
@@ -440,10 +445,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 3675.0,
+						"translation.y": 3681.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -472,7 +477,7 @@
 						"translation.y": 5747.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
@@ -481,15 +486,19 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 17595,
+						"buffer_size": 17746,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								15416,
-								15416
+								1960,
+								1974
+							],
+							[
+								1988,
+								2003
 							]
 						],
 						"settings":
@@ -498,10 +507,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 12886.0,
+						"translation.y": 912.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
@@ -530,32 +539,33 @@
 						"translation.y": 7311.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
 					"buffer": 7,
-					"file": "http-server.bat",
+					"file": "Client/Scripts/bine_misc.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 19,
+						"buffer_size": 2153,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								19,
-								19
+								0,
+								0
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Batch File/Batch File.sublime-syntax"
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 342.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 5,

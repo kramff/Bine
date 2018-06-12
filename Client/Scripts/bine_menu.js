@@ -218,6 +218,9 @@ function SetupButtons () {
 			var nesting = ruleParent.getAttribute("data-nesting");
 			var varSlot = event.target.getAttribute("data-variable-slot");
 
+			curNestingPoint = nesting;
+			inNestingPoint = true;
+
 			inVariableSlot = true;
 			curVariableSlot = varSlot;
 			FillVariableSelection();
