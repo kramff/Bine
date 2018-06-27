@@ -304,6 +304,9 @@ function ReceiveAssignPlayer (playerID) {
 	xCam = curPlayer.GetX() + 0.5;
 	yCam = curPlayer.GetY() + 0.5;
 	zCam = curPlayer.GetZ() + 0.5;
+
+	// Cancel touchmove if there is one
+	touchWalk = false;
 }
 
 function ReceiveRemoveEntity (levelID, entityID) {
