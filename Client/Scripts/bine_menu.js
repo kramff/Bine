@@ -498,6 +498,22 @@ function DoButtonAction (action, extra) {
 			// *** Update entity variable html display
 			SetupEntityVariables();
 		break;
+		case "inventory":
+			HideAllMenus();
+			ShowMenu("inventory");
+			inInventory = true;
+		break;
+		case "leave_note":
+			HideAllMenus();
+			ShowMenu("leaving_note");
+			leavingNote = true;
+		break;
+		case "throw_ball":
+			throwBall = true;
+		break;
+		case "brace_self":
+			braceSelf = true;
+		break;
 	}
 }
 

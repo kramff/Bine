@@ -676,11 +676,24 @@ var touchChanged = false;
 var touchGoalX = 0;
 var touchGoalY = 0;
 
+var throwBall = false;
+var throwStartTime = undefined;
+
 function GameplayTouchStart (event) {
-	touchWalk = true;
 	var newTouch = event.changedTouches.item(0);
+	if (throwBall)
+	{
+		var throwEndTime = Date.now();
+		var throwX = newTouch.clientX;
+		var throwY = newTouch.clientY;
+		ThrowBall(throwX, throwY, throwStartTime, throwEndTime);
+		return;
+	}
+
+	// Move to location
 	touchScreenX = newTouch.clientX;
 	touchScreenY = newTouch.clientY;
+	touchWalk = true;
 	touchChanged = true;
 }
 

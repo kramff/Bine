@@ -130,6 +130,11 @@ body {
 	align-content: center;
 }
 
+.small_menu_container {
+	padding: 0px;
+	margin: 10px;
+}
+
 .submenu_container {
 	padding: 10px;
 	margin: 10px;
@@ -147,6 +152,12 @@ body {
 }
 .button:hover, .add_sub_rule:hover, .rule_remove:hover, .required_variable:hover, .selected_variable:hover {
 	background-color: #202020;
+}
+
+.button.small_button {
+	padding: 2px;
+	margin: 2px;
+	font-size: 12px;
 }
 
 .menu_title {
