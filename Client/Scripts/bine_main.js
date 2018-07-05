@@ -382,6 +382,12 @@ function DoKeyDown (event) {
 	{
 		eKey = true;
 	}
+	else if (event.keyCode === 13)
+	{
+		// Enter pressed - start  typing or send chat message
+		DoEnterKey(event);
+		return;
+	}
 	else
 	{
 		// Input not used
@@ -421,6 +427,35 @@ function DoKeyUp (event) {
 		return;
 	}
 	inputChanged = true;
+}
+
+function DoEnterKey (event) {
+
+	if (inPlayer)
+	{
+		GameplayEnterKey(event);
+	}
+	
+}
+
+function GameplayEnterKey (event) {
+	// Focus chat input text box or send a chat message
+	var chatInput = document.getElementById("chat_input");
+	if (chatInput === document.activeElement)
+	{
+		// Already focused, so send a message
+		if (chatInput.value === "")
+		{
+			return;
+		}
+		SendChatMessage(chatInput.value);
+		chatInput.value = "";
+	}
+	else
+	{
+		// Focus the element
+		chatInput.focus();
+	}
 }
 
 function DoMouseDown (event) {

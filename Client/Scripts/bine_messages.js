@@ -42,7 +42,7 @@ function AddMessage (message, targetType) {
 	else
 	{
 		// No target: display message without linking to an in-game element (bottom of screen or whatever)
-		new message(message.text, undefined, MESG_TARGET_NONE);
+		new Message(message.text, undefined, MESG_TARGET_NONE);
 		return;
 	}
 	/*
@@ -59,6 +59,8 @@ var MESG_TARGET_OTHER_PLAYER = 2;
 var MESG_TARGET_AREA = 3;
 var MESG_TARGET_ENTITY = 4;
 var MESG_TARGET_NONE = 5;
+
+var messages = [];
 
 function Message (text, target, targetType) {
 	// Set targetType by what kind of object passed in for target

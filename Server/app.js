@@ -14,6 +14,7 @@ if (process.env.PORT !== undefined)
 var Session = require(pathString + "bine_session.js");
 
 var http = require("http");
+var fs = require("fs");
 var socketio = require("socket.io");
 
 function TimeLog (text) {
@@ -35,7 +36,20 @@ var motd = "Join or create a session!";
 
 // Saved worlds
 var worldArray = [];
-var worldNum = 0;
+var worldNum = 1;
+
+// Get saved worlds from filesystem
+var fileWorlds = fs.readdirSync("Worlds");
+
+for (var i = 0; i < fileWorlds.length; i++) {
+	var fileWorldPath = fileWorlds[i];
+	var fileWorldData = fs.readFileSync("Worlds/" + fileWorldPath, "utf8");
+	var fileWorld = JSON.parse(fileWorldData);
+	worldArray.push(fileWorld);
+	fileWorld.id = worldNum;
+	worldNum += 1;
+}
+
 function GetWorldByID (id) {
 	id = Number(id);
 	var result = worldArray.filter(function (world) {
@@ -60,6 +74,17 @@ function GetSessionByID (id) {
 		return result[0];
 	}
 }
+
+// Create a starting session for each saved world
+for (var i = 0; i < worldArray.length; i++) {
+	var startingWorldData = worldArray[i];
+	var newSession = new Session("Session #" + sessionNum, startingWorldData);
+	newSession.id = sessionNum;
+	TimeLog("created starting session! session name: " + newSession.name);
+	sessionArray.push(newSession);
+	sessionNum += 1;
+}
+
 
 // Connected players
 var playerArray = [];
@@ -94,7 +119,8 @@ io.on("connection", function(socket) {
 	// - Send the list of sessions available
 	// - (disabled for now) Send an initial upate for each current player
 	socket.emit("motd", motd);
-	socket.emit("worldList", worldArray.map(function (level) {return level.name;}));
+	// socket.emit("worldList", worldArray.map(function (level) {return level.name;}));
+	socket.emit("worldList", worldArray.map(function (world) {return world.id;}));
 	// session data: id, name, mode, worldName, playerCount
 	socket.emit("sessionList", sessionArray.map(function (session) {return {id: session.id, name: session.name, mode: session.mode, worldName: session.worldName, playerCount: session.playerCount};}));
 	/*for (var i = 0; i < playerArray.length; i++)
@@ -317,6 +343,22 @@ io.on("connection", function(socket) {
 			io.to(this.roomName).emit("entityChange", data);
 			this.curSession.ChangeEntity(data.levelID, data.entityID, data.entityData);
 		}
+	});
+
+	socket.on("message", function (data) {
+		// Player has sent a message
+		// data - text of message sent by player
+		TimeLog("Player: " + this.curPlayer.id + " sent a message: " + data);
+		if (this.inSession && this.inLevel && this.inPlayer)
+		{
+			// this.curPlayer.SetMoveDirections(data.up, data.down, data.left, data.right);
+			messageObj = {text: data, entityID: this.curPlayer.id, levelID: this.curLevel.id};
+			socket.broadcast.to(this.roomName).emit("message", messageObj);
+		}
+		// // data - chat message sent by player
+		// // Set the id and send it out to all other players
+		// data.id_player = socket.id;
+		// socket.broadcast.emit("message", data);
 	});
 
 	// Automatically when input received from players 

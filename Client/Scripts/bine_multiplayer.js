@@ -257,7 +257,6 @@ function RemovePlayer (playerData) {
 }
 function ReceiveChatMessage (message) {
 	console.log(message.text)
-	TextToSpeech(message.text);
 	AddMessage(message);
 }
 function ReceiveTileChange (tileChange) {
