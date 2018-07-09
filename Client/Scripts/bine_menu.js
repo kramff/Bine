@@ -80,15 +80,20 @@ function EnableMultiplayerFeatures () {
 }
 
 var currentMenu = "main_menu";
+var currentMenuElement = document.getElementById("main_menu");
+var currentClickableArea = undefined;
 
 function ShowMenu (menuId) {
-	var menu = document.getElementById(menuId);
-	if (menu !== undefined)
+	var menuElement = document.getElementById(menuId);
+	if (menuElement !== undefined)
 	{
-		currentMenu = menuId;
-		menu.classList.add("active_menu");
 
-		if (menu.classList.contains("allow_camera_controls"))
+		currentMenu = menuId;
+		currentMenuElement = menuElement;
+		currentMenuElement.classList.add("active_menu");
+		currentClickableArea = document.querySelector("#" + currentMenu + " .clickable_area") || undefined;
+
+		if (currentMenuElement.classList.contains("allow_camera_controls"))
 		{
 			cameraControlsEnabled = true;
 		}
@@ -96,7 +101,7 @@ function ShowMenu (menuId) {
 		{
 			cameraControlsEnabled = false;
 		}
-		if (menu.classList.contains("allow_edit_tiles"))
+		if (currentMenuElement.classList.contains("allow_edit_tiles"))
 		{
 			tileEditingEnabled = true;
 		}
@@ -109,6 +114,23 @@ function ShowMenu (menuId) {
 	{
 		console.error("Could not get menu with id " + menuId);
 	}
+}
+
+function CheckIfInClickableArea (x, y) {
+	if (currentClickableArea === undefined)
+	{
+		return false;
+	}
+	var boundingRect = currentClickableArea.getBoundingClientRect();
+	if (
+		x > boundingRect.x &&
+		x < boundingRect.x + boundingRect.width &&
+		y > boundingRect.y &&
+		y < boundingRect.y + boundingRect.height)
+	{
+		return true;
+	}
+	return false;
 }
 
 function ButtonClick (button) {

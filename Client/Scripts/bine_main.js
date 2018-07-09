@@ -780,6 +780,13 @@ function EditTileIfNewCoord (x, y) {
 	{
 		return;
 	}
+
+	// Test to see if this is within the clickable area
+	if (!CheckIfInClickableArea(x, y))
+	{
+		return;
+	}
+
 	var gameCoords = ScreenCoordToGameCoord(x, y, Math.round(editCamZ), editCamX + editMovX * (1 - 0.1 * editMovTime) + 0.5, editCamY + editMovY * (1 - 0.1 * editMovTime) + 0.5, editCamZ + editMovZ * (1 - 0.1 * editMovTime) + 0.5, R);
 
 	if (gameCoords.x === lastEditX && gameCoords.y === lastEditY && gameCoords.z === lastEditZ)

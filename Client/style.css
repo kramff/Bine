@@ -63,6 +63,9 @@ body {
 	transition: transform 0.5s ease;
 	transform: translate(0, 100%);
 	pointer-events: none;
+
+	display: flex;
+	flex-direction: column;
 }
 
 .menu_container.active_menu {
@@ -76,6 +79,11 @@ body {
 
 .menu_container.over_menu_2 {
 	z-index: 40;
+}
+
+.clickable_area {
+	flex-grow: 1;
+	box-shadow: inset 0 0 20px 1px rgba(255, 255, 255, 0.5);
 }
 
 .dark_cover {
