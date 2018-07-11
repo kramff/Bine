@@ -475,11 +475,11 @@ function DoMouseDown (event) {
 	}
 	if (editorActive)
 	{
-		EditorMouseDown();
+		EditorMouseDown(event);
 	}
 	else
 	{
-		GameplayMouseDown();
+		GameplayMouseDown(event);
 	}
 }
 function DoMouseMove (event) {
@@ -716,12 +716,19 @@ var throwStartTime = undefined;
 
 function GameplayTouchStart (event) {
 	var newTouch = event.changedTouches.item(0);
+	var touchX = newTouch.clientX;
+	var touchY = newTouch.clientY;
+
+	// Test to see if this is within the clickable area
+	if (!CheckIfInClickableArea(touchX, touchY))
+	{
+		return;
+	}
+
 	if (throwBall)
 	{
 		var throwEndTime = Date.now();
-		var throwX = newTouch.clientX;
-		var throwY = newTouch.clientY;
-		ThrowBall(throwX, throwY, throwStartTime, throwEndTime);
+		ThrowBall(touchX, touchY, throwStartTime, throwEndTime);
 		return;
 	}
 
@@ -743,7 +750,14 @@ function GameplayTouchMove (event) {
 	touchChanged = true;
 }
 
-function EditorMouseDown () {
+function EditorMouseDown (event) {
+
+	// Test to see if this is within the clickable area
+	if (!CheckIfInClickableArea(mouseX, mouseY))
+	{
+		return;
+	}
+
 	EditTileIfNewCoord(mouseX, mouseY);
 	
 }
@@ -763,8 +777,14 @@ function EditorMouseUp () {
 	lastEditZ = undefined;
 }
 
-function GameplayMouseDown () {
+function GameplayMouseDown (event) {
 
+	if (throwBall)
+	{
+		var throwEndTime = Date.now();
+		ThrowBall(mouseX, mouseY, throwStartTime, throwEndTime);
+		return;
+	}
 }
 
 function GameplayMouseMove () {
@@ -831,3 +851,27 @@ function EditTileIfNewCoord (x, y) {
 	}
 }
 
+
+// TODO: Abstract this into a more reusable form
+function ThrowBall (throwX, throwY, startTime, endTime) {
+
+	// How long the ball was charged for determines power of throw
+	var chargeTime = endTime - startTime;
+	var power = Math.sqrt(Math.max(10, Math.min(1, chargeTime / 1000)));
+
+	// Where the target point is determines angle of throw
+	// Throwing close to player throws higher vertically
+	var xDist = (R.CANVAS_HALF_WIDTH - throwX);
+	var yDist = (R.CANVAS_HALF_HEIGHT - throwY);
+	var xyAngle = Math.atan2(yDist, xDist);
+	var xyDist = Math.sqrt(xDist * xDist + yDist * yDist);
+	var maxDist = Math.sqrt(R.CANVAS_HALF_WIDTH * R.CANVAS_HALF_WIDTH + R.CANVAS_HALF_HEIGHT * R.CANVAS_HALF_HEIGHT);
+	var distAmt = xyDist / maxDist;
+	var zAngle = distAmt * Math.PI * 0.5;
+	var zPower = Math.sin(zAngle) * power;
+	var xyPower = Math.cos(zAngle) * power;
+	var xPower = Math.cos(xyAngle) * xyPower;
+	var yPower = Math.sin(xyAngle) * xyPower;
+
+	// Use x, y, z power as initial xyz velocity for ball
+}
