@@ -532,6 +532,7 @@ function DoButtonAction (action, extra) {
 		break;
 		case "throw_ball":
 			throwBall = true;
+			throwStartTime = Date.now();
 		break;
 		case "brace_self":
 			braceSelf = true;

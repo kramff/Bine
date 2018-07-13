@@ -729,6 +729,7 @@ function GameplayTouchStart (event) {
 	{
 		var throwEndTime = Date.now();
 		ThrowBall(touchX, touchY, throwStartTime, throwEndTime);
+		throwBall = false;
 		return;
 	}
 
@@ -783,6 +784,7 @@ function GameplayMouseDown (event) {
 	{
 		var throwEndTime = Date.now();
 		ThrowBall(mouseX, mouseY, throwStartTime, throwEndTime);
+		throwBall = false;
 		return;
 	}
 }
@@ -857,7 +859,7 @@ function ThrowBall (throwX, throwY, startTime, endTime) {
 
 	// How long the ball was charged for determines power of throw
 	var chargeTime = endTime - startTime;
-	var power = Math.sqrt(Math.max(10, Math.min(1, chargeTime / 1000)));
+	var power = Math.sqrt(Math.max(10, Math.min(1, chargeTime / 1000))) * 0.1;
 
 	// Where the target point is determines angle of throw
 	// Throwing close to player throws higher vertically
@@ -874,4 +876,16 @@ function ThrowBall (throwX, throwY, startTime, endTime) {
 	var yPower = Math.sin(xyAngle) * xyPower;
 
 	// Use x, y, z power as initial xyz velocity for ball
+	balls.push(new Ball(curPlayer.x, curPlayer.y, curPlayer.z, xPower, yPower, zPower));
+}
+
+var balls = [];
+
+function Ball (x, y, z, xSpd, ySpd, zSpd) {
+	this.x = x;
+	this.y = y;
+	this.z = z;
+	this.xSpd = xSpd;
+	this.ySpd = ySpd;
+	this.zSpd = zSpd;
 }

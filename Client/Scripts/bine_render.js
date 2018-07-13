@@ -136,6 +136,34 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	{
 		DrawEditOutline(Math.round(R.cameraZ));
 	}
+
+	for (var i = 0; i < balls.length; i++) {
+
+		R.ctx.save();
+		var ball = balls[i];
+		var scale = GetScale(ball.z);
+		var x = scale * (ball.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
+		var y = scale * (ball.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+		var radius = scale * 0.1;
+		if (radius < 0.001)
+		{
+			continue;
+		}
+		R.ctx.beginPath();
+		R.ctx.fillStyle = "#EE1111";
+		R.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+		R.ctx.fill();
+
+		R.ctx.restore();
+
+		ball.x += ball.xSpd;
+		ball.y += ball.ySpd;
+		ball.z += ball.zSpd;
+		ball.zSpd -= 0.1;
+		ball.xSpd *= 0.999;
+		ball.ySpd *= 0.999;
+		ball.zSpd *= 0.999;
+	}
 }
 
 function DrawEditOutline (z) {
