@@ -97,7 +97,7 @@ var Session = (function () {
 		this.tempMessageString = "";
 		this.tempMessageTime = 0;
 	}
-	Entity.prototype.Export = function() {
+	Entity.prototype.Export = function () {
 		var entityData = {
 			id: this.id,
 			x: this.x,
@@ -271,13 +271,13 @@ var Session = (function () {
 			}
 		}
 	}
-	Entity.prototype.GetX = function() {
+	Entity.prototype.GetX = function () {
 		return this.x + (this.xMov * this.moveTime / this.moveDuration);
 	};
-	Entity.prototype.GetY = function() {
+	Entity.prototype.GetY = function () {
 		return this.y + (this.yMov * this.moveTime / this.moveDuration);
 	};
-	Entity.prototype.GetZ = function() {
+	Entity.prototype.GetZ = function () {
 		return this.z + (this.zMov * this.moveTime / this.moveDuration);
 	};
 	Entity.prototype.SetMoveDirections = function (up, down, left, right) {
@@ -299,7 +299,7 @@ var Session = (function () {
 		this.needCorrection = true;
 	};
 	// Add a trigger and any needed variables
-	Entity.prototype.AddTrigger = function(triggerType) {
+	Entity.prototype.AddTrigger = function (triggerType) {
 		// Create the trigger object Add it to the rule array
 		var rulesObj = {
 			trigger: triggerType,
@@ -371,7 +371,7 @@ var Session = (function () {
 		}
 	};
 	// Execute an entity's rule
-	Entity.prototype.ExecuteRule = function(rule, variables, levelRef) {
+	Entity.prototype.ExecuteRule = function (rule, variables, levelRef) {
 		var entityRef = this;
 		if (rule.trigger)
 		{
@@ -415,7 +415,7 @@ var Session = (function () {
 			var result = effect.effectFunction(variables, levelRef, entityRef, effect.useVariables);
 		}
 	};
-	Entity.prototype.ExecuteBlock = function(ruleBlock, variables, levelRef) {
+	Entity.prototype.ExecuteBlock = function (ruleBlock, variables, levelRef) {
 		// Loop through the block and execute each rule in it
 		for (var i = 0; i < ruleBlock.length; i++)
 		{
@@ -474,7 +474,7 @@ var Session = (function () {
 		this.moveTime = 0;
 		this.moveDuration = MOVE_SPEED;
 	}
-	Area.prototype.Export = function() {
+	Area.prototype.Export = function () {
 		var areaData = {
 			id: this.id,
 			x: this.x,
@@ -519,15 +519,47 @@ var Session = (function () {
 
 		// Simulations
 	}
-	Area.prototype.GetX = function() {
+	Area.prototype.GetX = function () {
 		return this.x + (this.xMov * this.moveTime / this.moveDuration);
 	};
-	Area.prototype.GetY = function() {
+	Area.prototype.GetY = function () {
 		return this.y + (this.yMov * this.moveTime / this.moveDuration);
 	};
-	Area.prototype.GetZ = function() {
+	Area.prototype.GetZ = function () {
 		return this.z + (this.zMov * this.moveTime / this.moveDuration);
 	};
+
+	function Projectile (projectileData) {
+		this.type = "Projectile";
+		this.x = projectileData.x;
+		this.y = projectileData.y;
+		this.z = projectileData.z;
+		this.xSpd = projectileData.xSpd;
+		this.ySpd = projectileData.ySpd;
+		this.zSpd = projectileData.zSpd;
+		this.lifetime = projectileData.lifetime;
+		this.destroy = false;
+	}
+	Projectile.prototype.Update = function (levelRef) {
+		this.x += this.xSpd;
+		this.y += this.ySpd;
+		this.z += this.zSpd;
+		this.zSpd -= 0.01;
+		this.xSpd *= 0.99999;
+		this.ySpd *= 0.99999;
+		this.zSpd *= 0.99999;
+
+		if (levelRef.CheckLocationSolid(Math.floor(this.x), Math.floor(this.y), Math.floor(this.z)))
+		{
+			this.destroy = true;
+		}
+
+		this.lifetime -= 1;
+		if (this.lifetime <= 0)
+		{
+			this.destroy = true;
+		}
+	}
 
 	function Level (levelData) {
 		this.type = "Level";
@@ -565,8 +597,12 @@ var Session = (function () {
 			}
 		}
 		this.entityCounter = this.entities.length;
+
+		// Prep projectiles
+		this.projectiles = [];
+		this.projectileCounter = 0;
 	}
-	Level.prototype.Export = function() {
+	Level.prototype.Export = function () {
 		var areaDatas = [];
 		for (var i = 0; i < this.areas.length; i++)
 		{
@@ -598,8 +634,14 @@ var Session = (function () {
 			var area = this.areas[i];
 			area.Update(this);
 		}
+		for (var i = 0; i < this.projectiles.length; i++)
+		{
+			// Update projectiles
+			var projectile = this.projectiles[i];
+			projectile.Update(this);
+		}
 	}
-	Level.prototype.AddArea = function(areaData) {
+	Level.prototype.AddArea = function (areaData) {
 		var newArea = new Area(areaData);
 		this.areas.push(newArea);
 		if (!IS_SERVER)
@@ -608,7 +650,7 @@ var Session = (function () {
 		}
 		return newArea;
 	};
-	Level.prototype.GetAreaByID = function(areaID) {
+	Level.prototype.GetAreaByID = function (areaID) {
 		var id = Number(areaID);
 		var result = this.areas.filter(function (area) {
 			return area.id === id;
@@ -618,7 +660,7 @@ var Session = (function () {
 			return result[0];
 		}
 	};
-	Level.prototype.RemoveArea = function(areaID) {
+	Level.prototype.RemoveArea = function (areaID) {
 		var area = this.GetAreaByID(areaID);
 		if (!IS_SERVER)
 		{
@@ -626,7 +668,7 @@ var Session = (function () {
 		}
 		this.areas.splice(this.areas.indexOf(area), 1);
 	};
-	Level.prototype.AddEntity = function(entityData) {
+	Level.prototype.AddEntity = function (entityData) {
 		var newEntity = new Entity(entityData);
 		this.entities.push(newEntity);
 		if (!IS_SERVER)
@@ -635,7 +677,7 @@ var Session = (function () {
 		}
 		return newEntity;
 	};
-	Level.prototype.GetEntityByID = function(entityID) {
+	Level.prototype.GetEntityByID = function (entityID) {
 		var id = Number(entityID);
 		var result = this.entities.filter(function (entity) {
 			return entity.id === id;
@@ -645,6 +687,16 @@ var Session = (function () {
 			return result[0];
 		}
 	};
+	Level.prototype.AddProjectile = function (projectileData) {
+		// Server ignores projectiles for now
+		if (!IS_SERVER)
+		{
+			var newProjectile = new Projectile(projectileData);
+			this.projectiles.push(newProjectile);
+			this.drawObjects.push(newProjectile);
+			return newProjectile;
+		}
+	}
 	Level.prototype.CheckLocationSolid = function(x, y, z) {
 		for (var i = 0; i < this.areas.length; i++)
 		{
@@ -677,10 +729,10 @@ var Session = (function () {
 		}
 		return false;
 	};
-	Level.prototype.CheckRelativeLocationSolid = function(entity, x, y, z) {
+	Level.prototype.CheckRelativeLocationSolid = function (entity, x, y, z) {
 		return this.CheckLocationSolid(entity.x + x, entity.y + y, entity.z + z);
 	};
-	Level.prototype.GetAreaAtLocation = function(x, y, z) {
+	Level.prototype.GetAreaAtLocation = function (x, y, z) {
 		for (var i = 0; i < this.areas.length; i++)
 		{
 			var area = this.areas[i];
@@ -694,7 +746,7 @@ var Session = (function () {
 		}
 		return undefined;
 	};
-	Level.prototype.GetEntityAtLocation = function(x, y, z) {
+	Level.prototype.GetEntityAtLocation = function (x, y, z) {
 		for (var i = 0; i < this.entities.length; i++)
 		{
 			var entity = this.entities[i];
@@ -708,7 +760,7 @@ var Session = (function () {
 		}
 		return undefined;
 	};
-	function TileIsSolid(tile) {
+	function TileIsSolid (tile) {
 		if (tile !== 0)
 		{
 			return true;
@@ -764,7 +816,7 @@ var Session = (function () {
 		};
 		return worldData;
 	}
-	Session.prototype.AddLevel = function(levelData) {
+	Session.prototype.AddLevel = function (levelData) {
 		var newLevel = new Level(levelData);
 		this.levels.push(newLevel);
 		return newLevel;
@@ -783,7 +835,7 @@ var Session = (function () {
 			console.log("Couldn't find level with id: " + id);
 		}
 	}
-	Session.prototype.EditTile = function(levelID, areaID, tileData) {
+	Session.prototype.EditTile = function (levelID, areaID, tileData) {
 		var level = this.GetLevelByID(levelID);
 		var area = level.GetAreaByID(areaID);
 		area.map[tileData.x][tileData.y][tileData.z] = tileData.tile;
@@ -810,7 +862,7 @@ var Session = (function () {
 		}
 		level.entities.splice(level.entities.indexOf(entity), 1);
 	}
-	Session.prototype.ChangeEntity = function(levelID, entityID, entityData) {
+	Session.prototype.ChangeEntity = function (levelID, entityID, entityData) {
 		var level = this.GetLevelByID(levelID);
 		var entity = level.GetEntityByID(entityID);
 

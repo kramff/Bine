@@ -124,12 +124,12 @@ function InitSocketConnection () {
 		socket.on("sessionList", function (data) {
 			FillSessionBox(data);
 		});
-		socket.on("playerMove", function (data) {
-			UpdatePlayer(data);
-		});
-		socket.on("disconnection", function (data) {
-			RemovePlayer(data);
-		});
+		// socket.on("playerMove", function (data) {
+		// 	UpdatePlayer(data);
+		// });
+		// socket.on("disconnection", function (data) {
+		// 	RemovePlayer(data);
+		// });
 		socket.on("message", function (data) {
 			ReceiveChatMessage(data);
 		});
@@ -220,6 +220,10 @@ function InitSocketConnection () {
 
 		socket.on("entityChange", function (data) {
 			RecieveEntityChange(data.levelID, data.entityID, data.entityData);
+		});
+
+		socket.on("throwBall", function (data) {
+			RecieveThrowBall(data.levelID, data.entityID, data.ballData);
 		});
 
 		
@@ -341,24 +345,29 @@ function RecieveEntityChange (levelID, entityID, entityData) {
 	curSession.ChangeEntity(levelID, entityID, entityData);
 }
 
+function RecieveThrowBall (levelID, entityID, ballData) {
+	var level = curSession.GetLevelByID(levelID);
+	level.AddProjectile(ballData);
+}
+
 
 // ~~~~~~~~~~~
 // Functions to send data to server
 
 
-function SendPositionUpdate (position) {
-	if (MULTI_ON)
-	{
-		socket.emit("playerMove", position);
-	}
-}
-function SendChatMessage (message) {
-	if (MULTI_ON)
-	{
-		socket.emit("message", message);
-		// message.id = socket.id;	
-	}
-}
+// function SendPositionUpdate (position) {
+// 	if (MULTI_ON)
+// 	{
+// 		socket.emit("playerMove", position);
+// 	}
+// }
+// function SendChatMessage (message) {
+// 	if (MULTI_ON)
+// 	{
+// 		socket.emit("message", message);
+// 		// message.id = socket.id;	
+// 	}
+// }
 function SendTileChange (tileChange) {
 	if (MULTI_ON)
 	{
@@ -483,5 +492,12 @@ function SendEntityChange () {
 	if (MULTI_ON)
 	{
 		socket.emit("entityChange", {levelID: curLevel.id, entityID: curEntity.id, entityData: curEntity.Export()});
+	}
+}
+
+function SendThrowBall (x, y, z, xSpd, ySpd, zSpd) {
+	if (MULTI_ON)
+	{
+		socket.emit("throwBall", {x: x, y: y, z: z, xSpd: xSpd, ySpd: ySpd, zSpd: zSpd});
 	}
 }

@@ -752,7 +752,7 @@ var touchChanged = false;
 var touchGoalX = 0;
 var touchGoalY = 0;
 
-var throwBall = false;
+var throwingBall = false;
 var throwStartTime = undefined;
 
 function GameplayTouchStart (event) {
@@ -766,11 +766,11 @@ function GameplayTouchStart (event) {
 		return;
 	}
 
-	if (throwBall)
+	if (throwingBall)
 	{
 		var throwEndTime = Date.now();
-		ThrowBall(touchX, touchY, throwStartTime, throwEndTime);
-		throwBall = false;
+		GameplayThrowBall(touchX, touchY, throwStartTime, throwEndTime);
+		throwingBall = false;
 		return;
 	}
 
@@ -821,9 +821,9 @@ function EditorMouseUp () {
 
 function GameplayMouseDown (event) {
 
-	if (!throwBall)
+	if (!throwingBall)
 	{
-		throwBall = true;
+		throwingBall = true;
 		throwStartTime = Date.now();
 	}
 }
@@ -834,11 +834,11 @@ function GameplayMouseMove () {
 
 function GameplayMouseUp () {
 
-	if (throwBall)
+	if (throwingBall)
 	{
 		var throwEndTime = Date.now();
-		ThrowBall(mouseX, mouseY, throwStartTime, throwEndTime);
-		throwBall = false;
+		GameplayThrowBall(mouseX, mouseY, throwStartTime, throwEndTime);
+		throwingBall = false;
 		return;
 	}
 }
@@ -901,7 +901,7 @@ function EditTileIfNewCoord (x, y) {
 
 
 // TODO: Abstract this into a more reusable form
-function ThrowBall (throwX, throwY, startTime, endTime) {
+function GameplayThrowBall (throwX, throwY, startTime, endTime) {
 
 	// How long the ball was charged for determines power of throw
 	var chargeTime = endTime - startTime;
@@ -921,33 +921,35 @@ function ThrowBall (throwX, throwY, startTime, endTime) {
 	var xPower = Math.cos(xyAngle) * xyPower;
 	var yPower = Math.sin(xyAngle) * xyPower;
 
-	console.log(xPower + ", " + yPower + ", " + zPower);
+	// console.log(xPower + ", " + yPower + ", " + zPower);
 
 	// Use x, y, z power as initial xyz velocity for ball
-	balls.push(new Ball(curPlayer.x, curPlayer.y, curPlayer.z, xPower, yPower, zPower));
+	// balls.push(new Ball(curPlayer.GetX() + 0.5, curPlayer.GetY() + 0.5, curPlayer.GetZ() + 0.5, xPower, yPower, zPower));
+	SendThrowBall(curPlayer.GetX() + 0.5, curPlayer.GetY() + 0.5, curPlayer.GetZ() + 0.5, xPower, yPower, zPower);
+	curLevel.AddProjectile({x: curPlayer.GetX() + 0.5, y: curPlayer.GetY() + 0.5, z: curPlayer.GetZ() + 0.5, xSpd: xPower, ySpd: yPower, zSpd: zPower});
 }
 
-var balls = [];
-var particles = [];
-var zzz = 333;
+// var balls = [];
+// var particles = [];
+// var zzz = 333;
 
-function Ball (x, y, z, xSpd, ySpd, zSpd) {
-	this.x = x;
-	this.y = y;
-	this.z = z;
-	this.xSpd = xSpd;
-	this.ySpd = ySpd;
-	this.zSpd = zSpd;
-	this.destroy = false;
-}
+// function Ball (x, y, z, xSpd, ySpd, zSpd) {
+// 	this.x = x;
+// 	this.y = y;
+// 	this.z = z;
+// 	this.xSpd = xSpd;
+// 	this.ySpd = ySpd;
+// 	this.zSpd = zSpd;
+// 	this.destroy = false;
+// }
 
 
-function Particle (x, y, z) {
-	this.x = x;
-	this.y = y;
-	this.z = z;
-	this.xSpd = 0;
-	this.ySpd = 0;
-	this.zSpd = 0;
-	this.destroy = false;
-}
+// function Particle (x, y, z) {
+// 	this.x = x;
+// 	this.y = y;
+// 	this.z = z;
+// 	this.xSpd = 0;
+// 	this.ySpd = 0;
+// 	this.zSpd = 0;
+// 	this.destroy = false;
+// }

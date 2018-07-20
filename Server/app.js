@@ -108,7 +108,7 @@ io.on("connection", function(socket) {
 	socket.on("disconnect", function (reason) {
 		TimeLog("User disconnected with id: " + socket.id + ", and reason: " + reason);
 		ExitPlayer(this);
-		socket.broadcast.emit("disconnection", {"id": socket.id});
+		// socket.broadcast.emit("disconnection", {"id": socket.id});
 		// RemovePlayer({"id": socket.id});
 		this.playerID = undefined;
 	});
@@ -359,6 +359,14 @@ io.on("connection", function(socket) {
 		// // Set the id and send it out to all other players
 		// data.id_player = socket.id;
 		// socket.broadcast.emit("message", data);
+	});
+
+	socket.on("throwBall", function (data) {
+		if (this.inSession && this.inLevel && this.inPlayer)
+		{
+			ballThrowObj = {ballData: data, entityID: this.curPlayer.id, levelID: this.curLevel.id};
+			socket.broadcast.to(this.roomName).emit("throwBall", ballThrowObj);
+		}
 	});
 
 	// Automatically when input received from players 
