@@ -105,18 +105,22 @@
 	<div class="button" data-action="test_as_player">Test as player</div>
 	<div class="clickable_area"></div>
 </div>
-
+<div class="menu_container" id="join_by_link">
+	<div class="flex_row_container">
+		<div class="simple_text">Joining a session with a direct link...</div>
+	</div>
+</div>
 <div class="menu_container" id="test_level">
-	<div class="button" data-action="stop_testing">Stop testing</div>
-	<div class="chat_container">
+	<div class="gameplay_hide button" data-action="stop_testing">Stop testing</div>
+	<div class="mobile_only chat_container">
 		<input id="chat_input" type="text">
 		<button id="chat_send">Send</button>
 	</div>
 	<div class="small_menu_container flex_row_container">
-		<div class="button small_button" data-action="inventory">Inventory</div>
-		<div class="button small_button" data-action="brace_self">Brace self</div>
-		<div class="button small_button" data-action="throw_ball">Throw ball</div>
-		<div class="button small_button" data-action="leave_note">Leave note</div>
+		<div class="gameplay_hide button small_button" data-action="inventory">Inventory</div>
+		<div class="gameplay_hide button small_button" data-action="brace_self">Brace self</div>
+		<div class="mobile_only button small_button" data-action="throw_ball">Throw ball</div>
+		<div class="gameplay_hide button small_button" data-action="leave_note">Leave note</div>
 	</div>
 	<div class="clickable_area"></div>
 </div>

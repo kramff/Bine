@@ -137,7 +137,8 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 		DrawEditOutline(Math.round(R.cameraZ));
 	}
 
-	for (var i = 0; i < balls.length; i++) {
+	for (var i = 0; i < balls.length; i++)
+	{
 
 		R.ctx.save();
 		var ball = balls[i];
@@ -145,8 +146,9 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 		var x = scale * (ball.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
 		var y = scale * (ball.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
 		var radius = scale * 0.1;
-		if (radius < 0.001)
+		if (radius < 0.1)
 		{
+			ball.destroy = true;
 			continue;
 		}
 		R.ctx.beginPath();
@@ -159,10 +161,61 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 		ball.x += ball.xSpd;
 		ball.y += ball.ySpd;
 		ball.z += ball.zSpd;
-		ball.zSpd -= 0.1;
-		ball.xSpd *= 0.999;
-		ball.ySpd *= 0.999;
-		ball.zSpd *= 0.999;
+		ball.zSpd -= 0.01;
+		ball.xSpd *= 0.99999;
+		ball.ySpd *= 0.99999;
+		ball.zSpd *= 0.99999;
+	}
+	for (var i = 0; i < particles.length; i++) {
+		R.ctx.save();
+		var particle = particles[i];
+		var scale = GetScale(particle.z);
+		var x = scale * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
+		var y = scale * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+		var radius = scale * 0.05;
+		if (radius < 0.1)
+		{
+			particle.destroy = true;
+			continue;
+		}
+		R.ctx.beginPath();
+		R.ctx.fillStyle = "#1188EE";
+		R.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+		R.ctx.fill();
+
+		R.ctx.restore();
+
+		particle.x += particle.xSpd;
+		particle.y += particle.ySpd;
+		particle.z += particle.zSpd;
+		particle.zSpd -= 0.01;
+		particle.xSpd *= 0.99999;
+		particle.ySpd *= 0.99999;
+		particle.zSpd *= 0.99999;
+	}
+
+	if (throwBall)
+	{
+		var newParticle = new Particle(curPlayer.x, curPlayer.y, curPlayer.z);
+		newParticle.xSpd = (Math.random() - 0.5) * 0.1;
+		newParticle.ySpd = (Math.random() - 0.5) * 0.1;
+		newParticle.zSpd = (Math.random() - 0.5) * 0.1;
+		particles.push(newParticle);
+	}
+	
+	for (var i = balls.length - 1; i >= 0; i--) {
+		var ball = balls[i];
+		if (ball.destroy)
+		{
+			balls.splice(i, 1);
+		}
+	}
+	for (var i = particles.length - 1; i >= 0; i--) {
+		var particle = particles[i];
+		if (particle.destroy)
+		{
+			particles.splice(i, 1);
+		}
 	}
 }
 

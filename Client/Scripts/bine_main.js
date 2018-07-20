@@ -118,10 +118,51 @@ var lastEditX = undefined;
 var lastEditY = undefined;
 var lastEditZ = undefined;
 
+// If using a direct link, fill these variables
+var waitingToDirectConnect = false;
+var sessionDirectLinkID = undefined;
+var levelDirectLinkID = undefined;
+
+
+
 function Init () {
 	LoadIsoScripts();
 	SocketInit();
-	ShowMenu("main_menu");
+
+
+	if (location.search !== "")
+	{
+		// Joining session by direct link'
+		ShowMenu("join_by_link");
+
+		// Hide "gameplay_hide" elements
+		var gameplayHideElements = document.getElementsByClassName("gameplay_hide");
+		for (var i = 0; i < gameplayHideElements.length; i++) {
+			gameplayHideElements[i].hidden = true;
+		}
+
+		// Use search params
+		var searchParams = new URLSearchParams(document.location.search);
+		var searchSessionID = searchParams.get("session");
+		var searchLevelID = searchParams.get("level");
+		waitingToDirectConnect = true;
+		sessionDirectLinkID = searchSessionID;
+		levelDirectLinkID = searchLevelID;
+	}
+	else
+	{
+		// Regular main menu
+		ShowMenu("main_menu");
+	}
+
+	// Hide "mobile_only" elements
+	// (Show these if touch events happen)
+	var mobileHideElements = document.getElementsByClassName("mobile_only");
+	for (var i = 0; i < mobileHideElements.length; i++) {
+		mobileHideElements[i].hidden = true;
+	}
+
+
 	SetupButtons();
 	gameReady = true;
 	mainCanvas = document.getElementById("canvas");
@@ -780,12 +821,10 @@ function EditorMouseUp () {
 
 function GameplayMouseDown (event) {
 
-	if (throwBall)
+	if (!throwBall)
 	{
-		var throwEndTime = Date.now();
-		ThrowBall(mouseX, mouseY, throwStartTime, throwEndTime);
-		throwBall = false;
-		return;
+		throwBall = true;
+		throwStartTime = Date.now();
 	}
 }
 
@@ -795,6 +834,13 @@ function GameplayMouseMove () {
 
 function GameplayMouseUp () {
 
+	if (throwBall)
+	{
+		var throwEndTime = Date.now();
+		ThrowBall(mouseX, mouseY, throwStartTime, throwEndTime);
+		throwBall = false;
+		return;
+	}
 }
 
 function EditTileIfNewCoord (x, y) {
@@ -859,27 +905,31 @@ function ThrowBall (throwX, throwY, startTime, endTime) {
 
 	// How long the ball was charged for determines power of throw
 	var chargeTime = endTime - startTime;
-	var power = Math.sqrt(Math.max(10, Math.min(1, chargeTime / 1000))) * 0.1;
+	var power = Math.sqrt(Math.max(10, Math.min(1, chargeTime / 1000))) * 0.05;
 
 	// Where the target point is determines angle of throw
 	// Throwing close to player throws higher vertically
-	var xDist = (R.CANVAS_HALF_WIDTH - throwX);
-	var yDist = (R.CANVAS_HALF_HEIGHT - throwY);
+	var xDist = (throwX - R.CANVAS_HALF_WIDTH);
+	var yDist = (throwY - R.CANVAS_HALF_HEIGHT);
 	var xyAngle = Math.atan2(yDist, xDist);
 	var xyDist = Math.sqrt(xDist * xDist + yDist * yDist);
 	var maxDist = Math.sqrt(R.CANVAS_HALF_WIDTH * R.CANVAS_HALF_WIDTH + R.CANVAS_HALF_HEIGHT * R.CANVAS_HALF_HEIGHT);
 	var distAmt = xyDist / maxDist;
 	var zAngle = distAmt * Math.PI * 0.5;
-	var zPower = Math.sin(zAngle) * power;
-	var xyPower = Math.cos(zAngle) * power;
+	var zPower = Math.cos(zAngle) * power;
+	var xyPower = Math.sin(zAngle) * power;
 	var xPower = Math.cos(xyAngle) * xyPower;
 	var yPower = Math.sin(xyAngle) * xyPower;
+
+	console.log(xPower + ", " + yPower + ", " + zPower);
 
 	// Use x, y, z power as initial xyz velocity for ball
 	balls.push(new Ball(curPlayer.x, curPlayer.y, curPlayer.z, xPower, yPower, zPower));
 }
 
 var balls = [];
+var particles = [];
+var zzz = 333;
 
 function Ball (x, y, z, xSpd, ySpd, zSpd) {
 	this.x = x;
@@ -888,4 +938,16 @@ function Ball (x, y, z, xSpd, ySpd, zSpd) {
 	this.xSpd = xSpd;
 	this.ySpd = ySpd;
 	this.zSpd = zSpd;
+	this.destroy = false;
+}
+
+
+function Particle (x, y, z) {
+	this.x = x;
+	this.y = y;
+	this.z = z;
+	this.xSpd = 0;
+	this.ySpd = 0;
+	this.zSpd = 0;
+	this.destroy = false;
 }

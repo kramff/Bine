@@ -48,13 +48,14 @@ function SocketInit (argument) {
 	}
 	else if (location.href.indexOf("file:/") !== -1)
 	{
-		// Local
+		// Local file
 		socketScript.setAttribute("src", "http://localhost:5000/socket.io/socket.io.js");
 	}
 	else
 	{
 		// Hosting off some dumb custom server
-		socketScript.setAttribute("src", location.href.replace(/\d+\/$/, "5000/socket.io/socket.io.js"));
+		// socketScript.setAttribute("src", location.href.replace(/\d+\/$/, "5000/socket.io/socket.io.js"));
+		socketScript.setAttribute("src", (location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000/socket.io/socket.io.js").replace("http://", httpProtocol));
 	}
 	document.getElementsByTagName('body')[0].appendChild(socketScript);
 	socketScript.onreadystatechange = LoadSScript;
@@ -95,10 +96,18 @@ function InitSocketConnection () {
 		}
 		else
 		{
-			socket = io(location.href.replace(/\d+\/$/, "5000").replace("http://", httpProtocol), noOption);
+			// socket = io(location.href.replace(/\d+\/$/, "5000").replace("http://", httpProtocol), noOption);
+			socket = io((location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000").replace("http://", httpProtocol), noOption);
 		}
 		socket.on("connect", function (data) {
 			console.log("Connected to server with id: " + socket.id);
+
+			// Waiting until connected to server
+			// before directly joining session
+			if (waitingToDirectConnect)
+			{
+				JoinSession(sessionDirectLinkID);
+			}
 		});
 		socket.on("motd", function (data) {
 			motd = data;
@@ -146,6 +155,13 @@ function InitSocketConnection () {
 		socket.on("worldData", function (data) {
 			console.log("Got world data from server!");
 			ReceiveWorldData(data);
+
+			// Waiting until connected to server, then session
+			// before directly joining level
+			if (waitingToDirectConnect)
+			{
+				JoinLevel(levelDirectLinkID);
+			}
 		});
 
 
@@ -162,6 +178,14 @@ function InitSocketConnection () {
 		socket.on("enterLevel", function (data) {
 			// Enter a level
 			ReceiveEnterLevel(data);
+
+			// After directly connecting to the server, then session, then level
+			// Create a player entity
+			if (waitingToDirectConnect)
+			{
+				TestAsPlayer();
+			}
+
 		});
 
 		socket.on("newArea", function (data) {
