@@ -42,6 +42,26 @@ function LoadIsoScripts () {
 	}
 }
 
+// Based on https://stackoverflow.com/a/11381730/4876751
+function DetectMobile () { 
+	if (navigator.userAgent.match(/Android/i)
+		|| navigator.userAgent.match(/webOS/i)
+		|| navigator.userAgent.match(/iPhone/i)
+		|| navigator.userAgent.match(/iPad/i)
+		|| navigator.userAgent.match(/iPod/i)
+		|| navigator.userAgent.match(/BlackBerry/i)
+		|| navigator.userAgent.match(/Windows Phone/i))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+var isMobile = false;
+
 var mainCanvas = undefined;
 var gameReady = false;
 
@@ -137,7 +157,8 @@ function Init () {
 
 		// Hide "gameplay_hide" elements
 		var gameplayHideElements = document.getElementsByClassName("gameplay_hide");
-		for (var i = 0; i < gameplayHideElements.length; i++) {
+		for (var i = 0; i < gameplayHideElements.length; i++)
+		{
 			gameplayHideElements[i].hidden = true;
 		}
 
@@ -155,11 +176,17 @@ function Init () {
 		ShowMenu("main_menu");
 	}
 
+
+	isMobile = DetectMobile();
 	// Hide "mobile_only" elements
 	// (Show these if touch events happen)
-	var mobileHideElements = document.getElementsByClassName("mobile_only");
-	for (var i = 0; i < mobileHideElements.length; i++) {
-		mobileHideElements[i].hidden = true;
+	if (!isMobile)
+	{
+		var mobileHideElements = document.getElementsByClassName("mobile_only");
+		for (var i = 0; i < mobileHideElements.length; i++)
+		{
+			mobileHideElements[i].hidden = true;
+		}
 	}
 
 
@@ -655,7 +682,8 @@ function DoTouchEnd (event) {
 	{
 		return;
 	}
-	for (var i = 0; i < event.changedTouches.length; i++) {
+	for (var i = 0; i < event.changedTouches.length; i++)
+	{
 		var curTouch = event.changedTouches.item(i);
 
 		if (firstTouch !== undefined && curTouch.identifier === firstTouch.identifier)
@@ -707,7 +735,8 @@ function DoTouchMove (event) {
 	{
 		return;
 	}
-	for (var i = 0; i < event.changedTouches.length; i++) {
+	for (var i = 0; i < event.changedTouches.length; i++)
+	{
 		var curTouch = event.changedTouches.item(i);
 
 		if (firstTouch !== undefined && curTouch.identifier === firstTouch.identifier)
@@ -755,6 +784,8 @@ var touchGoalY = 0;
 var throwingBall = false;
 var throwStartTime = undefined;
 
+var debug_string = "";
+
 function GameplayTouchStart (event) {
 	var newTouch = event.changedTouches.item(0);
 	var touchX = newTouch.clientX;
@@ -771,8 +802,14 @@ function GameplayTouchStart (event) {
 		var throwEndTime = Date.now();
 		GameplayThrowBall(touchX, touchY, throwStartTime, throwEndTime);
 		throwingBall = false;
+		debug_string += "t";
+		Debug(debug_string)
+		if (debug_string.length > 30) {debug_string = ""}
 		return;
 	}
+	debug_string += "f";
+	Debug(debug_string)
+	if (debug_string.length > 30) {debug_string = ""}
 
 	// Move to location
 	touchScreenX = newTouch.clientX;
@@ -820,7 +857,6 @@ function EditorMouseUp () {
 }
 
 function GameplayMouseDown (event) {
-
 	if (!throwingBall)
 	{
 		throwingBall = true;
@@ -833,7 +869,6 @@ function GameplayMouseMove () {
 }
 
 function GameplayMouseUp () {
-
 	if (throwingBall)
 	{
 		var throwEndTime = Date.now();
@@ -874,7 +909,8 @@ function EditTileIfNewCoord (x, y) {
 
 	if (curLevel.areas.length >= 1)
 	{
-		for (var i = 0; i < curLevel.areas.length; i++) {
+		for (var i = 0; i < curLevel.areas.length; i++)
+		{
 			var curArea = curLevel.areas[i];
 			var relativeX = gameCoords.x - curArea.x;
 			var relativeY = gameCoords.y - curArea.y;
