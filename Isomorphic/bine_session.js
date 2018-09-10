@@ -369,6 +369,16 @@ var Session = (function () {
 				otherEntity.FireTrigger("entity_steps_adjacent", this, levelRef)
 			}
 		}
+		if (!IS_SERVER)
+		{
+			// Play footstep sound when stepping on solid tiles
+			if (levelRef.CheckRelativeLocationSolid(this, 0, 0, -1))
+			{
+				// PlayRandomFootstep();
+				DirectionalSound("footstep", this.x, this.y, this.z, levelRef);
+				// soundType, sourceX, sourceY, sourceZ, levelRef
+			}
+		}
 	};
 	// Execute an entity's rule
 	Entity.prototype.ExecuteRule = function (rule, variables, levelRef) {
@@ -816,6 +826,25 @@ var Session = (function () {
 		};
 		return worldData;
 	}
+	Session.prototype.ExportWorldNoPlayers = function() {
+		var worldExport = this.ExportWorld();
+		for (var i = 0; i < worldExport.levelDatas.length; i++) {
+			var level = worldExport.levelDatas[i];
+
+			// TODO: should check if each entity is a player or not, and take all the players out
+			// for (var i = 0; i < level.entityDatas.length; i++) {
+			// 	var entityData = level.entityDatas[i];
+			// 	if (true)
+			// 	{
+			// 		// Remove entity if it is a player
+			// 	}
+			// }
+			
+			// For now, just clear all entities
+			level.entityDatas = [];
+		}
+		return worldExport;
+	};
 	Session.prototype.AddLevel = function (levelData) {
 		var newLevel = new Level(levelData);
 		this.levels.push(newLevel);

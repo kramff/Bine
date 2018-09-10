@@ -147,6 +147,7 @@ var levelDirectLinkID = undefined;
 
 function Init () {
 	LoadIsoScripts();
+	LoadAllSound();
 	SocketInit();
 
 
@@ -527,6 +528,10 @@ function GameplayEnterKey (event) {
 }
 
 function DoMouseDown (event) {
+	if (autoMuted)
+	{
+		tryResumeAudio();
+	}
 	if (touchEventsActive)
 	{
 		return;
@@ -630,6 +635,10 @@ var distY = 0;
 var curTouchDistance = 0;
 
 function DoTouchStart (event) {
+	if (autoMuted)
+	{
+		tryResumeAudio
+	}
 	if (!editorActive)
 	{
 		GameplayTouchStart(event);
@@ -941,7 +950,8 @@ function GameplayThrowBall (throwX, throwY, startTime, endTime) {
 
 	// How long the ball was charged for determines power of throw
 	var chargeTime = endTime - startTime;
-	var power = Math.sqrt(Math.max(10, Math.min(1, chargeTime / 1000))) * 0.05;
+	console.log(chargeTime);
+	var power = Math.sqrt(Math.max(0.1, Math.min(5, chargeTime / 1000))) * 0.1;
 
 	// Where the target point is determines angle of throw
 	// Throwing close to player throws higher vertically
@@ -989,3 +999,11 @@ function GameplayThrowBall (throwX, throwY, startTime, endTime) {
 // 	this.zSpd = 0;
 // 	this.destroy = false;
 // }
+
+
+function DownloadCurrentWorld () {
+	var worldData = curSession.ExportWorldNoPlayers();
+	var worldString = JSON.stringify(worldData);
+
+	// Download the string as a file
+}

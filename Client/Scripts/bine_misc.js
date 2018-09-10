@@ -77,3 +77,63 @@ function RemoveRuleFromNestLocation (rules, nesting) {
 	// Remove curRuleData (rule entry) from prevRuleData (should be list)
 	prevRuleData.splice(prevRuleData.indexOf(curRuleData), 1);
 }
+
+// Makes line point by point and returns list of points
+// Determines which axis has moved the least relative distance and moving in that direction one step
+function GetPointsInLine (x0, y0, z0, x1, y1, z1) {
+	var curX = x0;
+	var curY = y0;
+	var curZ = z0;
+	var dirX = GetDir(x0, x1);
+	var dirY = GetDir(y0, y1);
+	var dirZ = GetDir(z0, z1);
+	var distX = Math.abs(x1 - x0);
+	var distY = Math.abs(y1 - y0);
+	var distZ = Math.abs(z1 - z0);
+
+	var pointList = [];
+
+	var breakLoopCounter = 0;
+	while (true)
+	{
+		breakLoopCounter ++;
+		if (breakLoopCounter > 1000)
+		{
+			console.log("Seems to be stuck in GetPointsInLine loop")
+			return false;
+		}
+
+		// Add point to list
+		pointList.push({x: curX, y: curY, z: curZ});
+
+		// Break out of loop if destination reached
+		if (curX === x1 && curY === y1 && curZ === z1)
+		{
+			break;
+		}
+		var relDistX = (distX !== 0) ? Math.abs(curX - x0) / distX : Infinity;
+		var relDistY = (distX !== 0) ? Math.abs(curY - y0) / distY : Infinity;
+		var relDistZ = (distX !== 0) ? Math.abs(curZ - z0) / distZ : Infinity;
+
+		// Move along X if it is the lowest relative distance
+		if (relDistX <= relDistY && relDistX <= relDistZ)
+		{
+			curX += dirX;
+		}
+		// Move along Y if it is the lowest relative distance
+		else if (relDistY <= relDistZ)
+		{
+			curY += dirY;
+		}
+		// Move along Z if it is the lowest relative distance
+		else
+		{
+			curZ += dirZ;
+		}
+	}
+	return pointList
+}
+
+function GetDir (n0, n1) {
+	return ((n1 > n0) ? 1 : ((n0 > n1) ? -1 : 0));
+}

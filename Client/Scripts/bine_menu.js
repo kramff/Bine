@@ -537,6 +537,11 @@ function DoButtonAction (action, extra) {
 		case "brace_self":
 			braceSelf = true;
 		break;
+		case "close_inventory":
+			HideAllMenus();
+			ShowMenu("test_level");
+			inInventory = false;
+		break;
 	}
 }
 

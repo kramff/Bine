@@ -1,28 +1,98 @@
 // bine_sound.js
 // Sound: Sound Effects, Music, etc.
 
-var audioSources = {
-	footsteps: {
-		concrete: {n: 10},
-		wood: {n: 0},
-		rug: {n: 0},
-		sticks: {n: 5},
-		leaves: {n: 0},
-		sand: {n: 0},
-		dirt: {n: 5},
-		snow: {n: 0},
-	},
-}
+// var audioSources = {
+// 	footsteps: {
+// 		concrete: {n: 10},
+// 		wood: {n: 0},
+// 		rug: {n: 0},
+// 		sticks: {n: 5},
+// 		leaves: {n: 0},
+// 		sand: {n: 0},
+// 		dirt: {n: 5},
+// 		snow: {n: 0},
+// 	},
+// }
 
-var audioData = {};
+var jsonAudioData = {};
+var audioDataTree = {};
 
 var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioCtx = new AudioContext();
+var autoMuted = true;
+
+function tryResumeAudio () {
+	if (autoMuted)
+	{
+		audioCtx.resume();
+		console.log("Audio resumed from automatic pause");
+		autoMuted = false;
+	}
+}
 
 function LoadAllSound () {
-	audioCtx.decodeAudioData("test").then(UseDecodedAudio);
+	fetch("Client/JSON/audio_data.json").then(function (response) {
+		return response.json();
+	}).then(function (responseData) {
+		jsonAudioData = responseData;
+		RecursiveLoadAudio(jsonAudioData, audioDataTree, "");
+	});
 }
-function UseDecodedAudio (decodedData) {
+
+function RecursiveLoadAudio (data, tree, nesting) {
+	for (var key in data)
+	{
+		if (data.hasOwnProperty(key) && (typeof data[key] === "object"))
+		{
+			if (key === "files")
+			{
+				tree[key] = [];
+				LoadAudioFileArray(data[key], tree[key], nesting);
+			}
+			else
+			{
+				tree[key] = {};
+				RecursiveLoadAudio(data[key], tree[key], nesting + "/" + key);
+			}
+		}
+	}
+}
+
+function LoadAudioFileArray (fileArray, destinationArray, nesting) {
+	for (var i = 0; i < fileArray.length; i++) {
+		fileArray[i]
+		GetAudioData(nesting + "/" + fileArray[i], destinationArray, i);
+	}
+}
+
+function GetAudioData (fileLocation, destinationArray, destinationIndex) {
+	var finalFileLocation = "Client/Audio" + fileLocation;
+
+	destinationArray[destinationIndex] = {
+		finalFileLocation: finalFileLocation,
+		audioData: undefined
+	};
+
+	fetch(finalFileLocation).then(function (response) {
+		return response.arrayBuffer();
+	}).then(function (buffer) {
+		return audioCtx.decodeAudioData(buffer);
+	}).then(function (audioData) {
+		destinationArray[destinationIndex].audioData = audioData;
+	});
+}
+
+function PlayRandomFootstep () {
+
+	var footstepFiles = audioDataTree.Effects.Footsteps.Concrete.files;
+
+	var randomFootstep = footstepFiles[Math.floor(Math.random() * footstepFiles.length)];
+
+	var bufferSource = audioCtx.createBufferSource();
+	bufferSource.buffer = randomFootstep.audioData;
+
+	bufferSource.connect(audioCtx.destination);
+	bufferSource.start();
 }
 
 // var oscillator = undefined;
@@ -32,6 +102,7 @@ var processor = undefined
 var sampleDelay = 100000;
 
 function SetupSound () {
+	return;
 	// oscillator = audioCtx.createOscillator();
 	// oscillator.type = "square";
 	// oscillator.connect(gainNode);
@@ -61,3 +132,104 @@ function SetupSound () {
 		}
 	}
 }
+
+var soundMuted = false;
+
+function DirectionalSound (soundType, sourceX, sourceY, sourceZ, levelRef) {
+
+	if (soundMuted)
+	{
+		return;
+	}
+
+	var listenerX = 0;
+	var listenerY = 0;
+	var listenerZ = 0;
+	if (curPlayer !== undefined)
+	{
+		listenerX = curPlayer.x;
+		listenerY = curPlayer.y;
+		listenerZ = curPlayer.z;
+	}
+
+	var soundAngle = Math.atan2(sourceY - listenerY, sourceX - listenerX);
+	var closeEar = (soundAngle < 0.5 * Math.PI && soundAngle > -0.5 * Math.PI) ? "right" : "left";
+	var farEar = (closeEar === "right") ? "left" : "right";
+
+	var affectAngle = 0;
+	if (farEar === "right")
+	{
+		affectAngle = Math.abs(soundAngle) - (0.5 * Math.PI) 
+	}
+	else
+	{
+		affectAngle = Math.PI - Math.abs(soundAngle);
+	}
+
+	var distX = sourceX - listenerX;
+	var distY = sourceY - listenerY;
+	var distZ = sourceZ - listenerZ;
+	var distance = Math.sqrt((distX * distX) + (distY * distY) + (distZ * distZ));
+
+	// Setup adjustment values
+	var overallGain = 1 / Math.sqrt(Math.max(1, distance));
+
+	var farEarGain = overallGain * Math.sin(affectAngle);
+
+	var leftEarGain = 0;
+	var rightEarGain = 0;
+	if (farEar === "right")
+	{
+		leftEarGain = overallGain;
+		rightEarGain = farEarGain;
+	}
+	else
+	{
+		leftEarGain = farEarGain;
+		rightEarGain = overallGain;
+	}
+
+
+	// Non-directional footstep -----
+	var footstepFiles = audioDataTree.Effects.Footsteps.Concrete.files;
+
+	var randomFootstep = footstepFiles[Math.floor(Math.random() * footstepFiles.length)];
+
+	var bufferSource = audioCtx.createBufferSource();
+	bufferSource.buffer = randomFootstep.audioData;
+
+	// var pannerNode = audioCtx.createPanner();
+
+	// bufferSource.connect(pannerNode);
+	// pannerNode.connect(audioCtx.destination);
+
+	// pannerNode.setPosition(sourceX, sourceY, sourceZ);
+
+	// var splitter = new ChannelSplitterNode(audioCtx, {numberOfOutputs: 2})
+	// var splitter = audioCtx.createChannelSplitter(2);
+	
+
+	// bufferSource.connect(splitter);
+
+	var gainNodeLeft = audioCtx.createGain();
+	gainNodeLeft.gain.value = leftEarGain;
+	var gainNodeRight = audioCtx.createGain();
+	gainNodeRight.gain.value = rightEarGain;
+
+	bufferSource.connect(gainNodeLeft);
+	bufferSource.connect(gainNodeRight);
+
+	var merger = new ChannelMergerNode(audioCtx, {numberOfInputs: 2})
+
+	gainNodeLeft.connect(merger, 0, 0);
+	gainNodeRight.connect(merger, 0, 1);
+
+	merger.connect(audioCtx.destination);
+
+	// bufferSource.connect(audioCtx.destination);
+	bufferSource.start();
+	// -----
+
+
+}
+
