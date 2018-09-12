@@ -101,7 +101,21 @@ var processor = undefined
 
 var sampleDelay = 100000;
 
+class MyWorkletNode extends AudioWorkletNode {
+  constructor(context) {
+    super(audioCtx, 'my-worklet-processor');
+  }
+}
+
+
+
 function SetupSound () {
+
+
+	audioCtx.audioWorklet.addModule('Client/Scripts/Worklet/reverb.js').then(() => {
+	  let node = new MyWorkletNode(audioCtx);
+	});
+
 	return;
 	// oscillator = audioCtx.createOscillator();
 	// oscillator.type = "square";
@@ -156,15 +170,25 @@ function DirectionalSound (soundType, sourceX, sourceY, sourceZ, levelRef) {
 	var closeEar = (soundAngle < 0.5 * Math.PI && soundAngle > -0.5 * Math.PI) ? "right" : "left";
 	var farEar = (closeEar === "right") ? "left" : "right";
 
+	if (sourceX === listenerX)
+	{
+		closeEar = "both";
+		farEar = "none";
+	}
+	// console.log("soundAngle: " + Math.round(soundAngle * 100) / 100);
+
 	var affectAngle = 0;
 	if (farEar === "right")
 	{
-		affectAngle = Math.abs(soundAngle) - (0.5 * Math.PI) 
+		// affectAngle = Math.abs(soundAngle) - (0.5 * Math.PI) 
+		affectAngle = Math.abs(soundAngle) - (Math.PI / 2);
 	}
-	else
+	else if (farEar === "left")
 	{
-		affectAngle = Math.PI - Math.abs(soundAngle);
+		// affectAngle = Math.PI - Math.abs(soundAngle);
+		affectAngle = (Math.PI / 2) - Math.abs(soundAngle);
 	}
+	// console.log("AffectAngle: " + Math.round(affectAngle * 100) / 100);
 
 	var distX = sourceX - listenerX;
 	var distY = sourceY - listenerY;
@@ -174,18 +198,26 @@ function DirectionalSound (soundType, sourceX, sourceY, sourceZ, levelRef) {
 	// Setup adjustment values
 	var overallGain = 1 / Math.sqrt(Math.max(1, distance));
 
-	var farEarGain = overallGain * Math.sin(affectAngle);
-
 	var leftEarGain = 0;
 	var rightEarGain = 0;
-	if (farEar === "right")
+
+	if (farEar !== "none")
 	{
-		leftEarGain = overallGain;
-		rightEarGain = farEarGain;
+		var farEarGain = overallGain * Math.abs(Math.cos(affectAngle));
+		if (farEar === "right")
+		{
+			leftEarGain = overallGain;
+			rightEarGain = farEarGain;
+		}
+		else
+		{
+			leftEarGain = farEarGain;
+			rightEarGain = overallGain;
+		}
 	}
 	else
 	{
-		leftEarGain = farEarGain;
+		leftEarGain = overallGain;
 		rightEarGain = overallGain;
 	}
 
@@ -218,6 +250,8 @@ function DirectionalSound (soundType, sourceX, sourceY, sourceZ, levelRef) {
 
 	bufferSource.connect(gainNodeLeft);
 	bufferSource.connect(gainNodeRight);
+
+	// console.log("Left: " + (Math.round(leftEarGain * 100) / 100) + ", Right: " + (Math.round(rightEarGain * 100) / 100));
 
 	var merger = new ChannelMergerNode(audioCtx, {numberOfInputs: 2})
 
