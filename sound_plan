@@ -1,0 +1,16 @@
+Directional sound
+
+Inputs:
+-Angle of source -> listener
+angle
+farEar
+-Distance from source -> listener
+distance
+-How enclosed is the source
+enclosed
+-How obstructed is the path from source -> listener
+obstructed
+
+Outputs:
+Left/Right Ear each have:
+Gain: based on angle, farEar, distance, obstructed
