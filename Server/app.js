@@ -1,36 +1,25 @@
 // Server for Bine
 // Multiplayer level editor project
-// Copyright Mark Foster 2015-2016
+// Copyright Mark Foster 2015-2018
 
 TimeLog("starting server \\(^.^)/");
 
-// Local or web
+// Path to isomorphic files
 var pathString = "../Isomorphic/";
-if (process.env.PORT !== undefined)
-{
-	pathString = "./Isomorphic/";
-}
 
 var Session = require(pathString + "bine_session.js");
 
-var http = require("http");
-var fs = require("fs");
-var socketio = require("socket.io");
+const fs = require("fs");
+
+const WebSocket = require("ws");
+
+const wss = new WebSocket.Server({ port: 5000 })
+
+const crypto = require("crypto");
 
 function TimeLog (text) {
 	console.log("[" + (new Date().toUTCString()) + "] " + text);
 }
-
-var listener = function (req, res) {
-	res.end("This is the Bine session server - use kramff.com/Bine");
-}
-var server = http.createServer(listener)
-server.listen(process.env.PORT || 5000);
-
-var io = socketio(server);
-
-// Currently using http and not ws exclusively
-//io.set("transports", ["websocket"]);
 
 var motd = "Join or create a session!";
 
@@ -368,62 +357,6 @@ io.on("connection", function(socket) {
 			socket.broadcast.to(this.roomName).emit("throwBall", ballThrowObj);
 		}
 	});
-
-	// Automatically when input received from players 
-	// - Send player events (movement, etc)
-	// - Send level events (areas move, NPC's do actions)
-	// - Send new messages from other players
-	// - Send level updates (tile/other edits)
-
-	// Input from players
-	// - Switching level (Joining multiplayer level, making local level multiplayer, creating a local-only instance of a level, etc...)
-	// - Gameplay (movement, etc) -> send to players in same area
-	// - Messages (chat) -> send to players
-	// - Level events (player triggered a switch, etc) -> send to players
-	// - Editor stuff (player edits a tile/edits other stuff) -> send to players
-
-	//socket.on("switchLevel", function (data) {
-		// data - name of level to switch to, or "local" if leaving multiplayer
-
-		// Join the socket.io room for that level (?)
-	//});
-	/*
-	socket.on("playerMove", function (data) {
-		// data - new position of player
-		data.id = socket.id;
-		socket.broadcast.emit("playerMove", data);
-		// UpdatePlayer(data);
-	});
-	socket.on("message", function (data) {
-		// data - chat message sent by player
-		// Set the id and send it out to all other players
-		data.id_player = socket.id;
-		socket.broadcast.emit("message", data);
-	});
-	socket.on("levelEvent", function (data) {
-		// data - data of the level event
-		// {type, area, etc...}
-		socket.broadcast.emit("levelEvent", data);
-	});
-	socket.on("edit", function (data) {
-		// data - data of the edit information
-		// {type, area, x, y, z}
-		socket.broadcast.emit("edit", data);
-	});
-	socket.on("tileChange", function (data) {
-		socket.broadcast.emit("tileChange", data);
-		ReceiveTileChange(data);
-	});
-	socket.on("createArea", function (data) {
-		socket.broadcast.emit("createArea", data);
-		ReceiveCreateArea(data);
-	});
-	socket.on("removeArea", function (data) {
-		socket.broadcast.emit("removeArea", data);
-		ReceiveRemoveArea(data);
-	});
-	*/
-
 
 });
 
