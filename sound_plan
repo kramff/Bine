@@ -14,3 +14,7 @@ obstructed
 Outputs:
 Left/Right Ear each have:
 Gain: based on angle, farEar, distance, obstructed
+Delay: based on angle, farEar, distance
+Lowpass: based on angle, farEar, distance, obstructed
+Reverb: based on angle, farEar, distance, obstructed, enclosed
+
