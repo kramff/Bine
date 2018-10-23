@@ -24,7 +24,7 @@ function TimeLog (text) {
 var motd = "Join or create a session!";
 
 // Saved worlds
-var worldArray = [];
+var worldList = [];
 var worldNum = 1;
 
 // Get saved worlds from filesystem
@@ -34,14 +34,14 @@ for (var i = 0; i < fileWorlds.length; i++) {
 	var fileWorldPath = fileWorlds[i];
 	var fileWorldData = fs.readFileSync("Worlds/" + fileWorldPath, "utf8");
 	var fileWorld = JSON.parse(fileWorldData);
-	worldArray.push(fileWorld);
+	worldList.push(fileWorld);
 	fileWorld.id = worldNum;
 	worldNum += 1;
 }
 
 function GetWorldByID (id) {
 	id = Number(id);
-	var result = worldArray.filter(function (world) {
+	var result = worldList.filter(function (world) {
 		return world.id === id;
 	});
 	if (result[0] !== undefined)
@@ -51,11 +51,11 @@ function GetWorldByID (id) {
 }
 
 // Active sessions
-var sessionArray = [];
+var sessionList = [];
 var sessionNum = 0;
 function GetSessionByID (id) {
 	id = Number(id);
-	var result = sessionArray.filter(function (session) {
+	var result = sessionList.filter(function (session) {
 		return session.id === id;
 	});
 	if (result[0] !== undefined)
@@ -65,19 +65,54 @@ function GetSessionByID (id) {
 }
 
 // Create a starting session for each saved world
-for (var i = 0; i < worldArray.length; i++) {
-	var startingWorldData = worldArray[i];
+for (var i = 0; i < worldList.length; i++) {
+	var startingWorldData = worldList[i];
 	var newSession = new Session("Session #" + sessionNum, startingWorldData);
 	newSession.id = sessionNum;
 	TimeLog("created starting session! session name: " + newSession.name);
-	sessionArray.push(newSession);
+	sessionList.push(newSession);
 	sessionNum += 1;
 }
 
 
 // Connected players
-var playerArray = [];
+var playerList = [];
 var playerNum = 0;
+
+
+// ws stuff starts here
+
+function Player (ws) {
+	this.ID = playerNum;
+	playerNum += 1;
+	this.ws = ws;
+	this.session = undefined;
+	this.sessionID = undefined;
+	playerList.push(this);
+}
+Player.prototype.disconnect = function () {
+	playerList.splice(playerList.indexOf(this), 1);
+}
+Player.prototype.sendData = function (type, data) {
+	var stringData = JSON.stringify({type: type, data: data});
+	this.ws.send(stringData);
+}
+
+wss.on("connection", function connection (ws) {
+
+	var newPlayer = new Player(ws);
+
+	ws.on("message", function incoming (message) {
+		var mData = JSON.parse(message);
+		handleMessageData(newPlayer, mData.type, mData.data);
+	});
+
+	ws.on("close", function close () {
+		newPlayer.disconnect();
+	});
+});
+
+// TODO: Swap out socket.io for ws
 
 io.on("connection", function(socket) {
 	TimeLog("User connected with id: " + socket.id);
@@ -108,13 +143,13 @@ io.on("connection", function(socket) {
 	// - Send the list of sessions available
 	// - (disabled for now) Send an initial upate for each current player
 	socket.emit("motd", motd);
-	// socket.emit("worldList", worldArray.map(function (level) {return level.name;}));
-	socket.emit("worldList", worldArray.map(function (world) {return world.id;}));
+	// socket.emit("worldList", worldList.map(function (level) {return level.name;}));
+	socket.emit("worldList", worldList.map(function (world) {return world.id;}));
 	// session data: id, name, mode, worldName, playerCount
-	socket.emit("sessionList", sessionArray.map(function (session) {return {id: session.id, name: session.name, mode: session.mode, worldName: session.worldName, playerCount: session.playerCount};}));
-	/*for (var i = 0; i < playerArray.length; i++)
+	socket.emit("sessionList", sessionList.map(function (session) {return {id: session.id, name: session.name, mode: session.mode, worldName: session.worldName, playerCount: session.playerCount};}));
+	/*for (var i = 0; i < playerList.length; i++)
 	{
-		socket.emit("playerMove", playerArray[i]);
+		socket.emit("playerMove", playerList[i]);
 	}*/
 
 	socket.on("createSessionNewWorld", function (data) {
@@ -125,8 +160,8 @@ io.on("connection", function(socket) {
 		var newSession = new Session("Session #" + sessionNum, emptyWorldData);
 		newSession.id = sessionNum;
 		TimeLog("created session! session name: " + newSession.name);
-		sessionArray.push(newSession);
-		sessionNum ++;
+		sessionList.push(newSession);
+		sessionNum += 1;
 
 		// Send player the world data for the created session
 		socket.emit("worldData", newSession.ExportWorld());
@@ -177,7 +212,7 @@ io.on("connection", function(socket) {
 	socket.on("createNewLevel", function (data) {
 		if (this.inSession)
 		{
-			this.curSession.levelCounter ++;
+			this.curSession.levelCounter += 1;
 			var blankLevelData = {
 				name: "level name",
 				id: this.curSession.levelCounter,
@@ -205,7 +240,7 @@ io.on("connection", function(socket) {
 	socket.on("createNewArea", function (data) {
 		if (this.inSession && this.inLevel)
 		{
-			this.curLevel.areaCounter ++;
+			this.curLevel.areaCounter += 1;
 			var blankAreaData = {
 				id: this.curLevel.areaCounter,
 				x: data.x,
@@ -230,7 +265,7 @@ io.on("connection", function(socket) {
 	socket.on("createNewEntity", function (data) {
 		if (this.inSession && this.inLevel)
 		{
-			this.curLevel.entityCounter ++;
+			this.curLevel.entityCounter += 1;
 			var blankEntityData = {
 				id: this.curLevel.entityCounter,
 				x: data.x,
@@ -252,7 +287,7 @@ io.on("connection", function(socket) {
 	socket.on("testAsPlayer", function (data) {
 		if (this.inSession && this.inLevel)
 		{
-			this.curLevel.entityCounter ++;
+			this.curLevel.entityCounter += 1;
 			var newPlayerData = {
 				id: this.curLevel.entityCounter,
 				x: data.x,
@@ -376,8 +411,8 @@ function ExitPlayer (client) {
 function MainUpdate () {
 	setTimeout(MainUpdate, 16);
 
-	for (var i = 0; i < sessionArray.length; i++) {
-		var session = sessionArray[i];
+	for (var i = 0; i < sessionList.length; i++) {
+		var session = sessionList[i];
 		for (var j = 0; j < session.levels.length; j++) {
 			var level = session.levels[j];
 			level.Update();
