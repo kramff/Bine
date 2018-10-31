@@ -110,6 +110,7 @@ wss.on("connection", function connection (ws) {
 	ws.on("close", function close () {
 		TimeLog("User disconnected with id: " + socket.id + ", and reason: " + reason);
 		newPlayer.disconnect();
+		// ExitPlayer(newPlayer);
 	});
 });
 
