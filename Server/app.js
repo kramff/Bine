@@ -82,12 +82,15 @@ var playerNum = 0;
 
 // ws stuff starts here
 
+// Player - user that connects to server. Can join a room to access a session, and control an entity inside that session.
 function Player (ws) {
+	this.ws = ws;
 	this.ID = playerNum;
 	playerNum += 1;
-	this.ws = ws;
-	this.session = undefined;
-	this.sessionID = undefined;
+
+	this.room = undefined;
+	// this.session = undefined;
+	// this.sessionID = undefined;
 	playerList.push(this);
 }
 Player.prototype.disconnect = function () {
@@ -96,6 +99,13 @@ Player.prototype.disconnect = function () {
 Player.prototype.sendData = function (type, data) {
 	var stringData = JSON.stringify({type: type, data: data});
 	this.ws.send(stringData);
+}
+
+// Room - group of players in a session. Could potentially switch session and keep the same players
+// Takes an initial session
+function Room (session) {
+	this.players = [];
+	this.session = session;
 }
 
 wss.on("connection", function connection (ws) {
