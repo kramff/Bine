@@ -25,11 +25,15 @@ var playerArray = [];
 var receivedMessages = [];
 
 
-
-// socket.io connection
 var MULTI_ON = false;
 
-function SocketInit (argument) {
+function initSocket () {
+
+}
+
+
+// TODO: Remove this
+function oldSocketInit () {
 
 	// Skipping this step
 	// InitSocketConnection();

@@ -148,7 +148,7 @@ var levelDirectLinkID = undefined;
 function Init () {
 	LoadIsoScripts();
 	LoadAllSound();
-	SocketInit();
+	initSocket();
 
 
 	if (location.search !== "")

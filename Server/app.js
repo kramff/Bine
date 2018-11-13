@@ -2,7 +2,7 @@
 // Multiplayer level editor project
 // Copyright Mark Foster 2015-2018
 
-TimeLog("starting server \\(^.^)/");
+timeLog("starting server \\(^.^)/");
 
 // Path to isomorphic files
 var pathString = "../Isomorphic/";
@@ -17,7 +17,7 @@ const wss = new WebSocket.Server({ port: 5000 })
 
 const crypto = require("crypto");
 
-function TimeLog (text) {
+function timeLog (text) {
 	console.log("[" + (new Date().toUTCString()) + "] " + text);
 }
 
@@ -39,13 +39,12 @@ for (var i = 0; i < fileWorlds.length; i++) {
 	worldNum += 1;
 }
 
-function GetWorldByID (id) {
+function getWorldByID (id) {
 	id = Number(id);
 	var result = worldList.filter(function (world) {
 		return world.id === id;
 	});
-	if (result[0] !== undefined)
-	{
+	if (result[0] !== undefined) {
 		return result[0];
 	}
 }
@@ -53,13 +52,12 @@ function GetWorldByID (id) {
 // Active sessions
 var sessionList = [];
 var sessionNum = 0;
-function GetSessionByID (id) {
+function getSessionByID (id) {
 	id = Number(id);
 	var result = sessionList.filter(function (session) {
 		return session.id === id;
 	});
-	if (result[0] !== undefined)
-	{
+	if (result[0] !== undefined) {
 		return result[0];
 	}
 }
@@ -69,7 +67,7 @@ for (var i = 0; i < worldList.length; i++) {
 	var startingWorldData = worldList[i];
 	var newSession = new Session("Session #" + sessionNum, startingWorldData);
 	newSession.id = sessionNum;
-	TimeLog("created starting session! session name: " + newSession.name);
+	timeLog("created starting session! session name: " + newSession.name);
 	sessionList.push(newSession);
 	sessionNum += 1;
 }
@@ -101,6 +99,13 @@ Player.prototype.sendData = function (type, data) {
 	this.ws.send(stringData);
 }
 
+// Send data to all connected players
+function sendDataAll (type, data) {
+	playerList.forEach(function (player) {
+		player.sendData(type, data);
+	});
+}
+
 // Room - group of players in a session. Could potentially switch session and keep the same players
 // Takes an initial session
 function Room (session) {
@@ -108,19 +113,27 @@ function Room (session) {
 	this.session = session;
 }
 
+// Send data to all the players in this room
+Room.prototype.sendDataGroup = function(type, data) {
+	this.players.forEach(function (player) {
+		player.sendData(type, data);
+	});
+};
+
 wss.on("connection", function connection (ws) {
 
-	var newPlayer = new Player(ws);
+	var player = new Player(ws);
+
+	timeLog("Player connected! ID: " + player.ID);
 
 	ws.on("message", function incoming (message) {
 		var mData = JSON.parse(message);
-		handleMessageData(newPlayer, mData.type, mData.data);
+		handleMessageData(player, mData.type, mData.data);
 	});
 
 	ws.on("close", function close () {
-		TimeLog("User disconnected with id: " + socket.id + ", and reason: " + reason);
-		newPlayer.disconnect();
-		// ExitPlayer(newPlayer);
+		timeLog("Player disconnected! ID: " + player.ID);
+		player.disconnect();
 	});
 });
 
@@ -131,7 +144,7 @@ function handleMessageData (player, type, data) {
 // TODO: Swap out socket.io for ws
 
 io.on("connection", function(socket) {
-	TimeLog("User connected with id: " + socket.id);
+	timeLog("User connected with id: " + socket.id);
 
 	this.playerID = undefined;
 	this.roomName = undefined;
@@ -146,8 +159,8 @@ io.on("connection", function(socket) {
 	this.curPlayer = undefined;
 
 	socket.on("disconnect", function (reason) {
-		TimeLog("User disconnected with id: " + socket.id + ", and reason: " + reason);
-		ExitPlayer(this);
+		timeLog("User disconnected with id: " + socket.id + ", and reason: " + reason);
+		exitPlayer(this);
 		// socket.broadcast.emit("disconnection", {"id": socket.id});
 		// RemovePlayer({"id": socket.id});
 		this.playerID = undefined;
@@ -175,7 +188,7 @@ io.on("connection", function(socket) {
 		// Should use data.name
 		var newSession = new Session("Session #" + sessionNum, emptyWorldData);
 		newSession.id = sessionNum;
-		TimeLog("created session! session name: " + newSession.name);
+		timeLog("created session! session name: " + newSession.name);
 		sessionList.push(newSession);
 		sessionNum += 1;
 
@@ -200,12 +213,12 @@ io.on("connection", function(socket) {
 	// - Send a preview of a level (?)
 	socket.on("getSessionPlayers", function (data) {
 		// data - id of session to get current players of
-		var session = GetSessionByID(data);
+		var session = getSessionByID(data);
 		socket.emit("sessionPlayers", {"id": session.id, "players": session.currentPlayers});
 	});
 	socket.on("getWorldData", function (data) {
 		// data - id of world to send
-		var world = GetWorldByID(data);
+		var world = getWorldByID(data);
 		socket.emit("worldData", world);
 	});
 	socket.on("getLevelPreview", function (data) {
@@ -213,7 +226,7 @@ io.on("connection", function(socket) {
 	});
 	socket.on("joinSession", function (data) {
 		// data - id of session to join
-		var session = GetSessionByID(data);
+		var session = getSessionByID(data);
 		// Send world data
 		socket.emit("worldData", session.ExportWorld());
 		// Add player to session
@@ -323,7 +336,7 @@ io.on("connection", function(socket) {
 		}
 	});
 	socket.on("stopTestingPlayer", function () {
-		ExitPlayer(this);
+		exitPlayer(this);
 	});
 	socket.on("exitLevel", function () {
 		this.inLevel = false;
@@ -388,7 +401,7 @@ io.on("connection", function(socket) {
 	socket.on("message", function (data) {
 		// Player has sent a message
 		// data - text of message sent by player
-		TimeLog("Player: " + this.curPlayer.id + " sent a message: " + data);
+		timeLog("Player: " + this.curPlayer.id + " sent a message: " + data);
 		if (this.inSession && this.inLevel && this.inPlayer)
 		{
 			// this.curPlayer.SetMoveDirections(data.up, data.down, data.left, data.right);
@@ -412,7 +425,7 @@ io.on("connection", function(socket) {
 });
 
 // Functions for client to call
-function ExitPlayer (client) {
+function exitPlayer (client) {
 	if (client.inSession && client.inLevel && client.inPlayer)
 	{
 		io.to(client.roomName).emit("removeEntity", {levelID: client.curLevel.id, entityID: client.curPlayer.id});
@@ -424,7 +437,7 @@ function ExitPlayer (client) {
 
 
 // Gameplay loop
-function MainUpdate () {
+function mainUpdate () {
 	setTimeout(MainUpdate, 16);
 
 	for (var i = 0; i < sessionList.length; i++) {
@@ -443,23 +456,23 @@ if (false)
 
 if (Math.random() > 0.99)
 {	
-	TimeLog("\x1b[36m");
-	TimeLog("░░░░░░░░░░░░▄▐ ");
-	TimeLog("░░░░░░▄▄▄░░▄██▄ ");
-	TimeLog("░░░░░▐▀█▀▌░░░░▀█▄ ");
-	TimeLog("░░░░░▐█▄█▌░░░░░░▀█▄ ");
-	TimeLog("░░░░░░▀▄▀░░░▄▄▄▄▄▀▀ ");
-	TimeLog("░░░░▄▄▄██▀▀▀▀ ");
-	TimeLog("░░░█▀▄▄▄█░▀▀ ");
-	TimeLog("░░░▌░▄▄▄▐▌▀▀▀ ");
-	TimeLog("▄░▐░░░▄▄░█░▀▀ U HAVE BEEN SPOOKED BY THE ");
-	TimeLog("▀█▌░░░▄░▀█▀░▀ ");
-	TimeLog("░░░░░░░▄▄▐▌▄▄ ");
-	TimeLog("░░░░░░░▀███▀█░▄ ");
-	TimeLog("░░░░░░▐▌▀▄▀▄▀▐▄ SPOOKY SKILENTON ");
-	TimeLog("░░░░░░▐▀░░░░░░▐▌ ");
-	TimeLog("░░░░░░█░░░░░░░░█ ");
-	TimeLog("░░░░░▐▌░░░░░░░░░█ ");
-	TimeLog("░░░░░█░░░░░░░░░░▐▌");
-	TimeLog('\x1b[0m')
+	timeLog("\x1b[36m");
+	timeLog("░░░░░░░░░░░░▄▐ ");
+	timeLog("░░░░░░▄▄▄░░▄██▄ ");
+	timeLog("░░░░░▐▀█▀▌░░░░▀█▄ ");
+	timeLog("░░░░░▐█▄█▌░░░░░░▀█▄ ");
+	timeLog("░░░░░░▀▄▀░░░▄▄▄▄▄▀▀ ");
+	timeLog("░░░░▄▄▄██▀▀▀▀ ");
+	timeLog("░░░█▀▄▄▄█░▀▀ ");
+	timeLog("░░░▌░▄▄▄▐▌▀▀▀ ");
+	timeLog("▄░▐░░░▄▄░█░▀▀ U HAVE BEEN SPOOKED BY THE ");
+	timeLog("▀█▌░░░▄░▀█▀░▀ ");
+	timeLog("░░░░░░░▄▄▐▌▄▄ ");
+	timeLog("░░░░░░░▀███▀█░▄ ");
+	timeLog("░░░░░░▐▌▀▄▀▄▀▐▄ SPOOKY SKILENTON ");
+	timeLog("░░░░░░▐▀░░░░░░▐▌ ");
+	timeLog("░░░░░░█░░░░░░░░█ ");
+	timeLog("░░░░░▐▌░░░░░░░░░█ ");
+	timeLog("░░░░░█░░░░░░░░░░▐▌");
+	timeLog('\x1b[0m')
 }
