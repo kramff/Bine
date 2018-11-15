@@ -135,10 +135,73 @@ wss.on("connection", function connection (ws) {
 		timeLog("Player disconnected! ID: " + player.ID);
 		player.disconnect();
 	});
+
+	player.sendData("motd", motd);
+	player.emit("worldList", worldList.map(function (world) {return world.id;}));
+	socket.emit("sessionList", sessionList.map(function (session) {return {id: session.id, name: session.name, mode: session.mode, worldName: session.worldName, playerCount: session.playerCount};}));
 });
 
 function handleMessageData (player, type, data) {
+	if (type === "createSessionNewWorld") {
 
+	}
+	else if (type === "getSessionPlayers") {
+
+	}
+	else if (type === "getWorldData") {
+
+	}
+	else if (type === "getLevelPreview") {
+
+	}
+	else if (type === "joinSession") {
+
+	}
+	else if (type === "createNewLevel") {
+
+	}
+	else if (type === "joinLevel") {
+
+	}
+	else if (type === "createNewArea") {
+
+	}
+	else if (type === "createNewEntity") {
+
+	}
+	else if (type === "testAsPlayer") {
+
+	}
+	else if (type === "stopTestingPlayer") {
+
+	}
+	else if (type === "exitLevel") {
+
+	}
+	else if (type === "exitSession") {
+
+	}
+	else if (type === "tileChange") {
+
+	}
+	else if (type === "inputUpdate") {
+
+	}
+	else if (type === "locationCorrection") {
+
+	}
+	else if (type === "deleteArea") {
+
+	}
+	else if (type === "entityChange") {
+
+	}
+	else if (type === "message") {
+
+	}
+	else if (type === "throwBall") {
+
+	}
 }
 
 // TODO: Swap out socket.io for ws
