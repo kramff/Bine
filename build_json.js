@@ -1,3 +1,6 @@
+// Run this to create the following files:
+// Client/JSON/audio_data.json
+// 
 
 console.log("Build Command to Set Up JSON Files");
 
@@ -32,3 +35,4 @@ var audioLocation = "Client/Audio";
 var audioData = RecursiveWalk(audioLocation);
 console.log(audioData);
 fs.writeFileSync("Client/JSON/audio_data.json", JSON.stringify(audioData));
+
