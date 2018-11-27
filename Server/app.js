@@ -98,6 +98,12 @@ Player.prototype.sendData = function (type, data) {
 	var stringData = JSON.stringify({type: type, data: data});
 	this.ws.send(stringData);
 }
+Player.prototype.joinRoom = function(room) {
+	if (room !== undefined) {
+		room.addPlayer(this);
+		this.room = room;
+	}
+};
 
 // Send data to all connected players
 function sendDataAll (type, data) {
@@ -106,15 +112,32 @@ function sendDataAll (type, data) {
 	});
 }
 
+// List of rooms
+var roomList = [];
+var roomNum = 0;
+
+function findRoomByID (roomID) {
+	return roomList.find(function (room) {
+		return (room.ID === roomID);
+	});
+}
+
 // Room - group of players in a session. Could potentially switch session and keep the same players
 // Takes an initial session
 function Room (session) {
 	this.players = [];
 	this.session = session;
+	this.ID = roomNum;
+	roomNum += 1;
 }
 
+// Add a player to the players list. (Called by Player.joinRoom() )
+Room.prototype.addPlayer = function (player) {
+	this.players.push(player);
+};
+
 // Send data to all the players in this room
-Room.prototype.sendDataGroup = function(type, data) {
+Room.prototype.sendDataRoom = function(type, data) {
 	this.players.forEach(function (player) {
 		player.sendData(type, data);
 	});
@@ -143,7 +166,30 @@ wss.on("connection", function connection (ws) {
 
 function handleMessageData (player, type, data) {
 	if (type === "createSessionNewWorld") {
+		// data is {name}
+		var emptyWorldData = {levelDatas: [], tileData: [], worldRules: [], entityTemplates: [], areaTemplates: [], itemData: [], particleData: []};
 
+		// Should use data.name
+		var newSession = new Session("Session #" + sessionNum, emptyWorldData);
+		newSession.id = sessionNum;
+		timeLog("created session! session name: " + newSession.name);
+		sessionList.push(newSession);
+		sessionNum += 1;
+
+		// Send player the world data for the created session
+		player.sendData("worldData", newSession.ExportWorld());
+
+		// Make the room for this session and join it
+		var newRoom = new Room(newSession);
+		player.joinRoom(newRoom);
+		// Join the socket.io room for this session
+		this.roomName = "session_room " + newSession.id;
+		socket.join(this.roomName);
+		this.inSession = true;
+		this.curSession = newSession;
+
+		// Notify all connected users of new session
+		io.emit("newSession", {id: newSession.id, name: newSession.name, mode: newSession.mode, worldName: newSession.worldName, playerCount: newSession.playerCount});
 	}
 	else if (type === "getSessionPlayers") {
 
@@ -245,7 +291,7 @@ io.on("connection", function(socket) {
 	}*/
 
 	socket.on("createSessionNewWorld", function (data) {
-		// data - {name}
+		// data is {name}
 		var emptyWorldData = {levelDatas: [], tileData: [], worldRules: [], entityTemplates: [], areaTemplates: [], itemData: [], particleData: []};
 
 		// Should use data.name
