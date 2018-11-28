@@ -89,6 +89,8 @@ function Player (ws) {
 	this.room = undefined;
 	// this.session = undefined;
 	// this.sessionID = undefined;
+	this.session = undefined;
+	this.level = undefined;
 	playerList.push(this);
 }
 Player.prototype.disconnect = function () {
@@ -116,9 +118,15 @@ function sendDataAll (type, data) {
 var roomList = [];
 var roomNum = 0;
 
-function findRoomByID (roomID) {
+function getRoomByID (roomID) {
 	return roomList.find(function (room) {
 		return (room.ID === roomID);
+	});
+}
+
+function getRoomBySession (session) {
+	return roomList.find(function (room) {
+		return (room.session === session);
 	});
 }
 
@@ -166,7 +174,7 @@ wss.on("connection", function connection (ws) {
 
 function handleMessageData (player, type, data) {
 	if (type === "createSessionNewWorld") {
-		// data is {name}
+		// data - {name: "(name here)"}
 		var emptyWorldData = {levelDatas: [], tileData: [], worldRules: [], entityTemplates: [], areaTemplates: [], itemData: [], particleData: []};
 
 		// Should use data.name
@@ -182,29 +190,54 @@ function handleMessageData (player, type, data) {
 		// Make the room for this session and join it
 		var newRoom = new Room(newSession);
 		player.joinRoom(newRoom);
-		// Join the socket.io room for this session
-		this.roomName = "session_room " + newSession.id;
-		socket.join(this.roomName);
-		this.inSession = true;
-		this.curSession = newSession;
 
 		// Notify all connected users of new session
-		io.emit("newSession", {id: newSession.id, name: newSession.name, mode: newSession.mode, worldName: newSession.worldName, playerCount: newSession.playerCount});
+		sendDataAll("newSession", {id: newSession.id, name: newSession.name, mode: newSession.mode, worldName: newSession.worldName, playerCount: newSession.playerCount});
 	}
 	else if (type === "getSessionPlayers") {
-
+		var session = getSessionByID(data);
+		player.sendData("sessionPlayers", {"id": session.id, "players": session.currentPlayers});
 	}
 	else if (type === "getWorldData") {
-
+		var world = getWorldByID(data);
+		player.sendData("worldData", world);
 	}
 	else if (type === "getLevelPreview") {
-
+		// unimplemented
 	}
 	else if (type === "joinSession") {
+		// data - id of session to join
+		var session = getSessionByID(data);
+		// Send world data
+		player.sendData("worldData", session.ExportWorld());
+		// Add player to session
+		// session.CreatePlayerEntity();
 
+		// Join the socket.io room for this session
+		var room = getRoomBySession(session);
+		
+		player.joinRoom(room);
 	}
 	else if (type === "createNewLevel") {
+		if (player.session !== undefined)
+		{
+			player.session.levelCounter += 1;
+			var blankLevelData = {
+				name: "level name",
+				id: player.session.levelCounter,
+				entityDatas: [],
+				areaDatas: [],
+			}
+			var newLevel = player.session.AddLevel(blankLevelData);
+			player.level = newLevel;
+			
+			// Send info to other players in this room
+			var levelData = newLevel.Export();
+			player.room.sendDataRoom("enterLevel", levelData);
 
+			// Put the player into this room
+			player.sendData("enterLevel", newLevel.id);
+		}
 	}
 	else if (type === "joinLevel") {
 
