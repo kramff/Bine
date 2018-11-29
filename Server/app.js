@@ -91,6 +91,7 @@ function Player (ws) {
 	// this.sessionID = undefined;
 	this.session = undefined;
 	this.level = undefined;
+	this.playerEntity = undefined;
 	playerList.push(this);
 }
 Player.prototype.disconnect = function () {
@@ -240,19 +241,73 @@ function handleMessageData (player, type, data) {
 		}
 	}
 	else if (type === "joinLevel") {
-
+		var joinedLevel = player.session.GetLevelByID(data);
+		player.sendData("enterLevel", joinedLevel.id);
+		player.level = joinedLevel;
 	}
 	else if (type === "createNewArea") {
+		player.level.areaCounter += 1;
+		var blankAreaData = {
+			id: player.level.areaCounter,
+			x: data.x,
+			y: data.y,
+			z: data.z,
+			xSize: 5,
+			ySize: 5,
+			zSize: 5,
+			settings: [],
+			map: [],
+			extra: [],
+			style: [],
+			rules: [],
+			templates: [],
+		};
+		var area = player.level.AddArea(blankAreaData);
 
+		var areaData = area.Export();
+		player.room.sendDataRoom("newArea", {levelID: player.level.id, areaData: areaData});
 	}
 	else if (type === "createNewEntity") {
+		player.level.entityCounter += 1;
+		var blankEntityData = {
+			id: player.level.entityCounter,
+			x: data.x,
+			y: data.y,
+			z: data.z,
+			settings: [],
+			style: [],
+			variables: [],
+			rules: [],
+			templates: [],
+			variableCounter: 0,
+		};
+		var entity = player.level.AddEntity(blankEntityData);
 
+		var entityData = entity.Export();
+		player.room.sendDataRoom("newEntity", {levelID: player.level.id, entityData: entityData});
 	}
 	else if (type === "testAsPlayer") {
-
+		player.level.entityCounter += 1;
+		var newPlayerData = {
+			id: player.level.entityCounter,
+			x: data.x,
+			y: data.y,
+			z: data.z,
+			style: [],
+			settings: [],
+			variables: [],
+			rules: [],
+			templates: [],
+		}
+		var newPlayer = player.level.AddEntity(newPlayerData);
+		player.room.sendDataRoom("newEntity", {levelID: player.level.id, entityData: newPlayerData});
+		player.sendData("assignPlayerEntity", newPlayer.id);
+		player.playerEntity = newPlayer;
 	}
 	else if (type === "stopTestingPlayer") {
-
+		player.room.sendDataRoom("removeEntity", {levelID: player.level.id, entityID: player.playerEntity.id});
+		player.session.RemoveEntity(player.level.id, player.playerEntity.id)
+		player.playerEntity = undefined
 	}
 	else if (type === "exitLevel") {
 
