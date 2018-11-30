@@ -310,16 +310,24 @@ function handleMessageData (player, type, data) {
 		player.playerEntity = undefined
 	}
 	else if (type === "exitLevel") {
-
+		player.level = undefined;
 	}
 	else if (type === "exitSession") {
-
+		player.session = undefined;
 	}
 	else if (type === "tileChange") {
-
+		var levelID = data.levelID;
+		var areaID = data.areaID;
+		var tileData = data.tileData;
+		player.session.EditTile(levelID, areaID, tileData);
+		player.room.sendDataRoom("tileChange", data);
 	}
 	else if (type === "inputUpdate") {
-
+		player.playerEntity.SetMoveDirections(data.up, data.down, data.left, data.right);
+		data.entityID = player.playerEntity.id;
+		data.levelID = player.level.id;
+		// May need to exclude player from recieving this message?
+		player.room.sendDataRoom("inputUpdate", data);
 	}
 	else if (type === "locationCorrection") {
 

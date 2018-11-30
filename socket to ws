@@ -3,3 +3,4 @@ TO CHANGE SOCKET.IO TO WS
 socket.emit -> player.sendData
 io.emit -> sendDataAll
 io.to(this.roomName).emit -> player.room.sendDataRoom
+socket.broadcast.to(this.roomName).emit -> player.room.sendDataRoom
