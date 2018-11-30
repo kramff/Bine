@@ -330,7 +330,11 @@ function handleMessageData (player, type, data) {
 		player.room.sendDataRoom("inputUpdate", data);
 	}
 	else if (type === "locationCorrection") {
-
+		// 
+		player.playerEntity.SetLocationCorrection(data.x, data.y, data.z, data.xMov, data.yMov, data.zMov, data.moveTime, data.moveDuration);
+		data.entityID = this.curPlayer.id;
+		data.levelID = this.curLevel.id;/
+		player.room.sendDataRoom("locationCorrection", data);
 	}
 	else if (type === "deleteArea") {
 
