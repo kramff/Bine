@@ -337,7 +337,9 @@ function handleMessageData (player, type, data) {
 		player.room.sendDataRoom("locationCorrection", data);
 	}
 	else if (type === "deleteArea") {
-
+		var level = player.session.GetLevelByID(data.levelID);
+		level.RemoveArea(data.areaID);
+		player.room.sendDataRoom("deleteArea", data);
 	}
 	else if (type === "entityChange") {
 
