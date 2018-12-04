@@ -333,7 +333,7 @@ function handleMessageData (player, type, data) {
 		// 
 		player.playerEntity.SetLocationCorrection(data.x, data.y, data.z, data.xMov, data.yMov, data.zMov, data.moveTime, data.moveDuration);
 		data.entityID = this.curPlayer.id;
-		data.levelID = this.curLevel.id;/
+		data.levelID = this.curLevel.id;
 		player.room.sendDataRoom("locationCorrection", data);
 	}
 	else if (type === "deleteArea") {
@@ -342,13 +342,17 @@ function handleMessageData (player, type, data) {
 		player.room.sendDataRoom("deleteArea", data);
 	}
 	else if (type === "entityChange") {
-
+		player.room.sendDataRoom("entityChange", data);
+		player.session.ChangeEntity(data.levelID, data.entityID, data.entityData);
 	}
 	else if (type === "message") {
-
+		timeLog("Player: " + player.ID + " sent a message: " + data);
+		messageObj = {text: data, entityID: player.playerEntity.id, levelID: player.level.id};
+		player.room.sendDataRoom("message", messageObj);
 	}
 	else if (type === "throwBall") {
-
+		ballThrowObj = {ballData: data, entityID: player.playerEntity.id, levelID: player.level.id};
+		player.room.sendDataRoom("throwBall", ballThrowObj);
 	}
 }
 
