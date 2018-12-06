@@ -1,6 +1,18 @@
 HOW
 TO CHANGE SOCKET.IO TO WS
+
+Server side:
+
 socket.emit -> player.sendData
 io.emit -> sendDataAll
 io.to(this.roomName).emit -> player.room.sendDataRoom
 socket.broadcast.to(this.roomName).emit -> player.room.sendDataRoom
+
+
+Client side:
+
+remove oldSocketInit()
+modify InitSocketConnection() as follows:
+
+socket.on -> ???
+socket.emit -> ???

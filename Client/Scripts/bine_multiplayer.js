@@ -33,38 +33,38 @@ function initSocket () {
 
 
 // TODO: Remove this
-function oldSocketInit () {
+// function oldSocketInit () {
 
-	// Skipping this step
-	// InitSocketConnection();
-	// return;
+// 	// Skipping this step
+// 	// InitSocketConnection();
+// 	// return;
 	
-	var socketScript = document.createElement("script");
-	if (location.href === "http://kramff.github.io/")
-	{
-		// Web for github.io
-		socketScript.setAttribute("src", "https://bine-online.herokuapp.com/socket.io/socket.io.js");
-	}
-	else if (location.href.indexOf("http://www.kramff.com/Bine/") !== -1)
-	{
-		// Web for kramff.com
-		socketScript.setAttribute("src", "https://bine.nfshost.com/socket.io/socket.io.js");
-	}
-	else if (location.href.indexOf("file:/") !== -1)
-	{
-		// Local file
-		socketScript.setAttribute("src", "http://localhost:5000/socket.io/socket.io.js");
-	}
-	else
-	{
-		// Hosting off some dumb custom server
-		// socketScript.setAttribute("src", location.href.replace(/\d+\/$/, "5000/socket.io/socket.io.js"));
-		socketScript.setAttribute("src", (location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000/socket.io/socket.io.js").replace("http://", httpProtocol));
-	}
-	document.getElementsByTagName('body')[0].appendChild(socketScript);
-	socketScript.onreadystatechange = LoadSScript;
-	socketScript.onload = LoadSScript;
-}
+// 	var socketScript = document.createElement("script");
+// 	if (location.href === "http://kramff.github.io/")
+// 	{
+// 		// Web for github.io
+// 		socketScript.setAttribute("src", "https://bine-online.herokuapp.com/socket.io/socket.io.js");
+// 	}
+// 	else if (location.href.indexOf("http://www.kramff.com/Bine/") !== -1)
+// 	{
+// 		// Web for kramff.com
+// 		socketScript.setAttribute("src", "https://bine.nfshost.com/socket.io/socket.io.js");
+// 	}
+// 	else if (location.href.indexOf("file:/") !== -1)
+// 	{
+// 		// Local file
+// 		socketScript.setAttribute("src", "http://localhost:5000/socket.io/socket.io.js");
+// 	}
+// 	else
+// 	{
+// 		// Hosting off some dumb custom server
+// 		// socketScript.setAttribute("src", location.href.replace(/\d+\/$/, "5000/socket.io/socket.io.js"));
+// 		socketScript.setAttribute("src", (location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000/socket.io/socket.io.js").replace("http://", httpProtocol));
+// 	}
+// 	document.getElementsByTagName('body')[0].appendChild(socketScript);
+// 	socketScript.onreadystatechange = LoadSScript;
+// 	socketScript.onload = LoadSScript;
+// }
 
 var ssLoaded = false;
 function LoadSScript () {
@@ -86,22 +86,27 @@ var socket = undefined;
 function InitSocketConnection () {
 	try
 	{
+		var socketURL;
 		if (location.href === "http://kramff.github.io/")
 		{
-			socket = io(httpProtocol + "bine-online.herokuapp.com", noOption);
+			// socket = io(httpProtocol + "bine-online.herokuapp.com", noOption);
+			socketURL = wsProtocol + "bine-online.herokuapp.com";
 		}
 		else if (location.href.indexOf("http://www.kramff.com/Bine/") !== -1)
 		{
-			socket = io(httpProtocol + "bine.nfshost.com", noOption);
+			// socket = io(httpProtocol + "bine.nfshost.com", noOption);
+			socketURL = wsProtocol + "bine.nfshost.com";
 		}
 		else if (location.href.indexOf("file:/") !== -1)
 		{
-			socket = io(httpProtocol + "localhost:5000", noOption);
+			// socket = io(httpProtocol + "localhost:5000", noOption);
+			socketURL = wsProtocol + "localhost:5000";
 		}
 		else
 		{
 			// socket = io(location.href.replace(/\d+\/$/, "5000").replace("http://", httpProtocol), noOption);
-			socket = io((location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000").replace("http://", httpProtocol), noOption);
+			// socket = io((location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000").replace("http://", httpProtocol), noOption);
+			socketURL = (location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000").replace("http://", wsProtocol);
 		}
 		socket.on("connect", function (data) {
 			console.log("Connected to server with id: " + socket.id);
