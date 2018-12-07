@@ -107,9 +107,10 @@ function InitSocketConnection () {
 			// socket = io(location.href.replace(/\d+\/$/, "5000").replace("http://", httpProtocol), noOption);
 			// socket = io((location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000").replace("http://", httpProtocol), noOption);
 			socketURL = (location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000").replace("http://", wsProtocol);
+			socket = WebSocket(socketURL);
 		}
-		socket.on("connect", function (data) {
-			console.log("Connected to server with id: " + socket.id);
+		socket.onopen = function (data) {
+			// console.log("Connected to server with id: " + socket.id);
 
 			// Waiting until connected to server
 			// before directly joining session
@@ -117,7 +118,11 @@ function InitSocketConnection () {
 			{
 				JoinSession(sessionDirectLinkID);
 			}
-		});
+		}
+		socket.onmessage = function (event) {
+			event.data;
+			handleMessageData(event.data.type, event.data.data);
+		}
 		socket.on("motd", function (data) {
 			motd = data;
 			console.log("Message of the day: " + motd);
@@ -246,6 +251,10 @@ function InitSocketConnection () {
 		console.error(err);
 		MULTI_ON = false;
 	}
+}
+
+function handleMessageData (type, data) {
+	
 }
 
 var lastData = undefined;
