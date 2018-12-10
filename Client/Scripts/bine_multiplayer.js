@@ -254,7 +254,101 @@ function InitSocketConnection () {
 }
 
 function handleMessageData (type, data) {
-	
+	if (type === "motd") {
+		motd = data;
+		console.log("Message of the day: " + data);
+	}
+	if (type === "worldList") {
+		FillWorldBox(data);
+	}
+	if (type === "sessionList") {
+		FillSessionBox(data);
+	}
+	if (type === "message") {
+		ReceiveChatMessage(data);
+	}
+	// Level editor
+	if (type === "tileChange") {
+		ReceiveTileChange(data);
+	}
+	if (type === "createArea") {
+		ReceiveCreateArea(data);
+	}
+	if (type === "deleteArea") {
+		ReceiveDeleteArea(data.levelID, data.areaID);
+	}
+	// Receive world data from server
+	if (type === "worldData") {
+		console.log("Got world data from server!");
+		ReceiveWorldData(data);
+
+		// Waiting until connected to server, then session
+		// before directly joining level
+		if (waitingToDirectConnect)
+		{
+			JoinLevel(levelDirectLinkID);
+		}
+	};
+
+	if (type === "newSession") {
+		// Create new session (Add it to the list of sessions to join)
+		AddSingleSessionToBox(data);
+	};
+
+	if (type === "newLevel") {
+		// Create new level
+		ReceiveCreateLevel(data);
+	}
+	if (type === "enterLevel") {
+		// Enter a level
+		ReceiveEnterLevel(data);
+
+		// After directly connecting to the server, then session, then level
+		// Create a player entity
+		if (waitingToDirectConnect)
+		{
+			TestAsPlayer();
+		}
+
+	}
+
+	if (type === "newArea") {
+		// Create a new area
+		ReceiveCreateArea(data.levelID, data.areaData);
+	}
+
+	if (type === "newEntity") {
+		// Create a new entity
+		ReceiveCreateEntity(data.levelID, data.entityData);
+	}
+	if (type === "assignPlayerEntity") {
+		// Set the curPlayerID and curPlayer to the given entity
+		ReceiveAssignPlayer(data);
+	}
+	if (type === "removeEntity") {
+		// Remove the entity from the session
+		ReceiveRemoveEntity(data.levelID, data.entityID);
+	}
+
+	if (type === "inputUpdate") {
+		var level = curSession.GetLevelByID(data.levelID);
+		var entity = level.GetEntityByID(data.entityID);
+		entity.SetMoveDirections(data.up, data.down, data.left, data.right);
+	}
+
+	if (type === "locationCorrection") {
+		var level = curSession.GetLevelByID(data.levelID);
+		var entity = level.GetEntityByID(data.entityID);
+		entity.SetLocationCorrection(data.x, data.y, data.z, data.xMov, data.yMov, data.zMov, data.moveTime, data.moveDuration);
+	}
+
+	if (type === "entityChange") {
+		RecieveEntityChange(data.levelID, data.entityID, data.entityData);
+	}
+
+	if (type === "throwBall") {
+		RecieveThrowBall(data.levelID, data.entityID, data.ballData);
+	}
 }
 
 var lastData = undefined;
