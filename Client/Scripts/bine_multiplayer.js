@@ -28,7 +28,7 @@ var receivedMessages = [];
 var MULTI_ON = false;
 
 function initSocket () {
-
+	InitSocketConnection();
 }
 
 
@@ -66,14 +66,14 @@ function initSocket () {
 // 	socketScript.onload = LoadSScript;
 // }
 
-var ssLoaded = false;
-function LoadSScript () {
-	if (!ssLoaded)
-	{
-		ssLoaded = true;
-		InitSocketConnection();
-	}
-}
+// var ssLoaded = false;
+// function LoadSScript () {
+// 	if (!ssLoaded)
+// 	{
+// 		ssLoaded = true;
+// 		InitSocketConnection();
+// 	}
+// }
 
 // Currently: using http and not websockets
 var wsOption = {transports: ["websocket"]};
@@ -107,10 +107,11 @@ function InitSocketConnection () {
 			// socket = io(location.href.replace(/\d+\/$/, "5000").replace("http://", httpProtocol), noOption);
 			// socket = io((location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000").replace("http://", httpProtocol), noOption);
 			socketURL = (location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000").replace("http://", wsProtocol);
-			socket = WebSocket(socketURL);
 		}
+		socket = new WebSocket(socketURL);
 		socket.onopen = function (data) {
 			// console.log("Connected to server with id: " + socket.id);
+			console.log("Connected to server!");
 
 			// Waiting until connected to server
 			// before directly joining session
@@ -123,122 +124,122 @@ function InitSocketConnection () {
 			event.data;
 			handleMessageData(event.data.type, event.data.data);
 		}
-		socket.on("motd", function (data) {
-			motd = data;
-			console.log("Message of the day: " + motd);
-			// Show MOTD
-		});
-		// socket.on("serverLevels", function (data) {
-		// 	serverLevels = data;
-		// 	console.log("Server levels: " + serverLevels);
+		// socket.on("motd", function (data) {
+		// 	motd = data;
+		// 	console.log("Message of the day: " + motd);
+		// 	// Show MOTD
 		// });
-		socket.on("worldList", function (data) {
-			FillWorldBox(data);
-		});
-		socket.on("sessionList", function (data) {
-			FillSessionBox(data);
-		});
-		// socket.on("playerMove", function (data) {
-		// 	UpdatePlayer(data);
+		// // socket.on("serverLevels", function (data) {
+		// // 	serverLevels = data;
+		// // 	console.log("Server levels: " + serverLevels);
+		// // });
+		// socket.on("worldList", function (data) {
+		// 	FillWorldBox(data);
 		// });
-		// socket.on("disconnection", function (data) {
-		// 	RemovePlayer(data);
+		// socket.on("sessionList", function (data) {
+		// 	FillSessionBox(data);
 		// });
-		socket.on("message", function (data) {
-			ReceiveChatMessage(data);
-		});
-
-		// Level editor
-		socket.on("tileChange", function (data) {
-			ReceiveTileChange(data);
-		});
-		socket.on("createArea", function (data) {
-			ReceiveCreateArea(data);
-		});
-		socket.on("deleteArea", function (data) {
-			ReceiveDeleteArea(data.levelID, data.areaID);
-		});
-
-		//Temporary level direct download
-		// socket.on("chosenLevel", function (data) {
-		// 	console.log("got chosen level from server");
-		// 	ImportLevel(data.data);
+		// // socket.on("playerMove", function (data) {
+		// // 	UpdatePlayer(data);
+		// // });
+		// // socket.on("disconnection", function (data) {
+		// // 	RemovePlayer(data);
+		// // });
+		// socket.on("message", function (data) {
+		// 	ReceiveChatMessage(data);
 		// });
 
-		// Receive world data from server
-		socket.on("worldData", function (data) {
-			console.log("Got world data from server!");
-			ReceiveWorldData(data);
+		// // Level editor
+		// socket.on("tileChange", function (data) {
+		// 	ReceiveTileChange(data);
+		// });
+		// socket.on("createArea", function (data) {
+		// 	ReceiveCreateArea(data);
+		// });
+		// socket.on("deleteArea", function (data) {
+		// 	ReceiveDeleteArea(data.levelID, data.areaID);
+		// });
 
-			// Waiting until connected to server, then session
-			// before directly joining level
-			if (waitingToDirectConnect)
-			{
-				JoinLevel(levelDirectLinkID);
-			}
-		});
+		// //Temporary level direct download
+		// // socket.on("chosenLevel", function (data) {
+		// // 	console.log("got chosen level from server");
+		// // 	ImportLevel(data.data);
+		// // });
+
+		// // Receive world data from server
+		// socket.on("worldData", function (data) {
+		// 	console.log("Got world data from server!");
+		// 	ReceiveWorldData(data);
+
+		// 	// Waiting until connected to server, then session
+		// 	// before directly joining level
+		// 	if (waitingToDirectConnect)
+		// 	{
+		// 		JoinLevel(levelDirectLinkID);
+		// 	}
+		// });
 
 
 
-		socket.on("newSession", function (data) {
-			// Create new session (Add it to the list of sessions to join)
-			AddSingleSessionToBox(data);
-		});
+		// socket.on("newSession", function (data) {
+		// 	// Create new session (Add it to the list of sessions to join)
+		// 	AddSingleSessionToBox(data);
+		// });
 
-		socket.on("newLevel", function (data) {
-			// Create new level
-			ReceiveCreateLevel(data);
-		});
-		socket.on("enterLevel", function (data) {
-			// Enter a level
-			ReceiveEnterLevel(data);
+		// socket.on("newLevel", function (data) {
+		// 	// Create new level
+		// 	ReceiveCreateLevel(data);
+		// });
+		// socket.on("enterLevel", function (data) {
+		// 	// Enter a level
+		// 	ReceiveEnterLevel(data);
 
-			// After directly connecting to the server, then session, then level
-			// Create a player entity
-			if (waitingToDirectConnect)
-			{
-				TestAsPlayer();
-			}
+		// 	// After directly connecting to the server, then session, then level
+		// 	// Create a player entity
+		// 	if (waitingToDirectConnect)
+		// 	{
+		// 		TestAsPlayer();
+		// 	}
 
-		});
+		// });
 
-		socket.on("newArea", function (data) {
-			// Create a new area
-			ReceiveCreateArea(data.levelID, data.areaData);
-		});
+		// socket.on("newArea", function (data) {
+		// 	// Create a new area
+		// 	ReceiveCreateArea(data.levelID, data.areaData);
+		// });
 
-		socket.on("newEntity", function (data) {
-			// Create a new entity
-			ReceiveCreateEntity(data.levelID, data.entityData);
-		});
-		socket.on("assignPlayerEntity", function (data) {
-			// Set the curPlayerID and curPlayer to the given entity
-			ReceiveAssignPlayer(data);
-		});
-		socket.on("removeEntity", function (data) {
-			// Remove the entity from the session
-			ReceiveRemoveEntity(data.levelID, data.entityID);
-		});
+		// socket.on("newEntity", function (data) {
+		// 	// Create a new entity
+		// 	ReceiveCreateEntity(data.levelID, data.entityData);
+		// });
+		// socket.on("assignPlayerEntity", function (data) {
+		// 	// Set the curPlayerID and curPlayer to the given entity
+		// 	ReceiveAssignPlayer(data);
+		// });
+		// socket.on("removeEntity", function (data) {
+		// 	// Remove the entity from the session
+		// 	ReceiveRemoveEntity(data.levelID, data.entityID);
+		// });
 
-		socket.on("inputUpdate", function (data) {
-			var level = curSession.GetLevelByID(data.levelID);
-			var entity = level.GetEntityByID(data.entityID);
-			entity.SetMoveDirections(data.up, data.down, data.left, data.right);
-		});
+		// socket.on("inputUpdate", function (data) {
+		// 	var level = curSession.GetLevelByID(data.levelID);
+		// 	var entity = level.GetEntityByID(data.entityID);
+		// 	entity.SetMoveDirections(data.up, data.down, data.left, data.right);
+		// });
 
-		socket.on("locationCorrection", function (data) {
-			var level = curSession.GetLevelByID(data.levelID);
-			var entity = level.GetEntityByID(data.entityID);
-			entity.SetLocationCorrection(data.x, data.y, data.z, data.xMov, data.yMov, data.zMov, data.moveTime, data.moveDuration);
-		});
+		// socket.on("locationCorrection", function (data) {
+		// 	var level = curSession.GetLevelByID(data.levelID);
+		// 	var entity = level.GetEntityByID(data.entityID);
+		// 	entity.SetLocationCorrection(data.x, data.y, data.z, data.xMov, data.yMov, data.zMov, data.moveTime, data.moveDuration);
+		// });
 
-		socket.on("entityChange", function (data) {
-			RecieveEntityChange(data.levelID, data.entityID, data.entityData);
-		});
+		// socket.on("entityChange", function (data) {
+		// 	RecieveEntityChange(data.levelID, data.entityID, data.entityData);
+		// });
 
-		socket.on("throwBall", function (data) {
-			RecieveThrowBall(data.levelID, data.entityID, data.ballData);
-		});
+		// socket.on("throwBall", function (data) {
+		// 	RecieveThrowBall(data.levelID, data.entityID, data.ballData);
+		// });
 
 		
 
