@@ -15,5 +15,5 @@ remove oldSocketInit()
 modify InitSocketConnection() as follows:
 
 socket.on -> if (type === "message_type_here")
-socket.emit -> socket.send
+socket.emit -> socket.send -> sendData
 

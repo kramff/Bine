@@ -467,68 +467,66 @@ function RecieveThrowBall (levelID, entityID, ballData) {
 // ~~~~~~~~~~~
 // Functions to send data to server
 
+function sendData(type, data) {
+	socket.send({type: type, data: data});
+}
 
-// function SendPositionUpdate (position) {
-// 	if (MULTI_ON)
-// 	{
-// 		socket.emit("playerMove", position);
-// 	}
-// }
-// function SendChatMessage (message) {
-// 	if (MULTI_ON)
-// 	{
-// 		socket.emit("message", message);
-// 		// message.id = socket.id;	
-// 	}
-// }
 function SendTileChange (tileChange) {
 	if (MULTI_ON)
 	{
-		socket.emit("tileChange", tileChange);
+		// socket.emit("tileChange", tileChange);
+		sendData("tileChange", tileChange);
 	}
 }
 function SendCreateArea (createArea) {
 	if (MULTI_ON)
 	{
-		socket.emit("createArea", createArea);
+		// socket.emit("createArea", createArea);
+		sendData("createArea", createArea);
 	}
 }
 function SendRemoveArea (removeArea) {
 	if (MULTI_ON)
 	{
-		socket.emit("removeArea", removeArea);
+		// socket.emit("removeArea", removeArea);
+		sendData("removeArea", removeArea);
 	}
 }
 function SendInputUpdate (inputData) {
 	if (MULTI_ON)
 	{
-		socket.emit("inputUpdate", inputData);
+		// socket.emit("inputUpdate", inputData);
+		sendData("inputUpdate", inputData);
 	}
 }
 function SendLocationCorrection (correctionData) {
 	if (MULTI_ON)
 	{
-		socket.emit("locationCorrection", correctionData);
+		// socket.emit("locationCorrection", correctionData);
+		sendData("locationCorrection", correctionData);
 	}
 }
 
 function CreateSessionNewWorld () {
 	if (MULTI_ON)
 	{
-		socket.emit("createSessionNewWorld");
+		// socket.emit("createSessionNewWorld");
+		sendData("createSessionNewWorld");
 	}
 }
 function JoinSession (id) {
 	if (MULTI_ON)
 	{
-		socket.emit("joinSession", id);
+		// socket.emit("joinSession", id);
+		sendData("joinSession", id);
 	}
 }
 
 function CreateNewLevel () {
 	if (MULTI_ON)
 	{
-		socket.emit("createNewLevel");
+		// socket.emit("createNewLevel");
+		sendData("createNewLevel");
 	}
 	else
 	{
@@ -539,7 +537,8 @@ function CreateNewLevel () {
 function JoinLevel (levelID) {
 	if (MULTI_ON)
 	{
-		socket.emit("joinLevel", levelID);
+		// socket.emit("joinLevel", levelID);
+		sendData("joinLevel", levelID);
 	}
 	else
 	{
@@ -550,14 +549,16 @@ function JoinLevel (levelID) {
 function CreateNewArea (createX, createY, createZ) {
 	if (MULTI_ON)
 	{
-		socket.emit("createNewArea", {x: createX, y: createY, z: createZ});
+		// socket.emit("createNewArea", {x: createX, y: createY, z: createZ});
+		sendData("createNewArea", {x: createX, y: createY, z: createZ});
 	}
 }
 
 function CreateNewEntity (createX, createY, createZ) {
 	if (MULTI_ON)
 	{
-		socket.emit("createNewEntity", {x: createX, y: createY, z: createZ});
+		// socket.emit("createNewEntity", {x: createX, y: createY, z: createZ});
+		sendData("createNewEntity", {x: createX, y: createY, z: createZ});
 	}
 }
 
@@ -569,48 +570,55 @@ function TestAsPlayer () {
 		{
 			zAdj = 1
 		}
-		socket.emit("testAsPlayer", {x: Math.round(editCamX), y: Math.round(editCamY), z: Math.round(editCamZ + zAdj)});
+		// socket.emit("testAsPlayer", {x: Math.round(editCamX), y: Math.round(editCamY), z: Math.round(editCamZ + zAdj)});
+		sendData("testAsPlayer", {x: Math.round(editCamX), y: Math.round(editCamY), z: Math.round(editCamZ + zAdj)});
 	}
 }
 
 function ExitLevel () {
 	if (MULTI_ON)
 	{
-		socket.emit("exitLevel");
+		// socket.emit("exitLevel");
+		sendData("exitLevel");
 	}
 }
 
 function ExitSession () {
 	if (MULTI_ON)
 	{
-		socket.emit("exitSession");
+		// socket.emit("exitSession");
+		sendData("exitSession");
 	}
 }
 
 function StopTestingPlayer () {
 	if (MULTI_ON)
 	{
-		socket.emit("stopTestingPlayer");
+		// socket.emit("stopTestingPlayer");
+		sendData("stopTestingPlayer");
 	}
 }
 
 function DeleteArea () {
 	if (MULTI_ON)
 	{
-		socket.emit("deleteArea", {levelID: curLevel.id, areaID: curArea.id});
+		// socket.emit("deleteArea", {levelID: curLevel.id, areaID: curArea.id});
+		sendData("deleteArea", {levelID: curLevel.id, areaID: curArea.id});
 	}
 }
 
 function SendEntityChange () {
 	if (MULTI_ON)
 	{
-		socket.emit("entityChange", {levelID: curLevel.id, entityID: curEntity.id, entityData: curEntity.Export()});
+		// socket.emit("entityChange", {levelID: curLevel.id, entityID: curEntity.id, entityData: curEntity.Export()});
+		sendData("entityChange", {levelID: curLevel.id, entityID: curEntity.id, entityData: curEntity.Export()});
 	}
 }
 
 function SendThrowBall (x, y, z, xSpd, ySpd, zSpd) {
 	if (MULTI_ON)
 	{
-		socket.emit("throwBall", {x: x, y: y, z: z, xSpd: xSpd, ySpd: ySpd, zSpd: zSpd});
+		// socket.emit("throwBall", {x: x, y: y, z: z, xSpd: xSpd, ySpd: ySpd, zSpd: zSpd});
+		sendData("throwBall", {x: x, y: y, z: z, xSpd: xSpd, ySpd: ySpd, zSpd: zSpd});
 	}
 }

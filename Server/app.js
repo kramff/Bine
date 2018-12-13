@@ -169,8 +169,8 @@ wss.on("connection", function connection (ws) {
 	});
 
 	player.sendData("motd", motd);
-	player.emit("worldList", worldList.map(function (world) {return world.id;}));
-	socket.emit("sessionList", sessionList.map(function (session) {return {id: session.id, name: session.name, mode: session.mode, worldName: session.worldName, playerCount: session.playerCount};}));
+	player.sendData("worldList", worldList.map(function (world) {return world.id;}));
+	player.sendData("sessionList", sessionList.map(function (session) {return {id: session.id, name: session.name, mode: session.mode, worldName: session.worldName, playerCount: session.playerCount};}));
 });
 
 function handleMessageData (player, type, data) {
