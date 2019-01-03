@@ -121,8 +121,15 @@ function InitSocketConnection () {
 			}
 		}
 		socket.onmessage = function (event) {
-			event.data;
-			handleMessageData(event.data.type, event.data.data);
+			//console.log("Received Data");
+			//console.log(event.data.type);
+			//console.log(event.data.data);
+			//console.log(event);
+			//event.data;
+			
+			//handleMessageData(event.data.type, event.data.data);
+			var message = JSON.parse(event.data);
+			handleMessageData(message.type, message.data);
 		}
 		// socket.on("motd", function (data) {
 		// 	motd = data;

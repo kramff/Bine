@@ -99,6 +99,9 @@ Player.prototype.disconnect = function () {
 }
 Player.prototype.sendData = function (type, data) {
 	var stringData = JSON.stringify({type: type, data: data});
+	//console.log("Sending Data");
+	//console.log(type);
+	//console.log(data);
 	this.ws.send(stringData);
 }
 Player.prototype.joinRoom = function(room) {
