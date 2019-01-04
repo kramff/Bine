@@ -162,8 +162,14 @@ wss.on("connection", function connection (ws) {
 	timeLog("Player connected! ID: " + player.ID);
 
 	ws.on("message", function incoming (message) {
+		try {
 		var mData = JSON.parse(message);
 		handleMessageData(player, mData.type, mData.data);
+		}
+		catch (err) {
+		console.error(err);
+		console.log(message);
+		}
 	});
 
 	ws.on("close", function close () {

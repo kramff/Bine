@@ -475,12 +475,14 @@ function RecieveThrowBall (levelID, entityID, ballData) {
 // Functions to send data to server
 
 function sendData(type, data) {
-	socket.send({type: type, data: data});
+	console.log("~~~ Sent Data:");
+	console.log("type: " + type);
+	console.log("data: " + data);
+	socket.send(JSON.stringify({type: type, data: data}));
 }
 
 function SendTileChange (tileChange) {
-	if (MULTI_ON)
-	{
+	 if (MULTI_ON) {
 		// socket.emit("tileChange", tileChange);
 		sendData("tileChange", tileChange);
 	}
