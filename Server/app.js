@@ -325,6 +325,8 @@ function handleMessageData (player, type, data) {
 		player.room.sendDataRoom("newEntity", {levelID: player.level.id, entityData: newPlayerData});
 		player.sendData("assignPlayerEntity", newPlayer.id);
 		player.playerEntity = newPlayer;
+		console.log("assigned Player Entity: ");
+		console.log(player.playerEntity);
 	}
 	else if (type === "stopTestingPlayer") {
 		player.room.sendDataRoom("removeEntity", {levelID: player.level.id, entityID: player.playerEntity.id});
@@ -354,8 +356,8 @@ function handleMessageData (player, type, data) {
 	else if (type === "locationCorrection") {
 		// 
 		player.playerEntity.SetLocationCorrection(data.x, data.y, data.z, data.xMov, data.yMov, data.zMov, data.moveTime, data.moveDuration);
-		data.entityID = this.curPlayer.id;
-		data.levelID = this.curLevel.id;
+		data.entityID = player.playerEntity.id;
+		data.levelID = player.level.id;
 		player.room.sendDataRoom("locationCorrection", data);
 	}
 	else if (type === "deleteArea") {
