@@ -27,18 +27,6 @@ var motd = "Join or create a session!";
 var worldList = [];
 var worldNum = 1;
 
-// Get saved worlds from filesystem
-var fileWorlds = fs.readdirSync("Worlds");
-
-for (var i = 0; i < fileWorlds.length; i++) {
-	var fileWorldPath = fileWorlds[i];
-	var fileWorldData = fs.readFileSync("Worlds/" + fileWorldPath, "utf8");
-	var fileWorld = JSON.parse(fileWorldData);
-	worldList.push(fileWorld);
-	fileWorld.id = worldNum;
-	worldNum += 1;
-}
-
 function getWorldByID (id) {
 	id = Number(id);
 	var result = worldList.filter(function (world) {
@@ -62,16 +50,6 @@ function getSessionByID (id) {
 	}
 }
 
-// Create a starting session for each saved world
-for (var i = 0; i < worldList.length; i++) {
-	var startingWorldData = worldList[i];
-	var newSession = new Session("Session #" + sessionNum, startingWorldData);
-	newSession.id = sessionNum;
-	timeLog("created starting session! session name: " + newSession.name);
-	sessionList.push(newSession);
-	sessionNum += 1;
-}
-
 
 // Connected players
 var playerList = [];
@@ -87,8 +65,6 @@ function Player (ws) {
 	playerNum += 1;
 
 	this.room = undefined;
-	// this.session = undefined;
-	// this.sessionID = undefined;
 	this.session = undefined;
 	this.level = undefined;
 	this.playerEntity = undefined;
@@ -154,6 +130,36 @@ Room.prototype.sendDataRoom = function(type, data) {
 		player.sendData(type, data);
 	});
 };
+
+
+// Initial Setup:
+
+// Get saved worlds from filesystem
+var fileWorlds = fs.readdirSync("Worlds");
+
+for (var i = 0; i < fileWorlds.length; i++) {
+	var fileWorldPath = fileWorlds[i];
+	var fileWorldData = fs.readFileSync("Worlds/" + fileWorldPath, "utf8");
+	var fileWorld = JSON.parse(fileWorldData);
+	worldList.push(fileWorld);
+	fileWorld.id = worldNum;
+	worldNum += 1;
+}
+
+// Create a starting session for each saved world
+for (var i = 0; i < worldList.length; i++) {
+	var startingWorldData = worldList[i];
+	var newSession = new Session("Session #" + sessionNum, startingWorldData);
+	newSession.id = sessionNum;
+	timeLog("created starting session! session name: " + newSession.name);
+	sessionList.push(newSession);
+	var newRoom = new Room(newSession);
+	roomList.push(newRoom);
+	sessionNum += 1;
+}
+
+
+// Socket connection:
 
 wss.on("connection", function connection (ws) {
 
@@ -223,6 +229,9 @@ function handleMessageData (player, type, data) {
 		// Add player to session
 		// session.CreatePlayerEntity();
 
+		// Keep track of session for player
+		player.session = session;
+
 		// Join the socket.io room for this session
 		var room = getRoomBySession(session);
 		
@@ -250,6 +259,10 @@ function handleMessageData (player, type, data) {
 		}
 	}
 	else if (type === "joinLevel") {
+
+		console.log("~~~ joinLevel called. with data: ");
+		console.log(data);
+
 		var joinedLevel = player.session.GetLevelByID(data);
 		player.sendData("enterLevel", joinedLevel.id);
 		player.level = joinedLevel;
