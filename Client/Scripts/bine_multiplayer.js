@@ -87,12 +87,12 @@ function InitSocketConnection () {
 	try
 	{
 		var socketURL;
-		if (location.href === "http://kramff.github.io/")
+		if (location.href === "kramff.github.io/")
 		{
 			// socket = io(httpProtocol + "bine-online.herokuapp.com", noOption);
 			socketURL = wsProtocol + "bine-online.herokuapp.com";
 		}
-		else if (location.href.indexOf("http://www.kramff.com/Bine/") !== -1)
+		else if (location.href.indexOf("kramff.com/Bine/") !== -1)
 		{
 			// socket = io(httpProtocol + "bine.nfshost.com", noOption);
 			socketURL = wsProtocol + "bine.nfshost.com";
