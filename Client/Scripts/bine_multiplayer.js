@@ -95,6 +95,7 @@ function InitSocketConnection () {
 		else if (location.href.indexOf("kramff.com/Bine/") !== -1)
 		{
 			// socket = io(httpProtocol + "bine.nfshost.com", noOption);
+			wsProtocol = "wss://";
 			socketURL = wsProtocol + "bine.nfshost.com";
 		}
 		else if (location.href.indexOf("file:/") !== -1)
