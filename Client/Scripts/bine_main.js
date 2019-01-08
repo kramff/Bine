@@ -950,7 +950,7 @@ function GameplayThrowBall (throwX, throwY, startTime, endTime) {
 
 	// How long the ball was charged for determines power of throw
 	var chargeTime = endTime - startTime;
-	console.log(chargeTime);
+	// console.log(chargeTime);
 	var power = Math.sqrt(Math.max(0.1, Math.min(5, chargeTime / 1000))) * 0.1;
 
 	// Where the target point is determines angle of throw

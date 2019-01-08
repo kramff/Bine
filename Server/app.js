@@ -71,6 +71,7 @@ function Player (ws) {
 	playerList.push(this);
 }
 Player.prototype.disconnect = function () {
+	this.room.players.splice(this.room.players.indexOf(this), 1);
 	playerList.splice(playerList.indexOf(this), 1);
 }
 Player.prototype.sendData = function (type, data) {
@@ -259,10 +260,6 @@ function handleMessageData (player, type, data) {
 		}
 	}
 	else if (type === "joinLevel") {
-
-		console.log("~~~ joinLevel called. with data: ");
-		console.log(data);
-
 		var joinedLevel = player.session.GetLevelByID(data);
 		player.sendData("enterLevel", joinedLevel.id);
 		player.level = joinedLevel;
@@ -325,8 +322,6 @@ function handleMessageData (player, type, data) {
 		player.room.sendDataRoom("newEntity", {levelID: player.level.id, entityData: newPlayerData});
 		player.sendData("assignPlayerEntity", newPlayer.id);
 		player.playerEntity = newPlayer;
-		console.log("assigned Player Entity: ");
-		console.log(player.playerEntity);
 	}
 	else if (type === "stopTestingPlayer") {
 		player.room.sendDataRoom("removeEntity", {levelID: player.level.id, entityID: player.playerEntity.id});

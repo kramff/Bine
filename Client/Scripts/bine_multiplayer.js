@@ -475,9 +475,9 @@ function RecieveThrowBall (levelID, entityID, ballData) {
 // Functions to send data to server
 
 function sendData(type, data) {
-	console.log("~~~ Sent Data:");
-	console.log("type: " + type);
-	console.log("data: " + data);
+	// console.log("~~~ Sent Data:");
+	// console.log("type: " + type);
+	// console.log("data: " + data);
 	socket.send(JSON.stringify({type: type, data: data}));
 }
 
