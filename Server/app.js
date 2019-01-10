@@ -71,7 +71,12 @@ function Player (ws) {
 	playerList.push(this);
 }
 Player.prototype.disconnect = function () {
-	this.room.players.splice(this.room.players.indexOf(this), 1);
+	if (this.room !== undefined)
+	{
+		// console.log("Room had X players before: " + this.room.players.length);
+		this.room.players.splice(this.room.players.indexOf(this), 1);
+		// console.log("Room had Y players after: " + this.room.players.length);
+	}
 	playerList.splice(playerList.indexOf(this), 1);
 }
 Player.prototype.sendData = function (type, data) {
@@ -175,6 +180,7 @@ wss.on("connection", function connection (ws) {
 		}
 		catch (err) {
 		console.error(err);
+		console.log("Error from the following incoming message: ");
 		console.log(message);
 		}
 	});

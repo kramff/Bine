@@ -21,6 +21,8 @@ var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioCtx = new AudioContext();
 var autoMuted = true;
 
+var manualMuted = false;
+
 function tryResumeAudio () {
 	if (autoMuted)
 	{
@@ -83,6 +85,11 @@ function GetAudioData (fileLocation, destinationArray, destinationIndex) {
 }
 
 function PlayRandomFootstep () {
+
+	if (manualMuted)
+	{
+		return;
+	}
 
 	var footstepFiles = audioDataTree.Effects.Footsteps.Concrete.files;
 

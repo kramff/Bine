@@ -285,6 +285,13 @@ function DoButtonAction (action, extra) {
 		default:
 			console.log("No action set up for " + action);
 		break;
+
+		// Settings menu
+		case "mute_sound":
+			manualMuted = !manualMuted;
+			document.querySelector("[data-action='mute_sound']").textContent = "Mute Sound (currently " + (!manualMuted ? "not " : "") + "muted)";
+		break;
+
 		case "create_session_new_world":
 			CreateSessionNewWorld();
 			HideAllMenus();
