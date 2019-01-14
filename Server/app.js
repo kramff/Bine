@@ -70,12 +70,20 @@ function Player (ws) {
 	this.playerEntity = undefined;
 	playerList.push(this);
 }
+
 Player.prototype.disconnect = function () {
+	if (this.session !== undefined && this.level !== undefined && this.playerEntity !== undefined && this.room !== undefined)
+	{
+		this.session.removeEntity(this.level.ID, this.playerEntity.ID);
+		this.session = undefined;
+		this.level = undefined;
+		this.playerEntity = undefined;
+		this.room.sendDataRoom("removeEntity", {levelID: player.level.id, entityID: player.playerEntity.id});
+		this.room.players.splice(this.room.players.indexOf(this), 1);
+		this.room = undefined;
+	}
 	if (this.room !== undefined)
 	{
-		// console.log("Room had X players before: " + this.room.players.length);
-		this.room.players.splice(this.room.players.indexOf(this), 1);
-		// console.log("Room had Y players after: " + this.room.players.length);
 	}
 	playerList.splice(playerList.indexOf(this), 1);
 }
@@ -331,8 +339,8 @@ function handleMessageData (player, type, data) {
 	}
 	else if (type === "stopTestingPlayer") {
 		player.room.sendDataRoom("removeEntity", {levelID: player.level.id, entityID: player.playerEntity.id});
-		player.session.RemoveEntity(player.level.id, player.playerEntity.id)
-		player.playerEntity = undefined
+		player.session.RemoveEntity(player.level.id, player.playerEntity.id);
+		player.playerEntity = undefined;
 	}
 	else if (type === "exitLevel") {
 		player.level = undefined;
