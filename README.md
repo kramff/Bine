@@ -7,4 +7,4 @@ kramff.com/Bine
 
 WORK IN PROGRESS
 
-Copyright Mark "kramff" Foster 2015-2018
+Copyright Mark "kramff" Foster 2015-2019
