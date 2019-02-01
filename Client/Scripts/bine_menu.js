@@ -537,13 +537,6 @@ function DoButtonAction (action, extra) {
 			ShowMenu("leaving_note");
 			leavingNote = true;
 		break;
-		case "throw_ball":
-			throwBall = true;
-			throwStartTime = Date.now();
-		break;
-		case "brace_self":
-			braceSelf = true;
-		break;
 		case "close_inventory":
 			HideAllMenus();
 			ShowMenu("test_level");

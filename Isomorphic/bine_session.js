@@ -539,38 +539,6 @@ var Session = (function () {
 		return this.z + (this.zMov * this.moveTime / this.moveDuration);
 	};
 
-	function Projectile (projectileData) {
-		this.type = "Projectile";
-		this.x = projectileData.x;
-		this.y = projectileData.y;
-		this.z = projectileData.z;
-		this.xSpd = projectileData.xSpd;
-		this.ySpd = projectileData.ySpd;
-		this.zSpd = projectileData.zSpd;
-		this.lifetime = projectileData.lifetime;
-		this.destroy = false;
-	}
-	Projectile.prototype.Update = function (levelRef) {
-		this.x += this.xSpd;
-		this.y += this.ySpd;
-		this.z += this.zSpd;
-		this.zSpd -= 0.01;
-		this.xSpd *= 0.99999;
-		this.ySpd *= 0.99999;
-		this.zSpd *= 0.99999;
-
-		if (levelRef.CheckLocationSolid(Math.floor(this.x), Math.floor(this.y), Math.floor(this.z)))
-		{
-			this.destroy = true;
-		}
-
-		this.lifetime -= 1;
-		if (this.lifetime <= 0)
-		{
-			this.destroy = true;
-		}
-	}
-
 	function Level (levelData) {
 		this.type = "Level";
 
@@ -608,9 +576,6 @@ var Session = (function () {
 		}
 		this.entityCounter = this.entities.length;
 
-		// Prep projectiles
-		this.projectiles = [];
-		this.projectileCounter = 0;
 	}
 	Level.prototype.Export = function () {
 		var areaDatas = [];
@@ -643,12 +608,6 @@ var Session = (function () {
 			// Update areas
 			var area = this.areas[i];
 			area.Update(this);
-		}
-		for (var i = 0; i < this.projectiles.length; i++)
-		{
-			// Update projectiles
-			var projectile = this.projectiles[i];
-			projectile.Update(this);
 		}
 	}
 	Level.prototype.AddArea = function (areaData) {
@@ -697,16 +656,6 @@ var Session = (function () {
 			return result[0];
 		}
 	};
-	Level.prototype.AddProjectile = function (projectileData) {
-		// Server ignores projectiles for now
-		if (!IS_SERVER)
-		{
-			var newProjectile = new Projectile(projectileData);
-			this.projectiles.push(newProjectile);
-			this.drawObjects.push(newProjectile);
-			return newProjectile;
-		}
-	}
 	Level.prototype.CheckLocationSolid = function(x, y, z) {
 		for (var i = 0; i < this.areas.length; i++)
 		{

@@ -383,10 +383,6 @@ function handleMessageData (player, type, data) {
 		messageObj = {text: data, entityID: player.playerEntity.id, levelID: player.level.id};
 		player.room.sendDataRoom("message", messageObj);
 	}
-	else if (type === "throwBall") {
-		ballThrowObj = {ballData: data, entityID: player.playerEntity.id, levelID: player.level.id};
-		player.room.sendDataRoom("throwBall", ballThrowObj);
-	}
 }
 
 // TODO: Swap out socket.io for ws
@@ -662,13 +658,6 @@ function handleMessageData (player, type, data) {
 // 		// socket.broadcast.emit("message", data);
 // 	});
 
-// 	socket.on("throwBall", function (data) {
-// 		if (this.inSession && this.inLevel && this.inPlayer)
-// 		{
-// 			ballThrowObj = {ballData: data, entityID: this.curPlayer.id, levelID: this.curLevel.id};
-// 			socket.broadcast.to(this.roomName).emit("throwBall", ballThrowObj);
-// 		}
-// 	});
 
 // });
 

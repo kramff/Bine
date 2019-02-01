@@ -119,16 +119,7 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 						bottomI ++;
 					}
 				}
-				else if (currentObject.type === "Projectile")
-				{
-					if (z > currentObject.drawZ)
-					{
-						bottomI ++;
-					}
-				}
 			}
-			
-
 
 			i ++;
 			currentObject = drawObjects[i];
@@ -143,88 +134,6 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	{
 		DrawEditOutline(Math.round(R.cameraZ));
 	}
-
-	// for (var i = 0; i < balls.length; i++)
-	// {
-
-	// 	R.ctx.save();
-	// 	var ball = balls[i];
-	// 	var scale = GetScale(ball.z);
-	// 	var x = scale * (ball.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	// 	var y = scale * (ball.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-	// 	var radius = scale * 0.1;
-	// 	if (radius < 0.1)
-	// 	{
-	// 		ball.destroy = true;
-	// 		continue;
-	// 	}
-	// 	R.ctx.beginPath();
-	// 	R.ctx.fillStyle = "#EE1111";
-	// 	R.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-	// 	R.ctx.fill();
-
-	// 	R.ctx.restore();
-
-	// 	ball.x += ball.xSpd;
-	// 	ball.y += ball.ySpd;
-	// 	ball.z += ball.zSpd;
-	// 	ball.zSpd -= 0.01;
-	// 	ball.xSpd *= 0.99999;
-	// 	ball.ySpd *= 0.99999;
-	// 	ball.zSpd *= 0.99999;
-	// }
-	// for (var i = 0; i < particles.length; i++) {
-	// 	R.ctx.save();
-	// 	var particle = particles[i];
-	// 	var scale = GetScale(particle.z);
-	// 	var x = scale * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	// 	var y = scale * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-	// 	var radius = scale * 0.05;
-	// 	if (radius < 0.1)
-	// 	{
-	// 		particle.destroy = true;
-	// 		continue;
-	// 	}
-	// 	R.ctx.beginPath();
-	// 	R.ctx.fillStyle = "#1188EE";
-	// 	R.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-	// 	R.ctx.fill();
-
-	// 	R.ctx.restore();
-
-	// 	particle.x += particle.xSpd;
-	// 	particle.y += particle.ySpd;
-	// 	particle.z += particle.zSpd;
-	// 	particle.zSpd -= 0.01;
-	// 	particle.xSpd *= 0.99999;
-	// 	particle.ySpd *= 0.99999;
-	// 	particle.zSpd *= 0.99999;
-	// }
-
-	// if (throwBall)
-	// {
-	// 	var newParticle = new Particle(curPlayer.GetX() + 0.5, curPlayer.GetY() + 0.5, curPlayer.GetZ());
-	// 	var randAngle = Math.random() * Math.PI * 2;
-	// 	newParticle.xSpd = Math.cos(randAngle) * 0.01;
-	// 	newParticle.ySpd = Math.sin(randAngle) * 0.01;
-	// 	newParticle.zSpd = Math.random() * 0.1;
-	// 	particles.push(newParticle);
-	// }
-	
-	// for (var i = balls.length - 1; i >= 0; i--) {
-	// 	var ball = balls[i];
-	// 	if (ball.destroy)
-	// 	{
-	// 		balls.splice(i, 1);
-	// 	}
-	// }
-	// for (var i = particles.length - 1; i >= 0; i--) {
-	// 	var particle = particles[i];
-	// 	if (particle.destroy)
-	// 	{
-	// 		particles.splice(i, 1);
-	// 	}
-	// }
 }
 
 function DrawEditOutline (z) {
@@ -259,10 +168,6 @@ function SetDrawZ (dObj) {
 	{
 		dObj.drawZ = dObj.z;
 	}
-	else if (dObj.type === "Projectile")
-	{
-		dObj.drawZ = Math.ceil(dObj.z);
-	}
 	else
 	{
 		dObj.drawZ = Math.ceil(dObj.z);
@@ -283,10 +188,6 @@ function DObjInZ (dObj, z) {
 	else if (dObj.type === "Area")
 	{
 		return (dObj.z <= z && dObj.z + dObj.zSize > z);
-	}
-	else if (dObj.type === "Projectile")
-	{
-		return (Math.ceil(dObj.z) === z);
 	}
 	else
 	{
@@ -319,10 +220,6 @@ function DrawDObjZ (dObj, z, drawSideTiles) {
 		{
 			DrawAreaZSlice(dObj, z);
 		}
-	}
-	else if (dObj.type === "Projectile")
-	{
-		DrawProjectile(dObj);
 	}
 	else
 	{
@@ -385,21 +282,6 @@ function DrawEntity (entity) {
 	}
 }
 
-function DrawProjectile (projectile) {
-	R.ctx.save();
-
-	var scale = GetScale(projectile.z);
-	var x = scale * (projectile.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var y = scale * (projectile.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-	var radius = scale * 0.1;
-	
-	R.ctx.beginPath();
-	R.ctx.fillStyle = "#EE1111";
-	R.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-	R.ctx.fill();
-
-	R.ctx.restore();
-}
 
 function DrawAreaZSlice (area, z) {
 	var realZ = z;
