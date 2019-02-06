@@ -780,9 +780,6 @@ var touchChanged = false;
 var touchGoalX = 0;
 var touchGoalY = 0;
 
-var throwingBall = false;
-var throwStartTime = undefined;
-
 var debug_string = "";
 
 function GameplayTouchStart (event) {
@@ -796,16 +793,6 @@ function GameplayTouchStart (event) {
 		return;
 	}
 
-	if (throwingBall)
-	{
-		var throwEndTime = Date.now();
-		GameplayThrowBall(touchX, touchY, throwStartTime, throwEndTime);
-		throwingBall = false;
-		debug_string += "t";
-		Debug(debug_string)
-		if (debug_string.length > 30) {debug_string = ""}
-		return;
-	}
 	debug_string += "f";
 	Debug(debug_string)
 	if (debug_string.length > 30) {debug_string = ""}
@@ -856,11 +843,7 @@ function EditorMouseUp () {
 }
 
 function GameplayMouseDown (event) {
-	if (!throwingBall)
-	{
-		throwingBall = true;
-		throwStartTime = Date.now();
-	}
+
 }
 
 function GameplayMouseMove () {
@@ -868,13 +851,7 @@ function GameplayMouseMove () {
 }
 
 function GameplayMouseUp () {
-	if (throwingBall)
-	{
-		var throwEndTime = Date.now();
-		GameplayThrowBall(mouseX, mouseY, throwStartTime, throwEndTime);
-		throwingBall = false;
-		return;
-	}
+
 }
 
 function EditTileIfNewCoord (x, y) {
@@ -935,65 +912,10 @@ function EditTileIfNewCoord (x, y) {
 }
 
 
-// TODO: Abstract this into a more reusable form
-function GameplayThrowBall (throwX, throwY, startTime, endTime) {
-
-	// How long the ball was charged for determines power of throw
-	var chargeTime = endTime - startTime;
-	// console.log(chargeTime);
-	var power = Math.sqrt(Math.max(0.1, Math.min(5, chargeTime / 1000))) * 0.25;
-
-	// Where the target point is determines angle of throw
-	// Throwing close to player throws higher vertically
-	var xDist = (throwX - R.CANVAS_HALF_WIDTH);
-	var yDist = (throwY - R.CANVAS_HALF_HEIGHT);
-	var xyAngle = Math.atan2(yDist, xDist);
-	var xyDist = Math.sqrt(xDist * xDist + yDist * yDist);
-	var maxDist = Math.sqrt(R.CANVAS_HALF_WIDTH * R.CANVAS_HALF_WIDTH + R.CANVAS_HALF_HEIGHT * R.CANVAS_HALF_HEIGHT);
-	var distAmt = xyDist / maxDist;
-	var zAngle = distAmt * Math.PI * 0.5;
-	var zPower = Math.cos(zAngle) * power;
-	var xyPower = Math.sin(zAngle) * power;
-	var xPower = Math.cos(xyAngle) * xyPower;
-	var yPower = Math.sin(xyAngle) * xyPower;
-
-	// console.log(xPower + ", " + yPower + ", " + zPower);
-
-	// Use x, y, z power as initial xyz velocity for ball
-	// balls.push(new Ball(curPlayer.GetX() + 0.5, curPlayer.GetY() + 0.5, curPlayer.GetZ() + 0.5, xPower, yPower, zPower));
-	SendThrowBall(curPlayer.GetX() + 0.5, curPlayer.GetY() + 0.5, curPlayer.GetZ() + 0.5, xPower, yPower, zPower);
-	curLevel.AddProjectile({x: curPlayer.GetX() + 0.5, y: curPlayer.GetY() + 0.5, z: curPlayer.GetZ() + 0.5, xSpd: xPower, ySpd: yPower, zSpd: zPower});
-}
-
-// var balls = [];
-// var particles = [];
-// var zzz = 333;
-
-// function Ball (x, y, z, xSpd, ySpd, zSpd) {
-// 	this.x = x;
-// 	this.y = y;
-// 	this.z = z;
-// 	this.xSpd = xSpd;
-// 	this.ySpd = ySpd;
-// 	this.zSpd = zSpd;
-// 	this.destroy = false;
-// }
-
-
-// function Particle (x, y, z) {
-// 	this.x = x;
-// 	this.y = y;
-// 	this.z = z;
-// 	this.xSpd = 0;
-// 	this.ySpd = 0;
-// 	this.zSpd = 0;
-// 	this.destroy = false;
-// }
-
-
 function DownloadCurrentWorld () {
 	var worldData = curSession.ExportWorldNoPlayers();
 	var worldString = JSON.stringify(worldData);
 
 	// Download the string as a file
 }
+

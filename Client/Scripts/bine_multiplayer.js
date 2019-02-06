@@ -245,12 +245,6 @@ function InitSocketConnection () {
 		// 	RecieveEntityChange(data.levelID, data.entityID, data.entityData);
 		// });
 
-		// socket.on("throwBall", function (data) {
-		// 	RecieveThrowBall(data.levelID, data.entityID, data.ballData);
-		// });
-
-		
-
 		MULTI_ON = true;
 
 	}
@@ -353,10 +347,6 @@ function handleMessageData (type, data) {
 
 	if (type === "entityChange") {
 		RecieveEntityChange(data.levelID, data.entityID, data.entityData);
-	}
-
-	if (type === "throwBall") {
-		RecieveThrowBall(data.levelID, data.entityID, data.ballData);
 	}
 }
 
@@ -464,11 +454,6 @@ function ReceiveRemoveEntity (levelID, entityID) {
 
 function RecieveEntityChange (levelID, entityID, entityData) {
 	curSession.ChangeEntity(levelID, entityID, entityData);
-}
-
-function RecieveThrowBall (levelID, entityID, ballData) {
-	var level = curSession.GetLevelByID(levelID);
-	level.AddProjectile(ballData);
 }
 
 
@@ -625,10 +610,3 @@ function SendEntityChange () {
 	}
 }
 
-function SendThrowBall (x, y, z, xSpd, ySpd, zSpd) {
-	if (MULTI_ON)
-	{
-		// socket.emit("throwBall", {x: x, y: y, z: z, xSpd: xSpd, ySpd: ySpd, zSpd: zSpd});
-		sendData("throwBall", {x: x, y: y, z: z, xSpd: xSpd, ySpd: ySpd, zSpd: zSpd});
-	}
-}
