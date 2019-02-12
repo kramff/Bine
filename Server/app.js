@@ -61,7 +61,7 @@ var playerNum = 0;
 // Player - user that connects to server. Can join a room to access a session, and control an entity inside that session.
 function Player (ws) {
 	this.ws = ws;
-	this.ID = playerNum;
+	this.id = playerNum;
 	playerNum += 1;
 
 	this.room = undefined;
@@ -74,16 +74,15 @@ function Player (ws) {
 Player.prototype.disconnect = function () {
 	if (this.session !== undefined && this.level !== undefined && this.playerEntity !== undefined && this.room !== undefined)
 	{
-		this.session.removeEntity(this.level.ID, this.playerEntity.ID);
+		this.session.RemoveEntity(this.level.id, this.playerEntity.id);
+		var leavingRoom = this.room;
+		this.exitRoom();
+		leavingRoom.sendDataRoom("removeEntity", {levelID: this.level.id, entityID: this.playerEntity.id});
+		// this.room.players.splice(this.room.players.indexOf(this), 1);
 		this.session = undefined;
 		this.level = undefined;
 		this.playerEntity = undefined;
-		this.room.sendDataRoom("removeEntity", {levelID: player.level.id, entityID: player.playerEntity.id});
-		this.room.players.splice(this.room.players.indexOf(this), 1);
-		this.room = undefined;
-	}
-	if (this.room !== undefined)
-	{
+		// this.room = undefined;
 	}
 	playerList.splice(playerList.indexOf(this), 1);
 }
@@ -94,10 +93,19 @@ Player.prototype.sendData = function (type, data) {
 	//console.log(data);
 	this.ws.send(stringData);
 }
-Player.prototype.joinRoom = function(room) {
+// Join a room
+Player.prototype.joinRoom = function (room) {
 	if (room !== undefined) {
 		room.addPlayer(this);
 		this.room = room;
+	}
+};
+// Exit a room
+Player.prototype.exitRoom = function () {
+	if (this.room !== undefined)
+	{
+		this.room.removePlayer(this);
+		this.room = undefined;
 	}
 };
 
@@ -114,7 +122,7 @@ var roomNum = 0;
 
 function getRoomByID (roomID) {
 	return roomList.find(function (room) {
-		return (room.ID === roomID);
+		return (room.id === roomID);
 	});
 }
 
@@ -129,13 +137,18 @@ function getRoomBySession (session) {
 function Room (session) {
 	this.players = [];
 	this.session = session;
-	this.ID = roomNum;
+	this.id = roomNum;
 	roomNum += 1;
 }
 
 // Add a player to the players list. (Called by Player.joinRoom() )
 Room.prototype.addPlayer = function (player) {
 	this.players.push(player);
+};
+
+// Remove a player from the players list. (Called by Player.exitRoom() )
+Room.prototype.removePlayer = function (player) {
+	this.players.splice(this.players.indexOf(player), 1);
 };
 
 // Send data to all the players in this room
@@ -179,7 +192,7 @@ wss.on("connection", function connection (ws) {
 
 	var player = new Player(ws);
 
-	timeLog("Player connected! ID: " + player.ID);
+	timeLog("Player connected! ID: " + player.id);
 
 	ws.on("message", function incoming (message) {
 		try {
@@ -194,7 +207,7 @@ wss.on("connection", function connection (ws) {
 	});
 
 	ws.on("close", function close () {
-		timeLog("Player disconnected! ID: " + player.ID);
+		timeLog("Player disconnected! ID: " + player.id);
 		player.disconnect();
 	});
 

@@ -133,7 +133,81 @@ var waitingToDirectConnect = false;
 var sessionDirectLinkID = undefined;
 var levelDirectLinkID = undefined;
 
-
+var controlStyles = {
+	"Standard": {
+		input: "Mouse + Keyboard",
+		description: "WASD to move, aim with mouse, left/right click to shoot/collect.",
+		movement: "WASD",
+		direction: "Mouse",
+		ability1: "LeftClick",
+		ability2: "RightClick",
+	},
+	"QuickLook": {
+		input: "Keyboard",
+		description: "Arrow keys to move. Quick presses change direction without moving. ZX to shoot/collect.",
+		movement: "ArrowKeys",
+		direction: "LastMove",
+		ability1: "ZKey",
+		ability2: "XKey",
+	},
+	"DualKeyboard": {
+		input: "Keyboard",
+		description: "WASD to move, arrow keys to shoot/collect. Shift button to toggle.",
+		movement: "WASD",
+		direction: "ArrowKeys",
+		abilityBoth: "ArrowKeys",
+		abilityToggle: "ShiftKey",
+	},
+	"Mouse3": {
+		input: "Mouse",
+		description: "Middle Click to move, aim with mouse, left/right click to shoot/collect.",
+		movement: "MiddleClick",
+		direction: "Mouse",
+		ability1: "LeftClick",
+		ability2: "RightClick",
+	},
+	"DualStick": {
+		input: "Gamepad",
+		description: "Left stick to move, aim with right stick, left/right trigger to shoot/collect.",
+		movement: "LeftStick",
+		direction: "RightStick",
+		ability1: "LeftTrigger",
+		ability2: "RightTrigger",
+	},
+	"Toggler": {
+		input: "Gamepad",
+		description: "Left/right stick to move, face buttons to shoot/collect in 4 directions. Hold any trigger/bumper to toggle between shoot and collect.",
+		movement: "AnyStick",
+		direction: "FaceButtons",
+		abilityBoth: "FaceButtons",
+		abilityToggle: "AnyTriggerBumper",
+	},
+	"SwipeShooot": {
+		input: "Touchscreen",
+		description: "Tap to move, swipe away to shoot, swipe toward to collect.",
+		movement: "Tap",
+		direction: "Swipe",
+		ability1: "SwipeAway",
+		ability2: "SwipeToward",
+	},
+	"TapShoot": {
+		input: "Touchscreen",
+		description: "Swipe to move, tap in a direction to shoot/collect. Toggle between shoot and collect with on-screen button.",
+		movement: "Swipe",
+		direction: "Tap",
+		abilityBoth: "Tap",
+		abilityToggle: "OnScreenButton",
+	},
+	"CleverShoot": {
+		input: "Touchscreen",
+		description: "Swipe to move. Tap on a block to collect it, tap on an empty spot to shoot a block.",
+		movement: "Swipe",
+		direction: "Tap",
+		abilityBoth: "Tap",
+		abilityToggle: "ContextSensitive",
+	},
+};
+var controlStyle = "";
 
 function Init () {
 	LoadIsoScripts();
@@ -843,7 +917,7 @@ function EditorMouseUp () {
 }
 
 function GameplayMouseDown (event) {
-
+	
 }
 
 function GameplayMouseMove () {

@@ -320,9 +320,9 @@ var Session = (function () {
 					local: true,
 				};
 				this.variableCounter += 1;
-				variableObj.ID = this.variableCounter;
+				variableObj.id = this.variableCounter;
 				this.variables.push(variableObj);
-				rulesObj.connectedVariables.push(variableObj.ID);
+				rulesObj.connectedVariables.push(variableObj.id);
 			}
 		}
 	};
