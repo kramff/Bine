@@ -91,7 +91,13 @@ Player.prototype.sendData = function (type, data) {
 	//console.log("Sending Data");
 	//console.log(type);
 	//console.log(data);
-	this.ws.send(stringData);
+	try
+	{
+		this.ws.send(stringData);
+	}
+	catch (e) {
+		console.log("Error in sending data");
+	}
 }
 // Join a room
 Player.prototype.joinRoom = function (room) {
@@ -360,6 +366,8 @@ function handleMessageData (player, type, data) {
 	}
 	else if (type === "exitSession") {
 		player.session = undefined;
+		// Leave the room as well
+		player.exitRoom();
 	}
 	else if (type === "tileChange") {
 		var levelID = data.levelID;
