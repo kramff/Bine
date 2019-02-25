@@ -72,18 +72,22 @@ function Player (ws) {
 }
 
 Player.prototype.disconnect = function () {
-	if (this.session !== undefined && this.level !== undefined && this.playerEntity !== undefined && this.room !== undefined)
+	if (this.session !== undefined && this.level !== undefined && this.playerEntity !== undefined)
 	{
 		this.session.RemoveEntity(this.level.id, this.playerEntity.id);
-		var leavingRoom = this.room;
-		this.exitRoom();
-		leavingRoom.sendDataRoom("removeEntity", {levelID: this.level.id, entityID: this.playerEntity.id});
-		// this.room.players.splice(this.room.players.indexOf(this), 1);
-		this.session = undefined;
-		this.level = undefined;
-		this.playerEntity = undefined;
-		// this.room = undefined;
 	}
+	if (this.room !== undefined)
+	{
+		var roomToLeave = this.room;
+		this.exitRoom();
+		if (this.level !== undefined && this.playerEntity !== undefined)
+		{
+			roomToLeave.sendDataRoom("removeEntity", {levelID: this.level.id, entityID: this.playerEntity.id});
+		}
+	}
+	this.session = undefined;
+	this.level = undefined;
+	this.playerEntity = undefined;
 	playerList.splice(playerList.indexOf(this), 1);
 }
 Player.prototype.sendData = function (type, data) {
