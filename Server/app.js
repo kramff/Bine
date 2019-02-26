@@ -238,11 +238,14 @@ function handleMessageData (player, type, data) {
 		sessionList.push(newSession);
 		sessionNum += 1;
 
+		player.session = newSession;
+
 		// Send player the world data for the created session
 		player.sendData("worldData", newSession.ExportWorld());
 
 		// Make the room for this session and join it
 		var newRoom = new Room(newSession);
+		roomList.push(newRoom);
 		player.joinRoom(newRoom);
 
 		// Notify all connected users of new session
@@ -272,6 +275,7 @@ function handleMessageData (player, type, data) {
 
 		// Join the socket.io room for this session
 		var room = getRoomBySession(session);
+		console.log("getRoomBySession returns room: " + room);
 		
 		player.joinRoom(room);
 	}
@@ -290,7 +294,7 @@ function handleMessageData (player, type, data) {
 			
 			// Send info to other players in this room
 			var levelData = newLevel.Export();
-			player.room.sendDataRoom("enterLevel", levelData);
+			player.room.sendDataRoom("newLevel", levelData);
 
 			// Put the player into this room
 			player.sendData("enterLevel", newLevel.id);
