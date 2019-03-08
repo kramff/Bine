@@ -753,9 +753,6 @@ var Session = (function () {
 
 		// itemData
 		this.itemData = worldData.itemData;
-
-		// particleData
-		this.particleData = worldData.particleData;
 	}
 	Session.prototype.ExportWorld = function () {
 		var levelDatas = [];
@@ -771,7 +768,6 @@ var Session = (function () {
 			entityTemplates: this.entityTemplates,
 			areaTemplates: this.areaTemplates,
 			itemData: this.itemData,
-			particleData: this.particleData,
 		};
 		return worldData;
 	}

@@ -186,7 +186,7 @@ for (var i = 0; i < fileWorlds.length; i++) {
 // Create a starting session for each saved world
 for (var i = 0; i < worldList.length; i++) {
 	var startingWorldData = worldList[i];
-	var newSession = new Session("Session #" + sessionNum, startingWorldData);
+	var newSession = new Session("Test Session #" + sessionNum, startingWorldData);
 	newSession.id = sessionNum;
 	timeLog("created starting session! session name: " + newSession.name);
 	sessionList.push(newSession);
@@ -229,7 +229,7 @@ wss.on("connection", function connection (ws) {
 function handleMessageData (player, type, data) {
 	if (type === "createSessionNewWorld") {
 		// data - {name: "(name here)"}
-		var emptyWorldData = {levelDatas: [], tileData: [], worldRules: [], entityTemplates: [], areaTemplates: [], itemData: [], particleData: []};
+		var emptyWorldData = {levelDatas: [], tileData: [], worldRules: [], entityTemplates: [], areaTemplates: [], itemData: []};
 
 		// Should use data.name
 		var newSession = new Session("Session #" + sessionNum, emptyWorldData);
@@ -275,7 +275,7 @@ function handleMessageData (player, type, data) {
 
 		// Join the socket.io room for this session
 		var room = getRoomBySession(session);
-		console.log("getRoomBySession returns room: " + room);
+		// console.log("getRoomBySession returns room: " + room);
 		
 		player.joinRoom(room);
 	}
