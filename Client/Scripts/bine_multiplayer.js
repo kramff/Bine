@@ -24,58 +24,19 @@ var playerArray = [];
 // misc: {utterance, ...other effects go here}
 var receivedMessages = [];
 
+// IN_MULTI_SESSION: true when in a session connected to the server
+// If true, use sendData() to send events to the server's session
+// If false, all events go directly to the local session
+var IN_MULTI_SESSION = false;
 
-var MULTI_ON = false;
+// SERVER_CONNECTED: set to true when the websocket is connected to the server
+// If false, disable connecting to server sessions
+var SERVER_CONNECTED = false;
 
 function initSocket () {
 	InitSocketConnection();
 }
 
-
-// TODO: Remove this
-// function oldSocketInit () {
-
-// 	// Skipping this step
-// 	// InitSocketConnection();
-// 	// return;
-	
-// 	var socketScript = document.createElement("script");
-// 	if (location.href === "http://kramff.github.io/")
-// 	{
-// 		// Web for github.io
-// 		socketScript.setAttribute("src", "https://bine-online.herokuapp.com/socket.io/socket.io.js");
-// 	}
-// 	else if (location.href.indexOf("http://www.kramff.com/Bine/") !== -1)
-// 	{
-// 		// Web for kramff.com
-// 		socketScript.setAttribute("src", "https://bine.nfshost.com/socket.io/socket.io.js");
-// 	}
-// 	else if (location.href.indexOf("file:/") !== -1)
-// 	{
-// 		// Local file
-// 		socketScript.setAttribute("src", "http://localhost:5000/socket.io/socket.io.js");
-// 	}
-// 	else
-// 	{
-// 		// Hosting off some dumb custom server
-// 		// socketScript.setAttribute("src", location.href.replace(/\d+\/$/, "5000/socket.io/socket.io.js"));
-// 		socketScript.setAttribute("src", (location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000/socket.io/socket.io.js").replace("http://", httpProtocol));
-// 	}
-// 	document.getElementsByTagName('body')[0].appendChild(socketScript);
-// 	socketScript.onreadystatechange = LoadSScript;
-// 	socketScript.onload = LoadSScript;
-// }
-
-// var ssLoaded = false;
-// function LoadSScript () {
-// 	if (!ssLoaded)
-// 	{
-// 		ssLoaded = true;
-// 		InitSocketConnection();
-// 	}
-// }
-
-// Currently: using http and not websockets
 var wsOption = {transports: ["websocket"]};
 var noOption = {};
 var wsProtocol = "ws://";
@@ -89,29 +50,24 @@ function InitSocketConnection () {
 		var socketURL;
 		if (location.href === "kramff.github.io/")
 		{
-			// socket = io(httpProtocol + "bine-online.herokuapp.com", noOption);
 			socketURL = wsProtocol + "bine-online.herokuapp.com";
 		}
 		else if (location.href.indexOf("kramff.com/Bine/") !== -1)
 		{
-			// socket = io(httpProtocol + "bine.nfshost.com", noOption);
 			wsProtocol = "wss://";
 			socketURL = wsProtocol + "bine.nfshost.com";
 		}
 		else if (location.href.indexOf("file:/") !== -1)
 		{
-			// socket = io(httpProtocol + "localhost:5000", noOption);
 			socketURL = wsProtocol + "localhost:5000";
 		}
 		else
 		{
-			// socket = io(location.href.replace(/\d+\/$/, "5000").replace("http://", httpProtocol), noOption);
-			// socket = io((location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000").replace("http://", httpProtocol), noOption);
 			socketURL = (location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000").replace("http://", wsProtocol);
 		}
 		socket = new WebSocket(socketURL);
 		socket.onopen = function (data) {
-			// console.log("Connected to server with id: " + socket.id);
+
 			console.log("Connected to server!");
 
 			// Waiting until connected to server
@@ -122,137 +78,19 @@ function InitSocketConnection () {
 			}
 		}
 		socket.onmessage = function (event) {
-			//console.log("Received Data");
-			//console.log(event.data.type);
-			//console.log(event.data.data);
-			//console.log(event);
-			//event.data;
-			
-			//handleMessageData(event.data.type, event.data.data);
 			var message = JSON.parse(event.data);
 			handleMessageData(message.type, message.data);
 		}
-		// socket.on("motd", function (data) {
-		// 	motd = data;
-		// 	console.log("Message of the day: " + motd);
-		// 	// Show MOTD
-		// });
-		// // socket.on("serverLevels", function (data) {
-		// // 	serverLevels = data;
-		// // 	console.log("Server levels: " + serverLevels);
-		// // });
-		// socket.on("worldList", function (data) {
-		// 	FillWorldBox(data);
-		// });
-		// socket.on("sessionList", function (data) {
-		// 	FillSessionBox(data);
-		// });
-		// // socket.on("playerMove", function (data) {
-		// // 	UpdatePlayer(data);
-		// // });
-		// // socket.on("disconnection", function (data) {
-		// // 	RemovePlayer(data);
-		// // });
-		// socket.on("message", function (data) {
-		// 	ReceiveChatMessage(data);
-		// });
-
-		// // Level editor
-		// socket.on("tileChange", function (data) {
-		// 	ReceiveTileChange(data);
-		// });
-		// socket.on("createArea", function (data) {
-		// 	ReceiveCreateArea(data);
-		// });
-		// socket.on("deleteArea", function (data) {
-		// 	ReceiveDeleteArea(data.levelID, data.areaID);
-		// });
-
-		// //Temporary level direct download
-		// // socket.on("chosenLevel", function (data) {
-		// // 	console.log("got chosen level from server");
-		// // 	ImportLevel(data.data);
-		// // });
-
-		// // Receive world data from server
-		// socket.on("worldData", function (data) {
-		// 	console.log("Got world data from server!");
-		// 	ReceiveWorldData(data);
-
-		// 	// Waiting until connected to server, then session
-		// 	// before directly joining level
-		// 	if (waitingToDirectConnect)
-		// 	{
-		// 		JoinLevel(levelDirectLinkID);
-		// 	}
-		// });
 
 
-
-		// socket.on("newSession", function (data) {
-		// 	// Create new session (Add it to the list of sessions to join)
-		// 	AddSingleSessionToBox(data);
-		// });
-
-		// socket.on("newLevel", function (data) {
-		// 	// Create new level
-		// 	ReceiveCreateLevel(data);
-		// });
-		// socket.on("enterLevel", function (data) {
-		// 	// Enter a level
-		// 	ReceiveEnterLevel(data);
-
-		// 	// After directly connecting to the server, then session, then level
-		// 	// Create a player entity
-		// 	if (waitingToDirectConnect)
-		// 	{
-		// 		TestAsPlayer();
-		// 	}
-
-		// });
-
-		// socket.on("newArea", function (data) {
-		// 	// Create a new area
-		// 	ReceiveCreateArea(data.levelID, data.areaData);
-		// });
-
-		// socket.on("newEntity", function (data) {
-		// 	// Create a new entity
-		// 	ReceiveCreateEntity(data.levelID, data.entityData);
-		// });
-		// socket.on("assignPlayerEntity", function (data) {
-		// 	// Set the curPlayerID and curPlayer to the given entity
-		// 	ReceiveAssignPlayer(data);
-		// });
-		// socket.on("removeEntity", function (data) {
-		// 	// Remove the entity from the session
-		// 	ReceiveRemoveEntity(data.levelID, data.entityID);
-		// });
-
-		// socket.on("inputUpdate", function (data) {
-		// 	var level = curSession.GetLevelByID(data.levelID);
-		// 	var entity = level.GetEntityByID(data.entityID);
-		// 	entity.SetMoveDirections(data.up, data.down, data.left, data.right);
-		// });
-
-		// socket.on("locationCorrection", function (data) {
-		// 	var level = curSession.GetLevelByID(data.levelID);
-		// 	var entity = level.GetEntityByID(data.entityID);
-		// 	entity.SetLocationCorrection(data.x, data.y, data.z, data.xMov, data.yMov, data.zMov, data.moveTime, data.moveDuration);
-		// });
-
-		// socket.on("entityChange", function (data) {
-		// 	RecieveEntityChange(data.levelID, data.entityID, data.entityData);
-		// });
-
-		MULTI_ON = true;
+		SERVER_CONNECTED = true;
 
 	}
 	catch (err)
 	{
 		console.error("server not up");
 		console.error(err);
-		MULTI_ON = false;
+		SERVER_CONNECTED = false;
 	}
 }
 
@@ -468,59 +306,74 @@ function sendData(type, data) {
 }
 
 function SendTileChange (tileChange) {
-	 if (MULTI_ON) {
-		// socket.emit("tileChange", tileChange);
+	if (IN_MULTI_SESSION)
+	{
 		sendData("tileChange", tileChange);
+	}
+	else
+	{
+		handleMessageData("tileChange", tileChange);
 	}
 }
 function SendCreateArea (createArea) {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("createArea", createArea);
 		sendData("createArea", createArea);
+	}
+	else
+	{
 	}
 }
 function SendRemoveArea (removeArea) {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("removeArea", removeArea);
 		sendData("removeArea", removeArea);
+	}
+	else
+	{
 	}
 }
 function SendInputUpdate (inputData) {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("inputUpdate", inputData);
 		sendData("inputUpdate", inputData);
+	}
+	else
+	{
 	}
 }
 function SendLocationCorrection (correctionData) {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("locationCorrection", correctionData);
 		sendData("locationCorrection", correctionData);
+	}
+	else
+	{
 	}
 }
 
 function CreateSessionNewWorld () {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("createSessionNewWorld");
 		sendData("createSessionNewWorld");
+	}
+	else
+	{
 	}
 }
 function JoinSession (id) {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("joinSession", id);
 		sendData("joinSession", id);
+	}
+	else
+	{
 	}
 }
 
 function CreateNewLevel () {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("createNewLevel");
 		sendData("createNewLevel");
 	}
 	else
@@ -530,83 +383,97 @@ function CreateNewLevel () {
 }
 
 function JoinLevel (levelID) {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("joinLevel", levelID);
 		sendData("joinLevel", levelID);
 	}
 	else
 	{
-		//
 	}
 }
 
 function CreateNewArea (createX, createY, createZ) {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("createNewArea", {x: createX, y: createY, z: createZ});
 		sendData("createNewArea", {x: createX, y: createY, z: createZ});
+	}
+	else
+	{
 	}
 }
 
 function CreateNewEntity (createX, createY, createZ) {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("createNewEntity", {x: createX, y: createY, z: createZ});
 		sendData("createNewEntity", {x: createX, y: createY, z: createZ});
+	}
+	else
+	{
 	}
 }
 
 function TestAsPlayer () {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
 		var zAdj = 0;
 		if (curLevel.CheckLocationSolid(Math.round(editCamX), Math.round(editCamY), Math.round(editCamZ)))
 		{
 			zAdj = 1
 		}
-		// socket.emit("testAsPlayer", {x: Math.round(editCamX), y: Math.round(editCamY), z: Math.round(editCamZ + zAdj)});
 		sendData("testAsPlayer", {x: Math.round(editCamX), y: Math.round(editCamY), z: Math.round(editCamZ + zAdj)});
+	}
+	else
+	{
 	}
 }
 
 function ExitLevel () {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("exitLevel");
 		sendData("exitLevel");
+	}
+	else
+	{
 	}
 }
 
 function ExitSession () {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("exitSession");
 		sendData("exitSession");
+	}
+	else
+	{
 	}
 }
 
 function StopTestingPlayer () {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("stopTestingPlayer");
 		sendData("stopTestingPlayer");
+	}
+	else
+	{
 	}
 }
 
 function DeleteArea () {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("deleteArea", {levelID: curLevel.id, areaID: curArea.id});
 		sendData("deleteArea", {levelID: curLevel.id, areaID: curArea.id});
+	}
+	else
+	{
 	}
 }
 
 function SendEntityChange () {
-	if (MULTI_ON)
+	if (IN_MULTI_SESSION)
 	{
-		// socket.emit("entityChange", {levelID: curLevel.id, entityID: curEntity.id, entityData: curEntity.Export()});
 		sendData("entityChange", {levelID: curLevel.id, entityID: curEntity.id, entityData: curEntity.Export()});
+	}
+	else
+	{
 	}
 }
 

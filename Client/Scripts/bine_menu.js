@@ -172,6 +172,7 @@ function SetupButtons () {
 	// Enter a session by clicking on it
 	var sessionBox = document.getElementsByClassName("session_box")[0];
 	sessionBox.onclick = function () {
+		IN_MULTI_SESSION = true;
 		if (event.target.classList.contains("session"))
 		{
 			var sessionID = event.target.getAttribute("session_id");
@@ -293,10 +294,20 @@ function DoButtonAction (action, extra) {
 		break;
 
 		case "create_session_new_world":
+			IN_MULTI_SESSION = true;
 			CreateSessionNewWorld();
 			HideAllMenus();
 			ShowMenu("edit_world");
 		break;
+
+		// Create a local-only session
+		case "create_local_session_new_world":
+			IN_MULTI_SESSION = false;
+			CreateSessionNewWorld();
+			HideAllMenus();
+			ShowMenu("edit_world");
+		break;
+
 		case "create_new_level":
 			CreateNewLevel();
 			HideAllMenus();
