@@ -5,20 +5,16 @@
 
 function CreateNewDiv (parent, setClass, text, id) {
 	var newDiv = document.createElement("div");
-	if (setClass !== undefined)
-	{
+	if (setClass !== undefined) {
 		newDiv.className = setClass;
 	}
-	if (text !== undefined)
-	{
+	if (text !== undefined) {
 		newDiv.appendChild(document.createTextNode(text));
 	}
-	if (id !== undefined)
-	{
+	if (id !== undefined) {
 		newDiv.setAttribute("id", id);
 	}
-	if (parent !== undefined)
-	{
+	if (parent !== undefined) {
 		parent.appendChild(newDiv)
 	}
 	return newDiv;
@@ -85,40 +81,33 @@ var currentClickableArea = undefined;
 
 function ShowMenu (menuId) {
 	var menuElement = document.getElementById(menuId);
-	if (menuElement !== undefined)
-	{
+	if (menuElement !== undefined) {
 
 		currentMenu = menuId;
 		currentMenuElement = menuElement;
 		currentMenuElement.classList.add("active_menu");
 		currentClickableArea = document.querySelector("#" + currentMenu + " .clickable_area") || undefined;
 
-		if (currentMenuElement.classList.contains("allow_camera_controls"))
-		{
+		if (currentMenuElement.classList.contains("allow_camera_controls")) {
 			cameraControlsEnabled = true;
 		}
-		else
-		{
+		else {
 			cameraControlsEnabled = false;
 		}
-		if (currentMenuElement.classList.contains("allow_edit_tiles"))
-		{
+		if (currentMenuElement.classList.contains("allow_edit_tiles")) {
 			tileEditingEnabled = true;
 		}
-		else
-		{
+		else {
 			tileEditingEnabled = false;
 		}
 	}
-	else
-	{
+	else {
 		console.error("Could not get menu with id " + menuId);
 	}
 }
 
 function CheckIfInClickableArea (x, y) {
-	if (currentClickableArea === undefined)
-	{
+	if (currentClickableArea === undefined) {
 		return false;
 	}
 	var boundingRect = currentClickableArea.getBoundingClientRect();
@@ -126,27 +115,22 @@ function CheckIfInClickableArea (x, y) {
 		x > boundingRect.x &&
 		x < boundingRect.x + boundingRect.width &&
 		y > boundingRect.y &&
-		y < boundingRect.y + boundingRect.height)
-	{
+		y < boundingRect.y + boundingRect.height) {
 		return true;
 	}
 	return false;
 }
 
 function ButtonClick (button) {
-	if (button.dataset.menu !== undefined)
-	{
+	if (button.dataset.menu !== undefined) {
 		HideAllMenus();
 		ShowMenu(button.dataset.menu);
 	}
-	else if (button.dataset.action !== undefined)
-	{
-		if (button.dataset.extra !== undefined)
-		{
+	else if (button.dataset.action !== undefined) {
+		if (button.dataset.extra !== undefined) {
 			DoButtonAction(button.dataset.action, button.dataset.extra);
 		}
-		else
-		{
+		else {
 			DoButtonAction(button.dataset.action);
 		}
 	}
@@ -158,8 +142,7 @@ function SetupButtons () {
 	}
 	// Buttons for going to menus and doing actions
 	document.body.onclick = function () {
-		if (event.target.classList.contains("button"))
-		{
+		if (event.target.classList.contains("button")) {
 			ButtonClick(event.target)
 		}
 	}
@@ -173,11 +156,9 @@ function SetupButtons () {
 	var sessionBox = document.getElementsByClassName("session_box")[0];
 	sessionBox.onclick = function () {
 		IN_MULTI_SESSION = true;
-		if (event.target.classList.contains("session"))
-		{
+		if (event.target.classList.contains("session")) {
 			var sessionID = event.target.getAttribute("session_id");
-			if (sessionID !== null)
-			{
+			if (sessionID !== null) {
 				// Join session with this id
 				JoinSession(sessionID);
 				HideAllMenus();
@@ -188,11 +169,9 @@ function SetupButtons () {
 	// Enter a level by clicking on it
 	var levelBox = document.getElementsByClassName("level_box")[0];
 	levelBox.onclick = function () {
-		if (event.target.classList.contains("level"))
-		{
+		if (event.target.classList.contains("level")) {
 			var levelID = event.target.getAttribute("level_id");
-			if (levelID !== null)
-			{
+			if (levelID !== null) {
 				// Enter level with this id
 				JoinLevel(levelID);
 				HideAllMenus();
@@ -203,11 +182,9 @@ function SetupButtons () {
 	// Add a sub-rule (Effect or Condition) by clicking on the buttons placed in each rule block.
 	var rules_box = document.getElementsByClassName("rules_box")[0];
 	rules_box.onclick = function () {
-		if (event.target.classList.contains("add_sub_rule"))
-		{
+		if (event.target.classList.contains("add_sub_rule")) {
 			var nesting = event.target.getAttribute("data-nesting");
-			if (nesting !== null)
-			{
+			if (nesting !== null) {
 				// Pull open the menu to pick a sub rule, and keep track of the nesting point
 				ShowDarkCover();
 				ShowMenu("add_entity_sub_rule");
@@ -220,21 +197,18 @@ function SetupButtons () {
 				inBlock = true;
 			}
 		}
-		else if (event.target.classList.contains("rule_remove"))
-		{
+		else if (event.target.classList.contains("rule_delete")) {
 			// Remove the selected rule
 			var ruleParent = event.target.parentElement;
 			var nesting = ruleParent.getAttribute("data-nesting");
-			if (nesting !== null)
-			{
+			if (nesting !== null) {
 				// Remove the rule at that nesting point;
 				// var rule = GetRuleAtNestLocation(curEntity.rules, nesting);
 				RemoveRuleFromNestLocation(curEntity.rules, nesting);
 				SetupEntityRules();
 			}
 		}
-		else if (event.target.classList.contains("required_variable"))
-		{
+		else if (event.target.classList.contains("required_variable")) {
 			// TODO: Set this up
 			// TODO: Pass in the selected variable slot and associated rule
 			var ruleParent = event.target.parentElement;
@@ -251,15 +225,13 @@ function SetupButtons () {
 			ShowMenu("select_variable");
 		}
 	}
-	// Edit or remove a global variable
+	// Edit or delete a global variable
 	var variableBox = document.getElementsByClassName("variable_box")[0];
 	variableBox.onClick = function () {
-		if (event.target.classList.contains("variable_edit"))
-		{
+		if (event.target.classList.contains("variable_edit")) {
 			// Edit variable
 		}
-		else if (event.target.classList.contains("variable_remove"))
-		{
+		else if (event.target.classList.contains("variable_delete")) {
 			// Remove variable
 		}
 	}
@@ -267,15 +239,13 @@ function SetupButtons () {
 	var selectGlobalVariablesBox = document.getElementById("select_variable_global_variables_box");
 	var selectLocalVariablesBox = document.getElementById("select_variable_local_variables_box");
 	selectGlobalVariablesBox.onClick = function () {
-		if (event.target.classList.contains("selectable_variable"))
-		{
+		if (event.target.classList.contains("selectable_variable")) {
 			// TODO: Set this and the below function up
 			// Picked a variable to use in the earlier selected variable slot
 		}
 	}
 	selectLocalVariablesBox.onClick = function () {
-		if (event.target.classList.contains("selectable_variable"))
-		{
+		if (event.target.classList.contains("selectable_variable")) {
 			// Picked a variable to use in the earlier selected variable slot
 		}
 	}
@@ -315,12 +285,11 @@ function DoButtonAction (action, extra) {
 		break;
 
 		case "create_area":
-			CreateNewArea(editCamX, editCamY, editCamZ);
+			CreateArea(editCamX, editCamY, editCamZ);
 		break;
 		case "edit_area":
 			var areaSelected = curLevel.GetAreaAtLocation(editCamX, editCamY, editCamZ);
-			if (areaSelected !== undefined)
-			{
+			if (areaSelected !== undefined) {
 				inArea = true;
 				curArea = areaSelected;
 				HideAllMenus();
@@ -333,8 +302,7 @@ function DoButtonAction (action, extra) {
 		break;
 		case "edit_entity":
 			var entitySelected = curLevel.GetEntityAtLocation(editCamX, editCamY, editCamZ);
-			if (entitySelected !== undefined)
-			{
+			if (entitySelected !== undefined) {
 				inEntity = true;
 				curEntity = entitySelected;
 				HideAllMenus();
@@ -444,32 +412,25 @@ function DoButtonAction (action, extra) {
 		break;
 		case "select_entity_variable":
 			ShowDarkCover2();
-			if (extra === "string")
-			{
+			if (extra === "string") {
 				ShowMenu("input_variable_string");
 			}
-			if (extra === "number")
-			{
+			if (extra === "number") {
 				ShowMenu("input_variable_number");
 			}
-			if (extra === "entity")
-			{
+			if (extra === "entity") {
 
 			}
-			if (extra === "area")
-			{
+			if (extra === "area") {
 
 			}
-			if (extra === "level")
-			{
+			if (extra === "level") {
 
 			}
-			if (extra === "tile")
-			{
+			if (extra === "tile") {
 
 			}
-			if (extra === "coordinates")
-			{
+			if (extra === "coordinates") {
 
 			}
 		break;
@@ -484,8 +445,7 @@ function DoButtonAction (action, extra) {
 			var varName;
 			var varValue;
 			var variableObj;
-			if (extra === "string")
-			{
+			if (extra === "string") {
 				varName = document.getElementById("input_string_name").value;
 				varValue = document.getElementById("input_string").value;
 				variableObj = {
@@ -494,8 +454,7 @@ function DoButtonAction (action, extra) {
 					type: "string",
 				}
 			}
-			else if (extra === "number")
-			{
+			else if (extra === "number") {
 				varName = document.getElementById("input_number_name").value;
 				varValue = document.getElementById("input_number").value;
 				variableObj = {
@@ -504,29 +463,23 @@ function DoButtonAction (action, extra) {
 					type: "number",
 				}
 			}
-			else if (extra === "entity")
-			{
+			else if (extra === "entity") {
 
 			}
-			else if (extra === "area")
-			{
+			else if (extra === "area") {
 
 			}
-			else if (extra === "level")
-			{
+			else if (extra === "level") {
 
 			}
-			else if (extra === "tile")
-			{
+			else if (extra === "tile") {
 
 			}
-			else if (extra === "coordinates")
-			{
+			else if (extra === "coordinates") {
 
 			}
 			// Check if variable created correctly
-			if (variableObj !== undefined)
-			{
+			if (variableObj !== undefined) {
 				curEntity.variableCounter ++;
 				variableObj.ID = curEntity.variableCounter;
 				curEntity.variables.push(variableObj);
@@ -562,8 +515,7 @@ function FillSessionBox (sessionData) {
 	var sessionBox = document.getElementsByClassName("session_box")[0];
 
 	// Clear out old elements
-	while (sessionBox.firstChild)
-	{
+	while (sessionBox.firstChild) {
 		sessionBox.removeChild(sessionBox.firstChild);
 	}
 
@@ -603,8 +555,7 @@ function FillWorldBox (worldData) {
 	var worldBox = document.getElementsByClassName("world_box")[0];
 
 	// Clear out old elements
-	while (worldBox.firstChild)
-	{
+	while (worldBox.firstChild) {
 		worldBox.removeChild(worldBox.firstChild);
 	}
 
@@ -624,8 +575,7 @@ function FillLevelBox (levelArray) {
 	var levelBox = document.getElementsByClassName("level_box")[0];
 
 	// Clear out old elements
-	while (levelBox.firstChild)
-	{
+	while (levelBox.firstChild) {
 		levelBox.removeChild(levelBox.firstChild);
 	}
 
@@ -659,8 +609,7 @@ function FillRuleOptions (sessionRef) {
 	// Clear the menus (Is this necessary?)
 
 	// Loop through the exported rule data and create rule buttons for each
-	for (var triggerAbbrv in triggerData)
-	{
+	for (var triggerAbbrv in triggerData) {
 		var triggerRule = triggerData[triggerAbbrv];
 		CreateRuleOption(triggerChoiceBox, "trigger", triggerRule, triggerAbbrv);
 	}
@@ -684,8 +633,7 @@ function CreateRuleOption (parent, type, ruleData, ruleAbbrv) {
 
 function SetupEntityEditingMenu () {
 	var colorInput = document.getElementById("entity_color_input");
-	if (curEntity.style.color !== undefined)
-	{
+	if (curEntity.style.color !== undefined) {
 		colorInput.value = curEntity.style.color;
 	}
 	SetupEntityVariables();
@@ -696,8 +644,7 @@ function SetupEntityRules () {
 	// Get rules box
 	var rulesBox = document.getElementById("entity_rules_box");
 	// Clear rules box
-	while (rulesBox.firstChild)
-	{
+	while (rulesBox.firstChild) {
 		rulesBox.removeChild(rulesBox.firstChild);
 	}
 	// Recurse through rules and make divs based on the structure
@@ -707,8 +654,7 @@ function SetupEntityRules () {
 function CreateEntityRuleElementsRecurse (container, rules, nesting) {
 	// Loop through rules array
 	// Create div for each and possibly recurse through sub-blocks
-	for (var i = 0; i < rules.length; i++)
-	{
+	for (var i = 0; i < rules.length; i++) {
 		var rule = rules[i];
 		var ruleDiv = CreateNewDiv(container, "rule", undefined, undefined);
 		ruleDiv.setAttribute("data-nesting", nesting + i);
@@ -717,24 +663,21 @@ function CreateEntityRuleElementsRecurse (container, rules, nesting) {
 		// Create elements
 		var ruleSymbol = CreateNewDiv(ruleDiv, "rule_symbol " + ruleType, undefined, undefined);
 		var ruleTitle = CreateNewDiv(ruleDiv, "rule_title", GetRuleText(rule, ruleType), undefined);
-		var ruleClose = CreateNewDiv(ruleDiv, "rule_remove", "X", undefined);
+		var ruleClose = CreateNewDiv(ruleDiv, "rule_delete", "X", undefined);
 		// Create additional options (variables, etc)
 		AddRuleOptions(ruleDiv, rule, ruleType);
 		// If the rule has a sub-block, recursively create those
-		if (rule.block !== undefined)
-		{
+		if (rule.block !== undefined) {
 			var nestingString = nesting + i + "_block_";
 			var divClass = "rule_block";
 			CreateRuleBlock(ruleDiv, rule, nestingString, divClass, "block");
 		}
-		if (rule.trueBlock !== undefined)
-		{
+		if (rule.trueBlock !== undefined) {
 			var nestingString = nesting + i + "_trueBlock_";
 			var divClass = "rule_block trueBlock";
 			CreateRuleBlock(ruleDiv, rule, nestingString, divClass, "trueBlock");
 		}
-		if (rule.falseBlock !== undefined)
-		{
+		if (rule.falseBlock !== undefined) {
 			var nestingString = nesting + i + "_falseBlock_";
 			var divClass = "rule_block falseBlock";
 			CreateRuleBlock(ruleDiv, rule, nestingString, divClass, "falseBlock");
@@ -751,16 +694,13 @@ function CreateRuleBlock (ruleDiv, rule, nestingString, divClass, blockMode) {
 }
 
 function GetRuleText (rule, ruleType) {
-	if (ruleType === "rule_trigger")
-	{
+	if (ruleType === "rule_trigger") {
 		return triggerData[rule.trigger].text;
 	}
-	else if (ruleType === "rule_condition")
-	{
+	else if (ruleType === "rule_condition") {
 		return conditionData[rule.condition].text;
 	}
-	else if (ruleType === "rule_effect")
-	{
+	else if (ruleType === "rule_effect") {
 		return effectData[rule.effect].text;
 	}
 	return "missing rule text for " + rule;
@@ -769,26 +709,21 @@ function GetRuleText (rule, ruleType) {
 // Make the options needed to describe the rule. (Variables)
 function AddRuleOptions (ruleDiv, rule, ruleType) {
 	var ruleData;
-	if (ruleType === "rule_trigger")
-	{
+	if (ruleType === "rule_trigger") {
 		ruleData = triggerData[rule.trigger];
 	}
-	else if (ruleType === "rule_condition")
-	{
+	else if (ruleType === "rule_condition") {
 		ruleData = conditionData[rule.condition];
 	}
-	else if (ruleType === "rule_effect")
-	{
+	else if (ruleType === "rule_effect") {
 		ruleData = effectData[rule.effect];
 	}
-	else
-	{
+	else {
 		console.log("missing rule options for " + rule);
 		return;
 	}
 	// For each created variable, make a element that lets the user name the new variable
-	if (ruleData.createdVariables !== undefined)
-	{
+	if (ruleData.createdVariables !== undefined) {
 		for (var i = 0; i < ruleData.createdVariables.length; i++) {
 			var createdVariable = ruleData.createdVariables[i];
 			// createdVariable.name (default name)
@@ -798,8 +733,7 @@ function AddRuleOptions (ruleDiv, rule, ruleType) {
 		}
 	}
 	// For each required variable, make an element that lets the user pick a variable to use
-	if (ruleData.requiredVariables !== undefined)
-	{
+	if (ruleData.requiredVariables !== undefined) {
 		for (var i = 0; i < ruleData.requiredVariables.length; i++) {
 			var requiredVariable = ruleData.requiredVariables[i];
 			// requiredVariable is just a type string ("number", "string", "entity", etc)
@@ -817,8 +751,7 @@ function SetupEntityVariables () {
 	// Get variables box
 	var variablesBox = document.getElementById("entity_variables_box");
 	// Clear variables box
-	while (variablesBox.firstChild)
-	{
+	while (variablesBox.firstChild) {
 		variablesBox.removeChild(variablesBox.firstChild);
 	}
 	// Loop through variables and make divs based on the structure
@@ -830,15 +763,14 @@ function CreateEntityVariableElementsForMainList (container, variables) {
 	for (var i = 0; i < variables.length; i++) {
 		var variable = variables[i];
 		// Skip Non-Global variables
-		if (!variable.local)
-		{
+		if (!variable.local) {
 			var variableDiv = CreateNewDiv(container, "variable", undefined, undefined);
 			variableDiv.setAttribute("data-variable-id", variable.id);
 			var varType = CreateNewDiv(variableDiv, "variable_type variable_" + variable.type, undefined, undefined);
 			var varName = CreateNewDiv(variableDiv, "variable_name", variable.name, undefined);
 			var varValue = CreateNewDiv(variableDiv, "variable_value", variable.value, undefined);
 			var varEdit = CreateNewDiv(variableDiv, "variable_edit", "Edit", undefined);
-			var varRemove = CreateNewDiv(variableDiv, "variable_remove", "Remove", undefined);
+			var varRemove = CreateNewDiv(variableDiv, "variable_delete", "Remove", undefined);
 		}
 	}
 }
@@ -858,16 +790,14 @@ function CreateEntityVariableElementsForSelection (container, variables) {
 function FillVariableSelection () {
 	// Global variables
 	var globalsBox = document.getElementById("select_variable_global_variables_box");
-	while (globalsBox.firstChild)
-	{
+	while (globalsBox.firstChild) {
 		globalsBox.removeChild(globalsBox.firstChild);
 	}
 	var globalVars = GetEntityGlobalVariablesOfType(curEntity, "string");
 	CreateEntityVariableElementsForSelection(globalsBox, globalVars);
 	// Local variables
 	var localsBox = document.getElementById("select_variable_local_variables_box");
-	while (localsBox.firstChild)
-	{
+	while (localsBox.firstChild) {
 		localsBox.removeChild(localsBox.firstChild);
 	}
 	var localVars = GetEntityLocalVariablesOfType(curEntity, "string");
@@ -878,10 +808,8 @@ function GetEntityGlobalVariablesOfType (entity, type) {
 	var varList = [];
 	for (var i = 0; i < entity.variables.length; i++) {
 		var curVar = entity.variables[i];
-		if (!curVar.local)
-		{
-			if (curVar.type === type)
-			{
+		if (!curVar.local) {
+			if (curVar.type === type) {
 				varList.push(curVar);
 			}
 		}
@@ -896,10 +824,8 @@ function GetEntityLocalVariablesOfType (entity, type) {
 	var varList = [];
 	for (var i = 0; i < entity.variables.length; i++) {
 		var curVar = entity.variables[i];
-		if (curVar.local)
-		{
-			if (curVar.type === type)
-			{
+		if (curVar.local) {
+			if (curVar.type === type) {
 				varList.push(curVar);
 			}
 		}

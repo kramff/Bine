@@ -8,8 +8,7 @@ function Debug (text) {
 
 //Up to <dist> tiles away in all directions, except for z which is more forgiving by 2
 function IsNear (x1, y1, z1, x2, y2, z2, dist) {
-	if (Math.abs(x1 - x2) <= dist && Math.abs(y1 - y2) <= dist && Math.abs(z1 - z2) <= dist + 2)
-	{
+	if (Math.abs(x1 - x2) <= dist && Math.abs(y1 - y2) <= dist && Math.abs(z1 - z2) <= dist + 2) {
 		return true;
 	}
 	return false;
@@ -26,12 +25,9 @@ function ScreenCoordToGameCoord (screenX, screenY, inputZ, cameraX, cameraY, cam
 
 // Evaluate whether the given coordinate is inside the area
 function PositionInBounds (area, i, j, k) {
-	if (0 <= i && i < area.xSize)
-	{
-		if (0 <= j && j < area.ySize)
-		{
-			if (0 <= k && k < area.zSize)
-			{
+	if (0 <= i && i < area.xSize) {
+		if (0 <= j && j < area.ySize) {
+			if (0 <= k && k < area.zSize) {
 				return true;
 			}
 		}
@@ -45,12 +41,10 @@ function GetRuleAtNestLocation (rules, nesting) {
 	var curRuleData = rules;
 	for (var i = 0; i < nestingSplit.length; i++) {
 		var curNestPoint = nestingSplit[i];
-		if (curNestPoint !== "")
-		{
+		if (curNestPoint !== "") {
 			curRuleData = curRuleData[curNestPoint];
 		}
-		else
-		{
+		else {
 			return curRuleData;
 		}
 	}
@@ -65,12 +59,10 @@ function RemoveRuleFromNestLocation (rules, nesting) {
 	for (var i = 0; i < nestingSplit.length; i++) {
 		prevRuleData = curRuleData;
 		var curNestPoint = nestingSplit[i];
-		if (curNestPoint !== "")
-		{
+		if (curNestPoint !== "") {
 			curRuleData = curRuleData[curNestPoint];
 		}
-		else
-		{
+		else {
 			break;
 		}
 	}
@@ -94,11 +86,9 @@ function GetPointsInLine (x0, y0, z0, x1, y1, z1) {
 	var pointList = [];
 
 	var breakLoopCounter = 0;
-	while (true)
-	{
+	while (true) {
 		breakLoopCounter ++;
-		if (breakLoopCounter > 1000)
-		{
+		if (breakLoopCounter > 1000) {
 			console.log("Seems to be stuck in GetPointsInLine loop")
 			return false;
 		}
@@ -107,8 +97,7 @@ function GetPointsInLine (x0, y0, z0, x1, y1, z1) {
 		pointList.push({x: curX, y: curY, z: curZ});
 
 		// Break out of loop if destination reached
-		if (curX === x1 && curY === y1 && curZ === z1)
-		{
+		if (curX === x1 && curY === y1 && curZ === z1) {
 			break;
 		}
 		var relDistX = (distX !== 0) ? Math.abs(curX - x0) / distX : Infinity;
@@ -116,18 +105,15 @@ function GetPointsInLine (x0, y0, z0, x1, y1, z1) {
 		var relDistZ = (distX !== 0) ? Math.abs(curZ - z0) / distZ : Infinity;
 
 		// Move along X if it is the lowest relative distance
-		if (relDistX <= relDistY && relDistX <= relDistZ)
-		{
+		if (relDistX <= relDistY && relDistX <= relDistZ) {
 			curX += dirX;
 		}
 		// Move along Y if it is the lowest relative distance
-		else if (relDistY <= relDistZ)
-		{
+		else if (relDistY <= relDistZ) {
 			curY += dirY;
 		}
 		// Move along Z if it is the lowest relative distance
-		else
-		{
+		else {
 			curZ += dirZ;
 		}
 	}

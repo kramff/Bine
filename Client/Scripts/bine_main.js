@@ -9,8 +9,7 @@ var isoScripts = [];
 // var isoStates = [];
 var numLoadedScripts = 0;
 function LoadIsoScripts () {
-	for (var i = 0; i < isoSources.length; i++)
-	{
+	for (var i = 0; i < isoSources.length; i++) {
 		var source = isoSources[i];
 		var script = document.createElement("script");
 		isoScripts.push(script)
@@ -20,8 +19,7 @@ function LoadIsoScripts () {
 			return function () {
 				// isoStates[stateNum] = true;
 				numLoadedScripts ++;
-				if (numLoadedScripts >= isoSources.length)
-				{
+				if (numLoadedScripts >= isoSources.length) {
 					console.log("all iso scripts loaded");
 					GameInit();
 				}
@@ -40,12 +38,10 @@ function DetectMobile () {
 		|| navigator.userAgent.match(/iPad/i)
 		|| navigator.userAgent.match(/iPod/i)
 		|| navigator.userAgent.match(/BlackBerry/i)
-		|| navigator.userAgent.match(/Windows Phone/i))
-	{
+		|| navigator.userAgent.match(/Windows Phone/i)) {
 		return true;
 	}
-	else
-	{
+	else {
 		return false;
 	}
 }
@@ -215,15 +211,13 @@ function Init () {
 	initSocket();
 
 
-	if (location.search !== "")
-	{
+	if (location.search !== "") {
 		// Joining session by direct link'
 		ShowMenu("join_by_link");
 
 		// Hide "gameplay_hide" elements
 		var gameplayHideElements = document.getElementsByClassName("gameplay_hide");
-		for (var i = 0; i < gameplayHideElements.length; i++)
-		{
+		for (var i = 0; i < gameplayHideElements.length; i++) {
 			gameplayHideElements[i].hidden = true;
 		}
 
@@ -235,8 +229,7 @@ function Init () {
 		sessionDirectLinkID = searchSessionID;
 		levelDirectLinkID = searchLevelID;
 	}
-	else
-	{
+	else {
 		// Regular main menu
 		ShowMenu("main_menu");
 	}
@@ -245,11 +238,9 @@ function Init () {
 	isMobile = DetectMobile();
 	// Hide "mobile_only" elements
 	// (Show these if touch events happen)
-	if (!isMobile)
-	{
+	if (!isMobile) {
 		var mobileHideElements = document.getElementsByClassName("mobile_only");
-		for (var i = 0; i < mobileHideElements.length; i++)
-		{
+		for (var i = 0; i < mobileHideElements.length; i++) {
 			mobileHideElements[i].hidden = true;
 		}
 	}
@@ -307,19 +298,14 @@ function MainUpdate () {
 
 	frameCounter ++;
 
-	if (inSession & curSession !== undefined && inLevel && curLevel !== undefined)
-	{
+	if (inSession & curSession !== undefined && inLevel && curLevel !== undefined) {
 		// Editor mode
-		if (editorActive)
-		{
+		if (editorActive) {
 			// Touch movement rules
-			if (touchEventsActive)
-			{
-				if (editMovX !== 0 || editMovY !== 0 || editMovZ !== 0)
-				{
+			if (touchEventsActive) {
+				if (editMovX !== 0 || editMovY !== 0 || editMovZ !== 0) {
 					editMovTime += 1;
-					if (editMovTime >= 10)
-					{
+					if (editMovTime >= 10) {
 						editMovTime = 0;
 						editMovX = 0;
 						editMovY = 0;
@@ -328,11 +314,9 @@ function MainUpdate () {
 				}
 			}
 			// Normal movement rules
-			else
-			{
+			else {
 				// Move camera around
-				if (editMovX === 0 && editMovY === 0 && editMovZ === 0 && (aKey || dKey || wKey || sKey || eKey || qKey) && cameraControlsEnabled)
-				{
+				if (editMovX === 0 && editMovY === 0 && editMovZ === 0 && (aKey || dKey || wKey || sKey || eKey || qKey) && cameraControlsEnabled) {
 					// Set camera movement
 					editMovX = (aKey ? -1 : 0) + (dKey ? 1 : 0);
 					editMovY = (wKey ? -1 : 0) + (sKey ? 1 : 0);
@@ -340,16 +324,13 @@ function MainUpdate () {
 					editMovTime = 10;
 				}
 				// If mouse is held down, check for doing mouse-move tile editing
-				if (mousePressed)
-				{
-					if (editMovX !== 0 || editMovY !== 0 || editMovZ !== 0)
-					{
+				if (mousePressed) {
+					if (editMovX !== 0 || editMovY !== 0 || editMovZ !== 0) {
 						EditTileIfNewCoord(mouseX, mouseY);
 					}
 				}
 				editMovTime -= 1;
-				if (editMovTime <= 0)
-				{
+				if (editMovTime <= 0) {
 					editCamX = editCamX + editMovX;
 					editCamY = editCamY + editMovY;
 					editCamZ = editCamZ + editMovZ;
@@ -359,19 +340,16 @@ function MainUpdate () {
 					editMovZ = 0;
 
 					// Also check for mouse-move tile editing here, because of Z movement not getting checked earlierif (mousePressed)
-					if (mousePressed)
-					{
+					if (mousePressed) {
 						EditTileIfNewCoord(mouseX, mouseY);
 					}
 				}
 			}
 
 			// Render frame while moving with touches
-			if (touchEventsActive && touchMode === TOUCH_MODE_DOUBLE)
-			{
+			if (touchEventsActive && touchMode === TOUCH_MODE_DOUBLE) {
 				// Only change touch offset xyz if both touches are still on
-				if (firstTouch !== undefined && secondTouch !== undefined)
-				{
+				if (firstTouch !== undefined && secondTouch !== undefined) {
 					var curTouchCenterX = (firstTouch.clientX + secondTouch.clientX) / 2;
 					var curTouchCenterY = (firstTouch.clientY + secondTouch.clientY) / 2;
 
@@ -388,29 +366,24 @@ function MainUpdate () {
 					if (Math.abs(touchOffsetZ) < 1) {
 						touchOffsetZ = 0;
 					}
-					else if (touchOffsetZ > 0)
-					{
+					else if (touchOffsetZ > 0) {
 						touchOffsetZ -= 1;
 					}
-					else if (touchOffsetZ < 0)
-					{
+					else if (touchOffsetZ < 0) {
 						touchOffsetZ += 1;
 					}
 				}
 				RenderLevel(mainCanvas, curSession, curLevel, editCamX + touchOffsetX + 0.5, editCamY + touchOffsetY + 0.5, editCamZ + touchOffsetZ + 0.5, true);
 			}
-			else
-			{
+			else {
 				// Render frame normally
 				RenderLevel(mainCanvas, curSession, curLevel, editCamX + editMovX * (1 - 0.1 * editMovTime) + 0.5, editCamY + editMovY * (1 - 0.1 * editMovTime) + 0.5, editCamZ + editMovZ * (1 - 0.1 * editMovTime) + 0.5, true);
 			}
 		}
-		else if (inPlayer)
-		{
+		else if (inPlayer) {
 			// Player mode
 			// var player = curLevel.GetEntityByID(curPlayerID);
-			if (touchEventsActive)
-			{
+			if (touchEventsActive) {
 				if (touchWalk) {
 					touchChanged = false;
 					var coords = ScreenCoordToGameCoord(touchScreenX, touchScreenY, Math.round(zCam), xCam, yCam, zCam, R);
@@ -422,45 +395,37 @@ function MainUpdate () {
 				var prevSKey = sKey;
 				var prevDKey = dKey;
 				// X axis
-				if (touchGoalX > curPlayer.x)
-				{
+				if (touchGoalX > curPlayer.x) {
 					dKey = true;
 					aKey = false;
 				}
-				else if (touchGoalX < curPlayer.x)
-				{
+				else if (touchGoalX < curPlayer.x) {
 					dKey = false;
 					aKey = true;
 				}
-				else
-				{
+				else {
 					dKey = false;
 					aKey = false;
 				}
 				// Y axis
-				if (touchGoalY > curPlayer.y)
-				{
+				if (touchGoalY > curPlayer.y) {
 					sKey = true;
 					wKey = false;
 				}
-				else if (touchGoalY < curPlayer.y)
-				{
+				else if (touchGoalY < curPlayer.y) {
 					sKey = false;
 					wKey = true;
 				}
-				else
-				{
+				else {
 					sKey = false;
 					wKey = false;
 				}
 				// Determine if input has changed
-				if (prevWKey !== wKey || prevAKey !== aKey || prevSKey !== sKey || prevDKey !== dKey)
-				{
+				if (prevWKey !== wKey || prevAKey !== aKey || prevSKey !== sKey || prevDKey !== dKey) {
 					inputChanged = true;
 				}
 			}
-			if (inputChanged)
-			{
+			if (inputChanged) {
 				inputChanged = false;
 				curPlayer.SetMoveDirections(wKey, sKey, aKey, dKey);
 				// Todo: Send to server's session as well
@@ -477,52 +442,42 @@ function MainUpdate () {
 			RenderLevel(mainCanvas, curSession, curLevel, xCam, yCam, zCam);
 
 			// Every few seconds, send a location correction
-			if (frameCounter % 300 === 0)
-			{
+			if (frameCounter % 300 === 0) {
 				SendLocationCorrection({x: curPlayer.x, y: curPlayer.y, z: curPlayer.z, xMov: curPlayer.xMov, yMov: curPlayer.yMov, zMov: curPlayer.zMov, moveTime: curPlayer.moveTime, moveDuration: curPlayer.moveDuration});
 			}
 		}
 	}
-	else
-	{
+	else {
 		// Animation for when not in a game
 		ClearCanvas(mainCanvas);
 	}
 }
 
 function DoKeyDown (event) {
-	if (event.keyCode === 87)
-	{
+	if (event.keyCode === 87) {
 		wKey = true;
 	}
-	else if (event.keyCode === 65)
-	{
+	else if (event.keyCode === 65) {
 		aKey = true;
 	}
-	else if (event.keyCode === 83)
-	{
+	else if (event.keyCode === 83) {
 		sKey = true;
 	}
-	else if (event.keyCode === 68)
-	{
+	else if (event.keyCode === 68) {
 		dKey = true;
 	}
-	else if (event.keyCode === 81)
-	{
+	else if (event.keyCode === 81) {
 		qKey = true;
 	}
-	else if (event.keyCode === 69)
-	{
+	else if (event.keyCode === 69) {
 		eKey = true;
 	}
-	else if (event.keyCode === 13)
-	{
+	else if (event.keyCode === 13) {
 		// Enter pressed - start  typing or send chat message
 		DoEnterKey(event);
 		return;
 	}
-	else
-	{
+	else {
 		// Input not used
 		return;
 	}
@@ -530,32 +485,25 @@ function DoKeyDown (event) {
 }
 
 function DoKeyUp (event) {
-	if (event.keyCode === 87)
-	{
+	if (event.keyCode === 87) {
 		wKey = false;
 	}
-	else if (event.keyCode === 65)
-	{
+	else if (event.keyCode === 65) {
 		aKey = false;
 	}
-	else if (event.keyCode === 83)
-	{
+	else if (event.keyCode === 83) {
 		sKey = false;
 	}
-	else if (event.keyCode === 68)
-	{
+	else if (event.keyCode === 68) {
 		dKey = false;
 	}
-	else if (event.keyCode === 81)
-	{
+	else if (event.keyCode === 81) {
 		qKey = false;
 	}
-	else if (event.keyCode === 69)
-	{
+	else if (event.keyCode === 69) {
 		eKey = false;
 	}
-	else
-	{
+	else {
 		// Input not used
 		return;
 	}
@@ -564,8 +512,7 @@ function DoKeyUp (event) {
 
 function DoEnterKey (event) {
 
-	if (inPlayer)
-	{
+	if (inPlayer) {
 		GameplayEnterKey(event);
 	}
 	
@@ -574,30 +521,25 @@ function DoEnterKey (event) {
 function GameplayEnterKey (event) {
 	// Focus chat input text box or send a chat message
 	var chatInput = document.getElementById("chat_input");
-	if (chatInput === document.activeElement)
-	{
+	if (chatInput === document.activeElement) {
 		// Already focused, so send a message
-		if (chatInput.value === "")
-		{
+		if (chatInput.value === "") {
 			return;
 		}
 		SendChatMessage(chatInput.value);
 		chatInput.value = "";
 	}
-	else
-	{
+	else {
 		// Focus the element
 		chatInput.focus();
 	}
 }
 
 function DoMouseDown (event) {
-	if (autoMuted)
-	{
+	if (autoMuted) {
 		tryResumeAudio();
 	}
-	if (touchEventsActive)
-	{
+	if (touchEventsActive) {
 		return;
 	}
 	mouseX = event.clientX;
@@ -605,46 +547,38 @@ function DoMouseDown (event) {
 	mousePressed = true;
 	mouseButton = event.button;
 
-	if (!inSession || !inLevel)
-	{
+	if (!inSession || !inLevel) {
 		// Don't do anything if not in a session + level
 		return;
 	}
-	if (editorActive)
-	{
+	if (editorActive) {
 		EditorMouseDown(event);
 	}
-	else
-	{
+	else {
 		GameplayMouseDown(event);
 	}
 }
 function DoMouseMove (event) {
-	if (touchEventsActive)
-	{
+	if (touchEventsActive) {
 		return;
 	}
 	mouseX = event.clientX;
 	mouseY = event.clientY;
 
-	if (!inSession || !inLevel)
-	{
+	if (!inSession || !inLevel) {
 		// Don't do anything if not in a session + level
 		return;
 	}
-	if (editorActive)
-	{
+	if (editorActive) {
 		EditorMouseMove();
 	}
-	else
-	{
+	else {
 		GameplayMouseMove();
 	}
 }
 
 function DoMouseUp (event) {
-	if (touchEventsActive)
-	{
+	if (touchEventsActive) {
 		return;
 	}
 	mouseX = event.clientX;
@@ -652,17 +586,14 @@ function DoMouseUp (event) {
 	mousePressed = false;
 	mouseButton = event.button;
 
-	if (!inSession || !inLevel)
-	{
+	if (!inSession || !inLevel) {
 		// Don't do anything if not in a session + level
 		return;
 	}
-	if (editorActive)
-	{
+	if (editorActive) {
 		EditorMouseUp();
 	}
-	else
-	{
+	else {
 		GameplayMouseUp();
 	}
 }
@@ -699,34 +630,28 @@ var distY = 0;
 var curTouchDistance = 0;
 
 function DoTouchStart (event) {
-	if (autoMuted)
-	{
+	if (autoMuted) {
 		tryResumeAudio();
 	}
-	if (!editorActive)
-	{
+	if (!editorActive) {
 		GameplayTouchStart(event);
 		return;
 	}
-	if (!cameraControlsEnabled)
-	{
+	if (!cameraControlsEnabled) {
 		return;
 	}
 	touchEventsActive = true;
 
 	var newTouch = event.changedTouches.item(0);
-	if (touchMode === TOUCH_MODE_NONE)
-	{
+	if (touchMode === TOUCH_MODE_NONE) {
 		firstTouch = newTouch;
 		touchMode = TOUCH_MODE_SINGLE;
 		firstTouchTime = Date.now();
 		firstTouchX = firstTouch.clientX;
 		firstTouchY = firstTouch.clientY;
 	}
-	else if (touchMode === TOUCH_MODE_SINGLE && !touchDrawing)
-	{
-		if (Date.now() - firstTouchTime < TOUCH_DELAY_LIMIT)
-		{
+	else if (touchMode === TOUCH_MODE_SINGLE && !touchDrawing) {
+		if (Date.now() - firstTouchTime < TOUCH_DELAY_LIMIT) {
 			secondTouch = newTouch;
 			touchMode = TOUCH_MODE_DOUBLE;
 			touchCenterX = (firstTouch.clientX + secondTouch.clientX) / 2;
@@ -735,56 +660,44 @@ function DoTouchStart (event) {
 			var distY = (firstTouch.clientY - secondTouch.clientY);
 			touchDistance = Math.sqrt(distX * distX + distY * distY);
 		}
-		else
-		{
+		else {
 			// Do nothing... too slow
 		}
 	}
-	else if (touchMode === TOUCH_MODE_DOUBLE)
-	{
+	else if (touchMode === TOUCH_MODE_DOUBLE) {
 		// Do nothing... too many touches
 	}
 }
 function DoTouchEnd (event) {
-	if (!editorActive)
-	{
+	if (!editorActive) {
 		GameplayTouchEnd(event);
 		return;
 	}
-	if (!cameraControlsEnabled)
-	{
+	if (!cameraControlsEnabled) {
 		return;
 	}
-	for (var i = 0; i < event.changedTouches.length; i++)
-	{
+	for (var i = 0; i < event.changedTouches.length; i++) {
 		var curTouch = event.changedTouches.item(i);
 
-		if (firstTouch !== undefined && curTouch.identifier === firstTouch.identifier)
-		{
+		if (firstTouch !== undefined && curTouch.identifier === firstTouch.identifier) {
 			firstTouch = undefined;
 		}
-		else if (secondTouch !== undefined && curTouch.identifier === secondTouch.identifier)
-		{
+		else if (secondTouch !== undefined && curTouch.identifier === secondTouch.identifier) {
 			secondTouch = undefined;
 		}
 	}
-	if (touchMode === TOUCH_MODE_NONE)
-	{
+	if (touchMode === TOUCH_MODE_NONE) {
 		// Do nothing
 	}
-	else if (touchMode === TOUCH_MODE_SINGLE)
-	{
-		if (firstTouch === undefined)
-		{
+	else if (touchMode === TOUCH_MODE_SINGLE) {
+		if (firstTouch === undefined) {
 			EditTileIfNewCoord(firstTouchX, firstTouchY);
 			touchMode = TOUCH_MODE_NONE;
 			touchDrawing = false;
 		}
 	}
-	else if (touchMode === TOUCH_MODE_DOUBLE)
-	{
-		if (firstTouch === undefined && secondTouch === undefined)
-		{
+	else if (touchMode === TOUCH_MODE_DOUBLE) {
+		if (firstTouch === undefined && secondTouch === undefined) {
 			touchMode = TOUCH_MODE_NONE;
 
 			editCamX = editCamX + Math.round(touchOffsetX);
@@ -799,43 +712,34 @@ function DoTouchEnd (event) {
 	}
 }
 function DoTouchMove (event) {
-	if (!editorActive)
-	{
+	if (!editorActive) {
 		GameplayTouchMove(event);
 		return;
 	}
-	if (!cameraControlsEnabled)
-	{
+	if (!cameraControlsEnabled) {
 		return;
 	}
-	for (var i = 0; i < event.changedTouches.length; i++)
-	{
+	for (var i = 0; i < event.changedTouches.length; i++) {
 		var curTouch = event.changedTouches.item(i);
 
-		if (firstTouch !== undefined && curTouch.identifier === firstTouch.identifier)
-		{
+		if (firstTouch !== undefined && curTouch.identifier === firstTouch.identifier) {
 			firstTouch = curTouch;
 		}
-		else if (secondTouch !== undefined && curTouch.identifier === secondTouch.identifier)
-		{
+		else if (secondTouch !== undefined && curTouch.identifier === secondTouch.identifier) {
 			secondTouch = curTouch;
 		}
 	}
-	if (touchMode === TOUCH_MODE_SINGLE)
-	{
+	if (touchMode === TOUCH_MODE_SINGLE) {
 		// Already drawing, so edit tile
-		if (touchDrawing)
-		{
+		if (touchDrawing) {
 			// Change tile
 			EditTileIfNewCoord(firstTouch.clientX, firstTouch.clientY);
 		}
 		// Consider editing tile if moved far enough. Also edit starting tile if that's the case
-		else
-		{
+		else {
 			// Check distance (Either X or Y greater than 1 tile's distance moved)
 			// TODO: use actual tile size instead of 60
-			if (Math.abs(firstTouchX - firstTouch.clientX) > 60 || Math.abs(firstTouchY - firstTouch.clientY) > 60)
-			{
+			if (Math.abs(firstTouchX - firstTouch.clientX) > 60 || Math.abs(firstTouchY - firstTouch.clientY) > 60) {
 				touchDrawing = true;
 				// Change tile
 				EditTileIfNewCoord(firstTouch.clientX, firstTouch.clientY);
@@ -862,8 +766,7 @@ function GameplayTouchStart (event) {
 	var touchY = newTouch.clientY;
 
 	// Test to see if this is within the clickable area
-	if (!CheckIfInClickableArea(touchX, touchY))
-	{
+	if (!CheckIfInClickableArea(touchX, touchY)) {
 		return;
 	}
 
@@ -892,8 +795,7 @@ function GameplayTouchMove (event) {
 function EditorMouseDown (event) {
 
 	// Test to see if this is within the clickable area
-	if (!CheckIfInClickableArea(mouseX, mouseY))
-	{
+	if (!CheckIfInClickableArea(mouseX, mouseY)) {
 		return;
 	}
 
@@ -902,8 +804,7 @@ function EditorMouseDown (event) {
 }
 
 function EditorMouseMove() {
-	if (mousePressed)
-	{
+	if (mousePressed) {
 		// Potentially edit a tile if hovering over a new coordinate
 		EditTileIfNewCoord(mouseX, mouseY);
 	}
@@ -929,21 +830,18 @@ function GameplayMouseUp () {
 }
 
 function EditTileIfNewCoord (x, y) {
-	if (!tileEditingEnabled)
-	{
+	if (!tileEditingEnabled) {
 		return;
 	}
 
 	// Test to see if this is within the clickable area
-	if (!CheckIfInClickableArea(x, y))
-	{
+	if (!CheckIfInClickableArea(x, y)) {
 		return;
 	}
 
 	var gameCoords = ScreenCoordToGameCoord(x, y, Math.round(editCamZ), editCamX + editMovX * (1 - 0.1 * editMovTime) + 0.5, editCamY + editMovY * (1 - 0.1 * editMovTime) + 0.5, editCamZ + editMovZ * (1 - 0.1 * editMovTime) + 0.5, R);
 
-	if (gameCoords.x === lastEditX && gameCoords.y === lastEditY && gameCoords.z === lastEditZ)
-	{
+	if (gameCoords.x === lastEditX && gameCoords.y === lastEditY && gameCoords.z === lastEditZ) {
 		// Skip because exact same coords as last edited location
 		return;
 	}
@@ -952,21 +850,17 @@ function EditTileIfNewCoord (x, y) {
 	// Use coords as data object
 	gameCoords.tile = 1;
 
-	if (mouseButton === 2)
-	{
+	if (mouseButton === 2) {
 		gameCoords.tile = 0;
 	}
 
-	if (curLevel.areas.length >= 1)
-	{
-		for (var i = 0; i < curLevel.areas.length; i++)
-		{
+	if (curLevel.areas.length >= 1) {
+		for (var i = 0; i < curLevel.areas.length; i++) {
 			var curArea = curLevel.areas[i];
 			var relativeX = gameCoords.x - curArea.x;
 			var relativeY = gameCoords.y - curArea.y;
 			var relativeZ = gameCoords.z - curArea.z;
-			if (PositionInBounds(curArea, relativeX, relativeY, relativeZ))
-			{
+			if (PositionInBounds(curArea, relativeX, relativeY, relativeZ)) {
 				// Keep track of last edited tile coordinates
 				lastEditX = gameCoords.x;
 				lastEditY = gameCoords.y;

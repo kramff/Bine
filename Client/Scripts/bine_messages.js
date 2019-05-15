@@ -5,42 +5,35 @@
 // Show message on screen from a player / (or other source?)
 // Message is some weird object that has text, a target, and some kind of id perhaps? not sure
 function AddMessage (message, targetType) {
-	if (message.target !== undefined)
-	{
+	if (message.target !== undefined) {
 		// Target already known from local client
 		// Must be player? not sure
 		new Message(message.text, message.target, MESG_TARGET_PLAYER);
 		return;
 	}
-	else if (message.id_player !== undefined)
-	{
+	else if (message.id_player !== undefined) {
 		// Target not set up, but message has a player id to use
 		var target = undefined;
-		for (var i = 0; i < playerArray.length; i++)
-		{
+		for (var i = 0; i < playerArray.length; i++) {
 			var otherPlayer = playerArray[i];
-			if (otherPlayer.id === message.id_player)
-			{
+			if (otherPlayer.id === message.id_player) {
 				target = otherPlayer;
 				new Message(message.text, target, MESG_TARGET_OTHER_PLAYER)
 				return;
 			}
 		}
 	}
-	else if (message.id_area !== undefined)
-	{
+	else if (message.id_area !== undefined) {
 		// Target is an area
 		new Message(message.text, target, MESG_TARGET_AREA);
 		return;
 	}
-	else if (message.id_entity !== undefined)
-	{
+	else if (message.id_entity !== undefined) {
 		// Target is an entity
 		new Message(message.text, target, MESG_TARGET_ENTITY);
 		return;
 	}
-	else
-	{
+	else {
 		// No target: display message without linking to an in-game element (bottom of screen or whatever)
 		new Message(message.text, undefined, MESG_TARGET_NONE);
 		return;

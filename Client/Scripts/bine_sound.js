@@ -24,8 +24,7 @@ var autoMuted = true;
 var manualMuted = false;
 
 function tryResumeAudio () {
-	if (autoMuted)
-	{
+	if (autoMuted) {
 		audioCtx.resume();
 		console.log("Audio resumed from automatic pause");
 		autoMuted = false;
@@ -42,17 +41,13 @@ function LoadAllSound () {
 }
 
 function RecursiveLoadAudio (data, tree, nesting) {
-	for (var key in data)
-	{
-		if (data.hasOwnProperty(key) && (typeof data[key] === "object"))
-		{
-			if (key === "files")
-			{
+	for (var key in data) {
+		if (data.hasOwnProperty(key) && (typeof data[key] === "object")) {
+			if (key === "files") {
 				tree[key] = [];
 				LoadAudioFileArray(data[key], tree[key], nesting);
 			}
-			else
-			{
+			else {
 				tree[key] = {};
 				RecursiveLoadAudio(data[key], tree[key], nesting + "/" + key);
 			}
@@ -86,8 +81,7 @@ function GetAudioData (fileLocation, destinationArray, destinationIndex) {
 
 function PlayRandomFootstep () {
 
-	if (manualMuted)
-	{
+	if (manualMuted) {
 		return;
 	}
 
@@ -142,12 +136,10 @@ function SetupSound () {
 		var outputData = audioProcessingEvent.outputBuffer.getChannelData(0);
 		for (var sample = 0; sample < outputData.length; sample++) {
 			sampleDelay --;
-			if (sampleDelay < 1000)
-			{
+			if (sampleDelay < 1000) {
 				outputData[sample] = ((Math.random() * 2) - 1) * 0.2;
 			}
-			if (sampleDelay < 1)
-			{
+			if (sampleDelay < 1) {
 				sampleDelay = 100000;
 			}
 		}
@@ -158,16 +150,14 @@ var soundMuted = false;
 
 function DirectionalSound (soundType, sourceX, sourceY, sourceZ, levelRef) {
 
-	if (soundMuted)
-	{
+	if (soundMuted) {
 		return;
 	}
 
 	var listenerX = 0;
 	var listenerY = 0;
 	var listenerZ = 0;
-	if (curPlayer !== undefined)
-	{
+	if (curPlayer !== undefined) {
 		listenerX = curPlayer.x;
 		listenerY = curPlayer.y;
 		listenerZ = curPlayer.z;
@@ -177,21 +167,18 @@ function DirectionalSound (soundType, sourceX, sourceY, sourceZ, levelRef) {
 	var closeEar = (soundAngle < 0.5 * Math.PI && soundAngle > -0.5 * Math.PI) ? "right" : "left";
 	var farEar = (closeEar === "right") ? "left" : "right";
 
-	if (sourceX === listenerX)
-	{
+	if (sourceX === listenerX) {
 		closeEar = "both";
 		farEar = "none";
 	}
 	// console.log("soundAngle: " + Math.round(soundAngle * 100) / 100);
 
 	var affectAngle = 0;
-	if (farEar === "right")
-	{
+	if (farEar === "right") {
 		// affectAngle = Math.abs(soundAngle) - (0.5 * Math.PI) 
 		affectAngle = Math.abs(soundAngle) - (Math.PI / 2);
 	}
-	else if (farEar === "left")
-	{
+	else if (farEar === "left") {
 		// affectAngle = Math.PI - Math.abs(soundAngle);
 		affectAngle = (Math.PI / 2) - Math.abs(soundAngle);
 	}
@@ -208,22 +195,18 @@ function DirectionalSound (soundType, sourceX, sourceY, sourceZ, levelRef) {
 	var leftEarGain = 0;
 	var rightEarGain = 0;
 
-	if (farEar !== "none")
-	{
+	if (farEar !== "none") {
 		var farEarGain = overallGain * Math.abs(Math.cos(affectAngle));
-		if (farEar === "right")
-		{
+		if (farEar === "right") {
 			leftEarGain = overallGain;
 			rightEarGain = farEarGain;
 		}
-		else
-		{
+		else {
 			leftEarGain = farEarGain;
 			rightEarGain = overallGain;
 		}
 	}
-	else
-	{
+	else {
 		leftEarGain = overallGain;
 		rightEarGain = overallGain;
 	}

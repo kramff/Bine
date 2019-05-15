@@ -72,17 +72,14 @@ function Player (ws) {
 }
 
 Player.prototype.disconnect = function () {
-	if (this.session !== undefined && this.level !== undefined && this.playerEntity !== undefined)
-	{
-		this.session.RemoveEntity(this.level.id, this.playerEntity.id);
+	if (this.session !== undefined && this.level !== undefined && this.playerEntity !== undefined) {
+		this.session.DeleteEntity(this.level.id, this.playerEntity.id);
 	}
-	if (this.room !== undefined)
-	{
+	if (this.room !== undefined) {
 		var roomToLeave = this.room;
 		this.exitRoom();
-		if (this.level !== undefined && this.playerEntity !== undefined)
-		{
-			roomToLeave.sendDataRoom("removeEntity", {levelID: this.level.id, entityID: this.playerEntity.id});
+		if (this.level !== undefined && this.playerEntity !== undefined) {
+			roomToLeave.sendDataRoom("deleteEntity", {levelID: this.level.id, entityID: this.playerEntity.id});
 		}
 	}
 	this.session = undefined;
@@ -95,8 +92,7 @@ Player.prototype.sendData = function (type, data) {
 	//console.log("Sending Data");
 	//console.log(type);
 	//console.log(data);
-	try
-	{
+	try {
 		this.ws.send(stringData);
 	}
 	catch (e) {
@@ -112,9 +108,8 @@ Player.prototype.joinRoom = function (room) {
 };
 // Exit a room
 Player.prototype.exitRoom = function () {
-	if (this.room !== undefined)
-	{
-		this.room.removePlayer(this);
+	if (this.room !== undefined) {
+		this.room.deletePlayer(this);
 		this.room = undefined;
 	}
 };
@@ -156,8 +151,8 @@ Room.prototype.addPlayer = function (player) {
 	this.players.push(player);
 };
 
-// Remove a player from the players list. (Called by Player.exitRoom() )
-Room.prototype.removePlayer = function (player) {
+// Delete a player from the players list. (Called by Player.exitRoom() )
+Room.prototype.deletePlayer = function (player) {
 	this.players.splice(this.players.indexOf(player), 1);
 };
 
@@ -206,13 +201,13 @@ wss.on("connection", function connection (ws) {
 
 	ws.on("message", function incoming (message) {
 		try {
-		var mData = JSON.parse(message);
-		handleMessageData(player, mData.type, mData.data);
+			var mData = JSON.parse(message);
+			handleMessageData(player, mData.type, mData.data);
 		}
 		catch (err) {
-		console.error(err);
-		console.log("Error from the following incoming message: ");
-		console.log(message);
+			console.error(err);
+			console.log("Error from the following incoming message: ");
+			console.log(message);
 		}
 	});
 
@@ -280,8 +275,7 @@ function handleMessageData (player, type, data) {
 		player.joinRoom(room);
 	}
 	else if (type === "createNewLevel") {
-		if (player.session !== undefined)
-		{
+		if (player.session !== undefined) {
 			player.session.levelCounter += 1;
 			var blankLevelData = {
 				name: "level name",
@@ -305,7 +299,7 @@ function handleMessageData (player, type, data) {
 		player.sendData("enterLevel", joinedLevel.id);
 		player.level = joinedLevel;
 	}
-	else if (type === "createNewArea") {
+	else if (type === "createArea") {
 		player.level.areaCounter += 1;
 		var blankAreaData = {
 			id: player.level.areaCounter,
@@ -325,7 +319,7 @@ function handleMessageData (player, type, data) {
 		var area = player.level.AddArea(blankAreaData);
 
 		var areaData = area.Export();
-		player.room.sendDataRoom("newArea", {levelID: player.level.id, areaData: areaData});
+		player.room.sendDataRoom("createArea", {levelID: player.level.id, areaData: areaData});
 	}
 	else if (type === "createNewEntity") {
 		player.level.entityCounter += 1;
@@ -365,8 +359,8 @@ function handleMessageData (player, type, data) {
 		player.playerEntity = newPlayer;
 	}
 	else if (type === "stopTestingPlayer") {
-		player.room.sendDataRoom("removeEntity", {levelID: player.level.id, entityID: player.playerEntity.id});
-		player.session.RemoveEntity(player.level.id, player.playerEntity.id);
+		player.room.sendDataRoom("deleteEntity", {levelID: player.level.id, entityID: player.playerEntity.id});
+		player.session.DeleteEntity(player.level.id, player.playerEntity.id);
 		player.playerEntity = undefined;
 	}
 	else if (type === "exitLevel") {
@@ -400,7 +394,7 @@ function handleMessageData (player, type, data) {
 	}
 	else if (type === "deleteArea") {
 		var level = player.session.GetLevelByID(data.levelID);
-		level.RemoveArea(data.areaID);
+		level.DeleteArea(data.areaID);
 		player.room.sendDataRoom("deleteArea", data);
 	}
 	else if (type === "entityChange") {
@@ -714,14 +708,12 @@ function mainUpdate () {
 		}
 	}
 }
-if (false)
-{
+if (false) {
 	MainUpdate();
 }
 
 
-if (Math.random() > 0.99)
-{	
+if (Math.random() > 0.99) {
 	timeLog("\x1b[36m");
 	timeLog("░░░░░░░░░░░░▄▐ ");
 	timeLog("░░░░░░▄▄▄░░▄██▄ ");

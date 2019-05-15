@@ -45,24 +45,19 @@ var httpProtocol = "http://";
 
 var socket = undefined;
 function InitSocketConnection () {
-	try
-	{
+	try {
 		var socketURL;
-		if (location.href === "kramff.github.io/")
-		{
+		if (location.href === "kramff.github.io/") {
 			socketURL = wsProtocol + "bine-online.herokuapp.com";
 		}
-		else if (location.href.indexOf("kramff.com/Bine/") !== -1)
-		{
+		else if (location.href.indexOf("kramff.com/Bine/") !== -1) {
 			wsProtocol = "wss://";
 			socketURL = wsProtocol + "bine.nfshost.com";
 		}
-		else if (location.href.indexOf("file:/") !== -1)
-		{
+		else if (location.href.indexOf("file:/") !== -1) {
 			socketURL = wsProtocol + "localhost:5000";
 		}
-		else
-		{
+		else {
 			socketURL = (location.protocol + "//" + location.host + "/").replace(/\d+\/$/, "5000").replace("http://", wsProtocol);
 		}
 		socket = new WebSocket(socketURL);
@@ -72,8 +67,7 @@ function InitSocketConnection () {
 
 			// Waiting until connected to server
 			// before directly joining session
-			if (waitingToDirectConnect)
-			{
+			if (waitingToDirectConnect) {
 				JoinSession(sessionDirectLinkID);
 			}
 		}
@@ -84,10 +78,8 @@ function InitSocketConnection () {
 
 
 		SERVER_CONNECTED = true;
-
 	}
-	catch (err)
-	{
+	catch (err) {
 		console.error("server not up");
 		console.error(err);
 		SERVER_CONNECTED = false;
@@ -125,8 +117,7 @@ function handleMessageData (type, data) {
 
 		// Waiting until connected to server, then session
 		// before directly joining level
-		if (waitingToDirectConnect)
-		{
+		if (waitingToDirectConnect) {
 			JoinLevel(levelDirectLinkID);
 		}
 	};
@@ -146,8 +137,7 @@ function handleMessageData (type, data) {
 
 		// After directly connecting to the server, then session, then level
 		// Create a player entity
-		if (waitingToDirectConnect)
-		{
+		if (waitingToDirectConnect) {
 			TestAsPlayer();
 		}
 
@@ -166,15 +156,17 @@ function handleMessageData (type, data) {
 		// Set the curPlayerID and curPlayer to the given entity
 		ReceiveAssignPlayer(data);
 	}
-	if (type === "removeEntity") {
-		// Remove the entity from the session
-		ReceiveRemoveEntity(data.levelID, data.entityID);
+	if (type === "deleteEntity") {
+		// Delete the entity from the session
+		ReceiveDeleteEntity(data.levelID, data.entityID);
 	}
 
 	if (type === "inputUpdate") {
 		var level = curSession.GetLevelByID(data.levelID);
 		var entity = level.GetEntityByID(data.entityID);
-		entity.SetMoveDirections(data.up, data.down, data.left, data.right);
+		if (entity !== curPlayer) {
+			entity.SetMoveDirections(data.up, data.down, data.left, data.right);
+		}
 	}
 
 	if (type === "locationCorrection") {
@@ -203,10 +195,8 @@ function ReceiveWorldData (worldData) {
 	FillRuleOptions(curSession);
 }
 function UpdatePlayer (playerData) {
-	for (var i = 0; i < playerArray.length; i++)
-	{
-		if (playerArray[i].id === playerData.id)
-		{
+	for (var i = 0; i < playerArray.length; i++) {
+		if (playerArray[i].id === playerData.id) {
 			// playerArray[i] = playerData;
 			playerArray[i].x = playerData.x;
 			playerArray[i].y = playerData.y;
@@ -221,11 +211,9 @@ function UpdatePlayer (playerData) {
 	drawObjects.push(playerData);
 	console.log("New player");
 }
-function RemovePlayer (playerData) {
-	for (var i = 0; i < playerArray.length; i++)
-	{
-		if (playerArray[i].id === playerData.id)
-		{
+function DeletePlayer (playerData) {
+	for (var i = 0; i < playerArray.length; i++) {
+		if (playerArray[i].id === playerData.id) {
 			drawObjects.splice(drawObjects.indexOf(playerArray[i]), 1)
 			playerArray.splice(i, 1);
 			return;
@@ -253,7 +241,7 @@ function ReceiveCreateArea (levelID, areaData) {
 }
 function ReceiveDeleteArea (levelID, areaID) {
 	var level = curSession.GetLevelByID(levelID);
-	curLevel.RemoveArea(areaID);
+	curLevel.DeleteArea(areaID);
 }
 function ReceiveCreateLevel (levelData) {
 	// var levelID = newLevelData.id;
@@ -286,8 +274,8 @@ function ReceiveAssignPlayer (playerID) {
 	touchWalk = false;
 }
 
-function ReceiveRemoveEntity (levelID, entityID) {
-	curSession.RemoveEntity(levelID, entityID);
+function ReceiveDeleteEntity (levelID, entityID) {
+	curSession.DeleteEntity(levelID, entityID);
 }
 
 function RecieveEntityChange (levelID, entityID, entityData) {
@@ -306,174 +294,155 @@ function sendData(type, data) {
 }
 
 function SendTileChange (tileChange) {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("tileChange", tileChange);
 	}
-	else
-	{
+	else {
 		handleMessageData("tileChange", tileChange);
 	}
 }
 function SendCreateArea (createArea) {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("createArea", createArea);
 	}
-	else
-	{
+	else {
+		handleMessageData("createArea", createArea);
 	}
 }
-function SendRemoveArea (removeArea) {
-	if (IN_MULTI_SESSION)
-	{
-		sendData("removeArea", removeArea);
+function SendDeleteArea (deleteArea) {
+	if (IN_MULTI_SESSION) {
+		sendData("deleteArea", deleteArea);
 	}
-	else
-	{
+	else {
+		handleMessageData("deleteArea", deleteArea);
 	}
 }
 function SendInputUpdate (inputData) {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("inputUpdate", inputData);
 	}
-	else
-	{
+	else {
+		// handleMessageData("inputUpdate", inputData);
 	}
 }
 function SendLocationCorrection (correctionData) {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("locationCorrection", correctionData);
 	}
-	else
-	{
+	else {
+		// handleMessageData("locationCorrection", correctionData);
 	}
 }
 
 function CreateSessionNewWorld () {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("createSessionNewWorld");
 	}
-	else
-	{
+	else {
+		// handleMessageData("createSessionNewWorld");
 	}
 }
 function JoinSession (id) {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("joinSession", id);
 	}
-	else
-	{
+	else {
+		// handleMessageData("joinSession", id);
 	}
 }
 
 function CreateNewLevel () {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("createNewLevel");
 	}
-	else
-	{
+	else {
 		// create a level locally
+		handleMessageData("createNewLevel", id);
 	}
 }
 
 function JoinLevel (levelID) {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("joinLevel", levelID);
 	}
-	else
-	{
+	else {
+		handleMessageData("joinLevel", levelID);
 	}
 }
 
-function CreateNewArea (createX, createY, createZ) {
-	if (IN_MULTI_SESSION)
-	{
-		sendData("createNewArea", {x: createX, y: createY, z: createZ});
+function CreateArea (createX, createY, createZ) {
+	if (IN_MULTI_SESSION) {
+		sendData("createArea", {x: createX, y: createY, z: createZ});
 	}
-	else
-	{
+	else {
+		handleMessageData("createArea", {x: createX, y: createY, z: createZ});
 	}
 }
 
 function CreateNewEntity (createX, createY, createZ) {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("createNewEntity", {x: createX, y: createY, z: createZ});
 	}
-	else
-	{
+	else {
+		handleMessageData("createNewEntity", {x: createX, y: createY, z: createZ});
 	}
 }
 
 function TestAsPlayer () {
-	if (IN_MULTI_SESSION)
-	{
-		var zAdj = 0;
-		if (curLevel.CheckLocationSolid(Math.round(editCamX), Math.round(editCamY), Math.round(editCamZ)))
-		{
-			zAdj = 1
-		}
+	var zAdj = 0;
+	if (curLevel.CheckLocationSolid(Math.round(editCamX), Math.round(editCamY), Math.round(editCamZ))) {
+		zAdj = 1
+	}
+	if (IN_MULTI_SESSION) {
 		sendData("testAsPlayer", {x: Math.round(editCamX), y: Math.round(editCamY), z: Math.round(editCamZ + zAdj)});
 	}
-	else
-	{
+	else {
+		handleMessageData("testAsPlayer", {x: Math.round(editCamX), y: Math.round(editCamY), z: Math.round(editCamZ + zAdj)});
 	}
 }
 
 function ExitLevel () {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("exitLevel");
 	}
-	else
-	{
+	else {
+		handleMessageData("exitLevel");
 	}
 }
 
 function ExitSession () {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("exitSession");
 	}
-	else
-	{
+	else {
+		handleMessageData("exitSession");
 	}
 }
 
 function StopTestingPlayer () {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("stopTestingPlayer");
 	}
-	else
-	{
+	else {
+		handleMessageData("stopTestingPlayer");
 	}
 }
 
 function DeleteArea () {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("deleteArea", {levelID: curLevel.id, areaID: curArea.id});
 	}
-	else
-	{
+	else {
+		handleMessageData("deleteArea", {levelID: curLevel.id, areaID: curArea.id});
 	}
 }
 
 function SendEntityChange () {
-	if (IN_MULTI_SESSION)
-	{
+	if (IN_MULTI_SESSION) {
 		sendData("entityChange", {levelID: curLevel.id, entityID: curEntity.id, entityData: curEntity.Export()});
 	}
-	else
-	{
+	else {
+		handleMessageData("entityChange", {levelID: curLevel.id, entityID: curEntity.id, entityData: curEntity.Export()});
 	}
 }
 
