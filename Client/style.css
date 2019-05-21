@@ -156,6 +156,10 @@ body {
 	border: 1px solid #FFFFFF;
 	font-size: 16px;
 }
+div.disabled {
+	opacity: 0.6;
+	pointer-events: none;
+}
 
 .button:hover, .add_sub_rule:hover, .rule_remove:hover, .required_variable:hover, .selected_variable:hover {
 	background-color: #202020;

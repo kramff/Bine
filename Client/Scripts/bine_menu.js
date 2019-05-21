@@ -509,6 +509,22 @@ function DoButtonAction (action, extra) {
 	}
 }
 
+// Enable or disable the multiplayer buttons
+function SetMultiplayerButtonEnabled (enabledState) {
+	var joinSessionButton = document.getElementById("button_join_session");
+	var createSessionButton = document.getElementById("button_create_session");
+	if (enabledState)
+	{
+		joinSessionButton.className = "button";
+		createSessionButton.className = "button";
+	}
+	else
+	{
+		joinSessionButton.className = "button disabled";
+		createSessionButton.className = "button disabled";
+	}
+}
+
 // sessionData: [{session}, ...]
 // session: id, name, mode, worldName, playerCount
 function FillSessionBox (sessionData) {

@@ -45,6 +45,8 @@ var httpProtocol = "http://";
 
 var socket = undefined;
 function InitSocketConnection () {
+	SERVER_CONNECTED = false;
+	SetMultiplayerButtonEnabled(SERVER_CONNECTED);
 	try {
 		var socketURL;
 		if (location.href === "kramff.github.io/") {
@@ -64,6 +66,8 @@ function InitSocketConnection () {
 		socket.onopen = function (data) {
 
 			console.log("Connected to server!");
+			SERVER_CONNECTED = true;
+			SetMultiplayerButtonEnabled(SERVER_CONNECTED);
 
 			// Waiting until connected to server
 			// before directly joining session
@@ -77,7 +81,6 @@ function InitSocketConnection () {
 		}
 
 
-		SERVER_CONNECTED = true;
 	}
 	catch (err) {
 		console.error("server not up");
