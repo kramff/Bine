@@ -146,10 +146,10 @@ function handleMessageData (type, data) {
 
 	}
 
-	if (type === "newArea") {
-		// Create a new area
-		ReceiveCreateArea(data.levelID, data.areaData);
-	}
+	// if (type === "newArea") {
+	// 	// Create a new area
+	// 	ReceiveCreateArea(data.levelID, data.areaData);
+	// }
 
 	if (type === "newEntity") {
 		// Create a new entity
@@ -235,12 +235,12 @@ function ReceiveTileChange (tileChange) {
 	var tileData = tileChange.tileData;
 	curSession.EditTile(levelID, areaID, tileData);
 }
-function ReceiveCreateArea (levelID, areaData) {
+function ReceiveCreateArea (createArea) {
 	// var areaData = createAreaInLevel.areaData
 	// var levelID = createAreaInLevel.levelID;
 	// ActualCreateArea(areaData.x, areaData.y, areaData.z, areaData.xSize, areaData.ySize, areaData.zSize);
-	var level = curSession.GetLevelByID(levelID);
-	level.AddArea(areaData);
+	var level = curSession.GetLevelByID(createArea.levelID);
+	level.AddArea(createArea.areaData);
 }
 function ReceiveDeleteArea (levelID, areaID) {
 	var level = curSession.GetLevelByID(levelID);
@@ -304,14 +304,14 @@ function SendTileChange (tileChange) {
 		handleMessageData("tileChange", tileChange);
 	}
 }
-function SendCreateArea (createArea) {
-	if (IN_MULTI_SESSION) {
-		sendData("createArea", createArea);
-	}
-	else {
-		handleMessageData("createArea", createArea);
-	}
-}
+// function SendCreateArea (createArea) {
+// 	if (IN_MULTI_SESSION) {
+// 		sendData("createArea", createArea);
+// 	}
+// 	else {
+// 		handleMessageData("createArea", createArea);
+// 	}
+// }
 function SendDeleteArea (deleteArea) {
 	if (IN_MULTI_SESSION) {
 		sendData("deleteArea", deleteArea);
@@ -378,7 +378,23 @@ function CreateArea (createX, createY, createZ) {
 		sendData("createArea", {x: createX, y: createY, z: createZ});
 	}
 	else {
-		handleMessageData("createArea", {x: createX, y: createY, z: createZ});
+		curLevel.areaCounter += 1;
+		var blankAreaData = {
+			id: curLevel.areaCounter,
+			x: createX,
+			y: createY,
+			z: createZ,
+			xSize: 5,
+			ySize: 5,
+			zSize: 5,
+			settings: [],
+			map: [],
+			extra: [],
+			style: [],
+			rules: [],
+			templates: [],
+		};
+		handleMessageData("createArea", blankAreaData);
 	}
 }
 
