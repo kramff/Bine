@@ -343,6 +343,10 @@ function CreateSessionNewWorld () {
 	}
 	else {
 		// handleMessageData("createSessionNewWorld");
+		var emptyWorldData = {levelDatas: [], tileData: [], worldRules: [], entityTemplates: [], areaTemplates: [], itemData: []};
+		var newSession = new Session("Local Session", emptyWorldData);
+		newSession.id = 0;
+		curSession = newSession;
 	}
 }
 function JoinSession (id) {
@@ -360,7 +364,15 @@ function CreateNewLevel () {
 	}
 	else {
 		// create a level locally
-		handleMessageData("createNewLevel", id);
+		curSession.levelCounter += 1;
+		var blankLevelData = {
+			name: "level name",
+			id: curSession.levelCounter,
+			entityDatas: [],
+			areaDatas: [],
+		}
+		handleMessageData("newLevel", blankLevelData);
+		handleMessageData("enterLevel", blankLevelData.id);
 	}
 }
 
