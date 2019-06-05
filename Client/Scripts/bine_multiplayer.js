@@ -406,7 +406,7 @@ function CreateArea (createX, createY, createZ) {
 			rules: [],
 			templates: [],
 		};
-		handleMessageData("createArea", blankAreaData);
+		handleMessageData("createArea", {areaData: blankAreaData, levelID: curLevel.id});
 	}
 }
 
