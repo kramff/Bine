@@ -346,6 +346,7 @@ function CreateSessionNewWorld () {
 		var emptyWorldData = {levelDatas: [], tileData: [], worldRules: [], entityTemplates: [], areaTemplates: [], itemData: []};
 		var newSession = new Session("Local Session", emptyWorldData);
 		newSession.id = 0;
+		inSession = true;
 		curSession = newSession;
 	}
 }
@@ -428,7 +429,20 @@ function TestAsPlayer () {
 		sendData("testAsPlayer", {x: Math.round(editCamX), y: Math.round(editCamY), z: Math.round(editCamZ + zAdj)});
 	}
 	else {
-		handleMessageData("testAsPlayer", {x: Math.round(editCamX), y: Math.round(editCamY), z: Math.round(editCamZ + zAdj)});
+		curLevel.entityCounter += 1;
+		var newPlayerData = {
+			id: curLevel.entityCounter,
+			x: Math.round(editCamX),
+			y: Math.round(editCamY),
+			z: Math.round(editCamZ + zAdj),
+			style: [],
+			settings: [],
+			variables: [],
+			rules: [],
+			templates: [],
+		}
+		handleMessageData("newEntity", {levelID: curLevel.id, entityData: newPlayerData});
+		handleMessageData("assignPlayerEntity", newPlayerData.id);
 	}
 }
 
