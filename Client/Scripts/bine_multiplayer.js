@@ -469,7 +469,7 @@ function StopTestingPlayer () {
 		sendData("stopTestingPlayer");
 	}
 	else {
-		handleMessageData("stopTestingPlayer");
+		handleMessageData("deleteEntity", {levelID: curLevel.id, entityID: curPlayerID});
 	}
 }
 
