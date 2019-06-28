@@ -382,7 +382,8 @@ function JoinLevel (levelID) {
 		sendData("joinLevel", levelID);
 	}
 	else {
-		handleMessageData("joinLevel", levelID);
+		// handleMessageData("joinLevel", levelID);
+		handleMessageData("enterLevel", levelID);
 	}
 }
 
