@@ -342,12 +342,12 @@ function CreateSessionNewWorld () {
 		sendData("createSessionNewWorld");
 	}
 	else {
-		// handleMessageData("createSessionNewWorld");
 		var emptyWorldData = {levelDatas: [], tileData: [], worldRules: [], entityTemplates: [], areaTemplates: [], itemData: []};
-		var newSession = new Session("Local Session", emptyWorldData);
-		newSession.id = 0;
-		inSession = true;
-		curSession = newSession;
+		// var newSession = new Session("Local Session", emptyWorldData);
+		// newSession.id = 0;
+		// inSession = true;
+		// curSession = newSession;
+		ReceiveWorldData(emptyWorldData);
 	}
 }
 function JoinSession (id) {
