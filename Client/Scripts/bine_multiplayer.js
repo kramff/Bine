@@ -417,7 +417,21 @@ function CreateNewEntity (createX, createY, createZ) {
 		sendData("createNewEntity", {x: createX, y: createY, z: createZ});
 	}
 	else {
-		handleMessageData("createNewEntity", {x: createX, y: createY, z: createZ});
+		curLevel.entityCounter ++;
+		var blankEntityData = {
+			id: curLevel.entityCounter,
+			x: createX,
+			y: createY,
+			z: createZ,
+			settings: [],
+			style: [],
+			variables: [],
+			rules: [],
+			templates: [],
+			variableCounter: 0,
+		};
+		var entity = curLevel.AddEntity(blankEntityData);
+		// handleMessageData("createNewEntity", {x: createX, y: createY, z: createZ});
 	}
 }
 
