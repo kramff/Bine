@@ -728,6 +728,12 @@ var Session = (function () {
 		this.levels.push(newLevel);
 		return newLevel;
 	};
+	Session.prototype.RemoveLevel = function (id) {
+		var level = this.GetLevelByID(id);
+		if (level !== undefined) {
+			this.levels.splice(this.levels.indexOf(level), 1);
+		}
+	}
 	Session.prototype.GetLevelByID = function (id) {
 		id = Number(id);
 		var result = this.levels.filter(function (level) {
