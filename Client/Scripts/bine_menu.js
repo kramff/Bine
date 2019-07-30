@@ -481,7 +481,7 @@ function DoButtonAction (action, extra) {
 			// Check if variable created correctly
 			if (variableObj !== undefined) {
 				curEntity.variableCounter ++;
-				variableObj.ID = curEntity.variableCounter;
+				variableObj.id = curEntity.variableCounter;
 				curEntity.variables.push(variableObj);
 			}
 			HideAllOverMenu2s();
@@ -786,7 +786,7 @@ function CreateEntityVariableElementsForMainList (container, variables) {
 			var varName = CreateNewDiv(variableDiv, "variable_name", variable.name, undefined);
 			var varValue = CreateNewDiv(variableDiv, "variable_value", variable.value, undefined);
 			var varEdit = CreateNewDiv(variableDiv, "variable_edit", "Edit", undefined);
-			var varRemove = CreateNewDiv(variableDiv, "variable_delete", "Remove", undefined);
+			var varRemove = CreateNewDiv(variableDiv, "variable_delete", "X", undefined);
 		}
 	}
 }

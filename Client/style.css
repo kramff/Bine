@@ -161,7 +161,13 @@ div.disabled {
 	pointer-events: none;
 }
 
-.button:hover, .add_sub_rule:hover, .rule_remove:hover, .required_variable:hover, .selected_variable:hover {
+.button:hover,
+.add_sub_rule:hover,
+.rule_remove:hover,
+.required_variable:hover,
+.selected_variable:hover,
+.rule_delete:hover,
+.variable_delete:hover {
 	background-color: #202020;
 }
 
@@ -308,7 +314,7 @@ div.disabled {
 	padding-right: 3px;
 }
 
-.rule_remove {
+.rule_delete {
 	position: absolute;
 	right: 10px;
 	top: 10px;
@@ -355,10 +361,13 @@ div.disabled {
 	padding: 10px;
 }
 
-.variable_remove {
+.variable_delete {
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	padding: 6px 8px;
 	border: 1px solid white;
-	margin: 10px;
-	padding: 10px;
+	background: #404040;
 }
 
 .required_variable {
