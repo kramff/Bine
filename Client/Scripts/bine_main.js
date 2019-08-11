@@ -83,6 +83,10 @@ var curNestingPoint = undefined;
 var inVariableSlot = false;
 var curVariableSlot = undefined;
 
+// In a variable? (an entity's global variable editing) Keep reference
+var inVariable = false;
+var curVariable = undefined;
+
 // In a block? (Editing a rule block) Keep reference
 var inBlock = false;
 var curBlock = undefined;
@@ -454,6 +458,15 @@ function MainUpdate () {
 		// Animation for when not in a game
 		ClearCanvas(mainCanvas);
 	}
+}
+
+// Determine game coordinates from screen coordinates
+function ScreenCoordToGameCoord (screenX, screenY, inputZ, cameraX, cameraY, cameraZ, renderSettings) {
+	var scale = -(renderSettings.TILE_SIZE / (renderSettings.Z_MULTIPLIER * (inputZ - cameraZ) - renderSettings.EYE_DISTANCE)) * renderSettings.SCALE_MULTIPLIER;
+	var gameX = Math.floor((screenX - renderSettings.CANVAS_HALF_WIDTH) / scale + cameraX);
+	var gameY = Math.floor((screenY - renderSettings.CANVAS_HALF_HEIGHT) / scale + cameraY);
+	var gameZ = inputZ;
+	return {x: gameX, y: gameY, z: gameZ};
 }
 
 function DoKeyDown (event) {
@@ -880,6 +893,18 @@ function EditTileIfNewCoord (x, y) {
 			}
 		}
 	}
+}
+
+// Evaluate whether the given coordinate is inside the area
+function PositionInBounds (area, i, j, k) {
+	if (0 <= i && i < area.xSize) {
+		if (0 <= j && j < area.ySize) {
+			if (0 <= k && k < area.zSize) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 

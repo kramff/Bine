@@ -122,16 +122,16 @@ function CheckIfInClickableArea (x, y) {
 }
 
 function ButtonClick (button) {
-	if (button.dataset.menu !== undefined) {
+	if (button.getAttribute("data-menu") !== null) {
 		HideAllMenus();
-		ShowMenu(button.dataset.menu);
+		ShowMenu(button.getAttribute("data-menu"));
 	}
-	else if (button.dataset.action !== undefined) {
-		if (button.dataset.extra !== undefined) {
-			DoButtonAction(button.dataset.action, button.dataset.extra);
+	else if (button.getAttribute("data-action") !== null) {
+		if (button.getAttribute("data-extra") !== null) {
+			DoButtonAction(button.getAttribute("data-action"), button.getAttribute("data-extra"));
 		}
 		else {
-			DoButtonAction(button.dataset.action);
+			DoButtonAction(button.getAttribute("data-action"));
 		}
 	}
 }
@@ -202,7 +202,7 @@ function SetupButtons () {
 			var ruleParent = event.target.parentElement;
 			var nesting = ruleParent.getAttribute("data-nesting");
 			if (nesting !== null) {
-				// Remove the rule at that nesting point;
+				// Remove the rule at that nesting point
 				// var rule = GetRuleAtNestLocation(curEntity.rules, nesting);
 				RemoveRuleFromNestLocation(curEntity.rules, nesting);
 				SetupEntityRules();
@@ -227,12 +227,20 @@ function SetupButtons () {
 	}
 	// Edit or delete a global variable
 	var variableBox = document.getElementsByClassName("variable_box")[0];
-	variableBox.onClick = function () {
+	variableBox.onclick = function () {
 		if (event.target.classList.contains("variable_edit")) {
 			// Edit variable
 		}
 		else if (event.target.classList.contains("variable_delete")) {
-			// Remove variable
+			// Remove the associated variable
+			var variableParent = event.target.parentElement;
+			var variableID = variableParent.getAttribute("data-variable-id")
+			
+			if (variableID !== null) {
+				// Remove the variable with that id
+				DeleteVariableByID(curEntity.variables, variableID);
+				SetupEntityVariables();
+			}
 		}
 	}
 	// Select a variable (Global or Local) to use in a rule's variable slot
@@ -413,25 +421,39 @@ function DoButtonAction (action, extra) {
 		case "select_entity_variable":
 			ShowDarkCover2();
 			if (extra === "string") {
+				document.getElementById("input_string_name").value = "";
+				document.getElementById("input_string").value = "";
 				ShowMenu("input_variable_string");
 			}
 			if (extra === "number") {
+				document.getElementById("input_number_name").value = "";
+				document.getElementById("input_number").value = "";
 				ShowMenu("input_variable_number");
 			}
 			if (extra === "entity") {
-
+				document.getElementById("input_entity_name").value = "";
+				document.getElementById("input_entity").value = "";
+				ShowMenu("input_variable_entity");
 			}
 			if (extra === "area") {
-
+				document.getElementById("input_area_name").value = "";
+				document.getElementById("input_area").value = "";
+				ShowMenu("input_variable_area");
 			}
 			if (extra === "level") {
-
+				document.getElementById("input_level_name").value = "";
+				document.getElementById("input_level").value = "";
+				ShowMenu("input_variable_level");
 			}
 			if (extra === "tile") {
-
+				document.getElementById("input_tile_name").value = "";
+				document.getElementById("input_tile").value = "";
+				ShowMenu("input_variable_tile");
 			}
 			if (extra === "coordinates") {
-
+				document.getElementById("input_coordinates_name").value = "";
+				document.getElementById("input_coordinates").value = "";
+				ShowMenu("input_variable_coordinates");
 			}
 		break;
 		case "change_variable":
@@ -763,6 +785,40 @@ function GetRuleRequiredVariables (ruleType, rule) {
 
 }
 
+function GetRuleAtNestLocation (rules, nesting) {
+	var nestingSplit = nesting.split("_");
+	var curRuleData = rules;
+	for (var i = 0; i < nestingSplit.length; i++) {
+		var curNestPoint = nestingSplit[i];
+		if (curNestPoint !== "") {
+			curRuleData = curRuleData[curNestPoint];
+		}
+		else {
+			return curRuleData;
+		}
+	}
+	return curRuleData;
+}
+
+function RemoveRuleFromNestLocation (rules, nesting) {
+	var nestingSplit = nesting.split("_");
+	var curRuleData = rules;
+	var prevRuleData = rules;
+	// Use same formula but keep track of previous rule data as well
+	for (var i = 0; i < nestingSplit.length; i++) {
+		prevRuleData = curRuleData;
+		var curNestPoint = nestingSplit[i];
+		if (curNestPoint !== "") {
+			curRuleData = curRuleData[curNestPoint];
+		}
+		else {
+			break;
+		}
+	}
+	// Remove curRuleData (rule entry) from prevRuleData (should be list)
+	prevRuleData.splice(prevRuleData.indexOf(curRuleData), 1);
+}
+
 function SetupEntityVariables () {
 	// Get variables box
 	var variablesBox = document.getElementById("entity_variables_box");
@@ -823,10 +879,10 @@ function FillVariableSelection () {
 function GetEntityGlobalVariablesOfType (entity, type) {
 	var varList = [];
 	for (var i = 0; i < entity.variables.length; i++) {
-		var curVar = entity.variables[i];
-		if (!curVar.local) {
-			if (curVar.type === type) {
-				varList.push(curVar);
+		var variable = entity.variables[i];
+		if (!variable.local) {
+			if (variable.type === type) {
+				varList.push(variable);
 			}
 		}
 	}
@@ -839,12 +895,35 @@ function GetEntityLocalVariablesOfType (entity, type) {
 	// follow rule tree upwards from target rule and keep track of variables along the way
 	var varList = [];
 	for (var i = 0; i < entity.variables.length; i++) {
-		var curVar = entity.variables[i];
-		if (curVar.local) {
-			if (curVar.type === type) {
-				varList.push(curVar);
+		var variable = entity.variables[i];
+		if (variable.local) {
+			if (variable.type === type) {
+				varList.push(variable);
 			}
 		}
 	}
 	return varList;
+}
+
+function GetVariableByID (variables, variableID) {
+	variableID = Number(variableID);
+	for (var i = 0; i < variables.length; i++) {
+		var variable = variables[i];
+		if (variable.id === variableID)
+		{
+			return variable;
+		}
+	}
+}
+
+function DeleteVariableByID (variables, variableID) {
+	variableID = Number(variableID);
+	for (var i = variables.length - 1; i >= 0; i--) {
+		var variable = variables[i];
+		if (variable.id === variableID)
+		{
+			variables.splice(i, 1);
+			return;
+		}
+	}
 }
