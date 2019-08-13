@@ -51,6 +51,9 @@ var isMobile = false;
 var mainCanvas = undefined;
 var gameReady = false;
 
+// How many frames have passed 
+var noConnectionTime = 0;
+
 // In a session? Keep reference
 var inSession = false;
 var curSession = undefined;
@@ -304,6 +307,15 @@ function MainUpdate () {
 	window.requestAnimationFrame(MainUpdate);
 
 	frameCounter ++;
+
+	if (!SERVER_CONNECTED)
+	{
+		noConnectionTime ++;
+		if (!ranNoConnection && noConnectionTime > 500)
+		{
+			// Load sample worlds for testing, if no connection is made
+		}
+	}
 
 	if (inSession & curSession !== undefined && inLevel && curLevel !== undefined) {
 		// Editor mode

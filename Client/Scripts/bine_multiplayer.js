@@ -42,7 +42,6 @@ var noOption = {};
 var wsProtocol = "ws://";
 var httpProtocol = "http://";
 
-
 var socket = undefined;
 function InitSocketConnection () {
 	SERVER_CONNECTED = false;
@@ -80,13 +79,18 @@ function InitSocketConnection () {
 			handleMessageData(message.type, message.data);
 		}
 
-
 	}
 	catch (err) {
 		console.error("server not up");
 		console.error(err);
 		SERVER_CONNECTED = false;
 	}
+}
+
+var ranNoConnection = false;
+
+function NoConnectionTimeout () {
+
 }
 
 function handleMessageData (type, data) {
