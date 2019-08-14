@@ -314,6 +314,7 @@ function MainUpdate () {
 		if (!ranNoConnection && noConnectionTime > 500)
 		{
 			// Load sample worlds for testing, if no connection is made
+			fetch("Worlds/entity_test.bineworld").then(function (response) {return response.json();}).then(function (responseJson) {console.log(responseJson);})
 		}
 	}
 
