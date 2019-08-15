@@ -589,23 +589,30 @@ function AddSingleSessionToBox (session) {
 }
 
 // 
-function FillWorldBox (worldData) {
-	var worldBox = document.getElementsByClassName("world_box")[0];
-
-	// Clear out old elements
-	while (worldBox.firstChild) {
-		worldBox.removeChild(worldBox.firstChild);
+function FillWorldBox (worldData, boxType) {
+	var worldBoxClass = "world_box";
+	if (boxType !== undefined) {
+		worldBoxClass += " " + boxType;
 	}
+	var worldBoxes = document.getElementsByClassName(worldBoxClass);
 
-	// Create an element for each world
-	for (var i = 0; i < worldData.length; i++) {
-		var world = worldData[i]; 
-		// Main new div
-		var worldDiv = CreateNewDiv(worldBox, "world", undefined, world.id);
-		// Name
-		CreateNewDiv(worldDiv, "world_name", world.name, undefined);
-		// Level Count
-		CreateNewDiv(worldDiv, "world_level_count", world.levelCount, undefined);
+	for (var i = 0; i < worldBoxes.length; i++) {
+		var worldBox = worldBoxes[i];
+		// Clear out old elements
+		while (worldBox.firstChild) {
+			worldBox.removeChild(worldBox.firstChild);
+		}
+
+		// Create an element for each world
+		for (var i = 0; i < worldData.length; i++) {
+			var world = worldData[i]; 
+			// Main new div
+			var worldDiv = CreateNewDiv(worldBox, "world", undefined, world.id);
+			// Name
+			CreateNewDiv(worldDiv, "world_name", world.name, undefined);
+			// Level Count
+			CreateNewDiv(worldDiv, "world_level_count", world.levelCount, undefined);
+		}
 	}
 }
 

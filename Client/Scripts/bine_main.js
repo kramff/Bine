@@ -51,7 +51,7 @@ var isMobile = false;
 var mainCanvas = undefined;
 var gameReady = false;
 
-// How many frames have passed 
+// How many frames have passed without connecting
 var noConnectionTime = 0;
 
 // In a session? Keep reference
@@ -314,7 +314,13 @@ function MainUpdate () {
 		if (!ranNoConnection && noConnectionTime > 500)
 		{
 			// Load sample worlds for testing, if no connection is made
-			fetch("Worlds/entity_test.bineworld").then(function (response) {return response.json();}).then(function (responseJson) {console.log(responseJson);})
+			fetch("Worlds/entity_test.bineworld")
+			.then(function (response) {
+				return response.json();
+			}).then(function (responseJson) {
+				console.log(responseJson);
+				// 
+			});
 		}
 	}
 
