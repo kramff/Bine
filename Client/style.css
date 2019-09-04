@@ -239,6 +239,32 @@ div.disabled {
 	background-image: url(Image/Page/session_player_count.png);
 }
 
+.world {
+	padding: 10px;
+	margin: 10px;
+	background-color: #404040;
+	border: 1px solid #FFFFFF;
+	font-size: 16px;
+}
+
+.world_name,
+.world_level_count {
+	padding: 10px;
+	padding-left: 24px;
+	background-position: 0% 50%;
+	background-size: 16px 16px;
+	background-repeat: no-repeat;
+	pointer-events: none;
+}
+
+.world_name {
+	background-image: url(Image/Page/session_world_name.png);
+}
+
+.world_level_count {
+	background-image: url(Image/Page/world_level_count.png);
+}
+
 .level_box {
 	border: 1px solid #FFFFFF;
 }
