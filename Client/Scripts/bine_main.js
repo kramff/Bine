@@ -139,6 +139,9 @@ var waitingToDirectConnect = false;
 var sessionDirectLinkID = undefined;
 var levelDirectLinkID = undefined;
 
+// If not connected to ws server, load local worlds
+var loadingLocalWorlds = false;
+
 var controlStyles = {
 	"Standard": {
 		input: "Mouse + Keyboard",
@@ -311,8 +314,9 @@ function MainUpdate () {
 	if (!SERVER_CONNECTED)
 	{
 		noConnectionTime ++;
-		if (!ranNoConnection && noConnectionTime > 500)
+		if (!ranNoConnection && noConnectionTime > 500 && !loadingLocalWorlds)
 		{
+			loadingLocalWorlds = true;
 			// Load sample worlds for testing, if no connection is made
 			fetch("Worlds/entity_test.bineworld")
 			.then(function (response) {
