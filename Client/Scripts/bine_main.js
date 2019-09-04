@@ -1,5 +1,6 @@
 // bine_main.js
 // main code - loads and runs other scripts
+// and runs main game loop
 
 
 // Load additional files
@@ -140,7 +141,8 @@ var sessionDirectLinkID = undefined;
 var levelDirectLinkID = undefined;
 
 // If not connected to ws server, load local worlds
-var loadingLocalWorlds = false;
+var startedLoadLocal = false;
+var loadedLocalLevels = [];
 
 var controlStyles = {
 	"Standard": {
@@ -314,16 +316,17 @@ function MainUpdate () {
 	if (!SERVER_CONNECTED)
 	{
 		noConnectionTime ++;
-		if (!ranNoConnection && noConnectionTime > 500 && !loadingLocalWorlds)
+		if (!ranNoConnection && noConnectionTime > 500 && !startedLoadLocal)
 		{
 			loadingLocalWorlds = true;
 			// Load sample worlds for testing, if no connection is made
+			startedLoadLocal = true;
 			fetch("Worlds/entity_test.bineworld")
 			.then(function (response) {
 				return response.json();
 			}).then(function (responseJson) {
-				console.log(responseJson);
-				// 
+				loadedLocalLevels.push(responseJson);
+				FillWorldBox(loadedLocalLevels, "local_worlds");
 			});
 		}
 	}
