@@ -166,6 +166,19 @@ function SetupButtons () {
 			}
 		}
 	}
+	// Enter a world by clicking on it
+	var worldBoxes = document.getElementsByClassName("world_box");
+	// Multiple world boxes:
+	// Loading from local or from server
+	for (var i = 0; i < worldBoxes.length; i++) {
+		var worldBox = worldBoxes[i];
+		worldBox.onclick = function () {
+			if (event.target.classList.contains("world")) {
+				
+			}
+		}
+	}
+
 	// Enter a level by clicking on it
 	var levelBox = document.getElementsByClassName("level_box")[0];
 	levelBox.onclick = function () {

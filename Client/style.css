@@ -167,8 +167,12 @@ div.disabled {
 .required_variable:hover,
 .selected_variable:hover,
 .rule_delete:hover,
-.variable_delete:hover {
+.variable_delete:hover,
+.level:hover,
+.session:hover,
+.world:hover {
 	background-color: #202020;
+	cursor: pointer;
 }
 
 .button.small_button {
@@ -207,10 +211,6 @@ div.disabled {
 	font-size: 16px;
 }
 
-.session:hover {
-	background-color: #202020;
-}
-
 .session_name,
 .session_mode,
 .session_world_name,
@@ -237,6 +237,11 @@ div.disabled {
 
 .session_player_count {
 	background-image: url(Image/Page/session_player_count.png);
+}
+
+.world_box {
+	box-sizing: border-box;
+	border: 1px dashed white;
 }
 
 .world {
@@ -275,10 +280,6 @@ div.disabled {
 	background-color: #404040;
 	border: 1px solid #FFFFFF;
 	font-size: 16px;
-}
-
-.level:hover {
-	background-color: #202020;
 }
 
 .simple_text {
