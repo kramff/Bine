@@ -615,11 +615,9 @@ var Session = (function () {
 			//	//Area is moving: check new bounds
 			//	if (x >= area.x + area.xMov && x < area.x + area.xMov + area.xSize &&
 			//		y >= area.y + area.yMov && y < area.y + area.yMov + area.ySize &&
-			//		z >= area.z + area.zMov && z < area.z + area.zMov + area.zSize)
-			//	{
+			//		z >= area.z + area.zMov && z < area.z + area.zMov + area.zSize) {
 			//		var tile = area.map[x - area.x - area.xMov][y - area.y - area.yMov][z - area.z - area.zMov];
-			//		if (TileIsSolid(tile))
-			//		{
+			//		if (TileIsSolid(tile)) {
 			//			return true;
 			//		}
 			//	}
@@ -712,8 +710,7 @@ var Session = (function () {
 			// TODO: should check if each entity is a player or not, and take all the players out
 			// for (var i = 0; i < level.entityDatas.length; i++) {
 			// 	var entityData = level.entityDatas[i];
-			// 	if (true)
-			// 	{
+			// 	if (true) {
 			// 		// Delete entity if it is a player
 			// 	}
 			// }

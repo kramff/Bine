@@ -313,11 +313,9 @@ function MainUpdate () {
 
 	frameCounter ++;
 
-	if (!SERVER_CONNECTED)
-	{
+	if (!SERVER_CONNECTED) {
 		noConnectionTime ++;
-		if (!ranNoConnection && noConnectionTime > 50 && !startedLoadLocal)
-		{
+		if (!ranNoConnection && noConnectionTime > 50 && !startedLoadLocal) {
 			loadingLocalWorlds = true;
 			// Load sample worlds for testing, if no connection is made
 			startedLoadLocal = true;

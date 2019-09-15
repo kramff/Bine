@@ -535,13 +535,11 @@ function DoButtonAction (action, extra) {
 function SetMultiplayerButtonEnabled (enabledState) {
 	var joinSessionButton = document.getElementById("button_join_session");
 	var createSessionButton = document.getElementById("button_create_session");
-	if (enabledState)
-	{
+	if (enabledState) {
 		joinSessionButton.className = "button";
 		createSessionButton.className = "button";
 	}
-	else
-	{
+	else {
 		joinSessionButton.className = "button disabled";
 		createSessionButton.className = "button disabled";
 	}
@@ -916,8 +914,7 @@ function GetVariableByID (variables, variableID) {
 	variableID = Number(variableID);
 	for (var i = 0; i < variables.length; i++) {
 		var variable = variables[i];
-		if (variable.id === variableID)
-		{
+		if (variable.id === variableID) {
 			return variable;
 		}
 	}
@@ -927,8 +924,7 @@ function DeleteVariableByID (variables, variableID) {
 	variableID = Number(variableID);
 	for (var i = variables.length - 1; i >= 0; i--) {
 		var variable = variables[i];
-		if (variable.id === variableID)
-		{
+		if (variable.id === variableID) {
 			variables.splice(i, 1);
 			return;
 		}

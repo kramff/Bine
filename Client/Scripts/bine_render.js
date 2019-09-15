@@ -217,8 +217,7 @@ function DrawEntity (entity) {
 		// {
 		// 	//Editor player: transparent, move with camera when middle clicking
 		// 	R.ctx.globalAlpha = 0.5;
-		// 	if (middleClick)
-		// 	{
+		// 	if (middleClick) {
 		// 		x = R.CANVAS_HALF_WIDTH - scale / 2;
 		// 		y = R.CANVAS_HALF_HEIGHT - scale / 2;
 		// 	}
