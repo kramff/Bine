@@ -142,7 +142,7 @@ var levelDirectLinkID = undefined;
 
 // If not connected to ws server, load local worlds
 var startedLoadLocal = false;
-var loadedLocalLevels = [];
+var loadedLocalWorlds = [];
 
 var controlStyles = {
 	"Standard": {
@@ -315,18 +315,21 @@ function MainUpdate () {
 
 	if (!SERVER_CONNECTED) {
 		noConnectionTime ++;
-		if (!ranNoConnection && noConnectionTime > 50 && !startedLoadLocal) {
-			loadingLocalWorlds = true;
-			// Load sample worlds for testing, if no connection is made
-			startedLoadLocal = true;
-			fetch("Worlds/entity_test.bineworld")
-			.then(function (response) {
-				return response.json();
-			}).then(function (responseJson) {
-				loadedLocalLevels.push(responseJson);
-				FillWorldBox(loadedLocalLevels, "local_worlds");
-			});
-		}
+	}
+
+	if (!startedLoadLocal) {
+		loadingLocalWorlds = true;
+		// Load sample worlds for testing, if no connection is made
+		startedLoadLocal = true;
+		fetch("Worlds/entity_test.bineworld")
+		.then(function (response) {
+			return response.json();
+		}).then(function (responseJson) {
+			// Temporary id of 0 for the only loaded world
+			responseJson.id = 0;
+			loadedLocalWorlds.push(responseJson);
+			FillWorldBox(loadedLocalWorlds, "local_worlds");
+		});
 	}
 
 	if (inSession & curSession !== undefined && inLevel && curLevel !== undefined) {

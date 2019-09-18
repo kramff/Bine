@@ -174,7 +174,20 @@ function SetupButtons () {
 		var worldBox = worldBoxes[i];
 		worldBox.onclick = function () {
 			if (event.target.classList.contains("world")) {
-				
+				var worldID = event.target.getAttribute("world_id");
+				if (worldBox.classList.contains("local_worlds")) {
+					// Load local world with new session
+					IN_MULTI_SESSION = false;
+					// TODO: Should actually look at the levels and pick the one with the right ID
+					var selectedWorldData = loadedLocalWorlds[0];
+					CreateSessionLoadedWorld(selectedWorldData);
+					HideAllMenus();
+					ShowMenu("edit_world");
+				}
+				else {
+					// Load world from server with new session
+
+				}
 			}
 		}
 	}
@@ -616,9 +629,10 @@ function FillWorldBox (worldData, boxType) {
 
 		// Create an element for each world
 		for (var i = 0; i < worldData.length; i++) {
-			var world = worldData[i]; 
+			var world = worldData[i];
 			// Main new div
-			var worldDiv = CreateNewDiv(worldBox, "world", undefined, world.id);
+			var worldDiv = CreateNewDiv(worldBox, "world", undefined, undefined);
+			worldDiv.setAttribute("world_id", world.id);
 			// Name
 			CreateNewDiv(worldDiv, "world_name", world.name, undefined);
 			// Level Count

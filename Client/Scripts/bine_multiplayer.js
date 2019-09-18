@@ -354,6 +354,16 @@ function CreateSessionNewWorld () {
 		ReceiveWorldData(emptyWorldData);
 	}
 }
+
+function CreateSessionLoadedWorld (worldData) {
+	if (IN_MULTI_SESSION) {
+		// TODO
+	}
+	else {
+		ReceiveWorldData(worldData);
+	}
+}
+
 function JoinSession (id) {
 	if (IN_MULTI_SESSION) {
 		sendData("joinSession", id);
