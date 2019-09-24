@@ -51,6 +51,8 @@ var Session = (function () {
 			requiredVariables: ["text"],
 			effectFunction: function (variables, levelRef, entityRef, useVariables) {
 				console.log("say_message effect happened");
+				entityRef.tempMessageTime = 300;
+				entityRef.tempMessageString = "temp message here!";
 			},
 		},
 	};

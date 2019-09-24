@@ -239,7 +239,14 @@ function DrawEntity (entity) {
 		}
 		R.ctx.fillRect(x, y, scale, scale);
 		R.ctx.strokeRect(x, y, scale, scale);
+
+		// Draw temporary text above entity
+		if (entity.tempMessageTime > 0) {
+			R.ctx.fillText(entity.tempMessageString + " (" + entity.tempMessageTime + ")", x - 50, y - 100);
+		}
+
 		R.ctx.restore();
+
 	}
 }
 
