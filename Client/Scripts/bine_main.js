@@ -528,44 +528,44 @@ function DoKeyDown (event) {
 		DisplayIndicators();
 	}
 	else if (event.keyCode === 49) {
-		// 1 pressed: activate 1th button on screen
-		ActivateNthButton(1);
+		// 1 pressed: activate 0th button on screen
+		ActivateNthButton(0);
 	}
 	else if (event.keyCode === 50) {
-		// 2 pressed: activate 2th button on screen
-		ActivateNthButton(2);
+		// 2 pressed: activate 1th button on screen
+		ActivateNthButton(1);
 	}
 	else if (event.keyCode === 51) {
-		// 3 pressed: activate 3th button on screen
-		ActivateNthButton(3);
+		// 3 pressed: activate 2th button on screen
+		ActivateNthButton(2);
 	}
 	else if (event.keyCode === 52) {
-		// 4 pressed: activate 4th button on screen
-		ActivateNthButton(4);
+		// 4 pressed: activate 3th button on screen
+		ActivateNthButton(3);
 	}
 	else if (event.keyCode === 53) {
-		// 5 pressed: activate 5th button on screen
-		ActivateNthButton(5);
+		// 5 pressed: activate 4th button on screen
+		ActivateNthButton(4);
 	}
 	else if (event.keyCode === 54) {
-		// 6 pressed: activate 6th button on screen
-		ActivateNthButton(6);
+		// 6 pressed: activate 5th button on screen
+		ActivateNthButton(5);
 	}
 	else if (event.keyCode === 55) {
-		// 7 pressed: activate 7th button on screen
-		ActivateNthButton(7);
+		// 7 pressed: activate 6th button on screen
+		ActivateNthButton(6);
 	}
 	else if (event.keyCode === 56) {
-		// 8 pressed: activate 8th button on screen
-		ActivateNthButton(8);
+		// 8 pressed: activate 7th button on screen
+		ActivateNthButton(7);
 	}
 	else if (event.keyCode === 57) {
-		// 9 pressed: activate 9th button on screen
-		ActivateNthButton(9);
+		// 9 pressed: activate 8th button on screen
+		ActivateNthButton(8);
 	}
 	else if (event.keyCode === 48) {
-		// 0 pressed: activate 10th button on screen
-		ActivateNthButton(10);
+		// 0 pressed: activate 9th button on screen
+		ActivateNthButton(9);
 	}
 	else {
 		// Input not used
@@ -989,11 +989,60 @@ function DownloadCurrentWorld () {
 	// Download the string as a file
 }
 
+// Get indicator text from number
+function GetIndicatorText (num) {
+	if (num <= 8) {
+		return (num + 1).toString();
+	}
+	else if (num === 9) {
+		return "0";
+	}
+	else if (num === 10) {
+		return "-";
+	}
+	else if (num === 11) {
+		return "="
+	}
+	else {
+		return false;
+	}
+}
+
+// Show little numbers next to first 10 buttons on screen
+// Unless they're already visible, then get rid of them
 function DisplayIndicators () {
-	// Show little numbers next to first 10 buttons on screen
-	// Unless they're already visible, then get rid of them
+	var activeMenu = document.getElementsByClassName("menu_container active_menu").item(0);
+	if (activeMenu !== null)
+	{
+		var activeButtons = activeMenu.getElementsByClassName("button");
+		for (var i = 0; i < activeButtons.length; i++) {
+			var activeButton = activeButtons[i];
+			if (activeButton.getElementsByClassName("indicator").length === 0)
+			{
+				var indicator = document.createElement("div");
+				indicator
+				var indicatorText = GetIndicatorText(i);
+				if (indicatorText) {
+					CreateNewDiv(activeButton, "indicator", indicatorText, undefined);
+				}
+			}
+		}
+	}
 }
 
 function ActivateNthButton (buttonNum) {
 	// Find nth button and click it
+	var activeMenu = document.getElementsByClassName("menu_container active_menu").item(0);
+	if (activeMenu !== null)
+	{
+		var activeButtons = activeMenu.getElementsByClassName("button");
+		var selectedButton = activeButtons.item(buttonNum);
+		if (selectedButton !== null)
+		{
+			if (!selectedButton.classList.contains("disabled"))
+			{
+				selectedButton.click();
+			}
+		}
+	}
 }
