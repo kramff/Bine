@@ -175,7 +175,8 @@ div.disabled {
 .variable_delete:hover,
 .level:hover,
 .session:hover,
-.world:hover {
+.world:hover,
+.selectable_variable:hover {
 	background-color: #202020;
 	cursor: pointer;
 }

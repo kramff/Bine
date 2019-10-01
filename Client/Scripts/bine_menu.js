@@ -3,6 +3,22 @@
 
 "use strict";
 
+var buttonTypes = [
+	"button",
+	"add_sub_rule",
+	"rule_remove",
+	"required_variable",
+	"selected_variable",
+	"rule_delete",
+	"variable_delete",
+	"level",
+	"session",
+	"world",
+	"selectable_variable",
+];
+
+var buttonTypesSelector = "." + buttonTypes.join(", .");
+
 function CreateNewDiv (parent, setClass, text, id) {
 	var newDiv = document.createElement("div");
 	if (setClass !== undefined) {
@@ -22,7 +38,7 @@ function CreateNewDiv (parent, setClass, text, id) {
 
 // html dom manipulation stuff
 function SetBGColor (newColor) {
-	document.getElementsByClassName("background_layer")[0].style["background-color"] = newColor;
+	document.getElementsByClassName("background_layer").item(0).style["background-color"] = newColor;
 }
 
 function HideAllMenus () {
@@ -153,7 +169,7 @@ function SetupButtons () {
 	// }
 
 	// Enter a session by clicking on it
-	var sessionBox = document.getElementsByClassName("session_box")[0];
+	var sessionBox = document.getElementsByClassName("session_box").item(0);
 	sessionBox.onclick = function () {
 		IN_MULTI_SESSION = true;
 		if (event.target.classList.contains("session")) {
@@ -193,7 +209,7 @@ function SetupButtons () {
 	}
 
 	// Enter a level by clicking on it
-	var levelBox = document.getElementsByClassName("level_box")[0];
+	var levelBox = document.getElementsByClassName("level_box").item(0);
 	levelBox.onclick = function () {
 		if (event.target.classList.contains("level")) {
 			var levelID = event.target.getAttribute("level_id");
@@ -206,7 +222,7 @@ function SetupButtons () {
 		}
 	}
 	// Add a sub-rule (Effect or Condition) by clicking on the buttons placed in each rule block.
-	var rules_box = document.getElementsByClassName("rules_box")[0];
+	var rules_box = document.getElementsByClassName("rules_box").item(0);
 	rules_box.onclick = function () {
 		if (event.target.classList.contains("add_sub_rule")) {
 			var nesting = event.target.getAttribute("data-nesting");
@@ -252,7 +268,7 @@ function SetupButtons () {
 		}
 	}
 	// Edit or delete a global variable
-	var variableBox = document.getElementsByClassName("variable_box")[0];
+	var variableBox = document.getElementsByClassName("variable_box").item(0);
 	variableBox.onclick = function () {
 		if (event.target.classList.contains("variable_edit")) {
 			// Edit variable
@@ -574,7 +590,7 @@ function SetMultiplayerButtonEnabled (enabledState) {
 // sessionData: [{session}, ...]
 // session: id, name, mode, worldName, playerCount
 function FillSessionBox (sessionData) {
-	var sessionBox = document.getElementsByClassName("session_box")[0];
+	var sessionBox = document.getElementsByClassName("session_box").item(0);
 
 	// Clear out old elements
 	while (sessionBox.firstChild) {
@@ -599,7 +615,7 @@ function FillSessionBox (sessionData) {
 }
 
 function AddSingleSessionToBox (session) {
-	var sessionBox = document.getElementsByClassName("session_box")[0];
+	var sessionBox = document.getElementsByClassName("session_box").item(0);
 	var sessionDiv = CreateNewDiv(sessionBox, "session", undefined, undefined);
 	sessionDiv.setAttribute("session_id", session.id);
 	// Name
@@ -642,7 +658,7 @@ function FillWorldBox (worldData, boxType) {
 }
 
 function FillLevelBox (levelArray) {
-	var levelBox = document.getElementsByClassName("level_box")[0];
+	var levelBox = document.getElementsByClassName("level_box").item(0);
 
 	// Clear out old elements
 	while (levelBox.firstChild) {
@@ -659,7 +675,7 @@ function FillLevelBox (levelArray) {
 }
 
 function AddSingleLevelToBox (level) {
-	var levelBox = document.getElementsByClassName("level_box")[0];
+	var levelBox = document.getElementsByClassName("level_box").item(0);
 	var levelDiv = CreateNewDiv(levelBox, "level", level.name, level.id);
 	levelDiv.setAttribute("level_id", level.id);
 }

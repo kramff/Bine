@@ -1008,19 +1008,32 @@ function GetIndicatorText (num) {
 	}
 }
 
+function GetActiveMenu () {
+	var activeMenusOver2 = document.getElementsByClassName("menu_container active_menu over_menu_2");
+	if (activeMenusOver2.length > 0)
+	{
+		return activeMenusOver2.item(0);
+	}
+	var activeMenusOver1 = document.getElementsByClassName("menu_container active_menu over_menu");
+	if (activeMenusOver1.length > 0)
+	{
+		return activeMenusOver1.item(0);
+	}
+	var activeMenus = document.getElementsByClassName("menu_container active_menu");
+	return activeMenus.item(0);
+}
+
 // Show little numbers next to first 10 buttons on screen
 // Unless they're already visible, then get rid of them
 function DisplayIndicators () {
-	var activeMenu = document.getElementsByClassName("menu_container active_menu").item(0);
+	var activeMenu = GetActiveMenu();
 	if (activeMenu !== null)
 	{
-		var activeButtons = activeMenu.getElementsByClassName("button");
+		var activeButtons = activeMenu.querySelectorAll(buttonTypesSelector);
 		for (var i = 0; i < activeButtons.length; i++) {
 			var activeButton = activeButtons[i];
 			if (activeButton.getElementsByClassName("indicator").length === 0)
 			{
-				var indicator = document.createElement("div");
-				indicator
 				var indicatorText = GetIndicatorText(i);
 				if (indicatorText) {
 					CreateNewDiv(activeButton, "indicator", indicatorText, undefined);
@@ -1032,10 +1045,10 @@ function DisplayIndicators () {
 
 function ActivateNthButton (buttonNum) {
 	// Find nth button and click it
-	var activeMenu = document.getElementsByClassName("menu_container active_menu").item(0);
+	var activeMenu = GetActiveMenu();
 	if (activeMenu !== null)
 	{
-		var activeButtons = activeMenu.getElementsByClassName("button");
+		var activeButtons = activeMenu.querySelectorAll(buttonTypesSelector);
 		var selectedButton = activeButtons.item(buttonNum);
 		if (selectedButton !== null)
 		{
