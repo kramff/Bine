@@ -567,6 +567,14 @@ function DoKeyDown (event) {
 		// 0 pressed: activate 9th button on screen
 		ActivateNthButton(9);
 	}
+	else if (event.keyCode === 189) {
+		// - pressed: activate 10th button on screen
+		ActivateNthButton(10);
+	}
+	else if (event.keyCode === 187) {
+		// - pressed: activate 11th button on screen
+		ActivateNthButton(11);
+	}
 	else {
 		// Input not used
 		return;
@@ -1023,9 +1031,16 @@ function GetActiveMenu () {
 	return activeMenus.item(0);
 }
 
+// Keep track of indicators to remove them later
+var indicators = [];
+
 // Show little numbers next to first 10 buttons on screen
 // Unless they're already visible, then get rid of them
 function DisplayIndicators () {
+
+	// First, clear out any old indicators
+	RemoveIndicators();
+
 	var activeMenu = GetActiveMenu();
 	if (activeMenu !== null)
 	{
@@ -1036,11 +1051,20 @@ function DisplayIndicators () {
 			{
 				var indicatorText = GetIndicatorText(i);
 				if (indicatorText) {
-					CreateNewDiv(activeButton, "indicator", indicatorText, undefined);
+					var newIndicator = CreateNewDiv(activeButton, "indicator", indicatorText, undefined);
+					indicators.push(newIndicator);
 				}
 			}
 		}
 	}
+}
+
+// Clear out all indicators. Do this after activating a button
+function RemoveIndicators () {
+	for (var i = 0; i < indicators.length; i++) {
+		indicators[i].remove();
+	}
+	indicators = [];
 }
 
 function ActivateNthButton (buttonNum) {

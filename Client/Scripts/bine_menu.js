@@ -152,6 +152,13 @@ function ButtonClick (button) {
 	}
 }
 
+// Extra stuff to do for any button activation
+function ButtonMisc () {
+
+	// Get rid of all keyboard shortcut indicators
+	RemoveIndicators();
+}
+
 function SetupButtons () {
 	document.body.onselectstart = function () {
 		return false;
@@ -159,7 +166,8 @@ function SetupButtons () {
 	// Buttons for going to menus and doing actions
 	document.body.onclick = function () {
 		if (event.target.classList.contains("button")) {
-			ButtonClick(event.target)
+			ButtonClick(event.target);
+			ButtonMisc();
 		}
 	}
 	// var buttons = document.getElementsByClassName("button");
@@ -180,6 +188,7 @@ function SetupButtons () {
 				HideAllMenus();
 				ShowMenu("edit_world");
 			}
+			ButtonMisc();
 		}
 	}
 	// Enter a world by clicking on it
@@ -204,6 +213,7 @@ function SetupButtons () {
 					// Load world from server with new session
 
 				}
+				ButtonMisc();
 			}
 		}
 	}
@@ -220,6 +230,7 @@ function SetupButtons () {
 				ShowMenu("edit_level");
 			}
 		}
+		ButtonMisc();
 	}
 	// Add a sub-rule (Effect or Condition) by clicking on the buttons placed in each rule block.
 	var rules_box = document.getElementsByClassName("rules_box").item(0);
@@ -257,8 +268,8 @@ function SetupButtons () {
 			var nesting = ruleParent.getAttribute("data-nesting");
 			var varSlot = event.target.getAttribute("data-variable-slot");
 
-			curNestingPoint = nesting;
 			inNestingPoint = true;
+			curNestingPoint = nesting;
 
 			inVariableSlot = true;
 			curVariableSlot = varSlot;
@@ -266,6 +277,7 @@ function SetupButtons () {
 			ShowDarkCover();
 			ShowMenu("select_variable");
 		}
+		ButtonMisc();
 	}
 	// Edit or delete a global variable
 	var variableBox = document.getElementsByClassName("variable_box").item(0);
@@ -276,7 +288,7 @@ function SetupButtons () {
 		else if (event.target.classList.contains("variable_delete")) {
 			// Remove the associated variable
 			var variableParent = event.target.parentElement;
-			var variableID = variableParent.getAttribute("data-variable-id")
+			var variableID = variableParent.getAttribute("data-variable-id");
 			
 			if (variableID !== null) {
 				// Remove the variable with that id
@@ -284,19 +296,49 @@ function SetupButtons () {
 				SetupEntityVariables();
 			}
 		}
+		ButtonMisc();
 	}
 	// Select a variable (Global or Local) to use in a rule's variable slot
-	var selectGlobalVariablesBox = document.getElementById("select_variable_global_variables_box");
-	var selectLocalVariablesBox = document.getElementById("select_variable_local_variables_box");
-	selectGlobalVariablesBox.onClick = function () {
-		if (event.target.classList.contains("selectable_variable")) {
-			// TODO: Set this and the below function up
-			// Picked a variable to use in the earlier selected variable slot
-		}
-	}
-	selectLocalVariablesBox.onClick = function () {
-		if (event.target.classList.contains("selectable_variable")) {
-			// Picked a variable to use in the earlier selected variable slot
+	// var selectGlobalVariablesBox = document.getElementById("select_variable_global_variables_box");
+	// var selectLocalVariablesBox = document.getElementById("select_variable_local_variables_box");
+	// selectGlobalVariablesBox.onClick = function () {
+	// 	if (event.target.classList.contains("selectable_variable")) {
+	// 		// TODO: Set this and the below function up
+	// 		// Picked a variable to use in the earlier selected variable slot
+	// 	}
+	// 	ButtonMisc();
+	// }
+	// selectLocalVariablesBox.onClick = function () {
+	// 	if (event.target.classList.contains("selectable_variable")) {
+	// 		// Picked a variable to use in the earlier selected variable slot
+	// 	}
+	// 	ButtonMisc();
+	// }
+	var variableChoiceBoxes = document.getElementsByClassName("choice_box");
+	for (var i = 0; i < variableChoiceBoxes.length; i++) {
+		var variableChoiceBox = variableChoiceBoxes[i];
+		variableChoiceBox.onclick = function () {
+			if (event.target.classList.contains("selectable_variable")) {
+				var variableID = event.target.getAttribute("data-variable-id");
+				if (variableID === "literal_variable") {
+					// Go to a menu to write in a variable literal
+				}
+				else if (variableID === "literal_variable") {
+					// Go to a menu to construct a literal out of other variables
+				}
+				else
+				{
+					// Otherwise, we have selected an actual variable to use
+					// Get the block we are editing
+					var ruleBlock = GetRuleAtNestLocation(curEntity.rules, curNestingPoint);
+					// Set the variable slot to the id of the selected variable
+					ruleBlock.variables[curVariableSlot] = variableID;
+
+					// Then, leave this menu, done selecting variable.
+					DoButtonAction ("close_over_menu_for_variable_selecting");
+				}
+				ButtonMisc();
+			}
 		}
 	}
 }
@@ -423,6 +465,15 @@ function DoButtonAction (action, extra) {
 		case "close_over_menu_2":
 			HideAllOverMenu2s();
 			HideDarkCover2();
+		break;
+		case "close_over_menu_for_variable_selecting":
+			HideAllOverMenus();
+			HideDarkCover();
+			// Turn off these variables so app doesn't get into weird state
+			inNestingPoint = false;
+			curNestingPoint = undefined;
+			inVariableSlot = false;
+			curVariableSlot = undefined;
 		break;
 		case "add_entity_variable":
 			ShowDarkCover();

@@ -53,6 +53,15 @@ var Session = (function () {
 				console.log("say_message effect happened");
 				entityRef.tempMessageTime = 300;
 				entityRef.tempMessageString = "temp message here!";
+
+				// variables: right now is the other entity that moved next to this one and triggered the rule
+				// levelRef: reference to level
+				// entityRef: reference to self entity (the entity that will say the message)
+				// useVariables: undefined, should contain the variable of what text to say?
+				// this: the say_message object, can use to get the following...
+				// this.text: "Say Message"
+				// this.requiredVariables: ["text"]
+				// this.effectFunction: the function currently running
 			},
 		},
 	};
