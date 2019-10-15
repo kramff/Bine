@@ -298,28 +298,24 @@ function SetupButtons () {
 		}
 		ButtonMisc();
 	}
-	// Select a variable (Global or Local) to use in a rule's variable slot
-	// var selectGlobalVariablesBox = document.getElementById("select_variable_global_variables_box");
-	// var selectLocalVariablesBox = document.getElementById("select_variable_local_variables_box");
-	// selectGlobalVariablesBox.onClick = function () {
-	// 	if (event.target.classList.contains("selectable_variable")) {
-	// 		// TODO: Set this and the below function up
-	// 		// Picked a variable to use in the earlier selected variable slot
-	// 	}
-	// 	ButtonMisc();
-	// }
-	// selectLocalVariablesBox.onClick = function () {
-	// 	if (event.target.classList.contains("selectable_variable")) {
-	// 		// Picked a variable to use in the earlier selected variable slot
-	// 	}
-	// 	ButtonMisc();
-	// }
+	// Pick a variable to use in a rule
 	var variableChoiceBoxes = document.getElementsByClassName("choice_box");
 	for (var i = 0; i < variableChoiceBoxes.length; i++) {
 		var variableChoiceBox = variableChoiceBoxes[i];
 		variableChoiceBox.onclick = function () {
-			if (event.target.classList.contains("selectable_variable")) {
-				var variableID = event.target.getAttribute("data-variable-id");
+			var variableElement;
+			if (event.target.classList.contains("selectable_variable"))
+			{
+				// Clicked on element directly
+				variableElement = event.target;
+			}
+			else if (event.target.parentElement.classList.contains("selectable_variable"))
+			{
+				// Clicked on child element, use parent
+				variableElement = event.target.parentElement;
+			}
+			if (variableElement !== undefined) {
+				var variableID = variableElement.getAttribute("data-variable-id");
 				if (variableID === "literal_variable") {
 					// Go to a menu to write in a variable literal
 				}
@@ -336,6 +332,7 @@ function SetupButtons () {
 
 					// Then, leave this menu, done selecting variable.
 					DoButtonAction ("close_over_menu_for_variable_selecting");
+					SetupEntityRules();
 				}
 				ButtonMisc();
 			}
@@ -872,9 +869,21 @@ function AddRuleOptions (ruleDiv, rule, ruleType) {
 	// For each required variable, make an element that lets the user pick a variable to use
 	if (ruleData.requiredVariables !== undefined) {
 		for (var i = 0; i < ruleData.requiredVariables.length; i++) {
-			var requiredVariable = ruleData.requiredVariables[i];
 			// requiredVariable is just a type string ("number", "string", "entity", etc)
-			var reqVarDiv = CreateNewDiv(ruleDiv, "required_variable", "Need var: " + "(" + requiredVariable + ")", undefined);
+			var requiredVariable = ruleData.requiredVariables[i];
+			// selectedVariableID is the ID of the selected variable that will be used in this slot
+			// If undefined, show that a variable is needed. Otherwise, show the selected variable
+			var selectedVariableID = rule.variables[i];
+			var reqVarDiv;
+			if (selectedVariableID === undefined)
+			{
+				reqVarDiv = CreateNewDiv(ruleDiv, "required_variable", "Need var of type: " + "(" + requiredVariable + ")", undefined);
+			}
+			else
+			{
+				var selectedVariable = GetVariableByID(curEntity.variables, selectedVariableID);
+				reqVarDiv = CreateNewDiv(ruleDiv, "required_variable", "Have var of type: " + "(" + requiredVariable + "). It is: " + selectedVariable.name, undefined);
+			}
 			reqVarDiv.setAttribute("data-variable-slot", i);
 		}
 	}

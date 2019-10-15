@@ -95,6 +95,9 @@ var curVariable = undefined;
 var inBlock = false;
 var curBlock = undefined;
 
+// In the inventory menu?
+var inInventory = false;
+
 var editorActive = true;
 
 var cameraControlsEnabled = false;

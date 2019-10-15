@@ -51,8 +51,18 @@ var Session = (function () {
 			requiredVariables: ["text"],
 			effectFunction: function (variables, levelRef, entityRef, useVariables) {
 				console.log("say_message effect happened");
-				entityRef.tempMessageTime = 300;
-				entityRef.tempMessageString = "temp message here!";
+				var textVariable = GetVariableByID(entityRef.variables, useVariables[0]);
+				if (textVariable !== undefined)
+				{
+					entityRef.tempMessageTime = 300;
+					entityRef.tempMessageString = textVariable.value;
+				}
+				else
+				{
+					entityRef.tempMessageTime = 300;
+					entityRef.tempMessageString = "(missing text)";
+				}
+
 
 				// variables: right now is the other entity that moved next to this one and triggered the rule
 				// levelRef: reference to level
@@ -377,7 +387,7 @@ var Session = (function () {
 			if (EVENT_DEBUGGING) {
 				console.log(condition.text);
 			}
-			var result = condition.conditionFunction(variables, levelRef, entityRef, condition.useVariables);
+			var result = condition.conditionFunction(variables, levelRef, entityRef, rule.variables);
 			if (result === true) {
 				this.ExecuteBlock(rule.trueBlock, variables, levelRef);
 			}
@@ -394,7 +404,7 @@ var Session = (function () {
 			}
 			// Is there a result from an effect????
 			// Should just be "side effects"?
-			var result = effect.effectFunction(variables, levelRef, entityRef, effect.useVariables);
+			var result = effect.effectFunction(variables, levelRef, entityRef, rule.variables);
 		}
 	};
 	Entity.prototype.ExecuteBlock = function (ruleBlock, variables, levelRef) {

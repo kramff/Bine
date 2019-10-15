@@ -242,6 +242,7 @@ function DrawEntity (entity) {
 
 		// Draw temporary text above entity
 		if (entity.tempMessageTime > 0) {
+			R.ctx.fillStyle = "#FFFFFF";
 			R.ctx.fillText(entity.tempMessageString + " (" + entity.tempMessageTime + ")", x - 50, y - 100);
 		}
 
