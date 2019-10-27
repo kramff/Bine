@@ -15,6 +15,7 @@ var buttonTypes = [
 	"session",
 	"world",
 	"selectable_variable",
+	"variable_edit",
 ];
 
 var buttonTypesSelector = "." + buttonTypes.join(", .");
@@ -283,7 +284,26 @@ function SetupButtons () {
 	var variableBox = document.getElementsByClassName("variable_box").item(0);
 	variableBox.onclick = function () {
 		if (event.target.classList.contains("variable_edit")) {
-			// Edit variable
+			// Edit a variable
+			var variableParent = event.target.parentElement;
+			var variableID = variableParent.getAttribute("data-variable-id");
+
+			if (variableID !== null) {
+				// Edit the variable with that id
+				inVariable = true;
+				curVariable = GetVariableByID(curEntity.variables, variableID);
+				var variableData
+
+				ShowDarkCover2();
+
+				// TODO: Setup other types of variables
+				// if (extra === "string") {
+				if (true) {
+					document.getElementById("input_string_name").value = curVariable.name;
+					document.getElementById("input_string").value = curVariable.value;
+					ShowMenu("input_variable_string");
+				}
+			}
 		}
 		else if (event.target.classList.contains("variable_delete")) {
 			// Remove the associated variable
@@ -463,6 +483,14 @@ function DoButtonAction (action, extra) {
 			HideAllOverMenu2s();
 			HideDarkCover2();
 		break;
+		case "close_input_variable":
+			HideAllOverMenu2s();
+			HideDarkCover2();
+			// May either be creating a new variable or editing an existing variable
+			// In either case, end up with no current variable
+			curVariable = undefined;
+			inVariable = false;
+		break;
 		case "close_over_menu_for_variable_selecting":
 			HideAllOverMenus();
 			HideDarkCover();
@@ -546,14 +574,8 @@ function DoButtonAction (action, extra) {
 				ShowMenu("input_variable_coordinates");
 			}
 		break;
-		case "change_variable":
-			// Get variable from variable edit window
-			// Determine rule to edit from nesting point / curRule or something
-			// Set the variable
-			// Close the window
-			// Clean up
-		break;
-		case "make_new_variable":
+		case "confirm_variable_input":
+			// May either be editing an existing variable or creating a new variable
 			var varName;
 			var varValue;
 			var variableObj;
@@ -590,11 +612,22 @@ function DoButtonAction (action, extra) {
 			else if (extra === "coordinates") {
 
 			}
-			// Check if variable created correctly
+
+			// Check if variableObj exists
 			if (variableObj !== undefined) {
-				curEntity.variableCounter ++;
-				variableObj.id = curEntity.variableCounter;
-				curEntity.variables.push(variableObj);
+				if (inVariable) {
+					// Editing an existing variable
+					var variableID = curVariable.id;
+					variableObj.id = variableID;
+					ReplaceVariableByID(curEntity.variables, variableID, variableObj);
+				}
+				else
+				{
+					// Creating a new variable
+					curEntity.variableCounter ++;
+					variableObj.id = curEntity.variableCounter;
+					curEntity.variables.push(variableObj);
+				}
 			}
 			HideAllOverMenu2s();
 			HideDarkCover2();
@@ -1019,6 +1052,17 @@ function GetVariableByID (variables, variableID) {
 		var variable = variables[i];
 		if (variable.id === variableID) {
 			return variable;
+		}
+	}
+}
+
+function ReplaceVariableByID (variables, variableID, replaceVariableObject) {
+	variableID = Number(variableID);
+	for (var i = 0; i < variables.length; i++) {
+		var variable = variables[i];
+		if (variable.id === variableID) {
+			variables[i] = replaceVariableObject;
+			return;
 		}
 	}
 }
