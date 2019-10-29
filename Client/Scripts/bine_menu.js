@@ -18,6 +18,17 @@ var buttonTypes = [
 	"variable_edit",
 ];
 
+var variableTypes = [
+	"string",
+	"number",
+	"boolean",
+	"entity",
+	"area",
+	"level",
+	"tile",
+	"coordinates",
+];
+
 var buttonTypesSelector = "." + buttonTypes.join(", .");
 
 function CreateNewDiv (parent, setClass, text, id) {
@@ -298,10 +309,35 @@ function SetupButtons () {
 
 				// TODO: Setup other types of variables
 				// if (extra === "string") {
-				if (true) {
+				if (curVariable.type === "string") {
 					document.getElementById("input_string_name").value = curVariable.name;
 					document.getElementById("input_string").value = curVariable.value;
 					ShowMenu("input_variable_string");
+				}
+				else if (curVariable.type === "number") {
+					document.getElementById("input_number_name").value = curVariable.name;
+					document.getElementById("input_number").value = curVariable.value;
+					ShowMenu("input_variable_number");
+				}
+				else if (curVariable.type === "boolean") {
+					document.getElementById("input_boolean_name").value = curVariable.name;
+					document.getElementById("input_boolean").value = curVariable.value;
+					ShowMenu("input_variable_number");
+				}
+				else if (curVariable.type === "entity") {
+					// TODO: Fill in the rest of these variable types
+				}
+				else if (curVariable.type === "area") {
+
+				}
+				else if (curVariable.type === "level") {
+
+				}
+				else if (curVariable.type === "tile") {
+
+				}
+				else if (curVariable.type === "coordinates") {
+
 				}
 			}
 		}
@@ -543,32 +579,37 @@ function DoButtonAction (action, extra) {
 				document.getElementById("input_string").value = "";
 				ShowMenu("input_variable_string");
 			}
-			if (extra === "number") {
+			else if (extra === "number") {
 				document.getElementById("input_number_name").value = "";
 				document.getElementById("input_number").value = "";
 				ShowMenu("input_variable_number");
 			}
-			if (extra === "entity") {
+			else if (extra === "boolean") {
+				document.getElementById("input_boolean_name").value = "";
+				document.getElementById("input_boolean").value = "";
+				ShowMenu("input_variable_boolean");
+			}
+			else if (extra === "entity") {
 				document.getElementById("input_entity_name").value = "";
 				document.getElementById("input_entity").value = "";
 				ShowMenu("input_variable_entity");
 			}
-			if (extra === "area") {
+			else if (extra === "area") {
 				document.getElementById("input_area_name").value = "";
 				document.getElementById("input_area").value = "";
 				ShowMenu("input_variable_area");
 			}
-			if (extra === "level") {
+			else if (extra === "level") {
 				document.getElementById("input_level_name").value = "";
 				document.getElementById("input_level").value = "";
 				ShowMenu("input_variable_level");
 			}
-			if (extra === "tile") {
+			else if (extra === "tile") {
 				document.getElementById("input_tile_name").value = "";
 				document.getElementById("input_tile").value = "";
 				ShowMenu("input_variable_tile");
 			}
-			if (extra === "coordinates") {
+			else if (extra === "coordinates") {
 				document.getElementById("input_coordinates_name").value = "";
 				document.getElementById("input_coordinates").value = "";
 				ShowMenu("input_variable_coordinates");
@@ -595,6 +636,15 @@ function DoButtonAction (action, extra) {
 					name: varName,
 					value: varValue,
 					type: "number",
+				}
+			}
+			else if (extra === "boolean") {
+				varName = document.getElementById("input_boolean_name").value;
+				varValue = document.getElementById("input_boolean").value;
+				variableObj = {
+					name: varName,
+					value: varValue,
+					type: "boolean",
 				}
 			}
 			else if (extra === "entity") {
@@ -856,7 +906,7 @@ function CreateRuleBlock (ruleDiv, rule, nestingString, divClass, blockMode) {
 	var ruleBlock = CreateNewDiv(ruleDiv, divClass, undefined, undefined);
 	var ruleBlock;
 	CreateEntityRuleElementsRecurse(ruleBlock, rule[blockMode], nestingString);
-	var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Condition", undefined);
+	var addSubRuleButton = CreateNewDiv(ruleBlock, "add_sub_rule", "Add Effect or Conditional", undefined);
 	addSubRuleButton.setAttribute("data-nesting", nestingString);
 }
 
@@ -1001,20 +1051,43 @@ function CreateEntityVariableElementsForSelection (container, variables) {
 
 // Fill in the options for selecting a variable to put into a slot
 function FillVariableSelection () {
+	var ruleBlock = GetRuleAtNestLocation(curEntity.rules, curNestingPoint);
+	var variableType = GetVariableType(ruleBlock, curVariableSlot);
 	// Global variables
 	var globalsBox = document.getElementById("select_variable_global_variables_box");
 	while (globalsBox.firstChild) {
 		globalsBox.removeChild(globalsBox.firstChild);
 	}
-	var globalVars = GetEntityGlobalVariablesOfType(curEntity, "string");
+	var globalVars = GetEntityGlobalVariablesOfType(curEntity, variableType);
 	CreateEntityVariableElementsForSelection(globalsBox, globalVars);
 	// Local variables
 	var localsBox = document.getElementById("select_variable_local_variables_box");
 	while (localsBox.firstChild) {
 		localsBox.removeChild(localsBox.firstChild);
 	}
-	var localVars = GetEntityLocalVariablesOfType(curEntity, "string");
+	var localVars = GetEntityLocalVariablesOfType(curEntity, variableType);
 	CreateEntityVariableElementsForSelection(localsBox, localVars);
+}
+
+function GetVariableType (ruleBlock, variableSlot) {
+	var variableType;
+	// Don't need this for triggers?
+	// if (ruleBlock.trigger !== undefined)
+	if (ruleBlock.condition !== undefined) {
+		variableType = conditionData[ruleBlock.condition].requiredVariableTypes[variableSlot]
+	}
+	else if (ruleBlock.effect !== undefined) {
+		variableType = effectData[ruleBlock.effect].requiredVariableTypes[variableSlot];
+	}
+	if (variableType !== undefined)
+	{
+		return variableType;
+	}
+	else
+	{
+		console.log("Missing variable type!");
+		return "string";
+	}
 }
 
 function GetEntityGlobalVariablesOfType (entity, type) {

@@ -36,11 +36,12 @@ var Session = (function () {
 		},
 	};
 	var conditions = {
-		variable_condition: {
-			text: "Variable Meets Criteria",
-			requiredVariables: ["value", "comparison", "value"],
+		boolean_condition: {
+			text: "Boolean Conditional (if/else)",
+			requiredVariables: ["condition"],
+			requiredVariableTypes: ["boolean"],
 			conditionFunction: function (variables, levelRef, entityRef, useVariables) {
-				console.log("variable_condition condition happened");
+				console.log("boolean_condition condition happened");
 				return true;
 			},
 		},
@@ -49,6 +50,7 @@ var Session = (function () {
 		say_message: {
 			text: "Say Message",
 			requiredVariables: ["text"],
+			requiredVariableTypes: ["string"],
 			effectFunction: function (variables, levelRef, entityRef, useVariables) {
 				console.log("say_message effect happened");
 				var textVariable = GetVariableByID(entityRef.variables, useVariables[0]);
