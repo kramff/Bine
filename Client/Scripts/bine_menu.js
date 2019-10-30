@@ -429,6 +429,20 @@ function DoButtonAction (action, extra) {
 			ShowMenu("edit_level");
 		break;
 
+		case "create_new_template"
+			inEntity = true;
+
+			// Make a blank entity
+			curEntity = {};
+			HideAllMenus();
+			ShowMenu("edit_entity");
+			SetupEntityEditingMenu();
+
+		break;
+		case "edit_player_template"
+			// Fish up the single player entity
+		break;
+
 		case "create_area":
 			CreateArea(editCamX, editCamY, editCamZ);
 		break;

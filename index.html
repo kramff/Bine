@@ -59,14 +59,13 @@
 	</div>
 </div>
 <div class="menu_container" id="edit_world">
-	<!-- <div class="button" data-menu="main_menu">Back</div> -->
+	<div class="button" data-action="exit_session">Exit Session</div>
 	<!-- Levels available in this world -->
 	<div class="level_box">
 		<!-- Add levels to open here -->
 	</div>
 	<div class="button" data-action="create_new_level">Create new level</div>
-	<div class="button" data-action="exit_session">Exit Session</div>
-	<!-- <div class="button" data-action="edit_templates">Edit Entity Templates</div> -->
+	<div class="button" data-menu="edit_templates">Edit Entity Templates</div>
 	
 	<!-- <div class="button" data-menu="edit_world_rules">World Rules and Settings</div> -->
 	<!-- <div class="button" data-menu="edit_level_rules">Level Rules and Templates</div> -->
@@ -85,6 +84,15 @@
 <!-- <div class="menu_container" id="edit_player_rules"></div> -->
 <!-- <div class="menu_container" id="edit_item_rules"></div> -->
 <!-- <div class="menu_container" id="edit_particle_rules"></div> -->
+<div class="menu_container" id="edit_templates">
+	<div class="button" data-menu="edit_world">Back to world overview</div>
+	<!-- Templates for entities available for this world -->
+	<div class="entity_template_box">
+		<!-- Add templates to edit here -->
+	</div>
+	<div class="button" data-action="create_new_template">Create new entity template</div>
+	<div class="button" data-action="edit_player_template">Edit default player template</div>
+</div>
 
 
 <div class="menu_container allow_camera_controls allow_edit_tiles" id="edit_level">
