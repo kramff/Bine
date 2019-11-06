@@ -177,7 +177,8 @@ div.disabled {
 .session:hover,
 .world:hover,
 .selectable_variable:hover,
-.variable_edit:hover {
+.variable_edit:hover,
+.entity_template:hover {
 	background-color: #202020;
 	cursor: pointer;
 }

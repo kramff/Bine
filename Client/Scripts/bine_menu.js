@@ -16,6 +16,7 @@ var buttonTypes = [
 	"world",
 	"selectable_variable",
 	"variable_edit",
+	"entity_template",
 ];
 
 var variableTypes = [
@@ -392,6 +393,13 @@ function SetupButtons () {
 				}
 				ButtonMisc();
 			}
+		}
+	}
+	// Pick an existing entity template to edit
+	var entityTemplateBox = document.getElementsByClassName("entity_template_box").item(0);
+	entityTemplateBox.onclick = function () {
+		if (event.target.classList.contains("entity_template")) {
+			// Move to entity template editing screen and load the associated entity template
 		}
 	}
 }
