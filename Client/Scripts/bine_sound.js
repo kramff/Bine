@@ -31,7 +31,7 @@ function tryResumeAudio () {
 	}
 }
 
-function LoadAllSound () {
+function LoadAllAudio () {
 	fetch("Client/JSON/audio_data.json").then(function (response) {
 		return response.json();
 	}).then(function (responseData) {

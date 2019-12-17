@@ -1,6 +1,65 @@
 // bine_render.js
 // drawing things to the canvas
 
+var jsonImageData = {};
+var imageDataTree = {};
+
+function LoadAllImages () {
+	fetch("Client/JSON/image_data.json").then(function (response) {
+		return response.json();
+	}).then(function (responseData) {
+		jsonImageData = responseData;
+		RecursiveLoadImages(jsonImageData, imageDataTree, "");
+	});
+}
+
+function RecursiveLoadImages (data, tree, nesting) {
+	for (var key in data) {
+		if (data.hasOwnProperty(key) && (typeof data[key] === "object")) {
+			if (key === "files") {
+				tree[key] = [];
+				LoadImageFileArray(data[key], tree[key], nesting);
+			}
+			else {
+				tree[key] = {};
+				RecursiveLoadImages(data[key], tree[key], nesting + "/" + key);
+			}
+		}
+	}
+}
+
+function LoadImageFileArray (fileArray, destinationArray, nesting) {
+	for (var i = 0; i < fileArray.length; i++) {
+		fileArray[i]
+		GetImageData(nesting + "/" + fileArray[i], destinationArray, i);
+	}
+}
+
+function GetImageData (fileLocation, destinationArray, destinationIndex) {
+	var finalFileLocation = "Client/GameImage" + fileLocation;
+
+	destinationArray[destinationIndex] = {
+		finalFileLocation: finalFileLocation,
+		imageData: undefined
+	};
+
+	// TODO: Make an IMAGE here and do correct stuff instead of audio stuff
+
+	/*
+
+	fetch(finalFileLocation).then(function (response) {
+		return response.arrayBuffer();
+	}).then(function (buffer) {
+		return audioCtx.decodeAudioData(buffer);
+	}).then(function (audioData) {
+		destinationArray[destinationIndex].audioData = audioData;
+	});
+
+	*/
+}
+
+
+
 // Global object to use instead of passing all variables to every function
 // (And avoid creating objects every frame)
 var R = {

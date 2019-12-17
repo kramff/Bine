@@ -232,19 +232,19 @@ div.disabled {
 }
 
 .session_name {
-	background-image: url(Image/Page/session_name.png);
+	background-image: url(PageImage/session_name.png);
 }
 
 .session_mode {
-	background-image: url(Image/Page/session_mode.png);
+	background-image: url(PageImage/session_mode.png);
 }
 
 .session_world_name {
-	background-image: url(Image/Page/session_world_name.png);
+	background-image: url(PageImage/session_world_name.png);
 }
 
 .session_player_count {
-	background-image: url(Image/Page/session_player_count.png);
+	background-image: url(PageImage/session_player_count.png);
 }
 
 .world_box {
@@ -271,11 +271,11 @@ div.disabled {
 }
 
 .world_name {
-	background-image: url(Image/Page/session_world_name.png);
+	background-image: url(PageImage/session_world_name.png);
 }
 
 .world_level_count {
-	background-image: url(Image/Page/world_level_count.png);
+	background-image: url(PageImage/world_level_count.png);
 }
 
 .level_box {
@@ -331,15 +331,15 @@ div.disabled {
 }
 
 .rule_symbol.rule_trigger {
-	background-image: url(Image/Page/rule_trigger.png);
+	background-image: url(PageImage/rule_trigger.png);
 }
 
 .rule_symbol.rule_condition {
-	background-image: url(Image/Page/rule_condition.png);
+	background-image: url(PageImage/rule_condition.png);
 }
 
 .rule_symbol.rule_effect {
-	background-image: url(Image/Page/rule_effect.png);
+	background-image: url(PageImage/rule_effect.png);
 }
 
 .rule_title {

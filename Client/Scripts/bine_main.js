@@ -225,7 +225,8 @@ var controlStyle = "";
 
 function Init () {
 	LoadIsoScripts();
-	LoadAllSound();
+	LoadAllAudio();
+	LoadAllImages();
 	initSocket();
 
 

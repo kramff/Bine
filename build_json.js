@@ -1,8 +1,10 @@
 // Run this to create the following files:
 // Client/JSON/audio_data.json
+// Client/JSON/image_data.json
 // 
 
-console.log("Build Command to Set Up JSON Files");
+console.log("");
+console.log("Running the Build Command to Set Up JSON Files\n");
 
 var fs = require("fs");
 
@@ -29,10 +31,23 @@ function RecursiveWalk (dir) {
 	return data;
 }
 
-console.log("Setting up audio JSON...");
 
+// Audio data into JSON:
+console.log("Setting up audio JSON...");
 var audioLocation = "Client/Audio";
 var audioData = RecursiveWalk(audioLocation);
-console.log(audioData);
+console.log("Audio Data:");
+console.log(JSON.stringify(audioData));
 fs.writeFileSync("Client/JSON/audio_data.json", JSON.stringify(audioData));
+console.log("");
 
+// Image data into JSON
+console.log("Setting up image JSON...");
+var imageLocation = "Client/GameImage";
+var imageData = RecursiveWalk(imageLocation);
+console.log("Image Data:");
+console.log(JSON.stringify(imageData));
+fs.writeFileSync("Client/JSON/image_data.json", JSON.stringify(imageData));
+console.log("");
+
+console.log("Done making JSONs!\n");
