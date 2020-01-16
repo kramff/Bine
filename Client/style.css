@@ -391,15 +391,19 @@ div.disabled {
 }
 
 .variable_edit {
+	position: absolute;
+	right: 50px;
+	top: 10px;
+	padding: 6px 8px;
 	border: 1px solid white;
-	margin: 10px;
-	padding: 10px;
+	background: #404040;
 }
 
 .variable_delete {
 	position: absolute;
 	right: 10px;
 	top: 10px;
+	width: 30px;
 	padding: 6px 8px;
 	border: 1px solid white;
 	background: #404040;

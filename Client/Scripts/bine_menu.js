@@ -1051,9 +1051,9 @@ function CreateEntityVariableElementsForMainList (container, variables) {
 		if (!variable.local) {
 			var variableDiv = CreateNewDiv(container, "variable", undefined, undefined);
 			variableDiv.setAttribute("data-variable-id", variable.id);
-			var varType = CreateNewDiv(variableDiv, "variable_type variable_" + variable.type, undefined, undefined);
-			var varName = CreateNewDiv(variableDiv, "variable_name", variable.name, undefined);
-			var varValue = CreateNewDiv(variableDiv, "variable_value", variable.value, undefined);
+			var varName = CreateNewDiv(variableDiv, "variable_name", "Name: " + variable.name, undefined);
+			var varType = CreateNewDiv(variableDiv, "variable_type variable_" + variable.type, "Type: " + variable.type, undefined);
+			var varValue = CreateNewDiv(variableDiv, "variable_value", "Value: " + variable.value, undefined);
 			var varEdit = CreateNewDiv(variableDiv, "variable_edit", "Edit", undefined);
 			var varRemove = CreateNewDiv(variableDiv, "variable_delete", "X", undefined);
 		}
