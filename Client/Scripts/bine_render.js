@@ -58,7 +58,70 @@ function GetImageData (fileLocation, destinationArray, destinationIndex) {
 	*/
 }
 
+var rainArr = [];
+function MakeRainObj (repeat) {
+	rainArr.push({
+		x: Math.random() * 200 - 100,
+		y: Math.random() * 200 - 100,
+		z: Math.random() * 200 - 100,
+		falling: true,
+		splash: 0,
+	});
 
+	if (repeat !== undefined && repeat > 0) {
+		MakeRainObj(repeat - 1);
+	}
+}
+
+function RainTick () {
+	for (var i = rainArr.length - 1; i >= 0; i--) {
+		var rain = rainArr[i];
+		if (rain.falling) {
+			rain.z -= 0.1;
+		}
+		else {
+			rain.splash += 0.1;
+		}
+		if (rain.falling && curLevel !== undefined) {
+			if (curLevel.CheckLocationSolid(Math.round(rain.x), Math.round(rain.y), Math.round(rain.z))) {
+				rain.falling = false;
+			}
+		}
+		if (!rain.falling && rain.splash > 1.0)
+		{
+			rainArr.splice(i, 1);
+		}
+		if (rain.falling && rain.z < -200)
+		{
+			rainArr.splice(i, 1);
+		}
+	}
+}
+
+function DrawAllRain () {
+	for (var i = rainArr.length - 1; i >= 0; i--) {
+		var rain = rainArr[i];
+		DrawOneRain(rain);
+	}
+}
+
+function DrawOneRain (rain) {
+	var scale = GetScale(rain.z);
+	var x = scale * (rain.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var y = scale * (rain.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+
+	if (scale < 0) {
+		return;
+	}
+	if (x > 0 - scale && x < R.CANVAS_WIDTH && y > 0 - scale && y < R.CANVAS_HEIGHT) {
+		R.ctx.save();
+
+		R.ctx.strokeStyle = "#9090F0";
+		R.ctx.strokeRect(x, y, scale / 10, scale / 10);
+
+		R.ctx.restore();
+	}
+}
 
 // Global object to use instead of passing all variables to every function
 // (And avoid creating objects every frame)
@@ -177,6 +240,8 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	if (R.EDIT_MODE && topZ < Math.round(R.cameraZ)) {
 		DrawEditOutline(Math.round(R.cameraZ));
 	}
+
+	DrawAllRain();
 }
 
 function DrawEditOutline (z) {

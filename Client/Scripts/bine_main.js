@@ -143,6 +143,10 @@ var waitingToDirectConnect = false;
 var sessionDirectLinkID = undefined;
 var levelDirectLinkID = undefined;
 
+// If using a direct link to play locally, fill these variables
+var waitingToLocalSession = false;
+var localSessionLinkID = undefined;
+
 // If not connected to ws server, load local worlds
 var startedLoadLocal = false;
 var loadedLocalWorlds = [];
@@ -231,22 +235,46 @@ function Init () {
 
 
 	if (location.search !== "") {
-		// Joining session by direct link'
-		ShowMenu("join_by_link");
-
-		// Hide "gameplay_hide" elements
-		var gameplayHideElements = document.getElementsByClassName("gameplay_hide");
-		for (var i = 0; i < gameplayHideElements.length; i++) {
-			gameplayHideElements[i].hidden = true;
-		}
 
 		// Use search params
 		var searchParams = new URLSearchParams(document.location.search);
+
+		// Direct join a network session
 		var searchSessionID = searchParams.get("session");
 		var searchLevelID = searchParams.get("level");
-		waitingToDirectConnect = true;
-		sessionDirectLinkID = searchSessionID;
-		levelDirectLinkID = searchLevelID;
+
+		// Direct create a local session
+		var searchLocalID = searchParams.get("local");
+
+		if (searchSessionID !== null && searchLevelID !== null) {
+			waitingToDirectConnect = true;
+			sessionDirectLinkID = searchSessionID;
+			levelDirectLinkID = searchLevelID;
+
+			// Joining session by direct link'
+			ShowMenu("join_by_link");
+
+			// Hide "gameplay_hide" elements
+			var gameplayHideElements = document.getElementsByClassName("gameplay_hide");
+			for (var i = 0; i < gameplayHideElements.length; i++) {
+				gameplayHideElements[i].hidden = true;
+			}
+		}
+		else if (searchLocalID !== null)
+		{
+			waitingToLocalSession = true;
+			localSessionLinkID = searchLocalID
+
+			// Joining session by direct link'
+			ShowMenu("join_by_link");
+
+			// Hide "gameplay_hide" elements
+			var gameplayHideElements = document.getElementsByClassName("gameplay_hide");
+			for (var i = 0; i < gameplayHideElements.length; i++) {
+				gameplayHideElements[i].hidden = true;
+			}
+		}
+		
 	}
 	else {
 		// Regular main menu
@@ -333,6 +361,12 @@ function MainUpdate () {
 			responseJson.id = 0;
 			loadedLocalWorlds.push(responseJson);
 			FillWorldBox(loadedLocalWorlds, "local_worlds");
+
+			if (waitingToLocalSession) {
+				document.querySelector(".local_worlds .world").click();
+				document.querySelector(".level_box .level").click();
+				document.querySelector(".button[data-action='test_as_player']").click();
+			}
 		});
 	}
 
