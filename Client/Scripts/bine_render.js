@@ -58,42 +58,59 @@ function GetImageData (fileLocation, destinationArray, destinationIndex) {
 	*/
 }
 
+var rainModeOn = false;
 var rainArr = [];
-function MakeRainObj (repeat) {
-	rainArr.push({
-		x: Math.random() * 200 - 100,
-		y: Math.random() * 200 - 100,
-		z: Math.random() * 200 - 100,
-		falling: true,
-		splash: 0,
-	});
+var rainStorage = [];
 
-	if (repeat !== undefined && repeat > 0) {
+function MakeRainObj (repeat) {
+	var rainObj;
+	if (rainStorage.length > 0) {
+		rainObj = rainStorage.pop();
+		// console.log("old rain");
+	} else {
+		rainObj = {};
+		console.log("new rain");
+	}
+	rainObj.x = Math.random() * 20 - 10;
+	rainObj.y = Math.random() * 20 - 10;
+	rainObj.z = 20;
+	rainObj.falling = true;
+	rainObj.splash = 0;
+	rainArr.push(rainObj);
+	
+	if (repeat !== undefined && repeat > 1) {
 		MakeRainObj(repeat - 1);
 	}
+	else
+	{
+		// Sort rain array
+		rainArr.sort(RainSortFunc);
+	}
+}
+
+function RainSortFunc (a, b) {
+	return a.z - b.z;
 }
 
 function RainTick () {
 	for (var i = rainArr.length - 1; i >= 0; i--) {
 		var rain = rainArr[i];
 		if (rain.falling) {
-			rain.z -= 0.1;
+			rain.z -= 0.7;
 		}
 		else {
 			rain.splash += 0.1;
 		}
 		if (rain.falling && curLevel !== undefined) {
-			if (curLevel.CheckLocationSolid(Math.round(rain.x), Math.round(rain.y), Math.round(rain.z))) {
+			if (curLevel.CheckLocationSolid(Math.floor(rain.x), Math.floor(rain.y), Math.floor(rain.z))) {
 				rain.falling = false;
 			}
 		}
-		if (!rain.falling && rain.splash > 1.0)
-		{
-			rainArr.splice(i, 1);
+		if (!rain.falling && rain.splash > 1.0) {
+			rainStorage.push(rainArr.splice(i, 1));
 		}
-		if (rain.falling && rain.z < -200)
-		{
-			rainArr.splice(i, 1);
+		if (rain.falling && rain.z < -200) {
+			rainStorage.push(rainArr.splice(i, 1));
 		}
 	}
 }
@@ -106,18 +123,31 @@ function DrawAllRain () {
 }
 
 function DrawOneRain (rain) {
-	var scale = GetScale(rain.z);
-	var x = scale * (rain.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var y = scale * (rain.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	var scale0 = GetScale(rain.z);
+	var scale1 = GetScale(rain.z + 1);
+	var x0 = scale0 * (rain.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var x1 = scale1 * (rain.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var y0 = scale0 * (rain.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	var y1 = scale1 * (rain.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
 
-	if (scale < 0) {
+	if (scale0 < 0) {
 		return;
 	}
-	if (x > 0 - scale && x < R.CANVAS_WIDTH && y > 0 - scale && y < R.CANVAS_HEIGHT) {
+	if (x0 > 0 - scale0 && x0 < R.CANVAS_WIDTH && y0 > 0 - scale0 && y0 < R.CANVAS_HEIGHT) {
 		R.ctx.save();
 
 		R.ctx.strokeStyle = "#9090F0";
-		R.ctx.strokeRect(x, y, scale / 10, scale / 10);
+		if (rain.falling) {
+			R.ctx.beginPath();
+			R.ctx.moveTo(x0, y0);
+			R.ctx.lineTo(x1, y1);
+			R.ctx.stroke();
+		}
+		else
+		{
+			var splashSize = scale0 / 10 * rain.splash;
+			R.ctx.strokeRect(x0 - splashSize / 2, y0 - splashSize / 2, splashSize, splashSize);
+		}
 
 		R.ctx.restore();
 	}
@@ -200,6 +230,7 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	if (R.EDIT_MODE && bottomZ > Math.round(R.cameraZ)) {
 		DrawEditOutline(Math.round(R.cameraZ));
 	}
+	var rainDrawI = 0;
 	for (var z = bottomZ; z <= topZ + 1; z++) {
 		var i = bottomI;
 		var currentObject = drawObjects[i];
@@ -232,6 +263,15 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 			i ++;
 			currentObject = drawObjects[i];
 		}
+		// Loop through rain (later, global particle effects) and draw all up to the currentZ
+		var rainDrawObj = rainArr[rainDrawI];
+		while (rainDrawObj !== undefined && rainDrawObj.z <= z) {
+			// Draw the rain object
+			DrawOneRain(rainDrawObj);
+			// Move up to next rain object
+			rainDrawI ++;
+			rainDrawObj = rainArr[rainDrawI];
+		}
 		// Draw outline where player could be placed if in edit mode
 		if (R.EDIT_MODE && z === Math.round(R.cameraZ)) {
 			DrawEditOutline(z);
@@ -241,7 +281,11 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 		DrawEditOutline(Math.round(R.cameraZ));
 	}
 
-	DrawAllRain();
+	RainTick();
+	// DrawAllRain();
+	if (rainModeOn) {
+		MakeRainObj();
+	}
 }
 
 function DrawEditOutline (z) {
