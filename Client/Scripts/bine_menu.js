@@ -664,7 +664,13 @@ function DoButtonAction (action, extra) {
 			}
 			else if (extra === "boolean") {
 				varName = document.getElementById("input_boolean_name").value;
-				varValue = document.getElementById("input_boolean").value;
+				var selectedOption = document.querySelector('input[name="boolean_input"]:checked');
+				if (selectedOption === null) {
+					// Nothing was selected
+					return;
+				}
+				var optionValue = selectedOption.value;
+				varValue = (optionValue === "boolean_true" ? true : false);
 				variableObj = {
 					name: varName,
 					value: varValue,
