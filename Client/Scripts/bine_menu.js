@@ -608,7 +608,9 @@ function DoButtonAction (action, extra) {
 			}
 			else if (extra === "boolean") {
 				document.getElementById("input_boolean_name").value = "";
-				document.getElementById("input_boolean").value = "";
+				// document.getElementById("input_boolean").value = "";
+				document.getElementById("boolean_option1").checked = false;
+				document.getElementById("boolean_option2").checked = false;
 				ShowMenu("input_variable_boolean");
 			}
 			else if (extra === "entity") {

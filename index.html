@@ -212,6 +212,7 @@
 	<div class="choice_box" id="select_entity_variable_choice_box">
 		<div class="button" data-action="select_entity_variable" data-extra="string">String</div>
 		<div class="button" data-action="select_entity_variable" data-extra="number">Number</div>
+		<div class="button" data-action="select_entity_variable" data-extra="boolean">Boolean</div>
 		<div class="button" data-action="select_entity_variable" data-extra="entity">Entity</div>
 		<div class="button" data-action="select_entity_variable" data-extra="area">Area</div>
 		<div class="button" data-action="select_entity_variable" data-extra="level">Level</div>
@@ -223,9 +224,7 @@
 	<div class="button" data-action="close_input_variable">Cancel</div>
 	<div class="simple_text">New String Variable</div>
 	<div class="simple_text">Variable Name:</div>
-	<div class="input_box">
-		<input type="text" id="input_string_name">
-	</div>
+	<div class="input_box"><input type="text" id="input_string_name"></div>
 	<div class="simple_text">Variable Value:</div>
 	<div class="input_box">
 		<input type="text" id="input_string">
@@ -236,14 +235,76 @@
 	<div class="button" data-action="close_over_menu_2">Cancel</div>
 	<div class="simple_text">New Number Variable</div>
 	<div class="simple_text">Variable Name:</div>
-	<div class="input_box"> 
-		<input type="text" id="input_number_name">
-	</div>
+	<div class="input_box"><input type="text" id="input_number_name"></div>
 	<div class="simple_text">Variable Value:</div>
 	<div class="input_box">
 		<input type="number" id="input_number">
 	</div>
 	<div class="button" data-action="confirm_variable_input" data-extra="number">OK</div>
+</div>
+<div class="menu_container over_menu_2" id="input_variable_boolean">
+	<div class="button" data-action="close_over_menu_2">Cancel</div>
+	<div class="simple_text">New Boolean Variable</div>
+	<div class="simple_text">Variable Name:</div>
+	<div class="input_box"><input type="text" id="input_boolean_name"></div>
+	<div class="simple_text">Variable Value:</div>
+	<div class="input_box">
+		<input type="radio" id="boolean_option1" name="boolean_input" value="boolean_true">
+		<label for="boolean_option1">True</label>
+		<input type="radio" id="boolean_option2" name="boolean_input" value="boolean_false">
+		<label for="boolean_option2">False</label>
+	</div>
+	<div class="button" data-action="confirm_variable_input" data-extra="boolean">OK</div>
+</div>
+<div class="menu_container over_menu_2" id="input_variable_entity">
+	<div class="button" data-action="close_over_menu_2">Cancel</div>
+	<div class="simple_text">New Entity Variable</div>
+	<div class="simple_text">Variable Name:</div>
+	<div class="input_box"><input type="text" id="input_entity"></div>
+	<div class="simple_text">Variable Value:</div>
+	<div class="input_box">
+		<!-- Fill with options of entities -->
+	</div>
+</div>
+<div class="menu_container over_menu_2" id="input_variable_area">
+	<div class="button" data-action="close_over_menu_2">Cancel</div>
+	<div class="simple_text">New Area Variable</div>
+	<div class="simple_text">Variable Name:</div>
+	<div class="input_box"><input type="text" id="input_area"></div>
+	<div class="simple_text">Variable Value:</div>
+	<div class="input_box">
+		<!-- Fill with options of areas -->
+	</div>
+</div>
+<div class="menu_container over_menu_2" id="input_variable_level">
+	<div class="button" data-action="close_over_menu_2">Cancel</div>
+	<div class="simple_text">New Level Variable</div>
+	<div class="simple_text">Variable Name:</div>
+	<div class="input_box"><input type="text" id="input_level"></div>
+	<div class="simple_text">Variable Value:</div>
+	<div class="input_box">
+		<!-- Fill with options of levels -->
+	</div>
+</div>
+<div class="menu_container over_menu_2" id="input_variable_tile">
+	<div class="button" data-action="close_over_menu_2">Cancel</div>
+	<div class="simple_text">New Tile Variable</div>
+	<div class="simple_text">Variable Name:</div>
+	<div class="input_box"><input type="text" id="input_tile"></div>
+	<div class="simple_text">Variable Value:</div>
+	<div class="input_box">
+		<!-- Unique tile selector interface? -->
+	</div>
+</div>
+<div class="menu_container over_menu_2" id="input_variable_coordinates">
+	<div class="button" data-action="close_over_menu_2">Cancel</div>
+	<div class="simple_text">New Coordinates Variable</div>
+	<div class="simple_text">Variable Name:</div>
+	<div class="input_box"><input type="text" id="input_coordinates"></div>
+	<div class="simple_text">Variable Value:</div>
+	<div class="input_box">
+		<!-- Three inputs for xyz, or unique interface? -->
+	</div>
 </div>
 <div class="menu_container over_menu" id="select_variable">
 	<div class="button" data-action="close_over_menu_for_variable_selecting">Cancel</div>
