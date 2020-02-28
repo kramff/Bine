@@ -349,8 +349,11 @@ function SetupButtons () {
 			
 			if (variableID !== null) {
 				// Remove the variable with that id
-				DeleteVariableByID(curEntity.variables, variableID);
+				DeleteVariableByID(curEntity.variables, variableID, curEntity.rules);
 				SetupEntityVariables();
+				// If a rule used the variable, indicate that with empty variable slots.
+				// (Same as if there never was a variable selected for that slot)
+				SetupEntityRules();
 			}
 		}
 		ButtonMisc();
@@ -988,7 +991,7 @@ function AddRuleOptions (ruleDiv, rule, ruleType) {
 			// If undefined, show that a variable is needed. Otherwise, show the selected variable
 			var selectedVariableID = rule.variables[i];
 			var reqVarDiv;
-			if (selectedVariableID === undefined)
+			if (selectedVariableID === undefined || selectedVariableID === -1)
 			{
 				reqVarDiv = CreateNewDiv(ruleDiv, "required_variable", "Need var of type: " + "(" + requiredVariable + ")", undefined);
 			}
@@ -1170,13 +1173,51 @@ function ReplaceVariableByID (variables, variableID, replaceVariableObject) {
 	}
 }
 
-function DeleteVariableByID (variables, variableID) {
+function DeleteVariableByID (variables, variableID, rules) {
 	variableID = Number(variableID);
+
+	// Look through the rules and take out any references to this variable
+	DeleteVariableInRules(rules, variableID);
+
+	// Loop through variables and remove the variable with this ID
 	for (var i = variables.length - 1; i >= 0; i--) {
 		var variable = variables[i];
 		if (variable.id === variableID) {
 			variables.splice(i, 1);
 			return;
+		}
+	}
+}
+
+// Note: Replace references to this variable with -1 as a placeholder, not actually deleting
+function DeleteVariableInRules (rules, variableID) {
+	// Loop through rules
+	for (var i = rules.length - 1; i >= 0; i--) {
+		var rule = rules[i];
+		if (rule.variables !== undefined)
+		{
+			// Loop through variables on this rule and delete matches
+			for (var i = rule.variables.length - 1; i >= 0; i--) {
+				var variable = rule.variables[i];
+				if (Number(variable) === variableID)
+				{
+					// Replace variable ID with -1
+					rule.variables[i] = -1;
+				}
+			}
+		}
+		// Recursion into the blocks inside this rule
+		if (rule.block !== undefined)
+		{
+			DeleteVariableInRules(rule.block, variableID);
+		}
+		if (rule.trueBlock !== undefined)
+		{
+			DeleteVariableInRules(rule.trueBlock, variableID);
+		}
+		if (rule.falseBlock !== undefined)
+		{
+			DeleteVariableInRules(rule.falseBlock, variableID);
 		}
 	}
 }
