@@ -1106,6 +1106,11 @@ function RemoveIndicators () {
 }
 
 function ActivateNthButton (buttonNum) {
+	// Check if the user is inputting text or number somewhere
+	if (document.activeElement && document.activeElement.tagName === "INPUT")
+	{
+		return;
+	}
 	// Find nth button and click it
 	var activeMenu = GetActiveMenu();
 	if (activeMenu !== null)
