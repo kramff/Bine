@@ -1100,6 +1100,10 @@ function FillVariableSelection () {
 	}
 	var localVars = GetEntityLocalVariablesOfType(curEntity, variableType);
 	CreateEntityVariableElementsForSelection(localsBox, localVars);
+
+	// Fill in text on page for information
+	var typeText = document.getElementById("variable_type_text");
+	typeText.textContent = variableType;
 }
 
 function GetVariableType (ruleBlock, variableSlot) {
