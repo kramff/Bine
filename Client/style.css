@@ -314,6 +314,10 @@ div.disabled {
 	overflow: auto;
 }
 
+.choice_box.hidden_choice_box {
+	display: none;
+}
+
 .rule {
 	position: relative;
 	margin: 10px;

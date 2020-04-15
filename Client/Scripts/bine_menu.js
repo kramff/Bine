@@ -1104,6 +1104,20 @@ function FillVariableSelection () {
 	// Fill in text on page for information
 	var typeText = document.getElementById("variable_type_text");
 	typeText.textContent = variableType;
+
+	// Hide the variable construction boxes for other types of variables
+	for (var i = 0; i < variableTypes.length; i++) {
+		var variableTypeEntry = variableTypes[i];
+		var variableConstructionBox = document.querySelector("[data-id='variable_construction_" + variableTypeEntry + "']");
+		if (variableType === variableTypeEntry) {
+			// Show this box
+			variableConstructionBox.classList.remove("hidden_choice_box");
+		}
+		else {
+			// Hide this box
+			variableConstructionBox.classList.add("hidden_choice_box");
+		}
+	}
 }
 
 function GetVariableType (ruleBlock, variableSlot) {
