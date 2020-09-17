@@ -734,6 +734,9 @@ function DoButtonAction (action, extra) {
 			ShowMenu("test_level");
 			inInventory = false;
 		break;
+		case "export_world_to_file":
+			alert("clicked export button");
+		break;
 	}
 }
 

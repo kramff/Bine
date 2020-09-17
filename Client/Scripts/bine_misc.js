@@ -15,6 +15,13 @@ function IsNear (x1, y1, z1, x2, y2, z2, dist) {
 	return false;
 }
 
+function IsSameCoord (x1, y1, z1, x2, y2, z2) {
+	if (x1 === x2 && y1 === y2 && z1 === z2) {
+		return true;
+	}
+	return false;
+}
+
 // Makes line point by point and returns list of points
 // Determines which axis has moved the least relative distance and moving in that direction one step
 function GetPointsInLine (x0, y0, z0, x1, y1, z1) {

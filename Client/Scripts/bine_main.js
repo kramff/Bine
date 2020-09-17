@@ -504,7 +504,7 @@ function MainUpdate () {
 				SendInputUpdate(curPlayer.moveDirections);
 			}
 			// Update the level
-			curLevel.Update();
+			curLevel.Update(curSession);
 			// Todo: determine how to sync with server's session
 
 			// Camera movement

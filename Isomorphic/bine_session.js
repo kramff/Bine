@@ -22,14 +22,27 @@ var EVENT_DEBUGGING = false;
 
 var Session = (function () {
 
+	var sessionRef = this;
+
 	// Events: triggers, conditions, effects
 	var triggers = {
 
 		// When a different entity steps adjacent to this one
 		entity_steps_adjacent: {
 			text: "Entity Steps Adjacent -> [Entity]",
-			createdVariables: [ {
+			createdVariables: [
+				{
 					name: "adjacent_entity",
+					type: "entity",
+				},
+			],
+		},
+		// When a different entity steps directly on top of this one
+		entity_steps_here: {
+			text: "Entity Steps Here -> [Entity]",
+			createdVariables: [
+				{
+					name: "here_entity",
 					type: "entity",
 				},
 			],
@@ -40,7 +53,7 @@ var Session = (function () {
 			text: "Boolean Conditional (if/else)",
 			requiredVariables: ["condition"],
 			requiredVariableTypes: ["boolean"],
-			conditionFunction: function (variables, levelRef, entityRef, useVariables) {
+			conditionFunction: function (variables, sessionRef, levelRef, entityRef, useVariables) {
 				console.log("boolean_condition condition happened");
 				return true;
 			},
@@ -51,7 +64,7 @@ var Session = (function () {
 			text: "Say Message",
 			requiredVariables: ["text"],
 			requiredVariableTypes: ["string"],
-			effectFunction: function (variables, levelRef, entityRef, useVariables) {
+			effectFunction: function (variables, sessionRef, levelRef, entityRef, useVariables) {
 				console.log("say_message effect happened");
 				var textVariable = GetVariableByID(entityRef.variables, useVariables[0]);
 				if (textVariable !== undefined)
@@ -67,6 +80,7 @@ var Session = (function () {
 
 
 				// variables: right now is the other entity that moved next to this one and triggered the rule
+				// sessionRef: reference to session
 				// levelRef: reference to level
 				// entityRef: reference to self entity (the entity that will say the message)
 				// useVariables: undefined, should contain the variable of what text to say?
@@ -74,6 +88,30 @@ var Session = (function () {
 				// this.text: "Say Message"
 				// this.requiredVariables: ["text"]
 				// this.effectFunction: the function currently running
+			},
+		},
+		warp_entity_to_level: {
+			text: "Warp Entity to a Level",
+			requiredVariables: ["entityToWarp", "levelToWarpTo"],
+			requiredVariableTypes: ["entity", "number"],
+			effectFunction: function (variables, sessionRef, levelRef, entityRef, useVariables) {
+				console.log("warp_entity_to_level effect happened");
+				// Weird that variables is the entity???
+				var entityToWarp = variables;//GetVariableByID(entityRef.variables, useVariables[0]);
+				var levelToWarpToID = GetVariableByID(entityRef.variables, useVariables[1]);
+				// var entityToWarp = 
+				var levelToWarpTo = sessionRef.GetLevelByID(levelToWarpToID.value);
+				// Check if the current level for the game is the level the entity is coming from
+				if (curLevel === levelRef) {
+					// Check if the entity to warp is the player
+					if (entityToWarp === curPlayer) {
+						curLevel = levelToWarpTo;
+						// Temporary
+						curPlayer.z += 10;
+					}
+				}
+				levelToWarpTo.AddExistingEntity(entityToWarp);
+				levelRef.RemoveEntity(entityToWarp);
 			},
 		},
 	};
@@ -133,7 +171,7 @@ var Session = (function () {
 		};
 		return entityData;
 	};
-	Entity.prototype.Update = function (levelRef) {
+	Entity.prototype.Update = function (sessionRef, levelRef) {
 		// Update an entity:
 		// - Input (if player-controlled)
 		// - Rules
@@ -171,7 +209,7 @@ var Session = (function () {
 				this.xMov = 0;
 				this.yMov = 0;
 				this.zMov = 0;
-				this.TriggerStepEnd(levelRef);
+				this.TriggerStepEnd(sessionRef, levelRef);
 			}
 		}
 		// Not moving - able to start a movement
@@ -340,11 +378,11 @@ var Session = (function () {
 	}
 	// If the entity has the specified trigger type, run that rule
 	// extra - anything else that needs to be passed to rule
-	Entity.prototype.FireTrigger = function (triggerType, extra, levelRef) {
+	Entity.prototype.FireTrigger = function (triggerType, extra, sessionRef, levelRef) {
 		for (var i = 0; i < this.rules.length; i++) {
 			var rule = this.rules[i];
 			if (rule.trigger !== undefined && rule.trigger === triggerType) {
-				this.ExecuteRule(rule, extra, levelRef);
+				this.ExecuteRule(rule, extra, sessionRef, levelRef);
 				// Only executes first instance of rule... is this correct?
 				return;
 			}
@@ -352,15 +390,21 @@ var Session = (function () {
 		return;
 	};
 	// Step adjacent trigger
-	Entity.prototype.TriggerStepEnd = function (levelRef) {
+	Entity.prototype.TriggerStepEnd = function (sessionRef, levelRef) {
 		for (var i = 0; i < levelRef.entities.length; i++) {
 			var otherEntity = levelRef.entities[i];
+			// Requires bine_misc
 			if (IsNear(this.x, this.y, this.z, otherEntity.x, otherEntity.y, otherEntity.z, 1)) {
 				// No need to check if rule exists before running it?
 				// if (otherEntity.CheckHaveTrigger("entity_steps_adjacent"))
 				// {
 				// }
-				otherEntity.FireTrigger("entity_steps_adjacent", this, levelRef)
+				otherEntity.FireTrigger("entity_steps_adjacent", this, sessionRef, levelRef)
+			}
+			// Requires bine_misc
+			if (IsSameCoord(this.x, this.y, this.z, otherEntity.x, otherEntity.y, otherEntity.z, 1)) {
+				// No need to check for rule exists
+				otherEntity.FireTrigger("entity_steps_here", this, sessionRef, levelRef);
 			}
 		}
 		if (!IS_SERVER) {
@@ -373,7 +417,7 @@ var Session = (function () {
 		}
 	};
 	// Execute an entity's rule
-	Entity.prototype.ExecuteRule = function (rule, variables, levelRef) {
+	Entity.prototype.ExecuteRule = function (rule, variables, sessionRef, levelRef) {
 		var entityRef = this;
 		if (rule.trigger) {
 			// Trigger - Go ahead and run the rule block.
@@ -381,7 +425,7 @@ var Session = (function () {
 			if (EVENT_DEBUGGING) {
 				console.log(trigger.text);
 			}
-			this.ExecuteBlock(rule.block, variables, levelRef);
+			this.ExecuteBlock(rule.block, variables, sessionRef, levelRef);
 		}
 		else if (rule.condition) {
 			// Condition - Check the condition, then run the true or false block
@@ -389,13 +433,13 @@ var Session = (function () {
 			if (EVENT_DEBUGGING) {
 				console.log(condition.text);
 			}
-			var result = condition.conditionFunction(variables, levelRef, entityRef, rule.variables);
+			var result = condition.conditionFunction(variables, sessionRef, levelRef, entityRef, rule.variables);
 			if (result === true) {
-				this.ExecuteBlock(rule.trueBlock, variables, levelRef);
+				this.ExecuteBlock(rule.trueBlock, variables, sessionRef, levelRef);
 			}
 			// False by default?
 			else {
-				this.ExecuteBlock(rule.falseBlock, variables, levelRef);
+				this.ExecuteBlock(rule.falseBlock, variables, sessionRef, levelRef);
 			}
 		}
 		else if (rule.effect) {
@@ -406,14 +450,14 @@ var Session = (function () {
 			}
 			// Is there a result from an effect????
 			// Should just be "side effects"?
-			var result = effect.effectFunction(variables, levelRef, entityRef, rule.variables);
+			var result = effect.effectFunction(variables, sessionRef, levelRef, entityRef, rule.variables);
 		}
 	};
-	Entity.prototype.ExecuteBlock = function (ruleBlock, variables, levelRef) {
+	Entity.prototype.ExecuteBlock = function (ruleBlock, variables, sessionRef, levelRef) {
 		// Loop through the block and execute each rule in it
 		for (var i = 0; i < ruleBlock.length; i++) {
 			var rule = ruleBlock[i];
-			this.ExecuteRule(rule, variables, levelRef);
+			this.ExecuteRule(rule, variables, sessionRef, levelRef);
 		}
 	};
 
@@ -481,7 +525,7 @@ var Session = (function () {
 		};
 		return areaData;
 	};
-	Area.prototype.Update = function (levelRef) {
+	Area.prototype.Update = function (sessionRef, levelRef) {
 		// Update an area:
 		// - Rules
 		// - Movement
@@ -568,16 +612,16 @@ var Session = (function () {
 		};
 		return levelData;
 	};
-	Level.prototype.Update = function () {
+	Level.prototype.Update = function (sessionRef) {
 		for (var i = 0; i < this.entities.length; i++) {
 			// Update entitites
 			var entity = this.entities[i];
-			entity.Update(this);
+			entity.Update(sessionRef, this);
 		}
 		for (var i = 0; i < this.areas.length; i++) {
 			// Update areas
 			var area = this.areas[i];
-			area.Update(this);
+			area.Update(sessionRef, this);
 		}
 	}
 	Level.prototype.AddArea = function (areaData) {
@@ -611,6 +655,20 @@ var Session = (function () {
 			this.drawObjects.push(newEntity);
 		}
 		return newEntity;
+	};
+	Level.prototype.AddExistingEntity = function (entity) {
+		this.entities.push(entity);
+		if (!IS_SERVER) {
+			this.drawObjects.push(entity);
+		}
+		return entity;
+	};
+	Level.prototype.RemoveEntity = function (entity) {
+		this.entities.splice(this.entities.indexOf(entity), 1);
+		if (!IS_SERVER) {
+			this.drawObjects.splice(this.drawObjects.indexOf(entity), 1);
+		}
+		return entity;
 	};
 	Level.prototype.GetEntityByID = function (entityID) {
 		var id = Number(entityID);
