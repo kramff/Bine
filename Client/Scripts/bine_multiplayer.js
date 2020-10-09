@@ -458,6 +458,7 @@ function TestAsPlayer () {
 		sendData("testAsPlayer", {x: Math.round(editCamX), y: Math.round(editCamY), z: Math.round(editCamZ + zAdj)});
 	}
 	else {
+		curLevelBackupObj = curLevel;
 		curLevelBackup = JSON.stringify(curLevel.Export());
 		curLevel.entityCounter += 1;
 		var newPlayerData = {
@@ -501,6 +502,9 @@ function StopTestingPlayer () {
 	else {
 		handleMessageData("deleteEntity", {levelID: curLevel.id, entityID: curPlayerID});
 		// Reset level to how it was before testing
+		// First, make sure we're looking at the right level. (May have changed during testing)
+		curLevel = curLevelBackupObj;
+		// Then, remove the level and re-add it
 		curSession.RemoveLevel(curLevel.id);
 		var restoredLevel = curSession.AddLevel(JSON.parse(curLevelBackup));
 		curLevel = restoredLevel;

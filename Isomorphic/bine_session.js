@@ -53,6 +53,7 @@ var Session = (function () {
 			text: "Boolean Conditional (if/else)",
 			requiredVariables: ["condition"],
 			requiredVariableTypes: ["boolean"],
+			// conditionFunction: function (variables, sessionRef, levelRef, entityRef, useVariables) {
 			conditionFunction: function (variables, sessionRef, levelRef, entityRef, useVariables) {
 				console.log("boolean_condition condition happened");
 				return true;
@@ -64,7 +65,8 @@ var Session = (function () {
 			text: "Say Message",
 			requiredVariables: ["text"],
 			requiredVariableTypes: ["string"],
-			effectFunction: function (variables, sessionRef, levelRef, entityRef, useVariables) {
+			// effectFunction: function (localVariables, sessionRef, levelRef, entityRef, useVariables) {
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 				console.log("say_message effect happened");
 				var textVariable = GetVariableByID(entityRef.variables, useVariables[0]);
 				if (textVariable !== undefined)
@@ -94,19 +96,21 @@ var Session = (function () {
 			text: "Warp Entity to a Level",
 			requiredVariables: ["entityToWarp", "levelToWarpTo"],
 			requiredVariableTypes: ["entity", "number"],
-			effectFunction: function (variables, sessionRef, levelRef, entityRef, useVariables) {
+			// effectFunction: function (localVariables, sessionRef, levelRef, entityRef, useVariables) {
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 				console.log("warp_entity_to_level effect happened");
 				// Weird that variables is the entity???
-				var entityToWarp = variables;//GetVariableByID(entityRef.variables, useVariables[0]);
-				var levelToWarpToID = GetVariableByID(entityRef.variables, useVariables[1]);
+				var entityToWarp = useVariables[0];//GetVariableByID(entityRef.variables, useVariables[0]);
+				// var levelToWarpToID = GetVariableByID(entityRef.variables, useVariables[1]);
 				// var entityToWarp = 
-				var levelToWarpTo = sessionRef.GetLevelByID(levelToWarpToID.value);
+				// var levelToWarpTo = sessionRef.GetLevelByID(levelToWarpToID.value);
+				var levelToWarpTo = useVariables[1];
 				// Check if the current level for the game is the level the entity is coming from
 				if (curLevel === levelRef) {
 					// Check if the entity to warp is the player
 					if (entityToWarp === curPlayer) {
 						curLevel = levelToWarpTo;
-						// Temporary
+						// Temporary fix for player too low
 						curPlayer.z += 10;
 					}
 				}
@@ -115,6 +119,66 @@ var Session = (function () {
 			},
 		},
 	};
+
+	// Todo: Rename this function?
+	// This does the prep-work of determining the variables to use
+	// in the effect functions, so that the effect functions can just use
+	// final versions of the variables instead of figuring them out
+	function effectFunctionVariableSetupFunction (effectFunction, localVariables, sessionRef, levelRef, entityRef, useVariables) {
+		// This is the old version
+		// effectFunction(localVariables, sessionRef, levelRef, entityRef, useVariables);
+
+		// New approach: Figure out variables first
+		var finalVariableData = [];
+		for (var i = 0; i < useVariables.length; i++) {
+			// Get the variable info
+			var variableInfo = GetVariableByID(entityRef.variables, useVariables[i]);
+			var variableData = undefined;
+			// If local variable, get from local variables
+			// (So far, just a single local variable is possible.)
+			// (Will later need to figure out further info)
+			if (variableInfo.local === true)
+			{
+				variableData = localVariables;
+			}
+			else
+			{
+				// Get the actual data for that variable.
+				// (Different process for different types)
+				switch (variableInfo.type) {
+					case "string":
+						variableData = variableInfo.value;
+					break;
+					case "number":
+						variableData = variableInfo.value;
+					break;
+					case "boolean":
+						variableData = variableInfo.value;
+					break;
+					case "entity":
+						variableData = variableInfo.value;
+					break;
+					case "area":
+						variableData = variableInfo.value;
+					break;
+					case "level":
+						variableData = variableInfo.value;
+					break;
+					case "tile":
+						variableData = variableInfo.value;
+					break;
+					case "coordinates":
+						variableData = variableInfo.value;
+					break;
+				}
+			}
+			finalVariableData[i] = variableData;
+		}
+		// run the effectFunction with the now-already-setup variable data
+		// ************
+		// IN PROGRESS HERE
+		effectFunction(sessionRef, levelRef, entityRef, finalVariableData);
+	}
 
 	// var entityIDCounter = 0;
 	//x, y, z, style, settings, rules, templates
@@ -377,12 +441,12 @@ var Session = (function () {
 		return false;
 	}
 	// If the entity has the specified trigger type, run that rule
-	// extra - anything else that needs to be passed to rule
-	Entity.prototype.FireTrigger = function (triggerType, extra, sessionRef, levelRef) {
+	// triggerVariables - anything else that needs to be passed to rule
+	Entity.prototype.FireTrigger = function (triggerType, triggerVariables, sessionRef, levelRef) {
 		for (var i = 0; i < this.rules.length; i++) {
 			var rule = this.rules[i];
 			if (rule.trigger !== undefined && rule.trigger === triggerType) {
-				this.ExecuteRule(rule, extra, sessionRef, levelRef);
+				this.ExecuteRule(rule, triggerVariables, sessionRef, levelRef);
 				// Only executes first instance of rule... is this correct?
 				return;
 			}
@@ -417,7 +481,11 @@ var Session = (function () {
 		}
 	};
 	// Execute an entity's rule
-	Entity.prototype.ExecuteRule = function (rule, variables, sessionRef, levelRef) {
+	// rule: The rule block, with a trigger/condition/effect, block, and connectedVariables
+	// localVariables: variables from the trigger rule that started this execution sequence
+	// sessionRef: reference to the session
+	// levelRef: reference to the level
+	Entity.prototype.ExecuteRule = function (rule, localVariables, sessionRef, levelRef) {
 		var entityRef = this;
 		if (rule.trigger) {
 			// Trigger - Go ahead and run the rule block.
@@ -425,7 +493,7 @@ var Session = (function () {
 			if (EVENT_DEBUGGING) {
 				console.log(trigger.text);
 			}
-			this.ExecuteBlock(rule.block, variables, sessionRef, levelRef);
+			this.ExecuteBlock(rule.block, localVariables, sessionRef, levelRef);
 		}
 		else if (rule.condition) {
 			// Condition - Check the condition, then run the true or false block
@@ -433,13 +501,13 @@ var Session = (function () {
 			if (EVENT_DEBUGGING) {
 				console.log(condition.text);
 			}
-			var result = condition.conditionFunction(variables, sessionRef, levelRef, entityRef, rule.variables);
+			var result = condition.conditionFunction(localVariables, sessionRef, levelRef, entityRef, rule.variables);
 			if (result === true) {
-				this.ExecuteBlock(rule.trueBlock, variables, sessionRef, levelRef);
+				this.ExecuteBlock(rule.trueBlock, localVariables, sessionRef, levelRef);
 			}
 			// False by default?
 			else {
-				this.ExecuteBlock(rule.falseBlock, variables, sessionRef, levelRef);
+				this.ExecuteBlock(rule.falseBlock, localVariables, sessionRef, levelRef);
 			}
 		}
 		else if (rule.effect) {
@@ -450,7 +518,8 @@ var Session = (function () {
 			}
 			// Is there a result from an effect????
 			// Should just be "side effects"?
-			var result = effect.effectFunction(variables, sessionRef, levelRef, entityRef, rule.variables);
+			var result = effectFunctionVariableSetupFunction(effect.effectFunction, localVariables, sessionRef, levelRef, entityRef, rule.variables);
+			// var result = effect.effectFunction(localVariables, sessionRef, levelRef, entityRef, rule.variables);
 		}
 	};
 	Entity.prototype.ExecuteBlock = function (ruleBlock, variables, sessionRef, levelRef) {

@@ -64,7 +64,8 @@ var inLevel = false;
 var curLevel = undefined;
 
 // Keep backup of level while testing, then restore when done testing
-var curLevelBackup = undefined
+var curLevelBackup = undefined;
+var curLevelBackupObj = undefined;
 
 // In a player? (Currently playing) Keep reference
 var inPlayer = true;
