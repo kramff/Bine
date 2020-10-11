@@ -441,3 +441,11 @@ div.disabled {
 	border: 1px solid #FFFFFF;
 	font-size: 16px;
 }
+
+.level_button {
+    padding: 10px;
+    margin: 10px;
+    background-color: #404040;
+    border: 1px solid #FFFFFF;
+    font-size: 16px;
+}

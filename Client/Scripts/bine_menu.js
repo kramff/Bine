@@ -618,27 +618,28 @@ function DoButtonAction (action, extra) {
 			}
 			else if (extra === "entity") {
 				document.getElementById("input_entity_name").value = "";
-				document.getElementById("input_entity").value = "";
+				// document.getElementById("input_entity").value = "";
 				ShowMenu("input_variable_entity");
 			}
 			else if (extra === "area") {
 				document.getElementById("input_area_name").value = "";
-				document.getElementById("input_area").value = "";
+				// document.getElementById("input_area").value = "";
 				ShowMenu("input_variable_area");
 			}
 			else if (extra === "level") {
 				document.getElementById("input_level_name").value = "";
-				document.getElementById("input_level").value = "";
+				// document.getElementById("input_level").value = "";
+				setupLevelVariableSelect();
 				ShowMenu("input_variable_level");
 			}
 			else if (extra === "tile") {
 				document.getElementById("input_tile_name").value = "";
-				document.getElementById("input_tile").value = "";
+				// document.getElementById("input_tile").value = "";
 				ShowMenu("input_variable_tile");
 			}
 			else if (extra === "coordinates") {
 				document.getElementById("input_coordinates_name").value = "";
-				document.getElementById("input_coordinates").value = "";
+				// document.getElementById("input_coordinates").value = "";
 				ShowMenu("input_variable_coordinates");
 			}
 		break;
@@ -1240,5 +1241,17 @@ function DeleteVariableInRules (rules, variableID) {
 		{
 			DeleteVariableInRules(rule.falseBlock, variableID);
 		}
+	}
+}
+
+function setupLevelVariableSelect () {
+	var levelInputBox = document.getElementById("input_box_level");
+	// Clear out old elements
+	while (levelInputBox.firstChild) {
+		levelInputBox.removeChild(levelInputBox.firstChild);
+	}
+	for (var i = 0; i < curSession.levels.length; i++) {
+		var levelToAdd = curSession.levels[i]
+		var levelButton = CreateNewDiv(levelInputBox, "level_button", levelToAdd.name, undefined);
 	}
 }
