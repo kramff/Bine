@@ -17,6 +17,7 @@ var buttonTypes = [
 	"selectable_variable",
 	"variable_edit",
 	"entity_template",
+	"level_button",
 ];
 
 var variableTypes = [
@@ -405,6 +406,19 @@ function SetupButtons () {
 			// Move to entity template editing screen and load the associated entity template
 		}
 	}
+	// For a level variable, pick a level to use
+	var levelVariableButtonBox = document.getElementById("input_box_level");
+	levelVariableButtonBox.onclick = function () {
+		if (event.target.classList.contains("level_button")) {
+			// var levelID = event.target.getAttribute("level_id");
+			var alreadySelected = document.getElementsByClassName("level_selected");
+			if (alreadySelected.length > 0)
+			{
+				alreadySelected.item(0).classList.remove("level_selected");
+			}
+			event.target.classList.add("level_selected");
+		}
+	}
 }
 
 function DoButtonAction (action, extra) {
@@ -688,7 +702,7 @@ function DoButtonAction (action, extra) {
 
 			}
 			else if (extra === "level") {
-
+				document.getElementsByClassName("level_selected");
 			}
 			else if (extra === "tile") {
 
@@ -1253,5 +1267,6 @@ function setupLevelVariableSelect () {
 	for (var i = 0; i < curSession.levels.length; i++) {
 		var levelToAdd = curSession.levels[i]
 		var levelButton = CreateNewDiv(levelInputBox, "level_button", levelToAdd.name, undefined);
+		levelButton.setAttribute("level_id", levelToAdd.id);
 	}
 }

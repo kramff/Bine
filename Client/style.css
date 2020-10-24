@@ -182,7 +182,8 @@ div.disabled {
 .world:hover,
 .selectable_variable:hover,
 .variable_edit:hover,
-.entity_template:hover {
+.entity_template:hover,
+.level_button:hover {
 	background-color: #202020;
 	cursor: pointer;
 }
@@ -449,3 +450,8 @@ div.disabled {
     border: 1px solid #FFFFFF;
     font-size: 16px;
 }
+
+.level_button.level_selected {
+	font-weight: bold;
+}
+
