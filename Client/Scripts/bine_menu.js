@@ -662,6 +662,7 @@ function DoButtonAction (action, extra) {
 			var varName;
 			var varValue;
 			var variableObj;
+			var variableOkay = true;
 			if (extra === "string") {
 				varName = document.getElementById("input_string_name").value;
 				varValue = document.getElementById("input_string").value;
@@ -702,7 +703,26 @@ function DoButtonAction (action, extra) {
 
 			}
 			else if (extra === "level") {
-				document.getElementsByClassName("level_selected");
+				varName = document.getElementById("input_level_name").value;
+				var levelSelectedButtonElements = document.getElementsByClassName("level_selected");
+				if (levelSelectedButtonElements.length > 0) {
+					var levelSelectedButton = levelSelectedButtonElements.item(0);
+					var levelID = levelSelectedButton.getAttribute("level_id");
+					if (levelID !== null) {
+						variableObj = {
+							name: varName,
+							value: Number(levelID),
+							type: "level",
+						};
+					}
+					else {
+						variableOkay = false;
+					}
+				}
+				else
+				{
+					variableOkay = false;
+				}
 			}
 			else if (extra === "tile") {
 
@@ -710,29 +730,32 @@ function DoButtonAction (action, extra) {
 			else if (extra === "coordinates") {
 
 			}
-
-			// Check if variableObj exists
-			if (variableObj !== undefined) {
-				if (inVariable) {
-					// Editing an existing variable
-					var variableID = curVariable.id;
-					variableObj.id = variableID;
-					ReplaceVariableByID(curEntity.variables, variableID, variableObj);
-				}
-				else
-				{
-					// Creating a new variable
-					curEntity.variableCounter ++;
-					variableObj.id = curEntity.variableCounter;
-					curEntity.variables.push(variableObj);
+			if (variableOkay)
+			{
+				// Check if variableObj exists
+				if (variableObj !== undefined) {
+					if (inVariable) {
+						// Editing an existing variable
+						var variableID = curVariable.id;
+						variableObj.id = variableID;
+						ReplaceVariableByID(curEntity.variables, variableID, variableObj);
+					}
+					else
+					{
+						// Creating a new variable
+						curEntity.variableCounter ++;
+						variableObj.id = curEntity.variableCounter;
+						curEntity.variables.push(variableObj);
+					}
+					HideAllOverMenu2s();
+					HideDarkCover2();
+					HideAllOverMenus();
+					HideDarkCover();
+					// *** Update entity variable html display
+					SetupEntityVariables();
 				}
 			}
-			HideAllOverMenu2s();
-			HideDarkCover2();
-			HideAllOverMenus();
-			HideDarkCover();
-			// *** Update entity variable html display
-			SetupEntityVariables();
+
 		break;
 		case "inventory":
 			HideAllMenus();
