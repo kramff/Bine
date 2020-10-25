@@ -324,7 +324,7 @@ function SetupButtons () {
 				else if (curVariable.type === "boolean") {
 					document.getElementById("input_boolean_name").value = curVariable.name;
 					document.getElementById("input_boolean").value = curVariable.value;
-					ShowMenu("input_variable_number");
+					ShowMenu("input_variable_boolean");
 				}
 				else if (curVariable.type === "entity") {
 					// TODO: Fill in the rest of these variable types
@@ -333,7 +333,12 @@ function SetupButtons () {
 
 				}
 				else if (curVariable.type === "level") {
-
+					document.getElementById("input_level_name").value = curVariable.name;
+					setupLevelVariableSelect();
+					var levelID = curVariable.value;
+					var levelButton = document.querySelector(".level_button[level_id='" + levelID + "']")
+					levelButton.classList.add("level_selected");
+					ShowMenu("input_variable_level");
 				}
 				else if (curVariable.type === "tile") {
 
