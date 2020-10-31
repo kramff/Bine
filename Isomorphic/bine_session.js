@@ -68,11 +68,11 @@ var Session = (function () {
 			// effectFunction: function (localVariables, sessionRef, levelRef, entityRef, useVariables) {
 			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 				console.log("say_message effect happened");
-				var textVariable = GetVariableByID(entityRef.variables, useVariables[0]);
+				var textVariable = useVariables[0]
 				if (textVariable !== undefined)
 				{
 					entityRef.tempMessageTime = 300;
-					entityRef.tempMessageString = textVariable.value;
+					entityRef.tempMessageString = textVariable;
 				}
 				else
 				{
@@ -95,7 +95,7 @@ var Session = (function () {
 		warp_entity_to_level: {
 			text: "Warp Entity to a Level",
 			requiredVariables: ["entityToWarp", "levelToWarpTo"],
-			requiredVariableTypes: ["entity", "number"],
+			requiredVariableTypes: ["entity", "level"],
 			// effectFunction: function (localVariables, sessionRef, levelRef, entityRef, useVariables) {
 			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 				console.log("warp_entity_to_level effect happened");
@@ -162,7 +162,7 @@ var Session = (function () {
 						variableData = variableInfo.value;
 					break;
 					case "level":
-						variableData = variableInfo.value;
+						variableData = sessionRef.GetLevelByID(variableInfo.value)
 					break;
 					case "tile":
 						variableData = variableInfo.value;
