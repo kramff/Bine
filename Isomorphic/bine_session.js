@@ -94,26 +94,27 @@ var Session = (function () {
 		},
 		warp_entity_to_level: {
 			text: "Warp Entity to a Level",
-			requiredVariables: ["entityToWarp", "levelToWarpTo"],
-			requiredVariableTypes: ["entity", "level"],
+			requiredVariables: ["entityToWarp", "levelToWarpTo", "coordinatesToWarpTo"],
+			requiredVariableTypes: ["entity", "level", "coordinates"],
 			// effectFunction: function (localVariables, sessionRef, levelRef, entityRef, useVariables) {
 			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 				console.log("warp_entity_to_level effect happened");
-				// Weird that variables is the entity???
-				var entityToWarp = useVariables[0];//GetVariableByID(entityRef.variables, useVariables[0]);
-				// var levelToWarpToID = GetVariableByID(entityRef.variables, useVariables[1]);
-				// var entityToWarp = 
-				// var levelToWarpTo = sessionRef.GetLevelByID(levelToWarpToID.value);
+				var entityToWarp = useVariables[0];
 				var levelToWarpTo = useVariables[1];
+				var coordinatesToWarpTo = useVariables[2];
 				// Check if the current level for the game is the level the entity is coming from
-				if (curLevel === levelRef) {
-					// Check if the entity to warp is the player
-					if (entityToWarp === curPlayer) {
-						curLevel = levelToWarpTo;
-						// Temporary fix for player too low
-						curPlayer.z += 10;
+				if (!IS_SERVER)
+				{
+					if (curLevel === levelRef) {
+						// Check if the entity to warp is the player
+						if (entityToWarp === curPlayer) {
+							curLevel = levelToWarpTo;
+						}
 					}
 				}
+				entityToWarp.x = Number(coordinatesToWarpTo.x);
+				entityToWarp.y = Number(coordinatesToWarpTo.y);
+				entityToWarp.z = Number(coordinatesToWarpTo.z);
 				levelToWarpTo.AddExistingEntity(entityToWarp);
 				levelRef.RemoveEntity(entityToWarp);
 			},
@@ -483,7 +484,7 @@ var Session = (function () {
 	// Execute an entity's rule
 	// rule: The rule block, with a trigger/condition/effect, block, and connectedVariables
 	// localVariables: variables from the trigger rule that started this execution sequence
-	// sessionRef: reference to the session
+	// sessionRef: reference to the current session
 	// levelRef: reference to the level
 	Entity.prototype.ExecuteRule = function (rule, localVariables, sessionRef, levelRef) {
 		var entityRef = this;
@@ -812,6 +813,7 @@ var Session = (function () {
 		this.type = "Session";
 		// name: string
 		this.name = name;
+		this.worldName = worldData.worldName;
 		this.levels = [];
 		for (var i = 0; i < worldData.levelDatas.length; i++) {
 			var levelData = worldData.levelDatas[i];
@@ -843,6 +845,8 @@ var Session = (function () {
 			levelDatas.push(level.Export());
 		}
 		var worldData = {
+			worldName: this.worldName || "World Name",
+			levelCount: this.levels.length,
 			levelDatas: levelDatas,
 			tileData: this.tileData,
 			worldRules: this.worldRules,

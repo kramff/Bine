@@ -304,10 +304,19 @@
 	<div class="simple_text">New Coordinates Variable</div>
 	<div class="simple_text">Variable Name:</div>
 	<div class="input_box"><input type="text" id="input_coordinates_name"></div>
-	<div class="simple_text">Variable Value:</div>
+	<div class="simple_text">Variable X Value:</div>
 	<div class="input_box">
-		<!-- Three inputs for xyz, or unique interface? -->
+		<input type="number" id="input_coordinate_x">
 	</div>
+	<div class="simple_text">Variable Y Value:</div>
+	<div class="input_box">
+		<input type="number" id="input_coordinate_y">
+	</div>
+	<div class="simple_text">Variable Z Value:</div>
+	<div class="input_box">
+		<input type="number" id="input_coordinate_z">
+	</div>
+	<div class="button" data-action="confirm_variable_input" data-extra="coordinates">OK</div>
 </div>
 <div class="menu_container over_menu" id="select_variable">
 	<div class="button" data-action="close_over_menu_for_variable_selecting">Cancel</div>

@@ -344,7 +344,11 @@ function SetupButtons () {
 
 				}
 				else if (curVariable.type === "coordinates") {
-
+					document.getElementById("input_number_name").value = curVariable.name;
+					document.getElementById("input_coordinate_x").value = curVariable.value.x;
+					document.getElementById("input_coordinate_y").value = curVariable.value.y;
+					document.getElementById("input_coordinate_z").value = curVariable.value.z;
+					ShowMenu("input_variable_coordinates");
 				}
 			}
 		}
@@ -658,7 +662,9 @@ function DoButtonAction (action, extra) {
 			}
 			else if (extra === "coordinates") {
 				document.getElementById("input_coordinates_name").value = "";
-				// document.getElementById("input_coordinates").value = "";
+				document.getElementById("input_coordinate_x").value = "";
+				document.getElementById("input_coordinate_y").value = "";
+				document.getElementById("input_coordinate_z").value = "";
 				ShowMenu("input_variable_coordinates");
 			}
 		break;
@@ -733,7 +739,15 @@ function DoButtonAction (action, extra) {
 
 			}
 			else if (extra === "coordinates") {
-
+				varName = document.getElementById("input_coordinates_name").value;
+				var varX = document.getElementById("input_coordinate_x").value;
+				var varY = document.getElementById("input_coordinate_y").value;
+				var varZ = document.getElementById("input_coordinate_z").value;
+				variableObj = {
+					name: varName,
+					value: {x: varX, y: varY, z: varZ},
+					type: "coordinates",
+				}
 			}
 			if (variableOkay)
 			{
@@ -860,7 +874,7 @@ function FillWorldBox (worldData, boxType) {
 			var worldDiv = CreateNewDiv(worldBox, "world", undefined, undefined);
 			worldDiv.setAttribute("world_id", world.id);
 			// Name
-			CreateNewDiv(worldDiv, "world_name", world.name, undefined);
+			CreateNewDiv(worldDiv, "world_name", world.worldName, undefined);
 			// Level Count
 			CreateNewDiv(worldDiv, "world_level_count", world.levelCount, undefined);
 		}
@@ -1110,10 +1124,38 @@ function CreateEntityVariableElementsForMainList (container, variables) {
 			variableDiv.setAttribute("data-variable-id", variable.id);
 			var varName = CreateNewDiv(variableDiv, "variable_name", "Name: " + variable.name, undefined);
 			var varType = CreateNewDiv(variableDiv, "variable_type variable_" + variable.type, "Type: " + variable.type, undefined);
-			var varValue = CreateNewDiv(variableDiv, "variable_value", "Value: " + variable.value, undefined);
+			var varValue = CreateNewDiv(variableDiv, "variable_value", "Value: " + GetReadableVariableString(variable.value, variable.type), undefined);
 			var varEdit = CreateNewDiv(variableDiv, "variable_edit", "Edit", undefined);
 			var varRemove = CreateNewDiv(variableDiv, "variable_delete", "X", undefined);
 		}
+	}
+}
+
+// Get a human readable string from a variable.
+// The raw value if a basic type, or the name of an complex object
+function GetReadableVariableString (varValue, type) {
+	switch (type) {
+		case "string":
+		case "number":
+		case "boolean":
+			return varValue;
+		break;
+		// Entity, Level, Area: May want to lookup names instead of just ID's
+		case "entity":
+			return ("Entity #" + varValue);
+		break;
+		case "level":
+			return ("Level #" + varValue);
+		break;
+		case "area":
+			return ("Area #" + varValue);
+		break;
+		case "tile":
+			return "Tile in Area #N at coordinates 3,4,5";
+		break;
+		case "coordinates":
+			return "{x: " + varValue.x + ", y: " + varValue.y + ", z: " + varValue.z + "}"; 
+		break;
 	}
 }
 
