@@ -818,7 +818,7 @@ function FillSessionBox (sessionData) {
 
 	// Clear out old elements
 	while (sessionBox.firstChild) {
-		sessionBox.removeChild(sessionBox.firstChild);
+		sessionBox.removeChild(sessionBox.lastChild);
 	}
 
 	// Create an element for each session
@@ -864,7 +864,7 @@ function FillWorldBox (worldData, boxType) {
 		var worldBox = worldBoxes[i];
 		// Clear out old elements
 		while (worldBox.firstChild) {
-			worldBox.removeChild(worldBox.firstChild);
+			worldBox.removeChild(worldBox.lastChild);
 		}
 
 		// Create an element for each world
@@ -886,7 +886,7 @@ function FillLevelBox (levelArray) {
 
 	// Clear out old elements
 	while (levelBox.firstChild) {
-		levelBox.removeChild(levelBox.firstChild);
+		levelBox.removeChild(levelBox.lastChild);
 	}
 
 	// Create an element for each level
@@ -917,6 +917,15 @@ function FillRuleOptions (sessionRef) {
 	var conditionChoiceBox = document.getElementById("conditions_choice_box");
 
 	// Clear the menus (Is this necessary?)
+	while (triggerChoiceBox.firstChild) {
+		triggerChoiceBox.removeChild(triggerChoiceBox.lastChild);
+	}
+	while (effectChoiceBox.firstChild) {
+		effectChoiceBox.removeChild(effectChoiceBox.lastChild);
+	}
+	while (conditionChoiceBox.firstChild) {
+		conditionChoiceBox.removeChild(conditionChoiceBox.lastChild);
+	}
 
 	// Loop through the exported rule data and create rule buttons for each
 	for (var triggerAbbrv in triggerData) {
@@ -955,7 +964,7 @@ function SetupEntityRules () {
 	var rulesBox = document.getElementById("entity_rules_box");
 	// Clear rules box
 	while (rulesBox.firstChild) {
-		rulesBox.removeChild(rulesBox.firstChild);
+		rulesBox.removeChild(rulesBox.lastChild);
 	}
 	// Recurse through rules and make divs based on the structure
 	CreateEntityRuleElementsRecurse(rulesBox, curEntity.rules, "");
@@ -1108,7 +1117,7 @@ function SetupEntityVariables () {
 	var variablesBox = document.getElementById("entity_variables_box");
 	// Clear variables box
 	while (variablesBox.firstChild) {
-		variablesBox.removeChild(variablesBox.firstChild);
+		variablesBox.removeChild(variablesBox.lastChild);
 	}
 	// Loop through variables and make divs based on the structure
 	CreateEntityVariableElementsForMainList(variablesBox, curEntity.variables, "");
@@ -1177,14 +1186,14 @@ function FillVariableSelection () {
 	// Global variables
 	var globalsBox = document.getElementById("select_variable_global_variables_box");
 	while (globalsBox.firstChild) {
-		globalsBox.removeChild(globalsBox.firstChild);
+		globalsBox.removeChild(globalsBox.lastChild);
 	}
 	var globalVars = GetEntityGlobalVariablesOfType(curEntity, variableType);
 	CreateEntityVariableElementsForSelection(globalsBox, globalVars);
 	// Local variables
 	var localsBox = document.getElementById("select_variable_local_variables_box");
 	while (localsBox.firstChild) {
-		localsBox.removeChild(localsBox.firstChild);
+		localsBox.removeChild(localsBox.lastChild);
 	}
 	var localVars = GetEntityLocalVariablesOfType(curEntity, variableType);
 	CreateEntityVariableElementsForSelection(localsBox, localVars);
@@ -1332,7 +1341,7 @@ function setupLevelVariableSelect () {
 	var levelInputBox = document.getElementById("input_box_level");
 	// Clear out old elements
 	while (levelInputBox.firstChild) {
-		levelInputBox.removeChild(levelInputBox.firstChild);
+		levelInputBox.removeChild(levelInputBox.lastChild);
 	}
 	for (var i = 0; i < curSession.levels.length; i++) {
 		var levelToAdd = curSession.levels[i]
