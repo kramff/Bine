@@ -119,13 +119,92 @@ var Session = (function () {
 				levelRef.RemoveEntity(entityToWarp);
 			},
 		},
+		// Variable setters
+		set_variable_string: {
+			text: "Set a variable (string)",
+			requiredVariables: ["variableToSet", "valueToUse"],
+			requiredVariableTypes: ["string", "string"],
+			variableSetter: true,
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+				console.log("set_variable_string effect happened");
+				debugger;
+			},
+		},
+		set_variable_number: {
+			text: "Set a variable (number)",
+			requiredVariables: ["variableToSet", "valueToUse"],
+			requiredVariableTypes: ["number", "number"],
+			variableSetter: true,
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+				console.log("set_variable_number effect happened");
+			},
+		},
+		set_variable_boolean: {
+			text: "Set a variable (boolean)",
+			requiredVariables: ["variableToSet", "valueToUse"],
+			requiredVariableTypes: ["boolean", "boolean"],
+			variableSetter: true,
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+				console.log("set_variable_boolean effect happened");
+			},
+		},
+		set_variable_entity: {
+			text: "Set a variable (entity)",
+			requiredVariables: ["variableToSet", "valueToUse"],
+			requiredVariableTypes: ["entity", "entity"],
+			variableSetter: true,
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+				console.log("set_variable_entity effect happened");
+			},
+		},
+		set_variable_area: {
+			text: "Set a variable (area)",
+			requiredVariables: ["variableToSet", "valueToUse"],
+			requiredVariableTypes: ["area", "area"],
+			variableSetter: true,
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+				console.log("set_variable_area effect happened");
+			},
+		},
+		set_variable_level: {
+			text: "Set a variable (level)",
+			requiredVariables: ["variableToSet", "valueToUse"],
+			requiredVariableTypes: ["level", "level"],
+			variableSetter: true,
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+				console.log("set_variable_level effect happened");
+			},
+		},
+		set_variable_tile: {
+			text: "Set a variable (tile)",
+			requiredVariables: ["variableToSet", "valueToUse"],
+			requiredVariableTypes: ["tile", "tile"],
+			variableSetter: true,
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+				console.log("set_variable_tile effect happened");
+			},
+		},
+		set_variable_coordinates: {
+			text: "Set a variable (coordinates)",
+			requiredVariables: ["variableToSet", "valueToUse"],
+			requiredVariableTypes: ["coordinates", "coordinates"],
+			variableSetter: true,
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+				console.log("set_variable_coordinates effect happened");
+			},
+		},
+		
+		set_variable: {
+			text: "Set a variable to a new value",
+			requiredVariables: []
+		},
 	};
 
 	// Todo: Rename this function?
 	// This does the prep-work of determining the variables to use
 	// in the effect functions, so that the effect functions can just use
 	// final versions of the variables instead of figuring them out
-	function effectFunctionVariableSetupFunction (effectFunction, localVariables, sessionRef, levelRef, entityRef, useVariables) {
+	function effectFunctionVariableSetupFunction (effectFunction, localVariables, sessionRef, levelRef, entityRef, useVariables, isVariableSetter) {
 		// This is the old version
 		// effectFunction(localVariables, sessionRef, levelRef, entityRef, useVariables);
 
@@ -175,10 +254,16 @@ var Session = (function () {
 			}
 			finalVariableData[i] = variableData;
 		}
-		// run the effectFunction with the now-already-setup variable data
-		// ************
-		// IN PROGRESS HERE
-		effectFunction(sessionRef, levelRef, entityRef, finalVariableData);
+
+		if (isVariableSetter) {
+			// Need to pass by reference so variable's value can be changed
+			// ???????
+		}
+		else {
+			// Normal, just pass values
+			// run the effectFunction with the now-already-setup variable data
+			effectFunction(sessionRef, levelRef, entityRef, finalVariableData);
+		}
 	}
 
 	// var entityIDCounter = 0;
@@ -517,9 +602,17 @@ var Session = (function () {
 			if (EVENT_DEBUGGING) {
 				console.log(effect.text);
 			}
+			var result;
+			if (rule.variableSetter === true) {
+				// Same as below but with "true" at end
+				effectFunctionVariableSetupFunction(effect.effectFunction, localVariables, sessionRef, levelRef, entityRef, rule.variables, true);
+			}
+			else {
+				effectFunctionVariableSetupFunction(effect.effectFunction, localVariables, sessionRef, levelRef, entityRef, rule.variables);
+			}
 			// Is there a result from an effect????
 			// Should just be "side effects"?
-			var result = effectFunctionVariableSetupFunction(effect.effectFunction, localVariables, sessionRef, levelRef, entityRef, rule.variables);
+			// var result = 
 			// var result = effect.effectFunction(localVariables, sessionRef, levelRef, entityRef, rule.variables);
 		}
 	};
