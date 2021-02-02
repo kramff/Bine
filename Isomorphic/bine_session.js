@@ -59,6 +59,17 @@ var Session = (function () {
 				return true;
 			},
 		},
+	};
+	var setVariableFunc = function (sessionRef, levelRef, entityRef, useVariables, variableIDs) {
+		console.log("setVariableFunc (generic function) effect happened");
+		// *** Set Variable Here
+		// Set the value of variable 0 to the value from variable 1
+		// get variable 1's value
+		var valueToUse = useVariables[1];
+		// get the variable 0 object
+		var variableToSet = GetVariableByID(entityRef.variables, variableIDs[0]);
+		// set the variable to the value
+		variableToSet.value = valueToUse;
 	}
 	var effects = {
 		say_message: {
@@ -125,73 +136,56 @@ var Session = (function () {
 			requiredVariables: ["variableToSet", "valueToUse"],
 			requiredVariableTypes: ["string", "string"],
 			variableSetter: true,
-			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
-				console.log("set_variable_string effect happened");
-				debugger;
-			},
+			effectFunction: setVariableFunc,
 		},
 		set_variable_number: {
 			text: "Set a variable (number)",
 			requiredVariables: ["variableToSet", "valueToUse"],
 			requiredVariableTypes: ["number", "number"],
 			variableSetter: true,
-			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
-				console.log("set_variable_number effect happened");
-			},
+			effectFunction: setVariableFunc,
 		},
 		set_variable_boolean: {
 			text: "Set a variable (boolean)",
 			requiredVariables: ["variableToSet", "valueToUse"],
 			requiredVariableTypes: ["boolean", "boolean"],
 			variableSetter: true,
-			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
-				console.log("set_variable_boolean effect happened");
-			},
+			effectFunction: setVariableFunc,
 		},
 		set_variable_entity: {
 			text: "Set a variable (entity)",
 			requiredVariables: ["variableToSet", "valueToUse"],
 			requiredVariableTypes: ["entity", "entity"],
 			variableSetter: true,
-			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
-				console.log("set_variable_entity effect happened");
-			},
+			effectFunction: setVariableFunc,
 		},
 		set_variable_area: {
 			text: "Set a variable (area)",
 			requiredVariables: ["variableToSet", "valueToUse"],
 			requiredVariableTypes: ["area", "area"],
 			variableSetter: true,
-			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
-				console.log("set_variable_area effect happened");
-			},
+			effectFunction: setVariableFunc,
 		},
 		set_variable_level: {
 			text: "Set a variable (level)",
 			requiredVariables: ["variableToSet", "valueToUse"],
 			requiredVariableTypes: ["level", "level"],
 			variableSetter: true,
-			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
-				console.log("set_variable_level effect happened");
-			},
+			effectFunction: setVariableFunc,
 		},
 		set_variable_tile: {
 			text: "Set a variable (tile)",
 			requiredVariables: ["variableToSet", "valueToUse"],
 			requiredVariableTypes: ["tile", "tile"],
 			variableSetter: true,
-			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
-				console.log("set_variable_tile effect happened");
-			},
+			effectFunction: setVariableFunc
 		},
 		set_variable_coordinates: {
 			text: "Set a variable (coordinates)",
 			requiredVariables: ["variableToSet", "valueToUse"],
 			requiredVariableTypes: ["coordinates", "coordinates"],
 			variableSetter: true,
-			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
-				console.log("set_variable_coordinates effect happened");
-			},
+			effectFunction: setVariableFunc,
 		},
 		
 		set_variable: {
@@ -256,8 +250,8 @@ var Session = (function () {
 		}
 
 		if (isVariableSetter) {
-			// Need to pass by reference so variable's value can be changed
-			// ???????
+			// Need to pass variable ID's so variable's value can be changed
+			effectFunction(sessionRef, levelRef, entityRef, finalVariableData, useVariables);
 		}
 		else {
 			// Normal, just pass values
@@ -603,7 +597,7 @@ var Session = (function () {
 				console.log(effect.text);
 			}
 			var result;
-			if (rule.variableSetter === true) {
+			if (effect.variableSetter === true) {
 				// Same as below but with "true" at end
 				effectFunctionVariableSetupFunction(effect.effectFunction, localVariables, sessionRef, levelRef, entityRef, rule.variables, true);
 			}
