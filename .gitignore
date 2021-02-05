@@ -3,3 +3,5 @@ bine_project*
 run.sh
 project.sublime-project
 project.sublime-workspace
+*.swp
+

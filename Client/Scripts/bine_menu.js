@@ -411,7 +411,7 @@ function SetupButtons () {
 				if (variableID === "literal_variable") {
 					// Go to a menu to write in a variable literal
 				}
-				else if (variableID === "literal_variable") {
+				else if (variableConstructors.indexOf(variableID) !== -1) {
 					// Go to a menu to construct a literal out of other variables
 				}
 				else
