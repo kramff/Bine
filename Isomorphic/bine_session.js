@@ -187,11 +187,6 @@ var Session = (function () {
 			variableSetter: true,
 			effectFunction: setVariableFunc,
 		},
-		
-		set_variable: {
-			text: "Set a variable to a new value",
-			requiredVariables: []
-		},
 	};
 
 	// Todo: Rename this function?
