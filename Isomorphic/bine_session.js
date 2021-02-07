@@ -76,7 +76,6 @@ var Session = (function () {
 			text: "Say Message",
 			requiredVariables: ["text"],
 			requiredVariableTypes: ["string"],
-			// effectFunction: function (localVariables, sessionRef, levelRef, entityRef, useVariables) {
 			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 				console.log("say_message effect happened");
 				var textVariable = useVariables[0]
@@ -90,17 +89,6 @@ var Session = (function () {
 					entityRef.tempMessageTime = 300;
 					entityRef.tempMessageString = "(missing text)";
 				}
-
-
-				// variables: right now is the other entity that moved next to this one and triggered the rule
-				// sessionRef: reference to session
-				// levelRef: reference to level
-				// entityRef: reference to self entity (the entity that will say the message)
-				// useVariables: undefined, should contain the variable of what text to say?
-				// this: the say_message object, can use to get the following...
-				// this.text: "Say Message"
-				// this.requiredVariables: ["text"]
-				// this.effectFunction: the function currently running
 			},
 		},
 		warp_entity_to_level: {
@@ -187,6 +175,46 @@ var Session = (function () {
 			variableSetter: true,
 			effectFunction: setVariableFunc,
 		},
+	};
+	var constructions = {
+		string: [
+			concatenate_two_strings: {
+				text: "Concatenate two strings",
+				requiredVariables: ["string1", "string2"],
+				requiredVariableTypes: "string", "string"],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					var stringConcat = useVariables[0] + useVariables[1];
+					return stringConcat;
+				},
+			},
+			convert_number_to_string: {},
+		],
+		number: [
+			add_two_numbers: {},
+			subtract_two_numbers: {},
+			multiply_two_numbers: {},
+			divide_two_numbers: {},
+			length_of_string: {},
+		],
+		boolean: [
+			equal_two_strings: {},
+			not_equal_two_strings: {},
+			equal_two_numbers: {},
+			not_equal_two_numbers: {},
+			greater_than: {},
+			greater_than_or_equal: {},
+			less_than: {},
+			less_than_or_equal: {},
+			boolean_and: {},
+			boolean_or: {},
+			boolean_xor: {},
+			boolean_not: {},
+		],
+		entity: [],
+		area: [],
+		level: [],
+		tile: [],
+		coordinates: [],
 	};
 
 	// Todo: Rename this function?
