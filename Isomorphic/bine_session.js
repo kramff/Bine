@@ -24,7 +24,7 @@ var Session = (function () {
 
 	var sessionRef = this;
 
-	// Events: triggers, conditions, effects
+	// Events: triggers, conditions, effects, constructions
 	var triggers = {
 
 		// When a different entity steps adjacent to this one
@@ -177,26 +177,26 @@ var Session = (function () {
 		},
 	};
 	var constructions = {
-		string: [
+		string: {
 			concatenate_two_strings: {
 				text: "Concatenate two strings",
 				requiredVariables: ["string1", "string2"],
-				requiredVariableTypes: "string", "string"],
+				requiredVariableTypes: ["string", "string"],
 				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 					var stringConcat = useVariables[0] + useVariables[1];
 					return stringConcat;
 				},
 			},
 			convert_number_to_string: {},
-		],
-		number: [
+		},
+		number: {
 			add_two_numbers: {},
 			subtract_two_numbers: {},
 			multiply_two_numbers: {},
 			divide_two_numbers: {},
 			length_of_string: {},
-		],
-		boolean: [
+		},
+		boolean: {
 			equal_two_strings: {},
 			not_equal_two_strings: {},
 			equal_two_numbers: {},
@@ -209,12 +209,12 @@ var Session = (function () {
 			boolean_or: {},
 			boolean_xor: {},
 			boolean_not: {},
-		],
-		entity: [],
-		area: [],
-		level: [],
-		tile: [],
-		coordinates: [],
+		},
+		entity: {},
+		area: {},
+		level: {},
+		tile: {},
+		coordinates: {},
 	};
 
 	// Todo: Rename this function?
@@ -1067,6 +1067,9 @@ var Session = (function () {
 	}
 	Session.prototype.ExportEffectData = function () {
 		return effects;
+	}
+	Session.prototype.ExportConstructionData = function () {
+		return constructions;
 	}
 	return Session;
 })();

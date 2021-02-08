@@ -929,14 +929,17 @@ function AddSingleLevelToBox (level) {
 var triggerData;
 var conditionData;
 var effectData;
+var constructionData;
 function FillRuleOptions (sessionRef) {
 	triggerData = sessionRef.ExportTriggerData();
 	conditionData = sessionRef.ExportConditionData();
 	effectData = sessionRef.ExportEffectData();
+	constructionData = sessionRef.ExportConstructionData();
 
 	var triggerChoiceBox = document.getElementById("triggers_choice_box");
 	var effectChoiceBox = document.getElementById("effects_choice_box");
 	var conditionChoiceBox = document.getElementById("conditions_choice_box");
+	var constructionChoiceBoxes = document.getElementsByClassName("variable_construction_box");
 
 	// Clear the menus (Is this necessary?)
 	while (triggerChoiceBox.firstChild) {
@@ -948,21 +951,33 @@ function FillRuleOptions (sessionRef) {
 	while (conditionChoiceBox.firstChild) {
 		conditionChoiceBox.removeChild(conditionChoiceBox.lastChild);
 	}
+	for (var i = 0; i < constructionChoiceBoxes.length; i++) {
+		var constChoiceBox = constructionChoiceBoxes[i];
+		while (constChoiceBox.firstChild) {
+			constChoiceBox.removeChild(constChoiceBox.lastChild);
+		}
+	}
 
 	// Loop through the exported rule data and create rule buttons for each
 	for (var triggerAbbrv in triggerData) {
 		var triggerRule = triggerData[triggerAbbrv];
 		CreateRuleOption(triggerChoiceBox, "trigger", triggerRule, triggerAbbrv);
 	}
-
 	for (var effectAbbrv in effectData) {
 		var effectRule = effectData[effectAbbrv];
 		CreateRuleOption(effectChoiceBox, "effect", effectRule, effectAbbrv);
 	}
-
 	for (var conditionAbbrv in conditionData) {
 		var conditionRule = conditionData[conditionAbbrv];
 		CreateRuleOption(conditionChoiceBox, "condition", conditionRule, conditionAbbrv);
+	}
+	for (var constructionTypeAbbrv in constructionData) {
+		var constructionTypeObj = constructionData[constructionTypeAbbrv];
+		var constructionChoiceBox = document.querySelector(".choice_box.variable_construction_box[data-id='variable_construction_" + constructionTypeAbbrv + "']")
+		for (var constructionItemAbbrv in constructionTypeObj) {
+			var constructionItem = constructionTypeObj[constructionItemAbbrv];
+			CreateConstructionOption(constructionChoiceBox, constructionItem, constructionItemAbbrv);
+		}
 	}
 }
 
