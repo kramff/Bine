@@ -187,7 +187,15 @@ var Session = (function () {
 					return stringConcat;
 				},
 			},
-			convert_number_to_string: {},
+			convert_number_to_string: {
+				text: "Convert number to string",
+				requiredVariables: ["number1"],
+				requiredVariableTypes: ["number"],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					var stringFromNum = String(useVariables[0]);
+					return stringFromNum;
+				},
+			},
 		},
 		number: {
 			add_two_numbers: {},
