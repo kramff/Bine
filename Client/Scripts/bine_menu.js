@@ -987,6 +987,12 @@ function CreateRuleOption (parent, type, ruleData, ruleAbbrv) {
 	ruleElement.setAttribute("data-extra", ruleAbbrv);
 }
 
+function CreateConstructionOption(parent, constructionData, constructionAbbr) {
+	var constructionElement = CreateNewDiv(parent, "selectable_variable", constructionData.text, undefined);
+	constructionElement.setAttribute("data-variable-id", "construction_" + constructionAbbr);
+	constructionElement.textContent = constructionData.text;
+}
+
 function SetupEntityEditingMenu () {
 	var colorInput = document.getElementById("entity_color_input");
 	if (curEntity.style.color !== undefined) {
