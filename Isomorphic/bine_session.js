@@ -198,25 +198,158 @@ var Session = (function () {
 			},
 		},
 		number: {
-			add_two_numbers: {},
-			subtract_two_numbers: {},
-			multiply_two_numbers: {},
-			divide_two_numbers: {},
-			length_of_string: {},
+			add_two_numbers: {
+				text: "Add two numbers",
+				requiredVariables: ["addend1", "addend2],
+				requiredVariableTypes: ["number", "number"],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return useVariables[0] + useVariables[1];
+				},
+			},
+			subtract_two_numbers: {
+				text: "Subtract a number from another number",
+				requiredVariables: ["minuend", "subtrahend"],
+				requiredVariableTypes: ["number", "number"],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return useVariables[0] - useVariables[1];
+				},
+			},
+			multiply_two_numbers: {
+				text: "Multiply two numbers together",
+				requiredVariables: ["multiplicand", "multiplier"],
+				requiredVariableTypes: ["number", "number"],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return useVariables[0] * useVariables[1];
+				},
+			},
+			divide_two_numbers: {
+				text: "Divide a number by another number",
+				requiredVariables: ["dividend", "divisor"],
+				requiredVariableTypes: ["number"],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					if (useVariables[1] === 0) {
+					{
+						// What to do about divide by zero problem?
+						return Infinity;
+					}
+					return useVariables[0] / useVariables[1];
+				},
+			},
+			length_of_string: {
+				text: "Get the number of characters in a string",
+				requiredVariables: ["string],
+				requiredVariableTypes: ["string"],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return useVariables[0].length;
+				},
+			},
+			number_read_from_string: {
+				text: "Try to read a number from a string",
+				requiredVariables: ["string],
+				requiredVariableTypes: ["string"],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					var onlyDigits = useVariables[0].replace(/[^0-9]/g, "");
+					return parseFloat(onlyDigits);
+				},
+			},
 		},
 		boolean: {
-			equal_two_strings: {},
-			not_equal_two_strings: {},
-			equal_two_numbers: {},
-			not_equal_two_numbers: {},
-			greater_than: {},
-			greater_than_or_equal: {},
-			less_than: {},
-			less_than_or_equal: {},
-			boolean_and: {},
-			boolean_or: {},
-			boolean_xor: {},
-			boolean_not: {},
+			equal_two_strings: {
+				text: "",
+				requiredVariables: [""],
+				requiredVariableTypes: [""],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return 3;
+				},
+			},
+			not_equal_two_strings: {
+				text: "",
+				requiredVariables: [""],
+				requiredVariableTypes: [""],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return 3;
+				},
+			},
+			equal_two_numbers: {
+				text: "",
+				requiredVariables: [""],
+				requiredVariableTypes: [""],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return 3;
+				},
+			},
+			not_equal_two_numbers: {
+				text: "",
+				requiredVariables: [""],
+				requiredVariableTypes: [""],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return 3;
+				},
+			},
+			greater_than: {
+				text: "",
+				requiredVariables: [""],
+				requiredVariableTypes: [""],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return 3;
+				},
+			},
+			greater_than_or_equal: {
+				text: "",
+				requiredVariables: [""],
+				requiredVariableTypes: [""],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return 3;
+				},
+			},
+			less_than: {
+				text: "",
+				requiredVariables: [""],
+				requiredVariableTypes: [""],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return 3;
+				},
+			},
+			less_than_or_equal: {
+				text: "",
+				requiredVariables: [""],
+				requiredVariableTypes: [""],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return 3;
+				},
+			},
+			boolean_and: {
+				text: "",
+				requiredVariables: [""],
+				requiredVariableTypes: [""],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return 3;
+				},
+			},
+			boolean_or: {
+				text: "",
+				requiredVariables: [""],
+				requiredVariableTypes: [""],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return 3;
+				},
+			},
+			boolean_xor: {
+				text: "",
+				requiredVariables: [""],
+				requiredVariableTypes: [""],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return 3;
+				},
+			},
+			boolean_not: {
+				text: "",
+				requiredVariables: [""],
+				requiredVariableTypes: [""],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return 3;
+				},
+			},
 		},
 		entity: {},
 		area: {},
