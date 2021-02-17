@@ -200,7 +200,7 @@ var Session = (function () {
 		number: {
 			add_two_numbers: {
 				text: "Add two numbers",
-				requiredVariables: ["addend1", "addend2],
+				requiredVariables: ["addend1", "addend2"],
 				requiredVariableTypes: ["number", "number"],
 				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 					return useVariables[0] + useVariables[1];
@@ -228,7 +228,6 @@ var Session = (function () {
 				requiredVariableTypes: ["number"],
 				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 					if (useVariables[1] === 0) {
-					{
 						// What to do about divide by zero problem?
 						return Infinity;
 					}
@@ -237,7 +236,7 @@ var Session = (function () {
 			},
 			length_of_string: {
 				text: "Get the number of characters in a string",
-				requiredVariables: ["string],
+				requiredVariables: ["string"],
 				requiredVariableTypes: ["string"],
 				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 					return useVariables[0].length;
@@ -245,7 +244,7 @@ var Session = (function () {
 			},
 			number_read_from_string: {
 				text: "Try to read a number from a string",
-				requiredVariables: ["string],
+				requiredVariables: ["string"],
 				requiredVariableTypes: ["string"],
 				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 					var onlyDigits = useVariables[0].replace(/[^0-9]/g, "");

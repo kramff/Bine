@@ -31,28 +31,6 @@ var variableTypes = [
 	"coordinates",
 ];
 
-var variableConstructors = [
-	"concatenate_two_strings",
-	"convert_number_to_string",
-	"add_two_numbers",
-	"subtract_two_numbers",
-	"multiply_two_numbers",
-	"divide_two_numbers",
-	"length_of_string",
-	"equal_two_strings",
-	"not_equal_two_strings",
-	"equal_two_numbers",
-	"not_equal_two_numbers",
-	"greater_than",
-	"greater_than_or_equal",
-	"less_than",
-	"less_than_or_equal",
-	"boolean_and",
-	"boolean_or",
-	"boolean_xor",
-	"boolean_not",
-];
-
 var buttonTypesSelector = "." + buttonTypes.join(", .");
 
 function CreateNewDiv (parent, setClass, text, id) {
@@ -410,9 +388,12 @@ function SetupButtons () {
 				var variableID = variableElement.getAttribute("data-variable-id");
 				if (variableID === "literal_variable") {
 					// Go to a menu to write in a variable literal
+					var newVariable = undefined;
 				}
-				else if (variableConstructors.indexOf(variableID) !== -1) {
-					// Go to a menu to construct a literal out of other variables
+				// else if (variableConstructors.indexOf(variableID) !== -1) {
+				else if (variableID.indexOf("construction_") !== -1) {
+					// Make a construction
+					var newConstruction = undefined;
 				}
 				else
 				{
