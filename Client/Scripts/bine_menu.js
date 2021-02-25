@@ -624,52 +624,7 @@ function DoButtonAction (action, extra) {
 			HideDarkCover();
 		break;
 		case "select_entity_variable":
-			ShowDarkCover2();
-			if (extra === "string") {
-				document.getElementById("input_string_name").value = "";
-				document.getElementById("input_string").value = "";
-				ShowMenu("input_variable_string");
-			}
-			else if (extra === "number") {
-				document.getElementById("input_number_name").value = "";
-				document.getElementById("input_number").value = "";
-				ShowMenu("input_variable_number");
-			}
-			else if (extra === "boolean") {
-				document.getElementById("input_boolean_name").value = "";
-				// document.getElementById("input_boolean").value = "";
-				document.getElementById("boolean_option1").checked = false;
-				document.getElementById("boolean_option2").checked = false;
-				ShowMenu("input_variable_boolean");
-			}
-			else if (extra === "entity") {
-				document.getElementById("input_entity_name").value = "";
-				// document.getElementById("input_entity").value = "";
-				ShowMenu("input_variable_entity");
-			}
-			else if (extra === "area") {
-				document.getElementById("input_area_name").value = "";
-				// document.getElementById("input_area").value = "";
-				ShowMenu("input_variable_area");
-			}
-			else if (extra === "level") {
-				document.getElementById("input_level_name").value = "";
-				// document.getElementById("input_level").value = "";
-				setupLevelVariableSelect();
-				ShowMenu("input_variable_level");
-			}
-			else if (extra === "tile") {
-				document.getElementById("input_tile_name").value = "";
-				// document.getElementById("input_tile").value = "";
-				ShowMenu("input_variable_tile");
-			}
-			else if (extra === "coordinates") {
-				document.getElementById("input_coordinates_name").value = "";
-				document.getElementById("input_coordinate_x").value = "";
-				document.getElementById("input_coordinate_y").value = "";
-				document.getElementById("input_coordinate_z").value = "";
-				ShowMenu("input_variable_coordinates");
-			}
+			ShowVariableInputMenu(extra);
 		break;
 		case "confirm_variable_input":
 			// May either be editing an existing variable or creating a new variable
@@ -797,6 +752,55 @@ function DoButtonAction (action, extra) {
 		case "export_world_to_file":
 			alert("clicked export button");
 		break;
+	}
+}
+
+function ShowVariableInputMenu (variableType) {
+	ShowDarkCover2();
+	if (extra === "string") {
+		document.getElementById("input_string_name").value = "";
+		document.getElementById("input_string").value = "";
+		ShowMenu("input_variable_string");
+	}
+	else if (extra === "number") {
+		document.getElementById("input_number_name").value = "";
+		document.getElementById("input_number").value = "";
+		ShowMenu("input_variable_number");
+	}
+	else if (extra === "boolean") {
+		document.getElementById("input_boolean_name").value = "";
+		// document.getElementById("input_boolean").value = "";
+		document.getElementById("boolean_option1").checked = false;
+		document.getElementById("boolean_option2").checked = false;
+		ShowMenu("input_variable_boolean");
+	}
+	else if (extra === "entity") {
+		document.getElementById("input_entity_name").value = "";
+		// document.getElementById("input_entity").value = "";
+		ShowMenu("input_variable_entity");
+	}
+	else if (extra === "area") {
+		document.getElementById("input_area_name").value = "";
+		// document.getElementById("input_area").value = "";
+		ShowMenu("input_variable_area");
+	}
+	else if (extra === "level") {
+		document.getElementById("input_level_name").value = "";
+		// document.getElementById("input_level").value = "";
+		setupLevelVariableSelect();
+		ShowMenu("input_variable_level");
+	}
+	else if (extra === "tile") {
+		document.getElementById("input_tile_name").value = "";
+		// document.getElementById("input_tile").value = "";
+		ShowMenu("input_variable_tile");
+	}
+	else if (extra === "coordinates") {
+		document.getElementById("input_coordinates_name").value = "";
+		document.getElementById("input_coordinate_x").value = "";
+		document.getElementById("input_coordinate_y").value = "";
+		document.getElementById("input_coordinate_z").value = "";
+		ShowMenu("input_variable_coordinates");
 	}
 }
 
