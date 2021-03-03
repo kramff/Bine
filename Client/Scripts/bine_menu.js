@@ -389,6 +389,9 @@ function SetupButtons () {
 				if (variableID === "literal_variable") {
 					// Go to a menu to write in a variable literal
 					var newVariable = undefined;
+					var ruleBlock = GetRuleAtNestLocation(curEntity.rules, curNestingPoint);
+					var variableType = GetVariableType(ruleBlock, curVariableSlot);
+					ShowVariableInputMenu(variableType, true);
 				}
 				// else if (variableConstructors.indexOf(variableID) !== -1) {
 				else if (variableID.indexOf("construction_") !== -1) {
@@ -624,10 +627,18 @@ function DoButtonAction (action, extra) {
 			HideDarkCover();
 		break;
 		case "select_entity_variable":
-			ShowVariableInputMenu(extra);
+			ShowVariableInputMenu(extra, false);
 		break;
 		case "confirm_variable_input":
 			// May either be editing an existing variable or creating a new variable
+			if (inLiteralMode) {
+				// Editing a literal variable here.
+				//... ??? WHAT NEEDS TO BE DIFFERENT? NOT SURE YET...
+				///
+				/////
+				///////
+
+			}
 			var varName;
 			var varValue;
 			var variableObj;
@@ -755,52 +766,73 @@ function DoButtonAction (action, extra) {
 	}
 }
 
-function ShowVariableInputMenu (variableType) {
+var inLiteralMode = false;
+function ShowVariableInputMenu (variableType, literalMode) {
+	inLiteralMode = literalMode;
 	ShowDarkCover2();
-	if (extra === "string") {
-		document.getElementById("input_string_name").value = "";
+	var nameElement;
+	if (variableType === "string") {
+		nameElement = document.getElementById("input_string_name");
+		nameElement.value = "";
 		document.getElementById("input_string").value = "";
 		ShowMenu("input_variable_string");
 	}
-	else if (extra === "number") {
-		document.getElementById("input_number_name").value = "";
+	else if (variableType === "number") {
+		nameElement = document.getElementById("input_number_name");
+		nameElement.value = "";
 		document.getElementById("input_number").value = "";
 		ShowMenu("input_variable_number");
 	}
-	else if (extra === "boolean") {
-		document.getElementById("input_boolean_name").value = "";
+	else if (variableType === "boolean") {
+		nameElement = document.getElementById("input_boolean_name");
+		nameElement.value = "";
 		// document.getElementById("input_boolean").value = "";
 		document.getElementById("boolean_option1").checked = false;
 		document.getElementById("boolean_option2").checked = false;
 		ShowMenu("input_variable_boolean");
 	}
-	else if (extra === "entity") {
-		document.getElementById("input_entity_name").value = "";
+	else if (variableType === "entity") {
+		nameElement = document.getElementById("input_entity_name");
+		nameElement.value = "";
 		// document.getElementById("input_entity").value = "";
 		ShowMenu("input_variable_entity");
 	}
-	else if (extra === "area") {
-		document.getElementById("input_area_name").value = "";
+	else if (variableType === "area") {
+		nameElement = document.getElementById("input_area_name");
+		nameElement.value = "";
 		// document.getElementById("input_area").value = "";
 		ShowMenu("input_variable_area");
 	}
-	else if (extra === "level") {
-		document.getElementById("input_level_name").value = "";
+	else if (variableType === "level") {
+		nameElement = document.getElementById("input_level_name");
+		nameElement.value = "";
 		// document.getElementById("input_level").value = "";
 		setupLevelVariableSelect();
 		ShowMenu("input_variable_level");
 	}
-	else if (extra === "tile") {
-		document.getElementById("input_tile_name").value = "";
+	else if (variableType === "tile") {
+		nameElement = document.getElementById("input_tile_name");
+		nameElement.value = "";
 		// document.getElementById("input_tile").value = "";
 		ShowMenu("input_variable_tile");
 	}
-	else if (extra === "coordinates") {
-		document.getElementById("input_coordinates_name").value = "";
+	else if (variableType === "coordinates") {
+		nameElement = document.getElementById("input_coordinates_name");
+		nameElement.value = "";
 		document.getElementById("input_coordinate_x").value = "";
 		document.getElementById("input_coordinate_y").value = "";
 		document.getElementById("input_coordinate_z").value = "";
 		ShowMenu("input_variable_coordinates");
+	}
+
+	// Stuff if this is actually a Literal Value not a Global Variable
+	if (inLiteralMode) {
+		nameElement.hidden = true;
+		nameElement.previousElementSibling.hidden = true;
+	}
+	else {
+		nameElement.hidden = false;
+		nameElement.previousElementSibling.hidden = false;
 	}
 }
 
