@@ -633,11 +633,7 @@ function DoButtonAction (action, extra) {
 			// May either be editing an existing variable or creating a new variable
 			if (inLiteralMode) {
 				// Editing a literal variable here.
-				//... ??? WHAT NEEDS TO BE DIFFERENT? NOT SURE YET...
-				///
-				/////
-				///////
-
+				// Does anything need to be different here, or is it only at the end?
 			}
 			var varName;
 			var varValue;
@@ -734,6 +730,21 @@ function DoButtonAction (action, extra) {
 						curEntity.variableCounter ++;
 						variableObj.id = curEntity.variableCounter;
 						curEntity.variables.push(variableObj);
+						if (inLiteralMode) {
+							// Creating a new Literal Variable
+							// Set literal to true
+							variableObj.literal = true;
+							// Set name to be a stringify version of the value
+							variableObj.name = JSON.stringify(variableObj.value) + "(literal)";
+
+							// At this point, also use this newly created variable
+							//  as the selected variable to use at the previously
+							//  selected rule blocks
+							var ruleBlock = GetRuleAtNestLocation(curEntity.rules, curNestingPoint);
+							// Set the variable slot to the id of the new literal variable
+							ruleBlock.variables[curVariableSlot] = variableObj.id;
+							SetupEntityRules();
+						} 
 					}
 					HideAllOverMenu2s();
 					HideDarkCover2();
@@ -828,11 +839,11 @@ function ShowVariableInputMenu (variableType, literalMode) {
 	// Stuff if this is actually a Literal Value not a Global Variable
 	if (inLiteralMode) {
 		nameElement.hidden = true;
-		nameElement.previousElementSibling.hidden = true;
+		// nameElement.previousElementSibling.hidden = true;
 	}
 	else {
 		nameElement.hidden = false;
-		nameElement.previousElementSibling.hidden = false;
+		// nameElement.previousElementSibling.hidden = false;
 	}
 }
 
@@ -1187,8 +1198,10 @@ function SetupEntityVariables () {
 function CreateEntityVariableElementsForMainList (container, variables) {
 	for (var i = 0; i < variables.length; i++) {
 		var variable = variables[i];
-		// Skip Non-Global variables
-		if (!variable.local) {
+		// Only show global variables
+		// Skip local variables - only accessible from their specific events
+		// Skip literal variables - only available immediately when created
+		if (!variable.local && !variable.literal) {
 			var variableDiv = CreateNewDiv(container, "variable", undefined, undefined);
 			variableDiv.setAttribute("data-variable-id", variable.id);
 			var varName = CreateNewDiv(variableDiv, "variable_name", "Name: " + variable.name, undefined);
