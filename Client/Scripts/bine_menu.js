@@ -374,13 +374,11 @@ function SetupButtons () {
 		var variableChoiceBox = variableChoiceBoxes[i];
 		variableChoiceBox.onclick = function () {
 			var variableElement;
-			if (event.target.classList.contains("selectable_variable"))
-			{
+			if (event.target.classList.contains("selectable_variable")) {
 				// Clicked on element directly
 				variableElement = event.target;
 			}
-			else if (event.target.parentElement.classList.contains("selectable_variable"))
-			{
+			else if (event.target.parentElement.classList.contains("selectable_variable")) {
 				// Clicked on child element, use parent
 				variableElement = event.target.parentElement;
 			}
@@ -394,18 +392,38 @@ function SetupButtons () {
 					ShowVariableInputMenu(variableType, true);
 				}
 				// else if (variableConstructors.indexOf(variableID) !== -1) {
-				else if (variableID.indexOf("construction_") !== -1) {
-					// Make a construction
-					var newConstruction = undefined;
-				}
-				else
-				{
-					// Otherwise, we have selected an actual variable to use
-					// Get the block we are editing
+				else {
+					// Get the block to edit
 					var ruleBlock = GetRuleAtNestLocation(curEntity.rules, curNestingPoint);
-					// Set the variable slot to the id of the selected variable
-					ruleBlock.variables[curVariableSlot] = variableID;
 
+					// Check if a construction was selected
+					if (variableID.indexOf("construction_") !== -1) {
+						// Make a new variable of type "construction"
+						// with a type (which construction)
+						// and an array of variables it's looking at (empty at first)
+						var constructionType = variableID.replace("construction_", "");
+						var newConstruction = {
+							type: constructionType,
+							conVars: [],
+						};
+						var variableObj = {
+							name: "C",
+							value: newConstruction,
+							type: "construction",
+						}
+						curEntity.variableCounter ++;
+						variableObj.id = curEntity.variableCounter;
+						variableObj.construction = true;
+						curEntity.variables.push(variableObj);
+
+						// Use the new construction as the variable for this rule
+						ruleBlock.variables[curVariableSlot] = variableObj.id;
+					}
+					else {
+						// Otherwise, we have selected an existing variable to use
+						// Set the variable slot to the id of the selected variable
+						ruleBlock.variables[curVariableSlot] = variableID;
+					}
 					// Then, leave this menu, done selecting variable.
 					DoButtonAction ("close_over_menu_for_variable_selecting");
 					SetupEntityRules();
@@ -1138,7 +1156,16 @@ function AddRuleOptions (ruleDiv, rule, ruleType) {
 			else
 			{
 				var selectedVariable = GetVariableByID(curEntity.variables, selectedVariableID);
-				reqVarDiv = CreateNewDiv(ruleDiv, "required_variable", "Have var of type: " + "(" + requiredVariable + "). It is: " + selectedVariable.name, undefined);
+				if (selectedVariable.type === "construction") {
+					// Construction variable here
+					// Create buttons for adding variables used in construction
+					// (Work in progress: just the standard button thingy)
+					reqVarDiv = CreateNewDiv(ruleDiv, "required_variable", "Have var of type: " + "(" + requiredVariable + " - construction). It is: " + selectedVariable.name, undefined);
+				}
+				else {
+					// Regular, non-construction variable here
+					reqVarDiv = CreateNewDiv(ruleDiv, "required_variable", "Have var of type: " + "(" + requiredVariable + "). It is: " + selectedVariable.name, undefined);
+				}
 			}
 			reqVarDiv.setAttribute("data-variable-slot", i);
 		}
@@ -1201,7 +1228,7 @@ function CreateEntityVariableElementsForMainList (container, variables) {
 		// Only show global variables
 		// Skip local variables - only accessible from their specific events
 		// Skip literal variables - only available immediately when created
-		if (!variable.local && !variable.literal) {
+		if (!variable.local && !variable.literal && !variable.construction) {
 			var variableDiv = CreateNewDiv(container, "variable", undefined, undefined);
 			variableDiv.setAttribute("data-variable-id", variable.id);
 			var varName = CreateNewDiv(variableDiv, "variable_name", "Name: " + variable.name, undefined);
