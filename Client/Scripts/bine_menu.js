@@ -1143,15 +1143,16 @@ function AddRuleOptions (ruleDiv, rule, ruleType) {
 	// For each required variable, make an element that lets the user pick a variable to use
 	if (ruleData.requiredVariables !== undefined) {
 		for (var i = 0; i < ruleData.requiredVariables.length; i++) {
-			// requiredVariable is just a type string ("number", "string", "entity", etc)
 			var requiredVariable = ruleData.requiredVariables[i];
+			// requiredVariableType is just a type string ("number", "string", "entity", etc)
+			var requiredVariableType = ruleData.requiredVariableTypes[i];
 			// selectedVariableID is the ID of the selected variable that will be used in this slot
 			// If undefined, show that a variable is needed. Otherwise, show the selected variable
 			var selectedVariableID = rule.variables[i];
 			var reqVarDiv;
 			if (selectedVariableID === undefined || selectedVariableID === -1)
 			{
-				reqVarDiv = CreateNewDiv(ruleDiv, "required_variable", "Need var of type: " + "(" + requiredVariable + ")", undefined);
+				reqVarDiv = CreateNewDiv(ruleDiv, "required_variable", "Need var of type: " + requiredVariableType + ", for purpose: " + requiredVariable , undefined);
 			}
 			else
 			{
@@ -1160,7 +1161,22 @@ function AddRuleOptions (ruleDiv, rule, ruleType) {
 					// Construction variable here
 					// Create buttons for adding variables used in construction
 					// (Work in progress: just the standard button thingy)
-					reqVarDiv = CreateNewDiv(ruleDiv, "required_variable", "Have var of type: " + "(" + requiredVariable + " - construction). It is: " + selectedVariable.name, undefined);
+					reqVarDiv = CreateNewDiv(ruleDiv, "required_variable construction_variable", "Have var of type: " + "(" + requiredVariable + " - construction). It is: " + selectedVariable.name, undefined);
+					var constructionType = selectedVariable.value.type;
+					var constructionVars = selectedVariable.value.conVars;
+					var constructionInfo = constructionData[requiredVariableType][constructionType];
+					var neededConVars = constructionInfo.requiredVariables.length;
+					for (var i = 0; i < neededConVars; i++) {
+						var conVarName = constructionInfo.requiredVariables[i]
+						var conVarType = constructionInfo.requiredVariableTypes[i];
+						var conVarPicked = selectedVariable.value.conVars[i];
+						if (conVarPicked !== undefined) {
+							// Already picked a variable to put here
+						}
+						else {
+							// Empty spot for a variable
+						}
+					}
 				}
 				else {
 					// Regular, non-construction variable here
