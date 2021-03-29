@@ -1172,11 +1172,19 @@ function AddRuleOptions (ruleDiv, rule, ruleType) {
 						var conVarPicked = selectedVariable.value.conVars[i];
 						if (conVarPicked !== undefined) {
 							// Already picked a variable to put here
+							var existingVarDiv = CreateNewDiv(reqVarDiv, "construction_component", "CC: " + conVarName + "(" + conVarType + ")", undefined);
+							existingVarDiv.setAttribute("data-construction-var-num", i);
+							existingVarDiv.setAttribute("data-construction-component-id", conVarPicked);
 						}
 						else {
 							// Empty spot for a variable
+							var emptyVarDiv = CreateNewDiv(reqVarDiv, "construction_component", "CC: <empty> (" + conVarType + ")", undefined);
+							emptyVarDiv.setAttribute("data-construction-var-num", i);
 						}
 					}
+					// Button to stop using this construction and pick something else
+					// either an existing variable, new variable, or new construction
+					var cancelConstructionDiv = CreateNewDiv(reqVarDiv, "construction_cancel", "Cancel construction", undefined);
 				}
 				else {
 					// Regular, non-construction variable here

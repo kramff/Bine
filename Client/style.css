@@ -455,3 +455,10 @@ div.disabled {
 	font-weight: bold;
 }
 
+.construction_component {
+	border: 1px solid #FFFFFF;
+}
+
+.construction_cancel {
+	border: 1px solid #FFFFFF;
+}
