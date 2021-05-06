@@ -11,6 +11,8 @@ var buttonTypes = [
 	"selected_variable",
 	"rule_delete",
 	"variable_delete",
+	"construction_component",
+	"construction_cancel",
 	"level",
 	"session",
 	"world",
@@ -290,6 +292,12 @@ function SetupButtons () {
 			FillVariableSelection();
 			ShowDarkCover();
 			ShowMenu("select_variable");
+		}
+		else if (event.target.classList.contains("construction_component")) {
+			// Open menu to pick variable to use for this construction component
+		}
+		else if (event.target.classList.contains("construction_cancel")) {
+			// Stop using the construction (it will turn back into a required_variable)
 		}
 		ButtonMisc();
 	}
@@ -1161,7 +1169,7 @@ function AddRuleOptions (ruleDiv, rule, ruleType) {
 					// Construction variable here
 					// Create buttons for adding variables used in construction
 					// (Work in progress: just the standard button thingy)
-					reqVarDiv = CreateNewDiv(ruleDiv, "required_variable construction_variable", "Have var of type: " + "(" + requiredVariable + " - construction). It is: " + selectedVariable.name, undefined);
+					reqVarDiv = CreateNewDiv(ruleDiv, "construction_variable", "Have var of type: " + "(" + requiredVariable + " - construction). It is: " + selectedVariable.name, undefined);
 					var constructionType = selectedVariable.value.type;
 					var constructionVars = selectedVariable.value.conVars;
 					var constructionInfo = constructionData[requiredVariableType][constructionType];

@@ -165,6 +165,31 @@ div {
 	border: 1px solid #FFFFFF;
 	font-size: 16px;
 }
+
+.construction_variable {
+	padding: 10px;
+	margin: 10px;
+	background-color: #404040;
+	border: 1px solid #FFFFFF;
+	font-size: 16px;
+}
+
+.construction_component {
+	padding: 5px;
+	margin: 5px;
+	background-color: #353535;
+	border: 1px solid #FFFFFF;
+	font-size: 16px;
+}
+
+.construction_cancel {
+	padding: 5px;
+	margin: 5px;
+	background-color: #353535;
+	border: 1px solid #FFFFFF;
+	font-size: 16px;
+}
+
 div.disabled {
 	opacity: 0.6;
 	pointer-events: none;
@@ -177,6 +202,8 @@ div.disabled {
 .selected_variable:hover,
 .rule_delete:hover,
 .variable_delete:hover,
+.construction_component:hover,
+.construction_cancel:hover,
 .level:hover,
 .session:hover,
 .world:hover,
