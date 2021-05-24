@@ -295,6 +295,10 @@ function SetupButtons () {
 		}
 		else if (event.target.classList.contains("construction_component")) {
 			// Open menu to pick variable to use for this construction component
+			// TODO: Figure out what the variable ID is supposed to be
+			// (Probably some nesting stuff)
+			var constructionVariableID = 123456;
+			OpenEditVariableMenu(constructionVariableID);
 		}
 		else if (event.target.classList.contains("construction_cancel")) {
 			// Stop using the construction (it will turn back into a required_variable)
@@ -308,57 +312,7 @@ function SetupButtons () {
 			// Edit a variable
 			var variableParent = event.target.parentElement;
 			var variableID = variableParent.getAttribute("data-variable-id");
-
-			if (variableID !== null) {
-				// Edit the variable with that id
-				inVariable = true;
-				curVariable = GetVariableByID(curEntity.variables, variableID);
-				var variableData
-
-				ShowDarkCover2();
-
-				// TODO: Setup other types of variables
-				// if (extra === "string") {
-				if (curVariable.type === "string") {
-					document.getElementById("input_string_name").value = curVariable.name;
-					document.getElementById("input_string").value = curVariable.value;
-					ShowMenu("input_variable_string");
-				}
-				else if (curVariable.type === "number") {
-					document.getElementById("input_number_name").value = curVariable.name;
-					document.getElementById("input_number").value = curVariable.value;
-					ShowMenu("input_variable_number");
-				}
-				else if (curVariable.type === "boolean") {
-					document.getElementById("input_boolean_name").value = curVariable.name;
-					document.getElementById("input_boolean").value = curVariable.value;
-					ShowMenu("input_variable_boolean");
-				}
-				else if (curVariable.type === "entity") {
-					// TODO: Fill in the rest of these variable types
-				}
-				else if (curVariable.type === "area") {
-
-				}
-				else if (curVariable.type === "level") {
-					document.getElementById("input_level_name").value = curVariable.name;
-					setupLevelVariableSelect();
-					var levelID = curVariable.value;
-					var levelButton = document.querySelector(".level_button[level_id='" + levelID + "']")
-					levelButton.classList.add("level_selected");
-					ShowMenu("input_variable_level");
-				}
-				else if (curVariable.type === "tile") {
-
-				}
-				else if (curVariable.type === "coordinates") {
-					document.getElementById("input_number_name").value = curVariable.name;
-					document.getElementById("input_coordinate_x").value = curVariable.value.x;
-					document.getElementById("input_coordinate_y").value = curVariable.value.y;
-					document.getElementById("input_coordinate_z").value = curVariable.value.z;
-					ShowMenu("input_variable_coordinates");
-				}
-			}
+			OpenEditVariableMenu(variableID);
 		}
 		else if (event.target.classList.contains("variable_delete")) {
 			// Remove the associated variable
@@ -458,6 +412,58 @@ function SetupButtons () {
 				alreadySelected.item(0).classList.remove("level_selected");
 			}
 			event.target.classList.add("level_selected");
+		}
+	}
+}
+
+function OpenEditVariableMenu (variableID) {
+
+	if (variableID !== null) {
+		// Edit the variable with that id
+		inVariable = true;
+		curVariable = GetVariableByID(curEntity.variables, variableID);
+		ShowDarkCover2();
+
+		// TODO: Setup other types of variables
+		// if (extra === "string") {
+		if (curVariable.type === "string") {
+			document.getElementById("input_string_name").value = curVariable.name;
+			document.getElementById("input_string").value = curVariable.value;
+			ShowMenu("input_variable_string");
+		}
+		else if (curVariable.type === "number") {
+			document.getElementById("input_number_name").value = curVariable.name;
+			document.getElementById("input_number").value = curVariable.value;
+			ShowMenu("input_variable_number");
+		}
+		else if (curVariable.type === "boolean") {
+			document.getElementById("input_boolean_name").value = curVariable.name;
+			document.getElementById("input_boolean").value = curVariable.value;
+			ShowMenu("input_variable_boolean");
+		}
+		else if (curVariable.type === "entity") {
+			// TODO: Fill in the rest of these variable types
+		}
+		else if (curVariable.type === "area") {
+
+		}
+		else if (curVariable.type === "level") {
+			document.getElementById("input_level_name").value = curVariable.name;
+			setupLevelVariableSelect();
+			var levelID = curVariable.value;
+			var levelButton = document.querySelector(".level_button[level_id='" + levelID + "']")
+			levelButton.classList.add("level_selected");
+			ShowMenu("input_variable_level");
+		}
+		else if (curVariable.type === "tile") {
+
+		}
+		else if (curVariable.type === "coordinates") {
+			document.getElementById("input_number_name").value = curVariable.name;
+			document.getElementById("input_coordinate_x").value = curVariable.value.x;
+			document.getElementById("input_coordinate_y").value = curVariable.value.y;
+			document.getElementById("input_coordinate_z").value = curVariable.value.z;
+			ShowMenu("input_variable_coordinates");
 		}
 	}
 }
@@ -776,7 +782,7 @@ function DoButtonAction (action, extra) {
 					HideDarkCover2();
 					HideAllOverMenus();
 					HideDarkCover();
-					// *** Update entity variable html display
+					// Update entity variable html display
 					SetupEntityVariables();
 				}
 			}
