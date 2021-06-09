@@ -1186,14 +1186,18 @@ function AddRuleOptions (ruleDiv, rule, ruleType) {
 						var conVarPicked = selectedVariable.value.conVars[i];
 						if (conVarPicked !== undefined) {
 							// Already picked a variable to put here
-							var existingVarDiv = CreateNewDiv(reqVarDiv, "construction_component", "CC: " + conVarName + "(" + conVarType + ")", undefined);
-							existingVarDiv.setAttribute("data-construction-var-num", i);
-							existingVarDiv.setAttribute("data-construction-component-id", conVarPicked);
+							// var existingVarDiv = CreateNewDiv(reqVarDiv, "construction_component", "CC: " + conVarName + "(" + conVarType + ")", undefined);
+							// existingVarDiv.setAttribute("data-construction-var-num", i);
+							// existingVarDiv.setAttribute("data-construction-component-id", conVarPicked);
+							// Create a required_variable or construction_variable
+							reqVarDiv = CreateNewDiv(ruleDiv, "required_variable", "Have var of type: " + conVarType + ". It is: " + conVarPicked.name, undefined);
 						}
 						else {
 							// Empty spot for a variable
-							var emptyVarDiv = CreateNewDiv(reqVarDiv, "construction_component", "CC: <empty> (" + conVarType + ")", undefined);
-							emptyVarDiv.setAttribute("data-construction-var-num", i);
+							// var emptyVarDiv = CreateNewDiv(reqVarDiv, "construction_component", "CC: <empty> (" + conVarType + ")", undefined);
+							// emptyVarDiv.setAttribute("data-construction-var-num", i);
+							// Create a required_variable
+							reqVarDiv = CreateNewDiv(ruleDiv, "required_variable", "Need var of type: " + conVarType + ", for purpose: " + "<requiredVariable??>" , undefined);
 						}
 					}
 					// Button to stop using this construction and pick something else
