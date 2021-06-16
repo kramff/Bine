@@ -354,21 +354,7 @@ function MainUpdate () {
 		loadingLocalWorlds = true;
 		// Load sample worlds for testing, if no connection is made
 		startedLoadLocal = true;
-		fetch("Worlds/entity_test.bineworld")
-		.then(function (response) {
-			return response.json();
-		}).then(function (responseJson) {
-			// Temporary id of 0 for the only loaded world
-			responseJson.id = 0;
-			loadedLocalWorlds.push(responseJson);
-			FillWorldBox(loadedLocalWorlds, "local_worlds");
-
-			if (waitingToLocalSession) {
-				document.querySelector(".local_worlds .world").click();
-				document.querySelector(".level_box .level").click();
-				document.querySelector(".button[data-action='test_as_player']").click();
-			}
-		});
+		loadDefaultLevels();
 	}
 
 	if (inSession & curSession !== undefined && inLevel && curLevel !== undefined) {
@@ -523,6 +509,37 @@ function MainUpdate () {
 	else {
 		// Animation for when not in a game
 		ClearCanvas(mainCanvas);
+	}
+}
+
+var defaultLevels = [
+	"entity_test",
+	"blockomancy",
+];
+
+var loadResponseId = 0;
+
+// Load default levels
+// This should ideally load all the locally saved levels automatically
+// but for now it just iterates through a list
+function loadDefaultLevels () {
+	for (var i = defaultLevels.length - 1; i >= 0; i--) {
+		var levelFile = defaultLevels[i];
+		fetch("Worlds/" + levelFile + ".bineworld")
+		.then(function (response) {
+			return response.json();
+		}).then(function (responseJson) {
+			// Temporary id of 0 for the only loaded world
+			responseJson.id = 0;
+			loadedLocalWorlds.push(responseJson);
+			FillWorldBox(loadedLocalWorlds, "local_worlds");
+
+			if (waitingToLocalSession) {
+				document.querySelector(".local_worlds .world").click();
+				document.querySelector(".level_box .level").click();
+				document.querySelector(".button[data-action='test_as_player']").click();
+			}
+		});
 	}
 }
 
