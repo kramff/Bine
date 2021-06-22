@@ -414,6 +414,11 @@ function SetupButtons () {
 			event.target.classList.add("level_selected");
 		}
 	}
+	// Change appearance and basic attributes of an entity
+	var entitySettings = document.querySelectorAll(".menu_container[id='edit_entity'] .setting_box");
+	for (var i = 0; i < entitySettings.length; i++) {
+		var entitySetting = entitySettings[i];
+	}
 }
 
 function OpenEditVariableMenu (variableID) {
