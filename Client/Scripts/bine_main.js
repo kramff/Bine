@@ -529,15 +529,17 @@ function loadDefaultLevels () {
 		.then(function (response) {
 			return response.json();
 		}).then(function (responseJson) {
-			// Temporary id of 0 for the only loaded world
-			responseJson.id = 0;
+			responseJson.id = loadResponseId;
+			loadResponseId += 1;
 			loadedLocalWorlds.push(responseJson);
-			FillWorldBox(loadedLocalWorlds, "local_worlds");
+			if (loadResponseId >= defaultLevels.length) {
+				FillWorldBox(loadedLocalWorlds, "local_worlds");
 
-			if (waitingToLocalSession) {
-				document.querySelector(".local_worlds .world").click();
-				document.querySelector(".level_box .level").click();
-				document.querySelector(".button[data-action='test_as_player']").click();
+				if (waitingToLocalSession) {
+					document.querySelector(".local_worlds .world").click();
+					document.querySelector(".level_box .level").click();
+					document.querySelector(".button[data-action='test_as_player']").click();
+				}
 			}
 		});
 	}

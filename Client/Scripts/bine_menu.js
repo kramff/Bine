@@ -220,7 +220,7 @@ function SetupButtons () {
 					// Load local world with new session
 					IN_MULTI_SESSION = false;
 					// TODO: Should actually look at the levels and pick the one with the right ID
-					var selectedWorldData = loadedLocalWorlds[0];
+					var selectedWorldData = loadedLocalWorlds[worldID];
 					CreateSessionLoadedWorld(selectedWorldData);
 					HideAllMenus();
 					ShowMenu("edit_world");
@@ -415,9 +415,22 @@ function SetupButtons () {
 		}
 	}
 	// Change appearance and basic attributes of an entity
+	var settingInputFunc = function (e) {
+		console.log(e);
+		var settingType = e.target.id;
+		var setTo;
+		if (e.target.type === "checkbox") {
+			setTo = e.target.checked;
+		}
+		else {
+			setTo = e.target.value;
+		}
+		curEntity[settingType] = setTo;
+	}
 	var entitySettings = document.querySelectorAll(".menu_container[id='edit_entity'] .setting_box");
 	for (var i = 0; i < entitySettings.length; i++) {
 		var entitySetting = entitySettings[i];
+		entitySetting.oninput = settingInputFunc;
 	}
 }
 
