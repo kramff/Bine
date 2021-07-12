@@ -425,7 +425,7 @@ function SetupButtons () {
 		else {
 			setTo = e.target.value;
 		}
-		curEntity[settingType] = setTo;
+		curEntity.settings[settingType] = setTo;
 	}
 	var entitySettings = document.querySelectorAll(".menu_container[id='edit_entity'] .setting_box");
 	for (var i = 0; i < entitySettings.length; i++) {

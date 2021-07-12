@@ -433,7 +433,13 @@ var Session = (function () {
 		this.y = entityData.y;
 		this.z = entityData.z;
 		this.style = entityData.style;
-		this.settings = entityData.settings;
+		this.settings = entityData.settings || {
+			visible: true,
+			solid: false,
+			standable: false,
+			pushable: false,
+			gravity: true,
+		};
 		this.variables = entityData.variables;
 		this.rules = entityData.rules;
 		this.templates = entityData.templates;
