@@ -47,6 +47,20 @@ var Session = (function () {
 				},
 			],
 		},
+		// When the player clicks in the play area
+		player_click: {
+			text: "Player clicks to do action. (Only for player entity) -> [String, String]",
+			createdVariables: [
+				{
+					name: "mouse_button",
+					type: "string",
+				},
+				{
+					name: "mouse_direction",
+					type: "string",
+				},
+			],
+		}
 	};
 	var conditions = {
 		boolean_condition: {

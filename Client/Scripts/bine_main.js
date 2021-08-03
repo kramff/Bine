@@ -974,7 +974,31 @@ function EditorMouseUp () {
 }
 
 function GameplayMouseDown (event) {
-	
+	if (!CheckIfInClickableArea(mouseX, mouseY)) {
+		return;
+	}
+	var mouseDirection;
+	var xDiff = mouseX - R.CANVAS_HALF_WIDTH;
+	var yDiff = mouseY - R.CANVAS_HALF_HEIGHT;
+	if (Math.abs(xDiff) > Math.abs(yDiff)) {
+		if (xDiff > 0) {
+			mouseDirection = "right";
+		}
+		else {
+			mouseDirection = "left";
+		}
+	}
+	else {
+		if (yDiff > 0) {
+			mouseDirection = "down";
+		}
+		else {
+			mouseDirection = "up";
+		}
+	}
+	// event.button: 0 = left, 1 = middle, 2 = right, 3+ = other
+	var mouseButton = event.button;
+	curPlayer.FireTrigger("player_click", [mouseButton, mouseDirection], curSession, curLevel);
 }
 
 function GameplayMouseMove () {
