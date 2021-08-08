@@ -461,16 +461,22 @@ function TestAsPlayer () {
 		curLevelBackupObj = curLevel;
 		curLevelBackup = JSON.stringify(curLevel.Export());
 		curLevel.entityCounter += 1;
-		var newPlayerData = {
-			id: curLevel.entityCounter,
-			x: Math.round(editCamX),
-			y: Math.round(editCamY),
-			z: Math.round(editCamZ + zAdj),
-			style: [],
-			settings: [],
-			variables: [],
-			rules: [],
-			templates: [],
+		var newPlayerData;
+		if (curSession.playerTemplate !== undefined) {
+			newPlayerData = curSession.playerTemplate;
+		}
+		else {
+			newPlayerData = {
+				id: curLevel.entityCounter,
+				x: Math.round(editCamX),
+				y: Math.round(editCamY),
+				z: Math.round(editCamZ + zAdj),
+				style: [],
+				settings: [],
+				variables: [],
+				rules: [],
+				templates: [],
+			};
 		}
 		handleMessageData("newEntity", {levelID: curLevel.id, entityData: newPlayerData});
 		handleMessageData("assignPlayerEntity", newPlayerData.id);

@@ -1105,6 +1105,9 @@ var Session = (function () {
 		// areaTemplate: {name: string, rules: [rules...], variables: [variables...]}
 		this.areaTemplates = worldData.areaTemplates;
 
+		// playerTemplate
+		this.playerTemplate = worldData.playerTemplate;
+
 		// itemData
 		this.itemData = worldData.itemData;
 	}
@@ -1122,6 +1125,7 @@ var Session = (function () {
 			worldRules: this.worldRules,
 			entityTemplates: this.entityTemplates,
 			areaTemplates: this.areaTemplates,
+			playerTemplate: this.playerTemplate,
 			itemData: this.itemData,
 		};
 		return worldData;
