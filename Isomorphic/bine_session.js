@@ -132,6 +132,35 @@ var Session = (function () {
 				levelRef.RemoveEntity(entityToWarp);
 			},
 		},
+		create_entity: {
+			text: "Create an entity",
+			requiredVariables: ["template", "location"],
+			requiredVariableTypes: ["string", "coordinates"],
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+				console.log("create_entity effect happened");
+			},
+		},
+		destroy_entity: {
+			text: "Destroy an entity",
+			requiredVariables: ["entity_to_destroy"],
+			requiredVariableTypes: ["entity"],
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+				console.log("destroy_entity effect happened");
+			},
+		},
+		blockomancy_action: {
+			text: "Shoot or collect a block (for Blockomancy game)",
+			requiredVariables: ["mouse_button", "direction"],
+			requiredVariableTypes: ["string", "string"],
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+				console.log("blockomancy_action effect happened");
+				// entityRef is curPlayer
+				// useVariables seems to be an array of 2 arrays,
+				// each with the first element as mouse button
+				//  (0 is left button, 2 is right button)
+				// and second element as direction
+			},
+		},
 		// Variable setters
 		set_variable_string: {
 			text: "Set a variable (string)",
@@ -364,11 +393,29 @@ var Session = (function () {
 				},
 			},
 		},
-		entity: {},
+		entity: {
+			first_entity_of_type_in_direction: {
+				text: "Get first entity of a certain type in a direction.",
+				requiredVariables: ["starting_point", "direction", "entity_type", "limit"],
+				requiredVariableTypes: ["coordinates", "string", "string", "number"],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return undefined;
+				},
+			},
+		},
 		area: {},
 		level: {},
 		tile: {},
-		coordinates: {},
+		coordinates: {
+			last_empty_before_solid: {
+				text: "Get coordinates of last empty tile before a solid tile.",
+				requiredVariables: ["starting_point", "direction", "limit"],
+				requiredVariableTypes: ["coordinates", "string", "number"],
+				constructionFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+					return [3, 3, 3];
+				},
+			},
+		},
 	};
 
 	// Todo: Rename this function?
