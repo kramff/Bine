@@ -153,12 +153,90 @@ var Session = (function () {
 			requiredVariables: ["mouse_button", "direction"],
 			requiredVariableTypes: ["string", "string"],
 			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
-				console.log("blockomancy_action effect happened");
+				// console.log("blockomancy_action effect happened");
 				// entityRef is curPlayer
 				// useVariables seems to be an array of 2 arrays,
 				// each with the first element as mouse button
 				//  (0 is left button, 2 is right button)
 				// and second element as direction
+				var mouseButton = useVariables[0][0];
+				var direction = useVariables[0][1];
+				var dirX = (direction === "left" ? -1 : (direction === "right" ? 1 : 0));
+				var dirY = (direction === "up" ? -1 : (direction === "down" ? 1 : 0));
+				// Check that one of the direction vars isn't zero
+				if (dirX === 0 && dirY === 0) {
+					return;
+				}
+				var shootMode = false;
+				var collectMode = false;
+				if (mouseButton === 0) {
+					// Shoot block
+					console.log("Shoot block to " + direction);
+					shootMode = true;
+				}
+				else if (mouseButton === 2) {
+					// Collect block
+					console.log("Collect block from " + direction);
+					collectMode = true;
+				}
+				// Arbitrary limit
+				var limit = 20;
+				// Starting point: entity's location
+				var curX = entityRef.x;
+				var curY = entityRef.y;
+				var curZ = entityRef.z;
+				// Make sure to at least pass first tile, for shoot mode
+				var passedFirstTile = false;
+				for (var i = 0; i < limit; i++) {
+					curX += dirX;
+					curY += dirY;
+					if (shootMode) {
+						if (levelRef.CheckLocationSolid(curX, curY, curZ)) {
+							if (!passedFirstTile) {
+								// Too close to player! Can't make block
+								console.log("Can't make block! Too close");
+								return;
+							}
+							var existingEntity = levelRef.GetEntityAtLocation(curX - dirX, curY - dirY, curZ);
+							if (existingEntity !== undefined) {
+								// There's already an entity here
+								console.log("Space occupied! Can't make block");
+								return;
+							}
+							console.log("Make a block entity at " + (curX - dirX) + ", " + (curY - dirY) + ", " + curZ);
+							levelRef.entityCounter ++;
+							var blockEntityData = {
+								id: levelRef.entityCounter ++,
+								x: curX - dirX,
+								y: curY - dirY,
+								z: curZ,
+								settings: {
+									visible: true,
+									solid: true,
+									standable: true,
+									pushable: false,
+									gravity: false,
+								},
+								style: "#2daa2d",
+								variables: [],
+								rules: [],
+								templates: ["block"],
+								variableCounter: 0,
+							};
+							levelRef.AddEntity(blockEntityData);
+							return;
+						}
+						passedFirstTile = true;
+					}
+					else if (collectMode) {
+						var entityAtLocation = levelRef.GetEntityAtLocation(curX, curY, curZ);
+						if (entityAtLocation !== undefined) {
+							console.log("Remove entity at " + curX + ", " + curY + ", " + curZ)
+							levelRef.RemoveEntity(entityAtLocation);
+							return;
+						}
+					}
+				}
 			},
 		},
 		// Variable setters
@@ -493,7 +571,7 @@ var Session = (function () {
 		this.x = entityData.x;
 		this.y = entityData.y;
 		this.z = entityData.z;
-		this.style = entityData.style;
+		this.style = entityData.style || "#208020";
 		this.settings = entityData.settings || {
 			visible: true,
 			solid: false,
@@ -1090,6 +1168,14 @@ var Session = (function () {
 			//		}
 			//	}
 			//}
+		}
+		for (var i = 0; i < this.entities.length; i++) {
+			var entity = this.entities[i];
+			if (entity.settings.solid === true) {
+				if (entity.x === x && entity.y === y && entity.z === z) {
+					return true;
+				}
+			}
 		}
 		return false;
 	};
