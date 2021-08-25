@@ -619,6 +619,17 @@ function DrawTile (x, y, scale, realX, realY, realZ) {
 		R.ctx.strokeRect(x, y, scale, scale);
 	}
 }
+//i, j, k: world x, y, z position
+function DrawTileInCeiling (x, y, scale, realX, realY, realZ) {
+	// If realX isn't passed in, don't bother doing the check
+	if ((realX === undefined) || !IsSolid(realX, realY, realZ + 1)) {
+		R.ctx.save();
+		R.ctx.globalAlpha = 0.5;
+		R.ctx.fillRect(x, y, scale, scale);
+		R.ctx.strokeRect(x, y, scale, scale);
+		R.ctx.restore();
+	}
+}
 // Just draws one side of a tile for now
 // Need to draw all sides / not draw covered sides before drawing any tiles for that layer
 function DrawTileSides (x, y, scale, x2, y2, scale2, realX, realY, realZ) {
@@ -701,8 +712,12 @@ function DrawAreaEdges (area, scale, z) {
 	R.ctx.restore();
 }
 
-function InCeiling () {
-	// re-implement this feature later
+function InCeiling (x, y, z) {
+	if (R.cameraZ < z) {
+		if (IsNearXY(R.cameraX, R.cameraY, x, y, 2)) {
+			return true;
+		}
+	}
 	return false;
 }
 /*function InCeiling (x, y, z) {

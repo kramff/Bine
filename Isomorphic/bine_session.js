@@ -669,10 +669,10 @@ var Session = (function () {
 		if ((this.xMov === 0 && this.yMov === 0 && this.zMov === 0) || (this.moveTime < MOVE_CANCEL_TIME && this.moveDirections.changed)) {
 			var floorSolid = levelRef.CheckRelativeLocationSolid(this, 0, 0, -1);
 			// Solid ground below player (Floor): Can move if solid
-			if (floorSolid) {
+			if (floorSolid || this.settings.gravity === false) {
 				this.moveDirections.changed = false;
 				this.falling = false;
-				this.fallSpeed = FALL_SPEED_START
+				this.fallSpeed = FALL_SPEED_START;
 				// Input for movement
 				if (this.moveDirections.up || this.moveDirections.down || this.moveDirections.left || this.moveDirections.right) {
 					// Set movement based on input
@@ -759,6 +759,10 @@ var Session = (function () {
 					this.fallSpeed --;
 				}
 				this.falling = true;
+				if (this.z < -20) {
+					this.x = curSession.playerTemplate.x;
+					this.falling = false;
+				}
 			}
 		}
 	}

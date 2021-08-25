@@ -15,6 +15,14 @@ function IsNear (x1, y1, z1, x2, y2, z2, dist) {
 	return false;
 }
 
+//Up to <dist> tiles away in X or Y directions
+function IsNearXY (x1, y1, x2, y2, dist) {
+	if (Math.abs(x1 - x2) <= dist && Math.abs(y1 - y2) <= dist) {
+		return true;
+	}
+	return false;
+}
+
 function IsSameCoord (x1, y1, z1, x2, y2, z2) {
 	if (x1 === x2 && y1 === y2 && z1 === z2) {
 		return true;
