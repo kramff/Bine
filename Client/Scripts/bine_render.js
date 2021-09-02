@@ -172,6 +172,7 @@ var R = {
 	Z_MULTIPLIER: 3.1,
 	TILE_SIZE: 5.4,
 	EDIT_MODE: false,
+	ceilingMode: false,
 }
 
 function ClearCanvas (canvas) {
@@ -207,6 +208,19 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	var drawObjects = R.level.drawObjects;
 	drawObjects.forEach(SetDrawZ);
 	drawObjects.sort(DrawObjSortFunc);
+	
+	// Determine if ceiling mode is on or not
+	R.ceilingMode = false;
+	// starting from above cameraZ, count 16 tiles above. If any are blocked, use ceiling mode
+	var ceilX = Math.floor(cameraX);
+	var ceilY = Math.floor(cameraY);
+	var ceilZ = Math.floor(cameraZ + 1);
+	for (var i = 0; i < 16; i++) {
+		if (level.CheckLocationSolid(ceilX, ceilY, ceilZ)) {
+			R.ceilingMode = true;
+		}
+		ceilZ += 1;
+	}
 
 	var bottomZ = 1;
 	var topZ = -1;
@@ -223,6 +237,7 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 			topZ = Math.max(topZ, drawObjects[i].drawZ + drawObjects[i].zSize);
 		}
 	}
+
 	// Limit bottomZ to 100 below the player, limit topZ to 100 above the player
 	bottomZ = Math.max(bottomZ, Math.round(cameraZ) - 100);
 	topZ = Math.min(topZ, Math.round(cameraZ) + 100);
@@ -439,7 +454,7 @@ function DrawAreaZSlice (area, z) {
 							}
 							else {
 								//SOLID tile
-								if (InCeiling(i + area.x, j + area.y, z)) {
+								if (R.ceilingMode && InCeiling(i + area.x, j + area.y, z)) {
 									DrawTileInCeiling(x, y, scale);
 								}
 								else {
@@ -480,7 +495,7 @@ function DrawAreaZSliceSideTiles (area, z) {
 							}
 							else {
 								//SOLID tile
-								if (InCeiling(i + area.x, j + area.y, z)) {
+								if (R.ceilingMode && InCeiling(i + area.x, j + area.y, z)) {
 									// DrawTileInCeiling(x, y, scale);
 								}
 								else {
@@ -586,7 +601,7 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 			// Draw tile but then draw circle on top
 			doDraw = false;
 			R.ctx.fillStyle = "#606060";
-			if (InCeiling(i, j, k)) {
+			if (R.ceilingMode && InCeiling(i, j, k)) {
 				DrawTileInCeiling(x, y, scale);
 			}
 			else {
@@ -602,7 +617,7 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 		break;
 	}
 	if (doDraw) {
-		if (InCeiling(i, j, k)) {
+		if (R.ceilingMode && InCeiling(i, j, k)) {
 			DrawTileInCeiling(x, y, scale);
 		}
 		else {
@@ -714,7 +729,7 @@ function DrawAreaEdges (area, scale, z) {
 
 function InCeiling (x, y, z) {
 	if (R.cameraZ < z) {
-		if (IsNearXY(R.cameraX, R.cameraY, x, y, 2)) {
+		if (IsNearXY(Math.floor(R.cameraX), Math.floor(R.cameraY), x, y, 2)) {
 			return true;
 		}
 	}
