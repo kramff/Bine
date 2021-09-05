@@ -58,6 +58,9 @@ function GetImageData (fileLocation, destinationArray, destinationIndex) {
 	*/
 }
 
+var particleArr = [];
+var particleStorage = [];
+
 var rainModeOn = false;
 var rainArr = [];
 var rainStorage = [];
@@ -66,8 +69,8 @@ function MakeRainObj (repeat) {
 	var rainObj;
 	if (rainStorage.length > 0) {
 		rainObj = rainStorage.pop();
-		// console.log("old rain");
-	} else {
+	}
+	else {
 		rainObj = {};
 		console.log("new rain");
 	}
@@ -81,14 +84,42 @@ function MakeRainObj (repeat) {
 	if (repeat !== undefined && repeat > 1) {
 		MakeRainObj(repeat - 1);
 	}
-	else
-	{
+	else {
 		// Sort rain array
-		rainArr.sort(RainSortFunc);
+		rainArr.sort(ParticleSortFunc);
 	}
 }
 
-function RainSortFunc (a, b) {
+function makeParticle (style, x, y, z, xSize, ySize, zSize, dur) {
+	var particleObj;
+	if (particleStorage.length > 0) {
+		particleObj = particleStorage.pop();
+	}
+	else {
+		particleObj = {};
+	}
+	// Style: required
+	particleObj.style = style;
+
+	// x y z: if not given, randomly near the camera location
+	particleObj.x = x || R.cameraX + Math.random() * 20 - 10;
+	particleObj.y = y || R.cameraY + Math.random() * 20 - 10;
+	particleObj.z = z || R.cameraZ + Math.random() * 20 - 10;
+
+	// x y z Size: if not given, assumed to be 1
+	particleObj.xSize = xSize || 1;
+	particleObj.ySize = ySize || 1;
+	particleObj.zSize = zSize || 1;
+
+	// dur (duration): if not given, assumed to be 100 frames
+	particleObj.dur = dur || 100;
+
+	// Push to array then sort by z value
+	particleArr.push(particleObj);
+	particleArr.sort(ParticleSortFunc);
+}
+
+function ParticleSortFunc (a, b) {
 	return a.z - b.z;
 }
 
@@ -151,6 +182,64 @@ function DrawOneRain (rain) {
 
 		R.ctx.restore();
 	}
+}
+
+function ParticleTick () {
+	for (var i = particleArr.length - 1; i >= 0; i--) {
+		var particle = particleArr[i];
+		if (rain.falling) {
+			rain.z -= 0.7;
+		}
+		else {
+			rain.splash += 0.1;
+		}
+		if (rain.falling && curLevel !== undefined) {
+			if (curLevel.CheckLocationSolid(Math.floor(rain.x), Math.floor(rain.y), Math.floor(rain.z))) {
+				rain.falling = false;
+			}
+		}
+		if (!rain.falling && rain.splash > 1.0) {
+			rainStorage.push(rainArr.splice(i, 1));
+		}
+		if (rain.falling && rain.z < -200) {
+			rainStorage.push(rainArr.splice(i, 1));
+		}
+	}
+}
+
+function DrawParticle (particle) {
+	// Get coordinates at top and bottom of tile for particle
+	var scaleB = GetScale(particle.z);
+	var scaleT = GetScale(particle.z + 1);
+	var xB = scale0 * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var xT = scale1 * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var yB = scale0 * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	var yT = scale1 * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	// If too small or out of camera view, skip
+	if (scaleB < 0) {
+		return;
+	}
+	if (x0 < 0 || x0 > R.CANVAS_WIDTH || y0 < 0 || y0 > R.CANVAS_HEIGHT) {
+		return;
+	}
+	// Save ctx state and draw particle
+	R.ctx.save();
+	switch (particle.type) {
+		case "rain":
+			R.ctx.strokeStyle = "#9090F0";
+			R.ctx.beginPath();
+			R.ctx.moveTo(xB, yB);
+			R.ctx.lineTo(xT, yT);
+			R.ctx.stroke();
+		break;
+		case "splash":
+			R.ctx.strokeStyle = "#9090F0";
+			var splashSize = (10 - particle.dur);
+			R.ctx.strokeRect(x0 - splashSize / 2, y0 - splashSize / 2, splashSize, splashSize);
+		break;
+	}
+	// Restore ctx state
+	R.ctx.restore();
 }
 
 // Global object to use instead of passing all variables to every function
