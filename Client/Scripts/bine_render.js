@@ -61,61 +61,39 @@ function GetImageData (fileLocation, destinationArray, destinationIndex) {
 var particleArr = [];
 var particleStorage = [];
 
-var rainModeOn = false;
-var rainArr = [];
-var rainStorage = [];
-
-function MakeRainObj (repeat) {
-	var rainObj;
-	if (rainStorage.length > 0) {
-		rainObj = rainStorage.pop();
-	}
-	else {
-		rainObj = {};
-		console.log("new rain");
-	}
-	rainObj.x = Math.random() * 20 - 10;
-	rainObj.y = Math.random() * 20 - 10;
-	rainObj.z = 20;
-	rainObj.falling = true;
-	rainObj.splash = 0;
-	rainArr.push(rainObj);
-	
-	if (repeat !== undefined && repeat > 1) {
-		MakeRainObj(repeat - 1);
-	}
-	else {
-		// Sort rain array
-		rainArr.sort(ParticleSortFunc);
+function makeRainParticle (repeat) {
+	makeParticle("rain", undefined, undefined, R.cameraZ + 20);
+	if (repeat > 0) {
+		makeRainParticle(repeat - 1);
 	}
 }
 
-function makeParticle (style, x, y, z, xSize, ySize, zSize, dur) {
-	var particleObj;
+function makeParticle (type, x, y, z, xSize, ySize, zSize, dur) {
+	var particle;
 	if (particleStorage.length > 0) {
-		particleObj = particleStorage.pop();
+		particle = particleStorage.pop();
 	}
 	else {
-		particleObj = {};
+		particle = {};
 	}
-	// Style: required
-	particleObj.style = style;
+	// Type: required
+	particle.type = type;
 
 	// x y z: if not given, randomly near the camera location
-	particleObj.x = x || R.cameraX + Math.random() * 20 - 10;
-	particleObj.y = y || R.cameraY + Math.random() * 20 - 10;
-	particleObj.z = z || R.cameraZ + Math.random() * 20 - 10;
+	particle.x = x || R.cameraX + Math.random() * 20 - 10;
+	particle.y = y || R.cameraY + Math.random() * 20 - 10;
+	particle.z = z || R.cameraZ + Math.random() * 20 - 10;
 
 	// x y z Size: if not given, assumed to be 1
-	particleObj.xSize = xSize || 1;
-	particleObj.ySize = ySize || 1;
-	particleObj.zSize = zSize || 1;
+	particle.xSize = xSize || 1;
+	particle.ySize = ySize || 1;
+	particle.zSize = zSize || 1;
 
 	// dur (duration): if not given, assumed to be 100 frames
-	particleObj.dur = dur || 100;
+	particle.dur = dur || 100;
 
 	// Push to array then sort by z value
-	particleArr.push(particleObj);
+	particleArr.push(particle);
 	particleArr.sort(ParticleSortFunc);
 }
 
@@ -123,86 +101,35 @@ function ParticleSortFunc (a, b) {
 	return a.z - b.z;
 }
 
-function RainTick () {
-	for (var i = rainArr.length - 1; i >= 0; i--) {
-		var rain = rainArr[i];
-		if (rain.falling) {
-			rain.z -= 0.7;
-		}
-		else {
-			rain.splash += 0.1;
-		}
-		if (rain.falling && curLevel !== undefined) {
-			if (curLevel.CheckLocationSolid(Math.floor(rain.x), Math.floor(rain.y), Math.floor(rain.z))) {
-				rain.falling = false;
-			}
-		}
-		if (!rain.falling && rain.splash > 1.0) {
-			rainStorage.push(rainArr.splice(i, 1));
-		}
-		if (rain.falling && rain.z < -200) {
-			rainStorage.push(rainArr.splice(i, 1));
-		}
-	}
-}
-
-function DrawAllRain () {
-	for (var i = rainArr.length - 1; i >= 0; i--) {
-		var rain = rainArr[i];
-		DrawOneRain(rain);
-	}
-}
-
-function DrawOneRain (rain) {
-	var scale0 = GetScale(rain.z);
-	var scale1 = GetScale(rain.z + 1);
-	var x0 = scale0 * (rain.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var x1 = scale1 * (rain.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var y0 = scale0 * (rain.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-	var y1 = scale1 * (rain.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-
-	if (scale0 < 0) {
-		return;
-	}
-	if (x0 > 0 - scale0 && x0 < R.CANVAS_WIDTH && y0 > 0 - scale0 && y0 < R.CANVAS_HEIGHT) {
-		R.ctx.save();
-
-		R.ctx.strokeStyle = "#9090F0";
-		if (rain.falling) {
-			R.ctx.beginPath();
-			R.ctx.moveTo(x0, y0);
-			R.ctx.lineTo(x1, y1);
-			R.ctx.stroke();
-		}
-		else
-		{
-			var splashSize = scale0 / 10 * rain.splash;
-			R.ctx.strokeRect(x0 - splashSize / 2, y0 - splashSize / 2, splashSize, splashSize);
-		}
-
-		R.ctx.restore();
-	}
-}
-
 function ParticleTick () {
+	// Reverse for loop, so removing is ok
 	for (var i = particleArr.length - 1; i >= 0; i--) {
 		var particle = particleArr[i];
-		if (rain.falling) {
-			rain.z -= 0.7;
+		// Set as "to be removed" if duration reaches 0
+		particle.dur -= 1;
+		var toBeRemoved = particle.dur <= 0;
+		// Various behavior for different types
+		switch (particle.type) {
+			case "rain":
+				// Rain: fall down and check if hit any solid tile
+				particle.z -= 0.7;
+				if (curLevel !== undefined) {
+					if (curLevel.CheckLocationSolid(Math.floor(particle.x), Math.floor(particle.y), Math.floor(particle.z))) {
+						// Hit solid tile: turn this particle into a splash particle
+						particle.type = "splash";
+						particle.dur = 10;
+						toBeRemoved = false;
+					}
+				}
+			break;
+			case "splash":
+				// Splash: nothing here, its dur determines the visual size
+			break;
 		}
-		else {
-			rain.splash += 0.1;
-		}
-		if (rain.falling && curLevel !== undefined) {
-			if (curLevel.CheckLocationSolid(Math.floor(rain.x), Math.floor(rain.y), Math.floor(rain.z))) {
-				rain.falling = false;
-			}
-		}
-		if (!rain.falling && rain.splash > 1.0) {
-			rainStorage.push(rainArr.splice(i, 1));
-		}
-		if (rain.falling && rain.z < -200) {
-			rainStorage.push(rainArr.splice(i, 1));
+		// To be removed: splice from particle array and put into storage
+		// (This is to avoid garbage collection lag spikes)
+		if (toBeRemoved) {
+			particleStorage.push(particleArr.splice(i, 1)[0]);
 		}
 	}
 }
@@ -211,15 +138,15 @@ function DrawParticle (particle) {
 	// Get coordinates at top and bottom of tile for particle
 	var scaleB = GetScale(particle.z);
 	var scaleT = GetScale(particle.z + 1);
-	var xB = scale0 * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var xT = scale1 * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var yB = scale0 * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-	var yT = scale1 * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	var xB = scaleB * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var xT = scaleT * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var yB = scaleB * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	var yT = scaleT * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
 	// If too small or out of camera view, skip
 	if (scaleB < 0) {
 		return;
 	}
-	if (x0 < 0 || x0 > R.CANVAS_WIDTH || y0 < 0 || y0 > R.CANVAS_HEIGHT) {
+	if (xB < 0 || xB > R.CANVAS_WIDTH || yB < 0 || yB > R.CANVAS_HEIGHT) {
 		return;
 	}
 	// Save ctx state and draw particle
@@ -235,7 +162,7 @@ function DrawParticle (particle) {
 		case "splash":
 			R.ctx.strokeStyle = "#9090F0";
 			var splashSize = (10 - particle.dur);
-			R.ctx.strokeRect(x0 - splashSize / 2, y0 - splashSize / 2, splashSize, splashSize);
+			R.ctx.strokeRect(xB - splashSize / 2, yB - splashSize / 2, splashSize, splashSize);
 		break;
 	}
 	// Restore ctx state
@@ -315,6 +242,7 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	var topZ = -1;
 	var bottomI = 0;
 
+	var particleDrawI = 0;
 
 	if (drawObjects.length > 0) {
 		bottomZ = drawObjects[0].drawZ - 1;
@@ -334,7 +262,6 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	if (R.EDIT_MODE && bottomZ > Math.round(R.cameraZ)) {
 		DrawEditOutline(Math.round(R.cameraZ));
 	}
-	var rainDrawI = 0;
 	for (var z = bottomZ; z <= topZ + 1; z++) {
 		var i = bottomI;
 		var currentObject = drawObjects[i];
@@ -367,14 +294,14 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 			i ++;
 			currentObject = drawObjects[i];
 		}
-		// Loop through rain (later, global particle effects) and draw all up to the currentZ
-		var rainDrawObj = rainArr[rainDrawI];
-		while (rainDrawObj !== undefined && rainDrawObj.z <= z) {
-			// Draw the rain object
-			DrawOneRain(rainDrawObj);
-			// Move up to next rain object
-			rainDrawI ++;
-			rainDrawObj = rainArr[rainDrawI];
+		// Loop through global particle effects and draw all up to the currentZ
+		var particle = particleArr[particleDrawI];
+		while (particle !== undefined && particle.z <= z) {
+			// Draw the particle object
+			DrawParticle(particle);
+			// Move up to next particle object
+			particleDrawI ++;
+			particle = particleArr[particleDrawI];
 		}
 		// Draw outline where player could be placed if in edit mode
 		if (R.EDIT_MODE && z === Math.round(R.cameraZ)) {
@@ -385,11 +312,7 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 		DrawEditOutline(Math.round(R.cameraZ));
 	}
 
-	RainTick();
-	// DrawAllRain();
-	if (rainModeOn) {
-		MakeRainObj();
-	}
+	ParticleTick();
 }
 
 function DrawEditOutline (z) {
