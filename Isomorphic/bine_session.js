@@ -229,31 +229,31 @@ var Session = (function () {
 							if (!IS_SERVER) {
 								var startX = entityRef.x;
 								var startY = entityRef.y;
-								var sizeX = Math.abs(newX - startX);
-								var sizeY = Math.abs(newY - startY);
+								var xSize = Math.abs(newX - startX);
+								var ySize = Math.abs(newY - startY);
 								if (newX > startX) {
 									startX += 1;
-									sizeX -= 1;
-									sizeY = 1;
+									xSize -= 1;
+									ySize = 1;
 								}
 								if (newX < startX) {
-									startX -= sizeX - 1;
-									sizeX -= 1;
-									sizeY = 1;
+									startX -= xSize - 1;
+									xSize -= 1;
+									ySize = 1;
 								}
 								if (newY > startY) {
 									startY += 1;
-									sizeY -= 1;
-									sizeX = 1;
+									ySize -= 1;
+									xSize = 1;
 								}
 								if (newY < startY) {
-									startY -= sizeY - 1;
-									sizeY -= 1;
-									sizeX = 1;
+									startY -= ySize - 1;
+									ySize -= 1;
+									xSize = 1;
 								}
-								//sizeX = Math.max(sizeX, 1);
-								//sizeY = Math.max(sizeY, 1);
-								MakeParticle("block_shot", startX, startY, entityRef.z, sizeX, sizeY, 1, 10);
+								//xSize = Math.max(xSize, 1);
+								//ySize = Math.max(ySize, 1);
+								MakeParticle("block_shot", startX, startY, entityRef.z, xSize, ySize, 1, 10);
 							}
 							return;
 						}
@@ -264,6 +264,35 @@ var Session = (function () {
 						if (entityAtLocation !== undefined) {
 							console.log("Remove entity at " + curX + ", " + curY + ", " + curZ)
 							levelRef.RemoveEntity(entityAtLocation);
+							if (!IS_SERVER) {
+								var startX = entityRef.x;
+								var startY = entityRef.y;
+								var xSize = Math.abs(curX - startX);
+								var ySize = Math.abs(curY - startY);
+								if (curX > startX) {
+									startX += 1;
+									xSize -= 1;
+									ySize = 1;
+								}
+								if (curX < startX) {
+									startX -= xSize - 1;
+									xSize -= 1;
+									ySize = 1;
+								}
+								if (curY > startY) {
+									startY += 1;
+									ySize -= 1;
+									xSize = 1;
+								}
+								if (curY < startY) {
+									startY -= ySize - 1;
+									ySize -= 1;
+									xSize = 1;
+								}
+								//xSize = Math.max(xSize, 1);
+								//ySize = Math.max(ySize, 1);
+								MakeParticle("block_collect", startX, startY, entityRef.z, xSize, ySize, 1, 10);
+							}
 							return;
 						}
 					}
@@ -602,8 +631,11 @@ var Session = (function () {
 		this.x = entityData.x;
 		this.y = entityData.y;
 		this.z = entityData.z;
-		this.style = entityData.style || "#208020";
-		this.settings = entityData.settings || {
+		this.xSize = entityData.xSize ?? 1;
+		this.ySize = entityData.ySize ?? 1;
+		this.zSize = entityData.zSize ?? 1;
+		this.style = entityData.style ?? "#208020";
+		this.settings = entityData.settings ?? {
 			visible: true,
 			solid: false,
 			standable: false,

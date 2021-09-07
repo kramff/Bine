@@ -340,6 +340,8 @@ function GameInit () {
 	window.requestAnimationFrame(MainUpdate);
 }
 
+var rainOn = false;
+
 var frameCounter = 0;
 function MainUpdate () {
 	window.requestAnimationFrame(MainUpdate);
@@ -503,6 +505,11 @@ function MainUpdate () {
 			// Every few seconds, send a location correction
 			if (frameCounter % 300 === 0) {
 				SendLocationCorrection({x: curPlayer.x, y: curPlayer.y, z: curPlayer.z, xMov: curPlayer.xMov, yMov: curPlayer.yMov, zMov: curPlayer.zMov, moveTime: curPlayer.moveTime, moveDuration: curPlayer.moveDuration});
+			}
+
+			// Rain
+			if (rainOn) {
+				MakeRainParticle(3);
 			}
 		}
 	}

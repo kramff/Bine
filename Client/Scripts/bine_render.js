@@ -62,7 +62,7 @@ var particleArr = [];
 var particleStorage = [];
 
 function MakeRainParticle (repeat) {
-	makeParticle("rain", undefined, undefined, R.cameraZ + 20);
+	MakeParticle("rain", undefined, undefined, R.cameraZ + 20);
 	if (repeat > 0) {
 		MakeRainParticle(repeat - 1);
 	}
