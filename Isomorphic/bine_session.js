@@ -205,10 +205,12 @@ var Session = (function () {
 							}
 							console.log("Make a block entity at " + (curX - dirX) + ", " + (curY - dirY) + ", " + curZ);
 							levelRef.entityCounter ++;
+							var newX = curX - dirX;
+							var newY = curY - dirY;
 							var blockEntityData = {
 								id: levelRef.entityCounter ++,
-								x: curX - dirX,
-								y: curY - dirY,
+								x: newX,
+								y: newY,
 								z: curZ,
 								settings: {
 									visible: true,
@@ -224,6 +226,35 @@ var Session = (function () {
 								variableCounter: 0,
 							};
 							levelRef.AddEntity(blockEntityData);
+							if (!IS_SERVER) {
+								var startX = entityRef.x;
+								var startY = entityRef.y;
+								var sizeX = Math.abs(newX - startX);
+								var sizeY = Math.abs(newY - startY);
+								if (newX > startX) {
+									startX += 1;
+									sizeX -= 1;
+									sizeY = 1;
+								}
+								if (newX < startX) {
+									startX -= sizeX - 1;
+									sizeX -= 1;
+									sizeY = 1;
+								}
+								if (newY > startY) {
+									startY += 1;
+									sizeY -= 1;
+									sizeX = 1;
+								}
+								if (newY < startY) {
+									startY -= sizeY - 1;
+									sizeY -= 1;
+									sizeX = 1;
+								}
+								//sizeX = Math.max(sizeX, 1);
+								//sizeY = Math.max(sizeY, 1);
+								MakeParticle("block_shot", startX, startY, entityRef.z, sizeX, sizeY, 1, 10);
+							}
 							return;
 						}
 						passedFirstTile = true;

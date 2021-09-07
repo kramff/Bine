@@ -61,14 +61,14 @@ function GetImageData (fileLocation, destinationArray, destinationIndex) {
 var particleArr = [];
 var particleStorage = [];
 
-function makeRainParticle (repeat) {
+function MakeRainParticle (repeat) {
 	makeParticle("rain", undefined, undefined, R.cameraZ + 20);
 	if (repeat > 0) {
-		makeRainParticle(repeat - 1);
+		MakeRainParticle(repeat - 1);
 	}
 }
 
-function makeParticle (type, x, y, z, xSize, ySize, zSize, dur) {
+function MakeParticle (type, x, y, z, xSize, ySize, zSize, dur) {
 	var particle;
 	if (particleStorage.length > 0) {
 		particle = particleStorage.pop();
@@ -80,17 +80,17 @@ function makeParticle (type, x, y, z, xSize, ySize, zSize, dur) {
 	particle.type = type;
 
 	// x y z: if not given, randomly near the camera location
-	particle.x = x || R.cameraX + Math.random() * 20 - 10;
-	particle.y = y || R.cameraY + Math.random() * 20 - 10;
-	particle.z = z || R.cameraZ + Math.random() * 20 - 10;
+	particle.x = x ?? R.cameraX + Math.random() * 20 - 10;
+	particle.y = y ?? R.cameraY + Math.random() * 20 - 10;
+	particle.z = z ?? R.cameraZ + Math.random() * 20 - 10;
 
 	// x y z Size: if not given, assumed to be 1
-	particle.xSize = xSize || 1;
-	particle.ySize = ySize || 1;
-	particle.zSize = zSize || 1;
+	particle.xSize = xSize ?? 1;
+	particle.ySize = ySize ?? 1;
+	particle.zSize = zSize ?? 1;
 
 	// dur (duration): if not given, assumed to be 100 frames
-	particle.dur = dur || 100;
+	particle.dur = dur ?? 100;
 
 	// Push to array then sort by z value
 	particleArr.push(particle);
@@ -122,9 +122,6 @@ function ParticleTick () {
 					}
 				}
 			break;
-			case "splash":
-				// Splash: nothing here, its dur determines the visual size
-			break;
 		}
 		// To be removed: splice from particle array and put into storage
 		// (This is to avoid garbage collection lag spikes)
@@ -146,11 +143,13 @@ function DrawParticle (particle) {
 	if (scaleB < 0) {
 		return;
 	}
-	if (xB < 0 || xB > R.CANVAS_WIDTH || yB < 0 || yB > R.CANVAS_HEIGHT) {
+	// currently any xyz size bigger than 1 excludes it from being off the screen not drawn
+	if ((xB < 0 || xB > R.CANVAS_WIDTH || yB < 0 || yB > R.CANVAS_HEIGHT) && !(particle.xSize > 1 || particle.ySize > 1 || particle.zSize > 1)) {
 		return;
 	}
 	// Save ctx state and draw particle
 	R.ctx.save();
+	R.ctx.beginPath();
 	switch (particle.type) {
 		case "rain":
 			R.ctx.strokeStyle = "#9090F0";
@@ -163,6 +162,38 @@ function DrawParticle (particle) {
 			R.ctx.strokeStyle = "#9090F0";
 			var splashSize = (10 - particle.dur);
 			R.ctx.strokeRect(xB - splashSize / 2, yB - splashSize / 2, splashSize, splashSize);
+		break;
+		case "block_shot":
+			R.ctx.strokeStyle = "#30F060";
+			R.ctx.fillStyle = "#60D060";
+			R.ctx.globalAlpha = (particle.dur / 20);
+			R.ctx.rect(xB, yB, particle.xSize * scaleB, particle.ySize * scaleB);
+			R.ctx.fill();
+			R.ctx.stroke();
+		break;
+		case "block_shot_fail":
+			R.ctx.strokeStyle = "#30F060";
+			R.ctx.fillStyle = "#60D060";
+			R.ctx.globalAlpha = (particle.dur / 20);
+			R.ctx.rect(xB, yB, particle.xSize * scaleB, particle.ySize * scaleB);
+			// R.ctx.fill();
+			R.ctx.stroke();
+		break;
+		case "block_collect":
+			R.ctx.strokeStyle = "#30F060";
+			R.ctx.fillStyle = "#60D060";
+			R.ctx.globalAlpha = (particle.dur / 20);
+			R.ctx.rect(xB, yB, particle.xSize * scaleB, particle.ySize * scaleB);
+			R.ctx.fill();
+			R.ctx.stroke();
+		break;
+		case "block_collect_fail":
+			R.ctx.strokeStyle = "#30F060";
+			R.ctx.fillStyle = "#60D060";
+			R.ctx.globalAlpha = (particle.dur / 20);
+			R.ctx.rect(xB, yB, particle.xSize * scaleB, particle.ySize * scaleB);
+			// R.ctx.fill();
+			R.ctx.stroke();
 		break;
 	}
 	// Restore ctx state
