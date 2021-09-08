@@ -132,13 +132,20 @@ function ParticleTick () {
 }
 
 function DrawParticle (particle) {
+	var xPosition = particle.x;
+	var yPosition = particle.y;
+	var zPosition = particle.z;
 	// Get coordinates at top and bottom of tile for particle
-	var scaleB = GetScale(particle.z);
-	var scaleT = GetScale(particle.z + 1);
-	var xB = scaleB * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var xT = scaleT * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var yB = scaleB * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-	var yT = scaleT * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	var scaleB = GetScale(zPosition);
+	var scaleT = GetScale(zPosition + 1);
+	// var xB = scaleB * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var xB = GetScreenXHaveScale(xPosition, yPosition, zPosition, scaleB);
+	// var xT = scaleT * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var xT = GetScreenXHaveScale(xPosition, yPosition, zPosition + 1, scaleT);
+	// var yB = scaleB * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	var yB = GetScreenYHaveScale(xPosition, yPosition, zPosition, scaleB);
+	// var yT = scaleT * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	var yT = GetScreenYHaveScale(xPosition, yPosition, zPosition + 1, scaleT);
 	// If too small or out of camera view, skip
 	if (scaleB < 0) {
 		return;
@@ -218,6 +225,7 @@ var R = {
 	SCALE_MULTIPLIER: 490,
 	Z_MULTIPLIER: 3.1,
 	TILE_SIZE: 5.4,
+	CAMERA_TILT: 0.5,
 	EDIT_MODE: false,
 	ceilingMode: false,
 }
@@ -248,8 +256,8 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 
 	// Set standard drawing values
 	R.ctx.font = "16px sans-serif";
-	R.ctx.strokeStyle = "#FFFFFF";
-	R.ctx.fillStyle = "#101010";
+	R.ctx.strokeStyle = "#E0E8F6";
+	R.ctx.fillStyle = "#303846";
 	
 	// Get level to draw and draw all objects in that level 
 	var drawObjects = R.level.drawObjects;
@@ -379,12 +387,28 @@ function SetDrawZ (dObj) {
 	}
 }
 
-
-
 function GetScale (z) {
 	return -(R.TILE_SIZE / ( R.Z_MULTIPLIER * (z - R.cameraZ) - R.EYE_DISTANCE)) * R.SCALE_MULTIPLIER;
 }
 
+function GetScreenX (x, y, z) {
+	var scale = GetScale(z);
+	return GetScreenXHaveScale(x, y, z, scale);
+}
+
+function GetScreenXHaveScale (x, y, z, scale) {
+	return scale * (x - R.cameraX) + R.CANVAS_HALF_WIDTH;
+}
+
+function GetScreenY (x, y, z) {
+	var scale = GetScale(z);
+	return GetScreenYHaveScale(x, y, z, scale);
+}
+
+function GetScreenYHaveScale (x, y, z, scale) {
+	return scale * (y - R.cameraY) + R.CANVAS_HALF_HEIGHT - ((z - R.cameraZ) * scale * R.CAMERA_TILT);
+}
+ 
 function DObjInZ (dObj, z) {
 	if (dObj.type === "Entity") {
 		return Math.ceil(dObj.GetZ()) === z;
@@ -404,6 +428,7 @@ function DObjInZ (dObj, z) {
 function DrawDObjZ (dObj, z, drawSideTiles) {
 	if (dObj.type === "Entity") {
 		if (drawSideTiles) {
+			DrawEntitySideTiles(dObj, z);
 		}
 		else {
 			DrawEntity(dObj);
@@ -429,9 +454,12 @@ function DrawDObjZ (dObj, z, drawSideTiles) {
 }
 
 function DrawEntity (entity) {
-	var scale = GetScale(entity.GetZ());
-	var x = scale * (entity.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var y = scale * (entity.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	var xPosition = entity.GetX();
+	var yPosition = entity.GetY();
+	var zPosition = entity.GetZ();
+	var scale = GetScale(zPosition);
+	var x = GetScreenXHaveScale(xPosition, yPosition, zPosition, scale);
+	var y = GetScreenYHaveScale(xPosition, yPosition, zPosition, scale);
 
 	if (scale < 0) {
 		return;
@@ -477,19 +505,30 @@ function DrawEntity (entity) {
 	}
 }
 
+function DrawEntitySideTiles () {}
+
 
 function DrawAreaZSlice (area, z) {
-	var realZ = z;
-	var scale = GetScale(z + area.GetZ() - area.z);
+	var xPosition = area.GetX();
+	var yPosition = area.GetY();
+	// var zPosition = area.GetZ();
+	var scale = GetScale(z);
+
+	// var realZ = z;
+	// var scale = GetScale(z + area.GetZ() - area.z);
+	var scale = GetScale(z);
 	if (scale > 0.01) {
 		for (var i = 0; i < area.xSize; i++) {
 			var realX = i + area.GetX();
-			var x = scale * (i + area.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
-			if (x > 0 - scale && x < R.CANVAS_WIDTH) {
+			//var x = scale * (i + area.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
+			//var x = GetScreenXHaveScale(i + xPosition, yPosition, zPosition, scale);
+			// if (x > 0 - scale && x < R.CANVAS_WIDTH) {
 				for (var j = 0; j < area.ySize; j++) {
 					var realY = j + area.GetY();
-					var y = scale * (j + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-					if (y > 0 - scale && y < R.CANVAS_HEIGHT) {	
+					// var y = scale * (j + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+					var x = GetScreenXHaveScale(realX, realY, z, scale);
+					var y = GetScreenYHaveScale(realX, realY, z, scale);
+					if ((y > 0 - scale && y < R.CANVAS_HEIGHT) && (x > 0 - scale && x < R.CANVAS_WIDTH)) {	
 						var tile = area.map[i][j][z - area.z];
 						if (tile > 0) {
 							if (tile > 1) {
@@ -501,14 +540,14 @@ function DrawAreaZSlice (area, z) {
 									DrawTileInCeiling(x, y, scale);
 								}
 								else {
-									DrawTile(x, y, scale, realX, realY, realZ);
+									DrawTile(x, y, scale, realX, realY, z);
 								}
 							}
 							// numSquares ++;
 						}
 					}
 				}
-			}
+			//}
 		}
 		if (editorActive) {
 			DrawAreaEdges(area, scale, z);
@@ -517,20 +556,35 @@ function DrawAreaZSlice (area, z) {
 	}
 }
 function DrawAreaZSliceSideTiles (area, z) {
-	var realZ = z;
-	var scale = GetScale(z + area.GetZ() - area.z);
-	var scale2 = GetScale(-1 + z + area.GetZ() - area.z);
+	var xPosition = area.GetX();
+	var yPosition = area.GetY();
+	// var zPosition = area.GetZ();
+	// var scale = GetScale(zPosition);
+	// var y = GetScreenYHaveScale(xPosition, yPosition, zPosition, scale);
+	R.ctx.save();
+	R.ctx.fillStyle = "#101826";
+	// var realZ = z;
+	// var scale = GetScale(z + area.GetZ() - area.z);
+	var scale = GetScale(z);
+	// var scale2 = GetScale(-1 + z + area.GetZ() - area.z);
+	var scale2 = GetScale(z - 1);
 	if (scale > 0.01) {
 		for (var i = 0; i < area.xSize; i++) {
-			var realX = i + area.GetX();
-			var x = scale * (realX - R.cameraX) + R.CANVAS_HALF_WIDTH;
-			var x2 = scale2 * (realX - R.cameraX) + R.CANVAS_HALF_WIDTH;
-			if (x2 > 0 - scale2 && x2 < R.CANVAS_WIDTH) {
+			var realX = i + xPosition;
+			// var x = scale * (realX - R.cameraX) + R.CANVAS_HALF_WIDTH;
+			// var x = GetScreenXHaveScale(realX, yPosition, zPosition, scale);
+			// var x2 = scale2 * (realX - R.cameraX) + R.CANVAS_HALF_WIDTH;
+			// var x2 = GetScreenXHaveScale(xPosition, yPosition, zPosition, scale2);
+			// if (x2 > 0 - scale2 && x2 < R.CANVAS_WIDTH) {
 				for (var j = 0; j < area.ySize; j++) {
 					var realY = j + area.GetY()
-					var y = scale * (realY - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-					var y2 = scale2 * (realY - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-					if (y2 > 0 - scale2 && y2 < R.CANVAS_HEIGHT) {	
+					var x = GetScreenXHaveScale(realX, realY, z, scale);
+					var x2 = GetScreenXHaveScale(realX, realY, z - 1, scale2);
+					// var y = scale * (realY - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+					var y = GetScreenYHaveScale(realX, realY, z, scale);
+					// var y2 = scale2 * (realY - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+					var y2 = GetScreenYHaveScale(realX, realY, z - 1, scale2);
+					if ((y2 > 0 - scale2 && y2 < R.CANVAS_HEIGHT) && (x2 > 0 - scale2 && x2 < R.CANVAS_WIDTH)) {	
 						var tile = area.map[i][j][z - area.z];
 						if (tile > 0) {
 							if (tile > 1) {
@@ -542,19 +596,20 @@ function DrawAreaZSliceSideTiles (area, z) {
 									// DrawTileInCeiling(x, y, scale);
 								}
 								else {
-									DrawTileSides(x, y, scale, x2, y2, scale2, realX, realY, realZ);
+									DrawTileSides(x, y, scale, x2, y2, scale2, realX, realY, z);
 								}
 							}
 							// numSquares ++;
 						}
 					}
 				}
-			}
+			// }
 		}
 		if (editorActive) {
 			// DrawAreaEdges(area, scale, z);
 		}
 	}
+	R.ctx.restore();
 }
 function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 	R.ctx.save();
