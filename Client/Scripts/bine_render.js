@@ -225,7 +225,7 @@ var R = {
 	SCALE_MULTIPLIER: 490,
 	Z_MULTIPLIER: 3.1,
 	TILE_SIZE: 5.4,
-	CAMERA_TILT: 0.5,
+	CAMERA_TILT: 0.45,
 	EDIT_MODE: false,
 	ceilingMode: false,
 }
@@ -428,7 +428,7 @@ function DObjInZ (dObj, z) {
 function DrawDObjZ (dObj, z, drawSideTiles) {
 	if (dObj.type === "Entity") {
 		if (drawSideTiles) {
-			DrawEntitySideTiles(dObj, z);
+			DrawEntitySideTiles(dObj);
 		}
 		else {
 			DrawEntity(dObj);
@@ -466,16 +466,6 @@ function DrawEntity (entity) {
 	}
 	if (x > 0 - scale && x < R.CANVAS_WIDTH && y > 0 - scale && y < R.CANVAS_HEIGHT) {
 		R.ctx.save();
-		// if (editorActive && character === player)
-		// if (false)
-		// {
-		// 	//Editor player: transparent, move with camera when middle clicking
-		// 	R.ctx.globalAlpha = 0.5;
-		// 	if (middleClick) {
-		// 		x = R.CANVAS_HALF_WIDTH - scale / 2;
-		// 		y = R.CANVAS_HALF_HEIGHT - scale / 2;
-		// 	}
-		// }
 
 		// Entity is player
 		if (entity === curPlayer) {
@@ -501,11 +491,43 @@ function DrawEntity (entity) {
 		}
 
 		R.ctx.restore();
-
 	}
 }
 
-function DrawEntitySideTiles () {}
+function DrawEntitySideTiles (entity) {
+	var xPosition = entity.GetX();
+	var yPosition = entity.GetY();
+	var zPosition = entity.GetZ();
+	var scale = GetScale(zPosition);
+	var scale2 = GetScale(zPosition - 1);
+	var x = GetScreenXHaveScale(xPosition, yPosition, zPosition, scale);
+	var x2 = GetScreenXHaveScale(xPosition, yPosition, zPosition - 1, scale2);
+	var y = GetScreenYHaveScale(xPosition, yPosition, zPosition, scale);
+	var y2 = GetScreenYHaveScale(xPosition, yPosition, zPosition - 1, scale2);
+	if (scale < 0) {
+		return;
+	}
+	if (x > 0 - scale && x < R.CANVAS_WIDTH && y > 0 - scale && y < R.CANVAS_HEIGHT) {
+		R.ctx.save();
+
+		// Entity is player
+		if (entity === curPlayer) {
+			R.ctx.strokeStyle = "#60C0C0";
+			R.ctx.fillStyle = "#208080";
+		}
+		// Entity is being edited
+		else if (entity === curEntity) {
+			R.ctx.strokeStyle = "#B03080";
+			R.ctx.fillStyle = "#802060";
+		}
+		else {
+			R.ctx.strokeStyle = "#80FF80";
+			R.ctx.fillStyle = "#208020";
+		}
+		DrawTileSides (x, y, scale, x2, y2, scale2, xPosition, yPosition, zPosition);
+		R.ctx.restore();
+	}
+}
 
 
 function DrawAreaZSlice (area, z) {
@@ -853,8 +875,8 @@ function InCeiling (x, y, z) {
 	return true;
 }*/
 
-function IsSolid () {
-	return false;
+function IsSolid (x, y, z) {
+	return curLevel.CheckLocationSolid(Math.round(x), Math.round(y), Math.round(z));
 }
 /*function IsSolid (x, y, z) {
 	for (var i = 0; i < areas.length; i++) {
