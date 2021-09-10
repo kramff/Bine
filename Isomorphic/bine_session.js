@@ -194,16 +194,16 @@ var Session = (function () {
 						if (levelRef.CheckLocationSolid(curX, curY, curZ)) {
 							if (!passedFirstTile) {
 								// Too close to player! Can't make block
-								console.log("Can't make block! Too close");
+								// console.log("Can't make block! Too close");
 								return;
 							}
 							var existingEntity = levelRef.GetEntityAtLocation(curX - dirX, curY - dirY, curZ);
 							if (existingEntity !== undefined) {
 								// There's already an entity here
-								console.log("Space occupied! Can't make block");
+								// console.log("Space occupied! Can't make block");
 								return;
 							}
-							console.log("Make a block entity at " + (curX - dirX) + ", " + (curY - dirY) + ", " + curZ);
+							// console.log("Make a block entity at " + (curX - dirX) + ", " + (curY - dirY) + ", " + curZ);
 							levelRef.entityCounter ++;
 							var newX = curX - dirX;
 							var newY = curY - dirY;
@@ -226,6 +226,7 @@ var Session = (function () {
 								variableCounter: 0,
 							};
 							levelRef.AddEntity(blockEntityData);
+							// The following is just for making a neat particle effect
 							if (!IS_SERVER) {
 								var startX = entityRef.x;
 								var startY = entityRef.y;
@@ -262,8 +263,9 @@ var Session = (function () {
 					else if (collectMode) {
 						var entityAtLocation = levelRef.GetEntityAtLocation(curX, curY, curZ);
 						if (entityAtLocation !== undefined) {
-							console.log("Remove entity at " + curX + ", " + curY + ", " + curZ)
+							// console.log("Remove entity at " + curX + ", " + curY + ", " + curZ)
 							levelRef.RemoveEntity(entityAtLocation);
+							// The following is just to make a neat particle effect
 							if (!IS_SERVER) {
 								var startX = entityRef.x;
 								var startY = entityRef.y;
@@ -822,8 +824,10 @@ var Session = (function () {
 					this.fallSpeed --;
 				}
 				this.falling = true;
-				if (this.z < -20) {
+				if (this.z < -20 && this === curPlayer && curSession.playerTemplate !== undefined) {
 					this.x = curSession.playerTemplate.x;
+					this.y = curSession.playerTemplate.y;
+					this.z = curSession.playerTemplate.z;
 					this.falling = false;
 				}
 			}

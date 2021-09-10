@@ -464,6 +464,7 @@ function TestAsPlayer () {
 		var newPlayerData;
 		if (curSession.playerTemplate !== undefined) {
 			newPlayerData = curSession.playerTemplate;
+			newPlayerData.id = curLevel.entityCounter;
 		}
 		else {
 			newPlayerData = {
