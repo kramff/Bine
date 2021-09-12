@@ -507,7 +507,7 @@ function DrawEntitySideTiles (entity) {
 	if (scale < 0) {
 		return;
 	}
-	if (x > 0 - scale && x < R.CANVAS_WIDTH && y > 0 - scale && y < R.CANVAS_HEIGHT) {
+	if (x2 > 0 - scale && x2 < R.CANVAS_WIDTH && y2 > 0 - scale && y2 < R.CANVAS_HEIGHT) {
 		R.ctx.save();
 
 		// Entity is player
