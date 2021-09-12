@@ -524,7 +524,7 @@ function DrawEntitySideTiles (entity) {
 			R.ctx.strokeStyle = "#80FF80";
 			R.ctx.fillStyle = "#208020";
 		}
-		DrawTileSides (x, y, scale, x2, y2, scale2, xPosition, yPosition, zPosition);
+		DrawCubeSides (x, y, scale, x2, y2, scale2, xPosition, yPosition, zPosition);
 		R.ctx.restore();
 	}
 }
@@ -572,7 +572,7 @@ function DrawAreaZSlice (area, z) {
 			//}
 		}
 		if (editorActive) {
-			DrawAreaEdges(area, scale, z);
+			DrawAreaEdges(area, scale, xPosition, yPosition, z);
 
 		}
 	}
@@ -583,8 +583,8 @@ function DrawAreaZSliceSideTiles (area, z) {
 	// var zPosition = area.GetZ();
 	// var scale = GetScale(zPosition);
 	// var y = GetScreenYHaveScale(xPosition, yPosition, zPosition, scale);
-	R.ctx.save();
-	R.ctx.fillStyle = "#101826";
+	// R.ctx.save();
+	// R.ctx.fillStyle = "#101826";
 	// var realZ = z;
 	// var scale = GetScale(z + area.GetZ() - area.z);
 	var scale = GetScale(z);
@@ -618,7 +618,7 @@ function DrawAreaZSliceSideTiles (area, z) {
 									// DrawTileInCeiling(x, y, scale);
 								}
 								else {
-									DrawTileSides(x, y, scale, x2, y2, scale2, realX, realY, z);
+									DrawCubeSides(x, y, scale, x2, y2, scale2, realX, realY, z, "wall_grad");
 								}
 							}
 							// numSquares ++;
@@ -631,7 +631,7 @@ function DrawAreaZSliceSideTiles (area, z) {
 			// DrawAreaEdges(area, scale, z);
 		}
 	}
-	R.ctx.restore();
+	// R.ctx.restore();
 }
 function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 	R.ctx.save();
@@ -765,9 +765,75 @@ function DrawTileInCeiling (x, y, scale, realX, realY, realZ) {
 		R.ctx.restore();
 	}
 }
-// Just draws one side of a tile for now
-// Need to draw all sides / not draw covered sides before drawing any tiles for that layer
-function DrawTileSides (x, y, scale, x2, y2, scale2, realX, realY, realZ) {
+
+var wallColors = [
+	"#586068",// 10
+	"#515961",// 9
+	"#4b535b",
+	"#444c54",
+	"#3e464e",
+	"#373f47",
+	"#313941",
+	"#2a323a",
+	"#242c34",// 2
+	"#1d252d",// 1
+	"#171f27",// 0
+	"#101820",// -1
+];
+
+// For setting up gradients for walls
+function GetWallGradientColor (z) {
+	var newZ = 10 - z;
+	newZ = Math.min(wallColors.length - 1, Math.max(0, newZ));
+	return wallColors[newZ];
+}
+
+// Top and bottom sides of walls use this one
+var gradVertMem = {};
+function GetWallGradientVertical (y, y2, z) {
+	y = Math.round(y);
+	y2 = Math.round(y2);
+	z = Math.round(z);
+	var memString = y + "," + y2 + "," + z;
+	if (gradVertMem[memString] !== undefined) {
+		return gradVertMem[memString];
+	}
+	else {
+		var topColor = GetWallGradientColor(z);
+		var bottomColor = GetWallGradientColor(z - 1);
+		var gradient = R.ctx.createLinearGradient(0, y, 0, y2);
+		gradient.addColorStop(0, topColor);
+		gradient.addColorStop(1, topColor);
+		gradVertMem[memString] = gradient;
+		return gradient;
+	}
+}
+
+// Left and right sides of walls use this one
+var gradHorizMem = {};
+function GetWallGradientHorizontal (x, x2, z) {
+	x = Math.round(x);
+	x2 = Math.round(x2);
+	z = Math.round(z);
+	var memString = x + "," + x2 + "," + z;
+	if (gradVertMem[memString] !== undefined) {
+		return gradVertMem[memString];
+	}
+	else {
+		var topColor = GetWallGradientColor(z);
+		var bottomColor = GetWallGradientColor(z - 1);
+		var gradient = R.ctx.createLinearGradient(x, 0, x2, 0);
+		gradient.addColorStop(0, topColor);
+		gradient.addColorStop(1, bottomColor);
+		gradVertMem[memString] = gradient;
+		return gradient;
+	}
+}
+
+// Draw the top, bottom, left, and right sides of a cube
+// Either for tile in area or for cube style entity
+function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideStyle) {
+	R.ctx.save();
 	// top side
 	if (y > y2 && !IsSolid(realX, realY - 1, realZ)) {
 		R.ctx.beginPath();
@@ -776,6 +842,9 @@ function DrawTileSides (x, y, scale, x2, y2, scale2, realX, realY, realZ) {
 		R.ctx.lineTo(x2 + scale2, y2);
 		R.ctx.lineTo(x + scale, y);
 		R.ctx.closePath();
+		if (sideStyle === "wall_grad") {
+			R.ctx.fillStyle = GetWallGradientHorizontal(y, y2, realZ);
+		}
 		R.ctx.fill();
 		R.ctx.stroke();
 	}
@@ -787,6 +856,9 @@ function DrawTileSides (x, y, scale, x2, y2, scale2, realX, realY, realZ) {
 		R.ctx.lineTo(x2 + scale2, y2 + scale2);
 		R.ctx.lineTo(x + scale, y + scale);
 		R.ctx.closePath();
+		if (sideStyle === "wall_grad") {
+			R.ctx.fillStyle = GetWallGradientHorizontal(y + scale, y2 + scale2, realZ);
+		}
 		R.ctx.fill();
 		R.ctx.stroke();
 	}
@@ -798,6 +870,9 @@ function DrawTileSides (x, y, scale, x2, y2, scale2, realX, realY, realZ) {
 		R.ctx.lineTo(x2, y2 + scale2);
 		R.ctx.lineTo(x, y + scale);
 		R.ctx.closePath();
+		if (sideStyle === "wall_grad") {
+			R.ctx.fillStyle = GetWallGradientVertical(x, x2, realZ);
+		}
 		R.ctx.fill();
 		R.ctx.stroke();
 	}
@@ -809,16 +884,24 @@ function DrawTileSides (x, y, scale, x2, y2, scale2, realX, realY, realZ) {
 		R.ctx.lineTo(x2 + scale2, y2 + scale2);
 		R.ctx.lineTo(x + scale, y + scale);
 		R.ctx.closePath();
+		if (sideStyle === "wall_grad") {
+			R.ctx.fillStyle = GetWallGradientVertical(x + scale, x2 + scale2, realZ);
+		}
 		R.ctx.fill();
 		R.ctx.stroke();
 	}
+	R.ctx.restore();
 }
 
-function DrawAreaEdges (area, scale, z) {
-	var x0 = scale * (0 + area.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var x1 = scale * (area.xSize + area.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var y0 = scale * (0 + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-	var y1 = scale * (area.ySize + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+function DrawAreaEdges (area, scale, x, y, z) {
+	// var x0 = scale * (0 + area.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var x0 = GetScreenXHaveScale(x, y, z, scale);
+	// var x1 = scale * (area.xSize + area.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
+	var x1 = GetScreenXHaveScale(x + area.xSize, y + area.ySize, z, scale);
+	// var y0 = scale * (0 + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	var y0 = GetScreenYHaveScale(x, y, z, scale);
+	// var y1 = scale * (area.ySize + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
+	var y1 = GetScreenYHaveScale(x + area.xSize, y + area.ySize, z, scale);
 	R.ctx.save();
 
 	// Dark cover over tiles below the edit level
