@@ -767,18 +767,18 @@ function DrawTileInCeiling (x, y, scale, realX, realY, realZ) {
 }
 
 var wallColors = [
-	"#586068",// 10
-	"#515961",// 9
+	"#586068",
+	"#515961",
 	"#4b535b",
 	"#444c54",
 	"#3e464e",
 	"#373f47",
 	"#313941",
 	"#2a323a",
-	"#242c34",// 2
-	"#1d252d",// 1
-	"#171f27",// 0
-	"#101820",// -1
+	"#242c34",
+	"#1d252d",
+	"#171f27",
+	"#101820",
 ];
 
 // For setting up gradients for walls
@@ -803,7 +803,7 @@ function GetWallGradientVertical (y, y2, z) {
 		var bottomColor = GetWallGradientColor(z - 1);
 		var gradient = R.ctx.createLinearGradient(0, y, 0, y2);
 		gradient.addColorStop(0, topColor);
-		gradient.addColorStop(1, topColor);
+		gradient.addColorStop(1, bottomColor);
 		gradVertMem[memString] = gradient;
 		return gradient;
 	}
@@ -843,7 +843,7 @@ function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideSt
 		R.ctx.lineTo(x + scale, y);
 		R.ctx.closePath();
 		if (sideStyle === "wall_grad") {
-			R.ctx.fillStyle = GetWallGradientHorizontal(y, y2, realZ);
+			R.ctx.fillStyle = GetWallGradientVertical(y, y2, realZ);
 		}
 		R.ctx.fill();
 		R.ctx.stroke();
@@ -857,7 +857,7 @@ function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideSt
 		R.ctx.lineTo(x + scale, y + scale);
 		R.ctx.closePath();
 		if (sideStyle === "wall_grad") {
-			R.ctx.fillStyle = GetWallGradientHorizontal(y + scale, y2 + scale2, realZ);
+			R.ctx.fillStyle = GetWallGradientVertical(y + scale, y2 + scale2, realZ);
 		}
 		R.ctx.fill();
 		R.ctx.stroke();
@@ -871,7 +871,7 @@ function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideSt
 		R.ctx.lineTo(x, y + scale);
 		R.ctx.closePath();
 		if (sideStyle === "wall_grad") {
-			R.ctx.fillStyle = GetWallGradientVertical(x, x2, realZ);
+			R.ctx.fillStyle = GetWallGradientHorizontal(x, x2, realZ);
 		}
 		R.ctx.fill();
 		R.ctx.stroke();
@@ -885,7 +885,7 @@ function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideSt
 		R.ctx.lineTo(x + scale, y + scale);
 		R.ctx.closePath();
 		if (sideStyle === "wall_grad") {
-			R.ctx.fillStyle = GetWallGradientVertical(x + scale, x2 + scale2, realZ);
+			R.ctx.fillStyle = GetWallGradientHorizontal(x + scale, x2 + scale2, realZ);
 		}
 		R.ctx.fill();
 		R.ctx.stroke();
