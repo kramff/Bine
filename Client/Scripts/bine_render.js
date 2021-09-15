@@ -136,16 +136,12 @@ function DrawParticle (particle) {
 	var yPosition = particle.y;
 	var zPosition = particle.z;
 	// Get coordinates at top and bottom of tile for particle
-	var scaleB = GetScale(zPosition);
-	var scaleT = GetScale(zPosition + 1);
-	// var xB = scaleB * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var xB = GetScreenXHaveScale(xPosition, yPosition, zPosition, scaleB);
-	// var xT = scaleT * (particle.x - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var xT = GetScreenXHaveScale(xPosition, yPosition, zPosition + 1, scaleT);
-	// var yB = scaleB * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-	var yB = GetScreenYHaveScale(xPosition, yPosition, zPosition, scaleB);
-	// var yT = scaleT * (particle.y - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-	var yT = GetScreenYHaveScale(xPosition, yPosition, zPosition + 1, scaleT);
+	var scaleT = GetScale(zPosition);
+	var xT = GetScreenXHaveScale(xPosition, yPosition, zPosition, scaleT);
+	var yT = GetScreenYHaveScale(xPosition, yPosition, zPosition, scaleT);
+	var scaleB = GetScale(zPosition - 1);
+	var xB = GetScreenXHaveScale(xPosition, yPosition, zPosition - 1, scaleB);
+	var yB = GetScreenYHaveScale(xPosition, yPosition, zPosition - 1, scaleB);
 	// If too small or out of camera view, skip
 	if (scaleB < 0) {
 		return;
@@ -161,8 +157,8 @@ function DrawParticle (particle) {
 		case "rain":
 			R.ctx.strokeStyle = "#9090F0";
 			R.ctx.beginPath();
-			R.ctx.moveTo(xB, yB);
-			R.ctx.lineTo(xT, yT);
+			R.ctx.moveTo(xT, yT);
+			R.ctx.lineTo(xB, yB);
 			R.ctx.stroke();
 		break;
 		case "splash":
@@ -174,7 +170,7 @@ function DrawParticle (particle) {
 			R.ctx.strokeStyle = "#30F060";
 			R.ctx.fillStyle = "#60D060";
 			R.ctx.globalAlpha = (particle.dur / 20);
-			R.ctx.rect(xB, yB, particle.xSize * scaleB, particle.ySize * scaleB);
+			R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
 			R.ctx.fill();
 			R.ctx.stroke();
 		break;
@@ -182,7 +178,7 @@ function DrawParticle (particle) {
 			R.ctx.strokeStyle = "#30F060";
 			R.ctx.fillStyle = "#60D060";
 			R.ctx.globalAlpha = (particle.dur / 20);
-			R.ctx.rect(xB, yB, particle.xSize * scaleB, particle.ySize * scaleB);
+			R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
 			// R.ctx.fill();
 			R.ctx.stroke();
 		break;
@@ -190,7 +186,7 @@ function DrawParticle (particle) {
 			R.ctx.strokeStyle = "#30F060";
 			R.ctx.fillStyle = "#60D060";
 			R.ctx.globalAlpha = (particle.dur / 20);
-			R.ctx.rect(xB, yB, particle.xSize * scaleB, particle.ySize * scaleB);
+			R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
 			R.ctx.fill();
 			R.ctx.stroke();
 		break;
@@ -198,8 +194,33 @@ function DrawParticle (particle) {
 			R.ctx.strokeStyle = "#30F060";
 			R.ctx.fillStyle = "#60D060";
 			R.ctx.globalAlpha = (particle.dur / 20);
-			R.ctx.rect(xB, yB, particle.xSize * scaleB, particle.ySize * scaleB);
+			R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
 			// R.ctx.fill();
+			R.ctx.stroke();
+		break;
+		case "block_disappear":
+			R.ctx.strokeStyle = "#80FF80";
+			R.ctx.fillStyle = "#208020";
+			var size = (particle.dur / 10);
+			// The apothem is half the width of the square
+			var apothem = size / 2;
+			var edgeToMini = 0.5 - apothem;
+			var zBPosMini = (zPosition - 1 + edgeToMini);
+			var scaleBMini = GetScale(zBPosMini);
+			var zTPosMini = (zPosition - edgeToMini);
+			var scaleTMini = GetScale(zTPosMini);
+			var xPosMini = xPosition + edgeToMini;
+			var yPosMini = yPosition + edgeToMini;
+			var xBMini = GetScreenXHaveScale(xPosMini, yPosMini, zBPosMini, scaleBMini);
+			var yBMini = GetScreenYHaveScale(xPosMini, yPosMini, zBPosMini, scaleBMini);
+			var xTMini = GetScreenXHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
+			var yTMini = GetScreenYHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
+			// Sides of cube
+			DrawCubeSides(xTMini, yTMini, scaleTMini * size, xBMini, yBMini, scaleBMini * size, xPosition, yPosition, zPosition);
+			// (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideStyle)
+			// Top of cube
+			R.ctx.rect(xTMini, yTMini, scaleTMini * size, scaleTMini * size);
+			R.ctx.fill();
 			R.ctx.stroke();
 		break;
 	}

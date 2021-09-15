@@ -293,7 +293,10 @@ var Session = (function () {
 								}
 								//xSize = Math.max(xSize, 1);
 								//ySize = Math.max(ySize, 1);
+								// Beam
 								MakeParticle("block_collect", startX, startY, entityRef.z, xSize, ySize, 1, 10);
+								// Dissapearing block
+								MakeParticle("block_disappear", curX, curY, curZ, 1, 1, 1, 10);
 							}
 							return;
 						}
