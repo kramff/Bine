@@ -80,6 +80,13 @@ var curArea = undefined;
 var inEntity = false;
 var curEntity = undefined;
 
+// Editing the player template?
+var inPlayerTemplate = false;
+
+// Editing an entity template?
+var inEntityTeplate = false;
+var curEntityTemplate = undefined;
+
 // In a rule nest? (Editing a nested rule) Keep reference
 var inNestingPoint = false;
 var curNestingPoint = undefined;

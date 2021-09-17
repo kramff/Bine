@@ -521,16 +521,28 @@ function DoButtonAction (action, extra) {
 
 		case "create_new_template":
 			inEntity = true;
-
+			inEntityTemplate = true;
 			// Make a blank entity
+			// TODO: Put the newly created entity into the list of templates
 			curEntity = {};
+			curEntityTemplate = 11234;
 			HideAllMenus();
 			ShowMenu("edit_entity");
 			SetupEntityEditingMenu();
 
 		break;
 		case "edit_player_template":
-			// Fish up the single player entity
+			if (curSession.playerTemplate !== undefined) {
+				inEntity = true;
+				inPlayerTemplate = true;
+				curEntity = curSession.playerTemplate 
+				HideAllMenus();
+				ShowMenu("edit_entity");
+				SetupEntityEditingMenu();
+			}
+			else {
+				alert(
+			}
 		break;
 
 		case "create_area":

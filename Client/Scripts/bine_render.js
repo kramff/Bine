@@ -318,42 +318,13 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	// Limit bottomZ to 100 below the player, limit topZ to 100 above the player
 	bottomZ = Math.max(bottomZ, Math.round(cameraZ) - 100);
 	topZ = Math.min(topZ, Math.round(cameraZ) + 100);
-
+	// Outlines around areas when in edit mode
 	if (R.EDIT_MODE && bottomZ > Math.round(R.cameraZ)) {
 		DrawEditOutline(Math.round(R.cameraZ));
 	}
 	for (var z = bottomZ; z <= topZ + 1; z++) {
 		var i = bottomI;
 		var currentObject = drawObjects[i];
-
-		//Loop through objects, stopping when no more objects or next object is above currentZ
-		while (currentObject !== undefined && currentObject.drawZ - 1 <= z) {
-			if (DObjInZ(currentObject, z)) {
-				// Draw the tops of cubes
-				DrawDObjZ(currentObject, z, false);
-			}
-			if (DObjInZ(currentObject, z + 1)) {
-				// Draw the sides of cubes
-				DrawDObjZ(currentObject, z + 1, true);
-			}
-
-			//move bottomI up when possible
-			if (i === bottomI) {
-				if (currentObject.type === "Entity") {
-					if (z > currentObject.drawZ) {
-						bottomI ++;
-					}
-				}
-				else if (currentObject.type === "Area") {
-					if (z > currentObject.drawZ + currentObject.zSize) {
-						bottomI ++;
-					}
-				}
-			}
-
-			i ++;
-			currentObject = drawObjects[i];
-		}
 		// Loop through global particle effects and draw all up to the currentZ
 		var particle = particleArr[particleDrawI];
 		while (particle !== undefined && particle.z <= z) {
@@ -362,6 +333,36 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 			// Move up to next particle object
 			particleDrawI ++;
 			particle = particleArr[particleDrawI];
+		}
+		// Loop through objects, stopping when no more objects or next object is above currentZ
+		// Do two loops: one for the tops of objects, then another for the sides of the objects
+		while (currentObject !== undefined && currentObject.drawZ - 1 <= z) {
+			if (DObjInZ(currentObject, z)) {
+				// Draw the tops of cubes
+				DrawDObjZ(currentObject, z, false);
+			}
+			// Next object
+			i ++;
+			currentObject = drawObjects[i];
+		}
+		// Second loop for sides of objects
+		i = bottomI;
+		currentObject = drawObjects[i];
+		while (currentObject !== undefined && currentObject.drawZ - 1 <= z) {
+			if (DObjInZ(currentObject, z + 1)) {
+				// Draw the sides of cubes
+				DrawDObjZ(currentObject, z + 1, true);
+			}
+			//move bottomI up when possible
+			if (i === bottomI) {
+				// Both areas and entities have zSize
+				if (z > currentObject.drawZ + currentObject.zSize - 1) {
+					bottomI ++;
+				}
+			}
+			// Next object
+			i ++;
+			currentObject = drawObjects[i];
 		}
 		// Draw outline where player could be placed if in edit mode
 		if (R.EDIT_MODE && z === Math.round(R.cameraZ)) {
