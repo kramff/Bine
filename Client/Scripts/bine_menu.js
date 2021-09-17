@@ -541,7 +541,7 @@ function DoButtonAction (action, extra) {
 				SetupEntityEditingMenu();
 			}
 			else {
-				alert(
+				alert("Player template missing!");
 			}
 		break;
 
