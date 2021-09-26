@@ -528,6 +528,14 @@ function DeleteArea () {
 }
 
 function SendEntityChange () {
+	if (inPlayerTemplate) {
+		curSession.playerTemplate = curEntity.Export();
+		return;
+	}
+	else if (inEntityTemplate) {
+		curSession.UpdateEntityTemplateByID(curEntity.id, curEntity.Export());
+		return;
+	}
 	if (IN_MULTI_SESSION) {
 		sendData("entityChange", {levelID: curLevel.id, entityID: curEntity.id, entityData: curEntity.Export()});
 	}

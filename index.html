@@ -166,7 +166,23 @@
 		</div>
 		<div class="simple_text">General Settings:</div>
 		<div class="setting_box">
-			<input type="checkbox" id="entity_solid" checked>
+			<input type="number" step="1" id="x_entity_position">
+			<label for="x_entity_position">X Position</label>
+			<input type="number" step="1" id="y_entity_position">
+			<label for="y_entity_position">Y Position</label>
+			<input type="number" step="1" id="z_entity_position">
+			<label for="z_entity_position">Z Position</label>
+		</div>
+		<div class="setting_box">
+			<input type="number" step="1" id="x_entity_size">
+			<label for="x_entity_position">X Size</label>
+			<input type="number" step="1" id="y_entity_size">
+			<label for="y_entity_position">Y Size</label>
+			<input type="number" step="1" id="z_entity_size">
+			<label for="z_entity_position">Z Size</label>
+		</div>
+		<div class="setting_box">
+			<input type="checkbox" id="entity_solid">
 			<label for="entity_solid">Solid</label>
 		</div>
 		<div class="setting_box">
@@ -178,16 +194,16 @@
 			<label for="entity_pushable">Pushable</label>
 		</div>
 		<div class="setting_box">
-			<input type="checkbox" id="entity_gravity" checked>
+			<input type="checkbox" id="entity_gravity">
 			<label for="entity_gravity">Gravity</label>
 		</div>
 		<div class="setting_box">
-			<input type="number" id="entity_move_speed" value="10">
-			<label for="entity_move_speed">Move Speed</label>
+			<input type="number" id="entity_move_speed">
+			<label for="entity_move_speed">Move Speed (lower is faster)</label>
 		</div>
 		<div class="setting_box">
-			<input type="number" id="entity_fall_speed" value="10">
-			<label for="entity_fall_speed">Fall Speed</label>
+			<input type="number" id="entity_fall_speed">
+			<label for="entity_fall_speed">Fall Speed (lower is faster)</label>
 		</div>
 
 		<div class="simple_text">Variables:</div>

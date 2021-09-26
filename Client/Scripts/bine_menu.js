@@ -416,7 +416,7 @@ function SetupButtons () {
 	}
 	// Change appearance and basic attributes of an entity
 	var settingInputFunc = function (e) {
-		console.log(e);
+		// console.log(e);
 		var settingType = e.target.id;
 		var setTo;
 		if (e.target.type === "checkbox") {
@@ -425,7 +425,19 @@ function SetupButtons () {
 		else {
 			setTo = e.target.value;
 		}
-		curEntity.settings[settingType] = setTo;
+		var entityAttribute = entityAttributeDictionary[settingType];
+		if (entityAttribute !== undefined) {
+			curEntity[entityAttribute] = setTo;
+		}
+		else {
+			var entitySetting = entitySettingDictionary[settingType];
+			if (entityAttribute !== undefined) {
+				curEntity[entityAttribute] = setTo;
+			}
+		}
+		else {
+			console.log("problem trying to edit an entity");
+		}
 	}
 	var entitySettings = document.querySelectorAll(".menu_container[id='edit_entity'] .setting_box");
 	for (var i = 0; i < entitySettings.length; i++) {
@@ -433,6 +445,24 @@ function SetupButtons () {
 		entitySetting.oninput = settingInputFunc;
 	}
 }
+var entityAttributeDictionary = {
+	entity_color_input: "style",
+	x_entity_position: "x",
+	y_entity_position: "y",
+	z_entity_position: "z",
+	x_entity_size: "xSize",
+	y_entity_size: "ySize",
+	z_entity_size: "zSize",
+	entity_move_speed: "x",
+	entity_fall_speed: "x",
+};
+var entitySettingDictionary = {
+	entity_visible
+	entity_solid
+	entity_standable
+	entity_pushable
+	entity_gravity
+};
 
 function OpenEditVariableMenu (variableID) {
 
@@ -603,6 +633,9 @@ function DoButtonAction (action, extra) {
 			SendEntityChange();
 			inEntity = false;
 			curEntity = undefined;
+			inPlayerTemplate = false;
+			inEntityTemplate = false;
+			curEntityTemplate = undefined;
 			HideAllMenus();
 			ShowMenu("edit_level");
 		break;

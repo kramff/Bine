@@ -656,10 +656,10 @@ var Session = (function () {
 		this.yMov = 0;
 		this.zMov = 0;
 		this.moveTime = 0;
-		this.moveDuration = MOVE_SPEED;
+		this.moveDuration = entityData.moveSpeed ?? MOVE_SPEED;
 
 		this.falling = false;
-		this.fallSpeed = FALL_SPEED_START;
+		this.fallSpeed = entityData.fallSpeed ?? FALL_SPEED_START;
 
 		this.moveDirections = {up: false, down: false, left: false, right: false, changed: false};
 
@@ -1441,6 +1441,23 @@ var Session = (function () {
 	}
 	Session.prototype.ExportConstructionData = function () {
 		return constructions;
+	}
+	Session.prototype.GetEntityTemplateByID = function (id) {
+		var result = this.entityTemplates.filter(function (entityTemplate) {
+			entityTemplate.id === id;
+		});
+		if (result[0] !== undefined) {
+			return result;
+		}
+	}
+	Session.prototype.UpdateEntityTemplateByID = function (id, entityData) {
+		var result = this.entityTemplates.filter(function (entityTemplate) {
+			entityTemplate.id === id;
+		});
+		if (result[0] !== undefined) {
+			var index = this.entityTemplates.indexOf(result[0]);
+			this.entityTemplates[index] = entityData;
+		}
 	}
 	return Session;
 })();
