@@ -366,21 +366,24 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 		}
 		// Draw outline where player could be placed if in edit mode
 		if (R.EDIT_MODE && z === Math.round(R.cameraZ)) {
-			DrawEditOutline(z);
+			DrawEditOutline(R.cameraX - 0.5, R.cameraY - 0.5, R.cameraZ);
 		}
 	}
 	if (R.EDIT_MODE && topZ < Math.round(R.cameraZ)) {
-		DrawEditOutline(Math.round(R.cameraZ));
+		DrawEditOutline(R.cameraX - 0.5, R.cameraY - 0.5, R.cameraZ);
 	}
 
 	ParticleTick();
 }
 
-function DrawEditOutline (z) {
+function DrawEditOutline (x, y, z) {
 	R.ctx.save();
-	var size = GetScale(z);
+	var scale = GetScale(z);
+	var xScreen = GetScreenXHaveScale(x, y, z, scale);
+	var yScreen = GetScreenYHaveScale(x, y, z, scale);
 	R.ctx.strokeStyle = "#40FF80";
-	R.ctx.strokeRect(R.CANVAS_HALF_WIDTH - size / 2, R.CANVAS_HALF_HEIGHT - size / 2, size, size);
+	// R.ctx.strokeRect(R.CANVAS_HALF_WIDTH - size / 2, R.CANVAS_HALF_HEIGHT - size / 2, size, size);
+	R.ctx.strokeRect(xScreen, yScreen, scale, scale);
 	R.ctx.restore();
 }
 
