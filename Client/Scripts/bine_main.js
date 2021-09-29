@@ -701,7 +701,9 @@ function GameplayEnterKey (event) {
 	}
 	else {
 		// Focus the element
-		chatInput.focus();
+		if (chatInput !== null) {
+			chatInput.focus();
+		}
 	}
 }
 
