@@ -84,7 +84,7 @@ var curEntity = undefined;
 var inPlayerTemplate = false;
 
 // Editing an entity template?
-var inEntityTeplate = false;
+var inEntityTemplate = false;
 var curEntityTemplate = undefined;
 
 // In a rule nest? (Editing a nested rule) Keep reference
