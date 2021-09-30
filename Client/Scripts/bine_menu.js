@@ -429,7 +429,7 @@ function SetupButtons () {
 		if (entityAttribute !== undefined) {
 			curEntity[entityAttribute] = setTo;
 		}
-		else {
+		else if (entitySetting !== undefined) {
 			var entitySetting = entitySettingDictionary[settingType];
 			if (entityAttribute !== undefined) {
 				curEntity[entityAttribute] = setTo;
@@ -457,11 +457,11 @@ var entityAttributeDictionary = {
 	entity_fall_speed: "x",
 };
 var entitySettingDictionary = {
-	entity_visible
-	entity_solid
-	entity_standable
-	entity_pushable
-	entity_gravity
+	entity_visible: "visible",
+	entity_solid: "solid",
+	entity_standable: "standable",
+	entity_pushable: "pushable",
+	entity_gravity: "gravity",
 };
 
 function OpenEditVariableMenu (variableID) {

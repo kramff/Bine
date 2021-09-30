@@ -529,7 +529,8 @@ function DeleteArea () {
 
 function SendEntityChange () {
 	if (inPlayerTemplate) {
-		curSession.playerTemplate = curEntity.Export();
+		// curSession.playerTemplate = curEntity.Export();
+		curSession.playerTemplate = curEntity;
 		return;
 	}
 	else if (inEntityTemplate) {
