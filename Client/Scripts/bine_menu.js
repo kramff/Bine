@@ -434,9 +434,9 @@ function SetupButtons () {
 			if (entityAttribute !== undefined) {
 				curEntity[entityAttribute] = setTo;
 			}
-		}
-		else {
-			console.log("problem trying to edit an entity");
+			else {
+				console.log("problem trying to edit an entity");
+			}
 		}
 	}
 	var entitySettings = document.querySelectorAll(".menu_container[id='edit_entity'] .setting_box");
