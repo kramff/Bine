@@ -454,7 +454,8 @@ function MainUpdate () {
 			if (touchEventsActive) {
 				if (touchWalk) {
 					touchChanged = false;
-					var coords = ScreenCoordToGameCoord(touchScreenX, touchScreenY, Math.round(zCam), xCam, yCam, zCam, R);
+					// var coords = ScreenCoordToGameCoord(touchScreenX, touchScreenY, Math.round(zCam), xCam, yCam, zCam);
+					var coords = ScreenCoordToGameCoord(touchScreenX, touchScreenY, Math.round(zCam));
 					touchGoalX = coords.x;
 					touchGoalY = coords.y;
 				}
@@ -560,11 +561,11 @@ function loadDefaultLevels () {
 }
 
 // Determine game coordinates from screen coordinates
-function ScreenCoordToGameCoord (screenX, screenY, inputZ, cameraX, cameraY, cameraZ, renderSettings) {
-	// var scale = -(renderSettings.TILE_SIZE / (renderSettings.Z_MULTIPLIER * (inputZ - cameraZ) - renderSettings.EYE_DISTANCE)) * renderSettings.SCALE_MULTIPLIER;
-	var scale = GetScale(cameraZ);
-	var gameX = Math.floor((screenX - renderSettings.CANVAS_HALF_WIDTH) / scale + cameraX);
-	var gameY = Math.floor((screenY - renderSettings.CANVAS_HALF_HEIGHT) / scale + cameraY);
+// function ScreenCoordToGameCoord (screenX, screenY, inputZ, cameraX, cameraY, cameraZ) {
+function ScreenCoordToGameCoord (screenX, screenY, inputZ) {
+	var scale = GetScale(inputZ);
+	var gameX = Math.floor((screenX - R.CANVAS_HALF_WIDTH) / scale + R.cameraX);
+	var gameY = Math.floor((screenY - R.CANVAS_HALF_HEIGHT) / scale + R.cameraY + (inputZ - R.cameraZ) * R.CAMERA_TILT);
 	var gameZ = inputZ;
 	return {x: gameX, y: gameY, z: gameZ};
 }
@@ -1036,7 +1037,8 @@ function EditTileIfNewCoord (x, y) {
 		return;
 	}
 
-	var gameCoords = ScreenCoordToGameCoord(x, y, Math.round(editCamZ), editCamX + editMovX * (1 - 0.1 * editMovTime) + 0.5, editCamY + editMovY * (1 - 0.1 * editMovTime) + 0.5, editCamZ + editMovZ * (1 - 0.1 * editMovTime) + 0.5, R);
+	// var gameCoords = ScreenCoordToGameCoord(x, y, Math.round(editCamZ), editCamX + editMovX * (1 - 0.1 * editMovTime) + 0.5, editCamY + editMovY * (1 - 0.1 * editMovTime) + 0.5, editCamZ + editMovZ * (1 - 0.1 * editMovTime) + 0.5);
+	var gameCoords = ScreenCoordToGameCoord(x, y, Math.round(editCamZ));
 
 	if (gameCoords.x === lastEditX && gameCoords.y === lastEditY && gameCoords.z === lastEditZ) {
 		// Skip because exact same coords as last edited location
