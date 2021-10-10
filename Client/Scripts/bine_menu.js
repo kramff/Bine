@@ -559,7 +559,6 @@ function DoButtonAction (action, extra) {
 			HideAllMenus();
 			ShowMenu("edit_entity");
 			SetupEntityEditingMenu();
-
 		break;
 		case "edit_player_template":
 			if (curSession.playerTemplate !== undefined) {
@@ -1121,6 +1120,25 @@ function SetupEntityEditingMenu () {
 	if (curEntity.style.color !== undefined) {
 		colorInput.value = curEntity.style.color;
 	}
+	var xPosInput = document.getElementById("x_entity_position");
+	var yPosInput = document.getElementById("y_entity_position");
+	var zPosInput = document.getElementById("z_entity_position");
+	xPosInput.value = curEntity.x;
+	yPosInput.value = curEntity.y;
+	zPosInput.value = curEntity.z;
+	var xSizeInput = document.getElementById("x_entity_size");
+	var ySizeInput = document.getElementById("y_entity_size");
+	var zSizeInput = document.getElementById("z_entity_size");
+	xSizeInput.value = curEntity.xSize;
+	ySizeInput.value = curEntity.ySize;
+	zSizeInput.value = curEntity.zSize;
+	var solidSetInput = document.getElementById("entity_solid");
+	var standableSetInput = document.getElementById("entity_standable");
+	var pushableSetInput = document.getElementById("entity_pushable");
+	var gravitySetInput = document.getElementById("entity_solid");
+	solidSetInput
+	standableSetInput
+	pushableSetInput
 	SetupEntityVariables();
 	SetupEntityRules();
 }
