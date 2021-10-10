@@ -365,11 +365,11 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 			currentObject = drawObjects[i];
 		}
 		// Draw outline where player could be placed if in edit mode
-		if (R.EDIT_MODE && z === Math.round(R.cameraZ + 0.5)) {
+		if (R.EDIT_MODE && z === Math.round(R.cameraZ - 0.5)) {
 			DrawEditOutline(R.cameraX - 0.5, R.cameraY - 0.5, R.cameraZ - 0.5);
 		}
 	}
-	if (R.EDIT_MODE && (topZ < Math.round(R.cameraZ - 0.5) || bottomZ > Math.round(R.cameraZ + 0.5))) {
+	if (R.EDIT_MODE && (topZ < Math.round(R.cameraZ - 0.5) || bottomZ > Math.round(R.cameraZ - 0.5))) {
 		DrawEditOutline(R.cameraX - 0.5, R.cameraY - 0.5, R.cameraZ - 0.5);
 	}
 
