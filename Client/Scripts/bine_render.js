@@ -132,16 +132,16 @@ function ParticleTick () {
 }
 
 function DrawParticle (particle) {
-	var xPosition = particle.x;
-	var yPosition = particle.y;
-	var zPosition = particle.z;
+	var xPos = particle.x;
+	var yPos = particle.y;
+	var zPos = particle.z;
 	// Get coordinates at top and bottom of tile for particle
-	var scaleT = GetScale(zPosition);
-	var xT = GetScreenXHaveScale(xPosition, yPosition, zPosition, scaleT);
-	var yT = GetScreenYHaveScale(xPosition, yPosition, zPosition, scaleT);
-	var scaleB = GetScale(zPosition - 1);
-	var xB = GetScreenXHaveScale(xPosition, yPosition, zPosition - 1, scaleB);
-	var yB = GetScreenYHaveScale(xPosition, yPosition, zPosition - 1, scaleB);
+	var scaleT = GetScale(zPos);
+	var xT = GetScreenXHaveScale(xPos, yPos, zPos, scaleT);
+	var yT = GetScreenYHaveScale(xPos, yPos, zPos, scaleT);
+	var scaleB = GetScale(zPos - 1);
+	var xB = GetScreenXHaveScale(xPos, yPos, zPos - 1, scaleB);
+	var yB = GetScreenYHaveScale(xPos, yPos, zPos - 1, scaleB);
 	// If too small or out of camera view, skip
 	if (scaleB < 0) {
 		return;
@@ -205,18 +205,18 @@ function DrawParticle (particle) {
 			// The apothem is half the width of the square
 			var apothem = size / 2;
 			var edgeToMini = 0.5 - apothem;
-			var zBPosMini = (zPosition - 1 + edgeToMini);
+			var zBPosMini = (zPos - 1 + edgeToMini);
 			var scaleBMini = GetScale(zBPosMini);
-			var zTPosMini = (zPosition - edgeToMini);
+			var zTPosMini = (zPos - edgeToMini);
 			var scaleTMini = GetScale(zTPosMini);
-			var xPosMini = xPosition + edgeToMini;
-			var yPosMini = yPosition + edgeToMini;
+			var xPosMini = xPos + edgeToMini;
+			var yPosMini = yPos + edgeToMini;
 			var xBMini = GetScreenXHaveScale(xPosMini, yPosMini, zBPosMini, scaleBMini);
 			var yBMini = GetScreenYHaveScale(xPosMini, yPosMini, zBPosMini, scaleBMini);
 			var xTMini = GetScreenXHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
 			var yTMini = GetScreenYHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
 			// Sides of cube
-			DrawCubeSides(xTMini, yTMini, scaleTMini * size, xBMini, yBMini, scaleBMini * size, xPosition, yPosition, zPosition);
+			DrawCubeSides(xTMini, yTMini, scaleTMini * size, xBMini, yBMini, scaleBMini * size, xPos, yPos, zPos);
 			// (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideStyle)
 			// Top of cube
 			R.ctx.rect(xTMini, yTMini, scaleTMini * size, scaleTMini * size);
@@ -479,23 +479,26 @@ function DrawDObjZ (dObj, z, drawSideTiles) {
 }
 
 function DrawEntity (entity) {
-	var xPosition = entity.GetX();
-	var yPosition = entity.GetY();
-	var zPosition = entity.GetZ();
-	var scale = GetScale(zPosition);
-	var x = GetScreenXHaveScale(xPosition, yPosition, zPosition, scale);
-	var y = GetScreenYHaveScale(xPosition, yPosition, zPosition, scale);
+	var xPos = entity.GetX();
+	var yPos = entity.GetY();
+	var zPos = entity.GetZ();
+	var scale = GetScale(zPos);
+	var xScr = GetScreenXHaveScale(xPos, yPos, zPos, scale);
+	var yScr = GetScreenYHaveScale(xPos, yPos, zPos, scale);
+	var skipRegularDraw = false;
 
 	if (scale < 0) {
 		return;
 	}
-	if (x > 0 - scale && x < R.CANVAS_WIDTH && y > 0 - scale && y < R.CANVAS_HEIGHT) {
+	if (xScr > 0 - scale && xScr < R.CANVAS_WIDTH && yScr > 0 - scale && yScr < R.CANVAS_HEIGHT) {
 		R.ctx.save();
 
 		// Entity is player
 		if (entity === curPlayer) {
-			R.ctx.strokeStyle = "#60C0C0";
-			R.ctx.fillStyle = "#208080";
+			// R.ctx.strokeStyle = "#60C0C0";
+			// R.ctx.fillStyle = "#208080";
+			DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "wizard");
+			skipRegularDraw = true;
 		}
 		// Entity is being edited
 		else if (entity === curEntity) {
@@ -506,13 +509,15 @@ function DrawEntity (entity) {
 			R.ctx.strokeStyle = "#80FF80";
 			R.ctx.fillStyle = "#208020";
 		}
-		R.ctx.fillRect(x, y, scale, scale);
-		R.ctx.strokeRect(x, y, scale, scale);
+		if (!skipRegularDraw) {
+			R.ctx.fillRect(xScr, yScr, scale, scale);
+			R.ctx.strokeRect(xScr, yScr, scale, scale);
+		}
 
 		// Draw temporary text above entity
 		if (entity.tempMessageTime > 0) {
 			R.ctx.fillStyle = "#FFFFFF";
-			R.ctx.fillText(entity.tempMessageString + " (" + entity.tempMessageTime + ")", x - 50, y - 100);
+			R.ctx.fillText(entity.tempMessageString + " (" + entity.tempMessageTime + ")", xScr - 50, yScr - 100);
 		}
 
 		R.ctx.restore();
@@ -520,25 +525,28 @@ function DrawEntity (entity) {
 }
 
 function DrawEntitySideTiles (entity) {
-	var xPosition = entity.GetX();
-	var yPosition = entity.GetY();
-	var zPosition = entity.GetZ();
-	var scale = GetScale(zPosition);
-	var scale2 = GetScale(zPosition - 1);
-	var x = GetScreenXHaveScale(xPosition, yPosition, zPosition, scale);
-	var x2 = GetScreenXHaveScale(xPosition, yPosition, zPosition - 1, scale2);
-	var y = GetScreenYHaveScale(xPosition, yPosition, zPosition, scale);
-	var y2 = GetScreenYHaveScale(xPosition, yPosition, zPosition - 1, scale2);
+	var xPos = entity.GetX();
+	var yPos = entity.GetY();
+	var zPos = entity.GetZ();
+	var scale = GetScale(zPos);
+	var scale2 = GetScale(zPos - 1);
+	var x = GetScreenXHaveScale(xPos, yPos, zPos, scale);
+	var x2 = GetScreenXHaveScale(xPos, yPos, zPos - 1, scale2);
+	var y = GetScreenYHaveScale(xPos, yPos, zPos, scale);
+	var y2 = GetScreenYHaveScale(xPos, yPos, zPos - 1, scale2);
 	if (scale < 0) {
 		return;
 	}
 	if (x2 > 0 - scale && x2 < R.CANVAS_WIDTH && y2 > 0 - scale && y2 < R.CANVAS_HEIGHT) {
 		R.ctx.save();
+		
+		var skipRegularDraw = false;
 
 		// Entity is player
 		if (entity === curPlayer) {
-			R.ctx.strokeStyle = "#60C0C0";
-			R.ctx.fillStyle = "#208080";
+			// R.ctx.strokeStyle = "#60C0C0";
+			// R.ctx.fillStyle = "#208080";
+			skipRegularDraw = true;
 		}
 		// Entity is being edited
 		else if (entity === curEntity) {
@@ -549,16 +557,18 @@ function DrawEntitySideTiles (entity) {
 			R.ctx.strokeStyle = "#80FF80";
 			R.ctx.fillStyle = "#208020";
 		}
-		DrawCubeSides (x, y, scale, x2, y2, scale2, xPosition, yPosition, zPosition);
+		if (!skipRegularDraw) {
+			DrawCubeSides(x, y, scale, x2, y2, scale2, xPos, yPos, zPos);
+		}
 		R.ctx.restore();
 	}
 }
 
 
 function DrawAreaZSlice (area, z) {
-	var xPosition = area.GetX();
-	var yPosition = area.GetY();
-	// var zPosition = area.GetZ();
+	var xPos = area.GetX();
+	var yPos = area.GetY();
+	// var zPos = area.GetZ();
 	var scale = GetScale(z);
 
 	// var realZ = z;
@@ -568,7 +578,7 @@ function DrawAreaZSlice (area, z) {
 		for (var i = 0; i < area.xSize; i++) {
 			var realX = i + area.GetX();
 			//var x = scale * (i + area.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
-			//var x = GetScreenXHaveScale(i + xPosition, yPosition, zPosition, scale);
+			//var x = GetScreenXHaveScale(i + xPos, yPos, zPos, scale);
 			// if (x > 0 - scale && x < R.CANVAS_WIDTH) {
 				for (var j = 0; j < area.ySize; j++) {
 					var realY = j + area.GetY();
@@ -597,17 +607,17 @@ function DrawAreaZSlice (area, z) {
 			//}
 		}
 		if (editorActive) {
-			DrawAreaEdges(area, scale, xPosition, yPosition, z);
+			DrawAreaEdges(area, scale, xPos, yPos, z);
 
 		}
 	}
 }
 function DrawAreaZSliceSideTiles (area, z) {
-	var xPosition = area.GetX();
-	var yPosition = area.GetY();
-	// var zPosition = area.GetZ();
-	// var scale = GetScale(zPosition);
-	// var y = GetScreenYHaveScale(xPosition, yPosition, zPosition, scale);
+	var xPos = area.GetX();
+	var yPos = area.GetY();
+	// var zPos = area.GetZ();
+	// var scale = GetScale(zPos);
+	// var y = GetScreenYHaveScale(xPos, yPos, zPos, scale);
 	// R.ctx.save();
 	// R.ctx.fillStyle = "#101826";
 	// var realZ = z;
@@ -617,11 +627,11 @@ function DrawAreaZSliceSideTiles (area, z) {
 	var scale2 = GetScale(z - 1);
 	if (scale > 0.01) {
 		for (var i = 0; i < area.xSize; i++) {
-			var realX = i + xPosition;
+			var realX = i + xPos;
 			// var x = scale * (realX - R.cameraX) + R.CANVAS_HALF_WIDTH;
-			// var x = GetScreenXHaveScale(realX, yPosition, zPosition, scale);
+			// var x = GetScreenXHaveScale(realX, yPos, zPos, scale);
 			// var x2 = scale2 * (realX - R.cameraX) + R.CANVAS_HALF_WIDTH;
-			// var x2 = GetScreenXHaveScale(xPosition, yPosition, zPosition, scale2);
+			// var x2 = GetScreenXHaveScale(xPos, yPos, zPos, scale2);
 			// if (x2 > 0 - scale2 && x2 < R.CANVAS_WIDTH) {
 				for (var j = 0; j < area.ySize; j++) {
 					var realY = j + area.GetY()
@@ -1013,4 +1023,28 @@ function IsSolid (x, y, z) {
 	return false;
 }*/
 
+function DrawComplicatedEntity (xPos, yPos, zPos, scale, xScr, yScr, kind) {
+	if (kind !== "wizard") {
+		console.log("Don't have a drawing approch for " + kind + " yet!");
+		return;
+	}
+	// Prep
+	R.ctx.save();
+	// Draw feet/shoes
+	// Draw legs
+	// Draw arms
+	// Draw sleeves
+	// Draw shirt
+	// Draw head
+	// Draw hat rim
+	R.ctx.fillStyle = "#1080F0";
+	R.ctx.strokeStyle = "#0070E0";
+	R.ctx.beginPath();
+	R.ctx.ellipse(xScr, yScr, scale, scale * R.CAMERA_TILT, 0, 0, Math.PI * 2);
+	R.ctx.fill();
+	R.ctx.stroke();
+	// Draw hat cone
+	// Done
+	R.ctx.restore();
+}
 
