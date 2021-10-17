@@ -263,9 +263,9 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	}
 	R.session = session;
 	R.level = level;
-	R.cameraX = cameraX
+	R.cameraX = cameraX;
 	R.cameraY = cameraY;
-	R.cameraZ = cameraZ
+	R.cameraZ = cameraZ;
 	R.CANVAS_WIDTH = canvas.width;
 	R.CANVAS_HEIGHT = canvas.height;
 	R.CANVAS_HALF_WIDTH = R.CANVAS_WIDTH / 2;
@@ -1023,27 +1023,89 @@ function IsSolid (x, y, z) {
 	return false;
 }*/
 
-function DrawComplicatedEntity (xPos, yPos, zPos, scale, xScr, yScr, kind) {
+function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, kind) {
 	if (kind !== "wizard") {
 		console.log("Don't have a drawing approch for " + kind + " yet!");
 		return;
 	}
 	// Prep
+	// Scale values from top to bottom of block
+	var scale00 = scaleTop;
+	var scale01 = GetScale(zPos - 0.1);
+	var scale02 = GetScale(zPos - 0.2);
+	var scale03 = GetScale(zPos - 0.3);
+	var scale04 = GetScale(zPos - 0.4);
+	var scale05 = GetScale(zPos - 0.5);
+	var scale06 = GetScale(zPos - 0.6);
+	var scale07 = GetScale(zPos - 0.7);
+	var scale08 = GetScale(zPos - 0.8);
+	var scale09 = GetScale(zPos - 0.9);
+	var scale10 = GetScale(zPos - 1.0);
+	// x positions from top to bottom of block
+	var xScr00 = xScrTop;
+	var xScr01 = GetScreenXHaveScale(xPos, yPos, zPos - 0.1, scale01);
+	var xScr02 = GetScreenXHaveScale(xPos, yPos, zPos - 0.2, scale02);
+	var xScr03 = GetScreenXHaveScale(xPos, yPos, zPos - 0.3, scale03);
+	var xScr04 = GetScreenXHaveScale(xPos, yPos, zPos - 0.4, scale04);
+	var xScr05 = GetScreenXHaveScale(xPos, yPos, zPos - 0.5, scale05);
+	var xScr06 = GetScreenXHaveScale(xPos, yPos, zPos - 0.6, scale06);
+	var xScr07 = GetScreenXHaveScale(xPos, yPos, zPos - 0.7, scale07);
+	var xScr08 = GetScreenXHaveScale(xPos, yPos, zPos - 0.8, scale08);
+	var xScr09 = GetScreenXHaveScale(xPos, yPos, zPos - 0.9, scale09);
+	var xScr10 = GetScreenXHaveScale(xPos, yPos, zPos - 1.0, scale10);
+	// y positions from top to bottom of block
+	var yScr00 = yScrTop;
+	var yScr01 = GetScreenYHaveScale(xPos, yPos, zPos - 0.1, scale01);
+	var yScr02 = GetScreenYHaveScale(xPos, yPos, zPos - 0.2, scale02);
+	var yScr03 = GetScreenYHaveScale(xPos, yPos, zPos - 0.3, scale03);
+	var yScr04 = GetScreenYHaveScale(xPos, yPos, zPos - 0.4, scale04);
+	var yScr05 = GetScreenYHaveScale(xPos, yPos, zPos - 0.5, scale05);
+	var yScr06 = GetScreenYHaveScale(xPos, yPos, zPos - 0.6, scale06);
+	var yScr07 = GetScreenYHaveScale(xPos, yPos, zPos - 0.7, scale07);
+	var yScr08 = GetScreenYHaveScale(xPos, yPos, zPos - 0.8, scale08);
+	var yScr09 = GetScreenYHaveScale(xPos, yPos, zPos - 0.9, scale09);
+	var yScr10 = GetScreenYHaveScale(xPos, yPos, zPos - 1.0, scale10);
 	R.ctx.save();
 	// Draw feet/shoes
 	// Draw legs
 	// Draw arms
 	// Draw sleeves
 	// Draw shirt
+	R.ctx.beginPath();
+	R.ctx.fillStyle = "#1080F0";
+	R.ctx.strokeStyle = "#0070E0";
+	// R.ctx.rect(xScr04 + scale04 * 0.4, yScr04 + scale04 * 0.5, scale04 * 0.2, scale04 * 0.4);
+	R.ctx.moveTo(xScr05 + scale05 * 0.42, yScr05 + scale05 * 0.5);
+	R.ctx.lineTo(xScr05 + scale05 * 0.58, yScr05 + scale05 * 0.5);
+	R.ctx.lineTo(xScr09 + scale09 * 0.58, yScr09 + scale09 * 0.5);
+	R.ctx.lineTo(xScr09 + scale09 * 0.42, yScr09 + scale09 * 0.5);
+	R.ctx.closePath()
+	R.ctx.fill();
+	R.ctx.stroke();
 	// Draw head
+	R.ctx.beginPath();
+	R.ctx.fillStyle = "#B18456";
+	R.ctx.strokeStyle = "#956738";
+	R.ctx.arc(xScr03 + scale03 * 0.5, yScr03 + scale03 * 0.5, scale03 * 0.1, Math.PI * 2, false);
+	R.ctx.fill();
+	R.ctx.stroke();
 	// Draw hat rim
 	R.ctx.fillStyle = "#1080F0";
 	R.ctx.strokeStyle = "#0070E0";
 	R.ctx.beginPath();
-	R.ctx.ellipse(xScr, yScr, scale, scale * R.CAMERA_TILT, 0, 0, Math.PI * 2);
+	// R.ctx.ellipse(xScrTop + scaleTop / 2, yScrTop + scaleTop / 2, scaleTop / 2, scaleTop * R.CAMERA_TILT / 2, 0, 0, Math.PI * 2);
+	R.ctx.ellipse(xScr02 + scale02 * 0.5, yScr02 + scale02 * 0.5, scale02 * 0.15, scale02 * 0.15 * R.CAMERA_TILT, 0, 0, Math.PI * 2);
 	R.ctx.fill();
 	R.ctx.stroke();
 	// Draw hat cone
+	R.ctx.fillStyle = "#1080F0";
+	R.ctx.strokeStyle = "#0070E0";
+	R.ctx.beginPath();
+	R.ctx.moveTo(xScr02 + scale02 * 0.45, yScr02 + scale02 * 0.5);
+	R.ctx.lineTo(xScr00 + scale00 * 0.5, yScr00 + scale00 * 0.5);
+	R.ctx.lineTo(xScr02 + scale02 * 0.55, yScr02 + scale02 * 0.5);
+	R.ctx.fill();
+	R.ctx.stroke();
 	// Done
 	R.ctx.restore();
 }
