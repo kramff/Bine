@@ -1067,6 +1067,16 @@ function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, ki
 	var yScr10 = GetScreenYHaveScale(xPos, yPos, zPos - 1.0, scale10);
 	R.ctx.save();
 	// Draw feet/shoes
+	R.ctx.beginPath();
+	R.ctx.fillStyle = "#8D501C";
+	R.ctx.strokeStyle = "#5C3412";
+	R.ctx.arc(xScr10 + scale10 * 0.45, yScr10 + scale10 * 0.5, scale10 * 0.05, Math.PI * 2, false);
+	R.ctx.fill();
+	R.ctx.stroke();
+	R.ctx.beginPath();
+	R.ctx.arc(xScr10 + scale10 * 0.55, yScr10 + scale10 * 0.5, scale10 * 0.05, Math.PI * 2, false);
+	R.ctx.fill();
+	R.ctx.stroke();
 	// Draw legs
 	// Draw arms
 	// Draw sleeves
