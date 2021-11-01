@@ -419,11 +419,17 @@ function SetupButtons () {
 		// console.log(e);
 		var settingType = e.target.id;
 		var setTo;
+		var type; 
 		if (e.target.type === "checkbox") {
 			setTo = e.target.checked;
+			type = "boolean";
 		}
 		else {
 			setTo = e.target.value;
+			type = e.target.type;
+			if (type === "number") {
+				setTo = Number(setTo);
+			}
 		}
 		var entityAttribute = entityAttributeDictionary[settingType];
 		if (entityAttribute !== undefined) {
@@ -1136,9 +1142,10 @@ function SetupEntityEditingMenu () {
 	var standableSetInput = document.getElementById("entity_standable");
 	var pushableSetInput = document.getElementById("entity_pushable");
 	var gravitySetInput = document.getElementById("entity_solid");
-	solidSetInput
-	standableSetInput
-	pushableSetInput
+	solidSetInput.checked = curEntity.settings.solid ?? false;
+	standableSetInput.checked = curEntity.settings.standable ?? false;
+	pushableSetInput.checked = curEntity.settings.pushable ?? false;
+	gravitySetInput.checked = curEntity.settings.gravity ?? false;
 	SetupEntityVariables();
 	SetupEntityRules();
 }
