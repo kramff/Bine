@@ -272,6 +272,21 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	R.CANVAS_HALF_HEIGHT = R.CANVAS_HEIGHT / 2;
 	R.EDIT_MODE = editMode || false;
 
+	if (cameraTilting) {
+		if (!cameraTilting2) {
+			R.CAMERA_TILT += 0.01;
+			if (R.CAMERA_TILT > 1) {
+				cameraTilting2 = true;
+			}
+		}
+		else {
+			R.CAMERA_TILT -= 0.01;
+			if (R.CAMERA_TILT < 0.1) {
+				cameraTilting2 = false;
+			}
+		}
+	}
+
 	// Clear canvas
 	R.canvas.width = R.canvas.width;
 

@@ -432,22 +432,20 @@ function SetupButtons () {
 			}
 		}
 		var entityAttribute = entityAttributeDictionary[settingType];
+		var entitySetting = entitySettingDictionary[settingType];
 		if (entityAttribute !== undefined) {
 			curEntity[entityAttribute] = setTo;
 		}
 		else if (entitySetting !== undefined) {
-			var entitySetting = entitySettingDictionary[settingType];
-			if (entityAttribute !== undefined) {
-				curEntity[entityAttribute] = setTo;
-			}
-			else {
-				console.log("problem trying to edit an entity");
-			}
+			curEntity.settings[entitySetting] = setTo;
+		}
+		else {
+			console.log("problem trying to edit an entity");
 		}
 	}
-	var entitySettings = document.querySelectorAll(".menu_container[id='edit_entity'] .setting_box");
-	for (var i = 0; i < entitySettings.length; i++) {
-		var entitySetting = entitySettings[i];
+	var entitySettingBoxes = document.querySelectorAll(".menu_container[id='edit_entity'] .setting_box");
+	for (var i = 0; i < entitySettingBoxes.length; i++) {
+		var entitySetting = entitySettingBoxes[i];
 		entitySetting.oninput = settingInputFunc;
 	}
 }
@@ -459,8 +457,8 @@ var entityAttributeDictionary = {
 	x_entity_size: "xSize",
 	y_entity_size: "ySize",
 	z_entity_size: "zSize",
-	entity_move_speed: "x",
-	entity_fall_speed: "x",
+	entity_move_speed: "moveDuration",
+	entity_fall_speed: "fallSpeed",
 };
 var entitySettingDictionary = {
 	entity_visible: "visible",
@@ -1141,7 +1139,7 @@ function SetupEntityEditingMenu () {
 	var solidSetInput = document.getElementById("entity_solid");
 	var standableSetInput = document.getElementById("entity_standable");
 	var pushableSetInput = document.getElementById("entity_pushable");
-	var gravitySetInput = document.getElementById("entity_solid");
+	var gravitySetInput = document.getElementById("entity_gravity");
 	solidSetInput.checked = curEntity.settings.solid ?? false;
 	standableSetInput.checked = curEntity.settings.standable ?? false;
 	pushableSetInput.checked = curEntity.settings.pushable ?? false;

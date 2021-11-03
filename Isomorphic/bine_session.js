@@ -656,7 +656,7 @@ var Session = (function () {
 		this.yMov = 0;
 		this.zMov = 0;
 		this.moveTime = 0;
-		this.moveDuration = entityData.moveSpeed ?? MOVE_SPEED;
+		this.moveDuration = entityData.moveDuration ?? MOVE_SPEED;
 
 		this.falling = false;
 		this.fallSpeed = entityData.fallSpeed ?? FALL_SPEED_START;

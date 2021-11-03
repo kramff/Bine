@@ -348,6 +348,8 @@ function GameInit () {
 }
 
 var rainOn = false;
+var cameraTilting = false;
+var cameraTilting2 = false;
 
 var frameCounter = 0;
 function MainUpdate () {
