@@ -262,7 +262,7 @@ var Session = (function () {
 					}
 					else if (collectMode) {
 						var entityAtLocation = levelRef.GetEntityAtLocation(curX, curY, curZ);
-						if (entityAtLocation !== undefined) {
+						if (entityAtLocation !== undefined && Array.isArray(entityAtLocation.templates) && entityAtLocation.templates.includes("block")) {
 							// console.log("Remove entity at " + curX + ", " + curY + ", " + curZ)
 							levelRef.RemoveEntity(entityAtLocation);
 							// The following is just to make a neat particle effect

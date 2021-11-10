@@ -521,7 +521,7 @@ function DrawEntity (entity) {
 			R.ctx.strokeStyle = "#B03080";
 			R.ctx.fillStyle = "#802060";
 		}
-		else if (entity.templates !== undefined && Array.isArray(entity.templates)) {
+		else if (entity.templates !== undefined && Array.isArray(entity.templates) && entity.templates.length > 0) {
 			// Entity has template
 			// Currently - hard coded ways to draw these
 			if (entity.templates.includes("laser")) {
@@ -530,7 +530,7 @@ function DrawEntity (entity) {
 				// DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "laser");
 				// skipRegularDraw = true;
 			}
-			else if (entity.emplates.includes("door")) {
+			else if (entity.templates.includes("door")) {
 				R.ctx.strokeStyle = "#9090D0";
 				R.ctx.fillStyle = "#8080C0";
 				// DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "door");
@@ -549,15 +549,15 @@ function DrawEntity (entity) {
 				// skipRegularDraw = true;
 			}
 		}
-		else if (entity.style !== undefined) {
-			// Entity has defined color
+		else if (entity.style !== undefined && typeof entity.style === "string") {
+			// Entity has defined style, and it's just a string
 			R.ctx.strokeStyle = "#CCCCCC";
 			R.ctx.fillStyle = entity.style;
 		}
 		else {
-			// No special draw -> gray cube
-			R.ctx.strokeStyle = "#909090";
-			R.ctx.fillStyle = "#707070";
+			// No special draw -> yellow cube
+			R.ctx.strokeStyle = "#D0D080";
+			R.ctx.fillStyle = "#C0C070";
 		}
 		if (!skipRegularDraw) {
 			R.ctx.fillRect(xScr, yScr, scale, scale);
@@ -594,18 +594,52 @@ function DrawEntitySideTiles (entity) {
 
 		// Entity is player
 		if (entity === curPlayer) {
-			// R.ctx.strokeStyle = "#60C0C0";
-			// R.ctx.fillStyle = "#208080";
-			skipRegularDraw = true;
+			R.ctx.strokeStyle = "#60C0C0";
+			R.ctx.fillStyle = "#208080";
+			// skipRegularDraw = true;
 		}
 		// Entity is being edited
 		else if (entity === curEntity) {
 			R.ctx.strokeStyle = "#B03080";
 			R.ctx.fillStyle = "#802060";
 		}
+		else if (entity.templates !== undefined && Array.isArray(entity.templates) && entity.templates.length > 0) {
+			// Entity has template
+			// Currently - hard coded ways to draw these
+			if (entity.templates.includes("laser")) {
+				R.ctx.strokeStyle = "#C07070";
+				R.ctx.fillStyle = "#B06060";
+				// DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "laser");
+				// skipRegularDraw = true;
+			}
+			else if (entity.templates.includes("door")) {
+				R.ctx.strokeStyle = "#9090D0";
+				R.ctx.fillStyle = "#8080C0";
+				// DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "door");
+				// skipRegularDraw = true;
+			}
+			else if (entity.templates.includes("teleporter")) {
+				R.ctx.strokeStyle = "#D0D0D0";
+				R.ctx.fillStyle = "#C0C0C0";
+				// DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "teleporter");
+				// skipRegularDraw = true;
+			}
+			else if (entity.templates.includes("block")) {
+				R.ctx.strokeStyle = "#80FF80";
+				R.ctx.fillStyle = "#208020";
+				// DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "block");
+				// skipRegularDraw = true;
+			}
+		}
+		else if (entity.style !== undefined && typeof entity.style === "string") {
+			// Entity has defined color
+			R.ctx.strokeStyle = "#CCCCCC";
+			R.ctx.fillStyle = entity.style;
+		}
 		else {
-			R.ctx.strokeStyle = "#80FF80";
-			R.ctx.fillStyle = "#208020";
+			// No special draw -> yellow cube
+			R.ctx.strokeStyle = "#D0D080";
+			R.ctx.fillStyle = "#C0C070";
 		}
 		if (!skipRegularDraw) {
 			DrawCubeSides(x, y, scale, x2, y2, scale2, xPos, yPos, zPos);
