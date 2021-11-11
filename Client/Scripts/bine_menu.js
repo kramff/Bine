@@ -175,7 +175,8 @@ function ButtonMisc () {
 	RemoveIndicators();
 }
 
-function SetupButtons () {
+// Set up buttons and other menu interactions
+function SetupMenuInteractions () {
 	document.body.onselectstart = function () {
 		return false;
 	}
@@ -447,6 +448,17 @@ function SetupButtons () {
 	for (var i = 0; i < entitySettingBoxes.length; i++) {
 		var entitySetting = entitySettingBoxes[i];
 		entitySetting.oninput = settingInputFunc;
+	}
+	// Template select function. (Simple version)
+	var templateSelect = document.querySelector("#template_select");
+	templateSelect.onchange = function (e) {
+		if (this.value === "") {
+			curEntity.templates = [];
+		}
+		else
+		{
+			curEntity.templates = [this.value];
+		}
 	}
 }
 var entityAttributeDictionary = {

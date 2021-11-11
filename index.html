@@ -189,11 +189,11 @@
 			<input type="checkbox" id="entity_solid">
 			<label for="entity_solid">Solid</label>
 		</div>
-		<div class="setting_box">
+		<div class="setting_box hidden">
 			<input type="checkbox" id="entity_standable">
 			<label for="entity_standable">Standable</label>
 		</div>
-		<div class="setting_box">
+		<div class="setting_box hidden">
 			<input type="checkbox" id="entity_pushable">
 			<label for="entity_pushable">Pushable</label>
 		</div>
@@ -201,13 +201,23 @@
 			<input type="checkbox" id="entity_gravity">
 			<label for="entity_gravity">Gravity</label>
 		</div>
-		<div class="setting_box">
+		<div class="setting_box hidden">
 			<input type="number" id="entity_move_speed">
 			<label for="entity_move_speed">Move Speed (lower is faster)</label>
 		</div>
-		<div class="setting_box">
+		<div class="setting_box hidden">
 			<input type="number" id="entity_fall_speed">
 			<label for="entity_fall_speed">Fall Speed (lower is faster)</label>
+		</div>
+		<div class="template_box">
+			<select name="template_select" id="template_select">
+				<option value="">(nothing)</option>
+				<option value="block">Block</option>
+				<option value="door">Door</option>
+				<option value="laser">Laser</option>
+				<option value="teleporter">Teleporter</option>
+			</select>
+			<label for="template_select">Select a template</label>
 		</div>
 
 		<div class="simple_text">Variables:</div>

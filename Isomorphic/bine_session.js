@@ -171,12 +171,12 @@ var Session = (function () {
 				var collectMode = false;
 				if (mouseButton === 0) {
 					// Shoot block
-					console.log("Shoot block to " + direction);
+					// console.log("Shoot block to " + direction);
 					shootMode = true;
 				}
 				else if (mouseButton === 2) {
 					// Collect block
-					console.log("Collect block from " + direction);
+					// console.log("Collect block from " + direction);
 					collectMode = true;
 				}
 				// Arbitrary limit
@@ -300,8 +300,28 @@ var Session = (function () {
 							}
 							return;
 						}
+						// Check if the tile is otherwise solid - hit a wall for example
+						if (levelRef.CheckLocationSolid(curX, curY, curZ)) {
+							return;
+						}
 					}
 				}
+			},
+		},
+		laser_action: {
+			text: "Detect solid entities in this space and send signal to connected door",
+			requiredVariables: [],
+			requiredVariableTypes: [],
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+				//
+			},
+		},
+		door_action: {
+			text: "Use signal to either open or close this door, setting solid state on/off",
+			requiredVariables: [],
+			requiredVariableTypes: [],
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+				//
 			},
 		},
 		// Variable setters

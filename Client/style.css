@@ -28,6 +28,10 @@ div {
 	height: 100%;
 }
 
+.hidden {
+	display: none;
+}
+
 .debug_zone {
 	position: absolute;
 	left: 0;

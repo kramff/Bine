@@ -301,7 +301,7 @@ function Init () {
 	}
 
 
-	SetupButtons();
+	SetupMenuInteractions();
 	gameReady = true;
 	mainCanvas = document.getElementById("canvas");
 
