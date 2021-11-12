@@ -450,7 +450,7 @@ function SetupMenuInteractions () {
 		entitySetting.oninput = settingInputFunc;
 	}
 	// Template select function. (Simple version)
-	var templateSelect = document.querySelector("#template_select");
+	var templateSelect = document.getElementById("template_select");
 	templateSelect.onchange = function (e) {
 		if (this.value === "") {
 			curEntity.templates = [];
@@ -1132,22 +1132,26 @@ function CreateConstructionOption(parent, constructionData, constructionAbbr) {
 }
 
 function SetupEntityEditingMenu () {
+	// Style
 	var colorInput = document.getElementById("entity_color_input");
 	if (curEntity.style.color !== undefined) {
 		colorInput.value = curEntity.style.color;
 	}
+	// XYZ Position
 	var xPosInput = document.getElementById("x_entity_position");
 	var yPosInput = document.getElementById("y_entity_position");
 	var zPosInput = document.getElementById("z_entity_position");
 	xPosInput.value = curEntity.x;
 	yPosInput.value = curEntity.y;
 	zPosInput.value = curEntity.z;
+	// XYZ Size
 	var xSizeInput = document.getElementById("x_entity_size");
 	var ySizeInput = document.getElementById("y_entity_size");
 	var zSizeInput = document.getElementById("z_entity_size");
 	xSizeInput.value = curEntity.xSize;
 	ySizeInput.value = curEntity.ySize;
 	zSizeInput.value = curEntity.zSize;
+	// Settings
 	var solidSetInput = document.getElementById("entity_solid");
 	var standableSetInput = document.getElementById("entity_standable");
 	var pushableSetInput = document.getElementById("entity_pushable");
@@ -1156,7 +1160,17 @@ function SetupEntityEditingMenu () {
 	standableSetInput.checked = curEntity.settings.standable ?? false;
 	pushableSetInput.checked = curEntity.settings.pushable ?? false;
 	gravitySetInput.checked = curEntity.settings.gravity ?? false;
+	// Set templates
+	var templateSelect = document.getElementById("template_select");
+	if (curEntity.templates.length > 0) {
+		templateSelect.value = curEntity.templates[0];
+	}
+	else {
+		templateSelect.value = "";
+	}
+	// Set variables
 	SetupEntityVariables();
+	// Set rules
 	SetupEntityRules();
 }
 

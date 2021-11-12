@@ -313,7 +313,34 @@ var Session = (function () {
 			requiredVariables: [],
 			requiredVariableTypes: [],
 			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
-				//
+				// Determine bounds
+				var xStart = entityRef.x;
+				var yStart = entityRef.y;
+				var zStart = entityRef.z;
+				var xEnd = entityRef.x + entityRef.xSize - 1;
+				var yEnd = entityRef.y + entityRef.ySize - 1;
+				var zEnd = entityRef.z + entityRef.zSize - 1;
+				// Loop through entities, counting the ones that:
+				// - are solid
+				// - within the bounds
+				// - not this entity
+				var solidOverlapEntityCount = 0;
+				for (var i = 0; i < levelRef.entities.length; i++) {
+					var checkEntity = levelRef.entities[i]
+					if (checkEntity.settings.solid === true) {
+						if (checkEntity.x >= xStart && checkEntity.y >= yStart && checkEntity.z >= zStart && checkEntity.x <= xEnd && checkEntity.y <= yEnd && checkEntity.z <= zEnd) {
+							if (checkEntity !== entityRef) {
+								solidOverlapEntityCount += 1;
+							}
+						}
+					}
+				}
+				// Signal value is either true or false
+				var signalValue = (solidOverlapEntityCount > 0);
+				// Send signal to connected entity
+				// userVariables[0]
+				debugger;
+				//otherEntity.FireTrigger("entity_steps_here", this, sessionRef, levelRef);
 			},
 		},
 		door_action: {
@@ -945,7 +972,7 @@ var Session = (function () {
 				// if (otherEntity.CheckHaveTrigger("entity_steps_adjacent"))
 				// {
 				// }
-				otherEntity.FireTrigger("entity_steps_adjacent", this, sessionRef, levelRef)
+				otherEntity.FireTrigger("entity_steps_adjacent", this, sessionRef, levelRef);
 			}
 			// Requires bine_misc
 			if (IsSameCoord(this.x, this.y, this.z, otherEntity.x, otherEntity.y, otherEntity.z, 1)) {
