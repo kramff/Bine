@@ -984,7 +984,7 @@ var Session = (function () {
 			// Play footstep sound when stepping on solid tiles
 			if (levelRef.CheckRelativeLocationSolid(this, 0, 0, -1)) {
 				// PlayRandomFootstep();
-				DirectionalSound("footstep", this.x, this.y, this.z, levelRef);
+				// DirectionalSound("footstep", this.x, this.y, this.z, levelRef);
 				// soundType, sourceX, sourceY, sourceZ, levelRef
 			}
 		}

@@ -43,7 +43,7 @@ console.log("");
 
 // Image data into JSON
 console.log("Setting up image JSON...");
-var imageLocation = "Client/GameImage";
+var imageLocation = "Client/Graphics";
 var imageData = RecursiveWalk(imageLocation);
 console.log("Image Data:");
 console.log(JSON.stringify(imageData));

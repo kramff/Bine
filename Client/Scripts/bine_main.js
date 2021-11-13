@@ -155,6 +155,10 @@ var levelDirectLinkID = undefined;
 var waitingToLocalSession = false;
 var localSessionLinkID = undefined;
 
+// If using a direct link to a world, fill these variables
+var waitingToDirectWorldLink = false;
+var worldDirectLinkID = undefined;
+
 // If not connected to ws server, load local worlds
 var startedLoadLocal = false;
 var loadedLocalWorlds = [];
@@ -247,6 +251,9 @@ function Init () {
 		// Use search params
 		var searchParams = new URLSearchParams(document.location.search);
 
+		// Directly join a world with a new local session
+		var searchWorld = searchParams.get("world");
+
 		// Direct join a network session
 		var searchSessionID = searchParams.get("session");
 		var searchLevelID = searchParams.get("level");
@@ -254,7 +261,18 @@ function Init () {
 		// Direct create a local session
 		var searchLocalID = searchParams.get("local");
 
-		if (searchSessionID !== null && searchLevelID !== null) {
+		if (searchWorld !== null) {
+			waitingToDirectWorldLink = true;
+			worldDirectLinkID = searchWorld;
+			if (searchWorld === "blockomancy") {
+				ShowMenu("blockomancy_entry");
+			}
+			else
+			{
+				ShowMenu("no_world_entry");
+			}
+		}
+		else if (searchSessionID !== null && searchLevelID !== null) {
 			waitingToDirectConnect = true;
 			sessionDirectLinkID = searchSessionID;
 			levelDirectLinkID = searchLevelID;
@@ -282,7 +300,6 @@ function Init () {
 				gameplayHideElements[i].hidden = true;
 			}
 		}
-		
 	}
 	else {
 		// Regular main menu

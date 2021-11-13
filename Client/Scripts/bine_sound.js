@@ -253,7 +253,5 @@ function DirectionalSound (soundType, sourceX, sourceY, sourceZ, levelRef) {
 	// bufferSource.connect(audioCtx.destination);
 	bufferSource.start();
 	// -----
-
-
 }
 
