@@ -514,10 +514,13 @@ function OpenEditVariableMenu (variableID) {
 			ShowMenu("input_variable_boolean");
 		}
 		else if (curVariable.type === "entity") {
-			// TODO: Fill in the rest of these variable types
+			// TODO: Set up an actual entity picker and not just the id value
+			document.getElementById("input_entity_name").value = curVariable.name;
+			document.getElementById("input_entity").value = curVariable.value;
+			ShowMenu("input_variable_entity");
 		}
 		else if (curVariable.type === "area") {
-
+			// TODO: Fill in the rest of these variable types
 		}
 		else if (curVariable.type === "level") {
 			document.getElementById("input_level_name").value = curVariable.name;
@@ -531,7 +534,7 @@ function OpenEditVariableMenu (variableID) {
 
 		}
 		else if (curVariable.type === "coordinates") {
-			document.getElementById("input_number_name").value = curVariable.name;
+			document.getElementById("input_coordinates_name").value = curVariable.name;
 			document.getElementById("input_coordinate_x").value = curVariable.value.x;
 			document.getElementById("input_coordinate_y").value = curVariable.value.y;
 			document.getElementById("input_coordinate_z").value = curVariable.value.z;
@@ -791,7 +794,13 @@ function DoButtonAction (action, extra) {
 				}
 			}
 			else if (extra === "entity") {
-
+				varName = document.getElementById("input_entity_name").value;
+				varValue = document.getElementById("input_entity").value;
+				variableObj = {
+					name: varName,
+					value: varValue,
+					type: "entity",
+				}
 			}
 			else if (extra === "area") {
 
@@ -933,7 +942,7 @@ function ShowVariableInputMenu (variableType, literalMode) {
 	else if (variableType === "entity") {
 		nameElement = document.getElementById("input_entity_name");
 		nameElement.value = "";
-		// document.getElementById("input_entity").value = "";
+		document.getElementById("input_entity").value = "";
 		ShowMenu("input_variable_entity");
 	}
 	else if (variableType === "area") {

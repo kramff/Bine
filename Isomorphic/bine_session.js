@@ -60,7 +60,17 @@ var Session = (function () {
 					type: "string",
 				},
 			],
-		}
+		},
+		// Trigger for receiving a boolean signal
+		receive_signal_boolean: {
+			text: "Receive a true/false signal -> [Boolean]",
+			createdVariables: [
+				{
+					name: "signal_value",
+					type: "boolean",
+				}
+			],
+		},
 	};
 	var conditions = {
 		boolean_condition: {
@@ -149,7 +159,7 @@ var Session = (function () {
 			},
 		},
 		blockomancy_action: {
-			text: "Shoot or collect a block (for Blockomancy game)",
+			text: "Block Gun: Shoot or collect a block",
 			requiredVariables: ["mouse_button", "direction"],
 			requiredVariableTypes: ["string", "string"],
 			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
@@ -309,9 +319,9 @@ var Session = (function () {
 			},
 		},
 		laser_action: {
-			text: "Detect solid entities in this space and send signal to connected door",
-			requiredVariables: [],
-			requiredVariableTypes: [],
+			text: "Laser: Detect solid entities in this space and send bool signal to connected door",
+			requiredVariables: ["entity_door_to_signal"],
+			requiredVariableTypes: ["entity"],
 			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 				// Determine bounds
 				var xStart = entityRef.x;
@@ -338,17 +348,21 @@ var Session = (function () {
 				// Signal value is either true or false
 				var signalValue = (solidOverlapEntityCount > 0);
 				// Send signal to connected entity
-				// userVariables[0]
-				debugger;
-				//otherEntity.FireTrigger("entity_steps_here", this, sessionRef, levelRef);
+				// useVariables[0]
+				// debugger;
+				var otherEntity = useVariables[0];
+				otherEntity.FireTrigger("receive_signal_boolean", signalValue, curSession, curLevel);
 			},
 		},
 		door_action: {
-			text: "Use signal to either open or close this door, setting solid state on/off",
+			text: "Door: Use signal to either open or close this door, setting solid state on/off",
 			requiredVariables: [],
 			requiredVariableTypes: [],
 			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 				//
+				// debugger;
+				entityRef.settings.solid = !entityRef.settings.solid;
+				entityRef.settings.visible = !entityRef.settings.visible;
 			},
 		},
 		// Variable setters
@@ -644,7 +658,7 @@ var Session = (function () {
 						variableData = variableInfo.value;
 					break;
 					case "entity":
-						variableData = variableInfo.value;
+						variableData = levelRef.GetEntityByID(variableInfo.value);
 					break;
 					case "area":
 						variableData = variableInfo.value;
@@ -776,7 +790,7 @@ var Session = (function () {
 				this.xMov = 0;
 				this.yMov = 0;
 				this.zMov = 0;
-				this.TriggerStepEnd(sessionRef, levelRef);
+				this.TriggerStepEndsForNearby(sessionRef, levelRef);
 			}
 		}
 		// Not moving - able to start a movement
@@ -963,7 +977,7 @@ var Session = (function () {
 		return;
 	};
 	// Step adjacent trigger
-	Entity.prototype.TriggerStepEnd = function (sessionRef, levelRef) {
+	Entity.prototype.TriggerStepEndsForNearby = function (sessionRef, levelRef) {
 		for (var i = 0; i < levelRef.entities.length; i++) {
 			var otherEntity = levelRef.entities[i];
 			// Requires bine_misc

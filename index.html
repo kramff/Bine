@@ -138,12 +138,12 @@
 		<input id="chat_input" type="text">
 		<button id="chat_send">Send</button>
 	</div> -->
-	<div class="small_menu_container flex_row_container">
-		<!-- <div class="gameplay_hide button" data-action="inventory">Inventory</div> -->
-		<!-- <div class="gameplay_hide button" data-action="brace_self">Brace self</div> -->
-		<!-- <div class="mobile_only button" data-action="throw_ball">Throw ball</div> -->
-		<!-- <div class="gameplay_hide button" data-action="leave_note">Leave note</div> -->
-	</div>
+	<!-- <div class="small_menu_container flex_row_container">
+		<div class="gameplay_hide button" data-action="inventory">Inventory</div>
+		<div class="gameplay_hide button" data-action="brace_self">Brace self</div>
+		<div class="mobile_only button" data-action="throw_ball">Throw ball</div>
+		<div class="gameplay_hide button" data-action="leave_note">Leave note</div>
+	</div> -->
 	<div class="clickable_area"></div>
 	<div class="variable_tracker">Blocks: 0</div>
 </div>
@@ -313,7 +313,10 @@
 	<div class="simple_text">Variable Value:</div>
 	<div class="input_box">
 		<!-- Fill with options of entities -->
+		<!-- use the id number for now -->
+		<input type="number" id="input_entity">
 	</div>
+	<div class="button" data-action="confirm_variable_input" data-extra="entity">OK</div>
 </div>
 <div class="menu_container over_menu_2" id="input_variable_area">
 	<div class="button" data-action="close_over_menu_2">Cancel</div>

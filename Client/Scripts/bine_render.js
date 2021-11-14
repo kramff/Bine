@@ -494,6 +494,10 @@ function DrawDObjZ (dObj, z, drawSideTiles) {
 }
 
 function DrawEntity (entity) {
+	// If not visible: skip drawing
+	if (entity.settings.visible === false) {
+		return;
+	}
 	var xPos = entity.GetX();
 	var yPos = entity.GetY();
 	var zPos = entity.GetZ();
@@ -575,6 +579,10 @@ function DrawEntity (entity) {
 }
 
 function DrawEntitySideTiles (entity) {
+	// If not visible: skip drawing
+	if (entity.settings.visible === false) {
+		return;
+	}
 	var xPos = entity.GetX();
 	var yPos = entity.GetY();
 	var zPos = entity.GetZ();
