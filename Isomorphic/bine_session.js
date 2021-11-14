@@ -1265,7 +1265,7 @@ var Session = (function () {
 			return result[0];
 		}
 	};
-	Level.prototype.CheckLocationSolid = function(x, y, z) {
+	Level.prototype.CheckLocationSolid = function(x, y, z, forRendering) {
 		for (var i = 0; i < this.areas.length; i++) {
 			var area = this.areas[i];
 			if (x >= area.x && x < area.x + area.xSize &&
@@ -1294,7 +1294,15 @@ var Session = (function () {
 			var entity = this.entities[i];
 			if (entity.settings.solid === true) {
 				if (entity.x === x && entity.y === y && entity.z === z) {
-					return true;
+					if (forRendering) {
+						if (entity.xMov === 0 && entity.yMov === 0 && entity.zMov === 0) {
+							return true;
+						}
+					}
+					else
+					{
+						return true;
+					}
 				}
 			}
 		}

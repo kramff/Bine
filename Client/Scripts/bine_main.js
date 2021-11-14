@@ -158,6 +158,7 @@ var localSessionLinkID = undefined;
 // If using a direct link to a world, fill these variables
 var waitingToDirectWorldLink = false;
 var worldDirectLinkID = undefined;
+var readyToDirectWorldLink = false;
 
 // If not connected to ws server, load local worlds
 var startedLoadLocal = false;
@@ -265,11 +266,15 @@ function Init () {
 			waitingToDirectWorldLink = true;
 			worldDirectLinkID = searchWorld;
 			if (searchWorld === "blockomancy") {
-				ShowMenu("blockomancy_entry");
+				ShowMenu("direct_world_entry");
+				document.getElementById("direct_world_entry_name").textContent = "Blockomancy";
+				document.getElementById("button_temp_playlist").children.item(0).href = "https://www.youtube.com/watch?v=hB0FaCU_eOk&list=PLpLvmu8IdiEnrDVrn24Dg_CONAtqxmnpX";
+				document.title = "Blockomancy";
 			}
 			else
 			{
-				ShowMenu("no_world_entry");
+				console.log("No world with that name...");
+				ShowMenu("main_menu");
 			}
 		}
 		else if (searchSessionID !== null && searchLevelID !== null) {
@@ -279,26 +284,16 @@ function Init () {
 
 			// Joining session by direct link'
 			ShowMenu("join_by_link");
-
-			// Hide "gameplay_hide" elements
-			var gameplayHideElements = document.getElementsByClassName("gameplay_hide");
-			for (var i = 0; i < gameplayHideElements.length; i++) {
-				gameplayHideElements[i].hidden = true;
-			}
+			HideTestingElements();
 		}
 		else if (searchLocalID !== null)
 		{
 			waitingToLocalSession = true;
-			localSessionLinkID = searchLocalID
+			localSessionLinkID = searchLocalID;
 
 			// Joining session by direct link'
 			ShowMenu("join_by_link");
-
-			// Hide "gameplay_hide" elements
-			var gameplayHideElements = document.getElementsByClassName("gameplay_hide");
-			for (var i = 0; i < gameplayHideElements.length; i++) {
-				gameplayHideElements[i].hidden = true;
-			}
+			HideTestingElements();
 		}
 	}
 	else {
@@ -382,7 +377,7 @@ function MainUpdate () {
 		loadingLocalWorlds = true;
 		// Load sample worlds for testing, if no connection is made
 		startedLoadLocal = true;
-		loadDefaultLevels();
+		loadDefaultWorlds();
 	}
 
 	if (inSession & curSession !== undefined && inLevel && curLevel !== undefined) {
@@ -546,7 +541,7 @@ function MainUpdate () {
 	}
 }
 
-var defaultLevels = [
+var defaultWorlds = [
 	"entity_test",
 	"blockomancy",
 ];
@@ -556,9 +551,9 @@ var loadResponseId = 0;
 // Load default levels
 // This should ideally load all the locally saved levels automatically
 // but for now it just iterates through a list
-function loadDefaultLevels () {
-	for (var i = defaultLevels.length - 1; i >= 0; i--) {
-		var levelFile = defaultLevels[i];
+function loadDefaultWorlds () {
+	for (var i = defaultWorlds.length - 1; i >= 0; i--) {
+		var levelFile = defaultWorlds[i];
 		fetch("Worlds/" + levelFile + ".bineworld")
 		.then(function (response) {
 			return response.json();
@@ -566,13 +561,18 @@ function loadDefaultLevels () {
 			responseJson.id = loadResponseId;
 			loadResponseId += 1;
 			loadedLocalWorlds.push(responseJson);
-			if (loadResponseId >= defaultLevels.length) {
+			if (loadResponseId >= defaultWorlds.length) {
 				FillWorldBox(loadedLocalWorlds, "local_worlds");
 
 				if (waitingToLocalSession) {
 					document.querySelector(".local_worlds .world").click();
 					document.querySelector(".level_box .level").click();
 					document.querySelector(".button[data-action='test_as_player']").click();
+				}
+				if (waitingToDirectWorldLink) {
+					readyToDirectWorldLink = true;
+					document.getElementById("button_play_direct_world_game").classList.remove("wait_until_loaded");
+					document.getElementById("button_play_direct_world_game").textContent = "Begin";
 				}
 			}
 		});

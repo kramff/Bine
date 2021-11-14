@@ -107,6 +107,14 @@ function EnableMultiplayerFeatures () {
 
 }
 
+// Hide "gameplay_hide" elements for non-testing mode (aka actual gameplay)
+function HideTestingElements () {
+	var gameplayHideElements = document.getElementsByClassName("gameplay_hide");
+	for (var i = 0; i < gameplayHideElements.length; i++) {
+		gameplayHideElements[i].hidden = true;
+	}
+}
+
 var currentMenu = "main_menu";
 var currentMenuElement = document.getElementById("main_menu");
 var currentClickableArea = undefined;
@@ -884,6 +892,16 @@ function DoButtonAction (action, extra) {
 		case "export_world_to_file":
 			alert("clicked export button");
 		break;
+		case "play_direct_world_game":
+			// Click "Begin" button and start playing a game!
+			if (!readyToDirectWorldLink) {
+				return;
+			}
+			document.querySelector(".world[world_name='" + worldDirectLinkID + "']").click();
+			document.querySelector(".level[level_id='1']").click();
+			document.querySelector(".button[data-action='test_as_player']").click();
+			HideTestingElements();
+		break;
 	}
 }
 
@@ -1033,6 +1051,7 @@ function FillWorldBox (worldData, boxType) {
 			// Main new div
 			var worldDiv = CreateNewDiv(worldBox, "world", undefined, undefined);
 			worldDiv.setAttribute("world_id", world.id);
+			worldDiv.setAttribute("world_name", world.worldName.toLowerCase());
 			// Name
 			CreateNewDiv(worldDiv, "world_name", world.worldName, undefined);
 			// Level Count

@@ -216,7 +216,7 @@ function DrawParticle (particle) {
 			var xTMini = GetScreenXHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
 			var yTMini = GetScreenYHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
 			// Sides of cube
-			DrawCubeSides(xTMini, yTMini, scaleTMini * size, xBMini, yBMini, scaleBMini * size, xPos, yPos, zPos);
+			DrawCubeSides(xTMini, yTMini, scaleTMini * size, xBMini, yBMini, scaleBMini * size, xPos, yPos, zPos, undefined, true);
 			// (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideStyle)
 			// Top of cube
 			R.ctx.rect(xTMini, yTMini, scaleTMini * size, scaleTMini * size);
@@ -642,7 +642,8 @@ function DrawEntitySideTiles (entity) {
 			R.ctx.fillStyle = "#C0C070";
 		}
 		if (!skipRegularDraw) {
-			DrawCubeSides(x, y, scale, x2, y2, scale2, xPos, yPos, zPos);
+			var mustDrawSides = entity.xMov !== 0 || entity.yMov !== 0 || entity.zMov !== 0;
+			DrawCubeSides(x, y, scale, x2, y2, scale2, xPos, yPos, zPos, undefined, mustDrawSides);
 		}
 		R.ctx.restore();
 	}
@@ -868,7 +869,7 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 //i, j, k: world x, y, z position
 function DrawTile (x, y, scale, realX, realY, realZ) {
 	// If realX isn't passed in, don't bother doing the check
-	if ((realX === undefined) || !IsSolid(realX, realY, realZ + 1)) {
+	if ((realX === undefined) || !IsOpaque(realX, realY, realZ + 1)) {
 		R.ctx.fillRect(x, y, scale, scale);
 		R.ctx.strokeRect(x, y, scale, scale);
 	}
@@ -876,7 +877,7 @@ function DrawTile (x, y, scale, realX, realY, realZ) {
 //i, j, k: world x, y, z position
 function DrawTileInCeiling (x, y, scale, realX, realY, realZ) {
 	// If realX isn't passed in, don't bother doing the check
-	if ((realX === undefined) || !IsSolid(realX, realY, realZ + 1)) {
+	if ((realX === undefined) || !IsOpaque(realX, realY, realZ + 1)) {
 		R.ctx.save();
 		R.ctx.globalAlpha = 0.5;
 		R.ctx.fillRect(x, y, scale, scale);
@@ -951,10 +952,10 @@ function GetWallGradientHorizontal (x, x2, z) {
 
 // Draw the top, bottom, left, and right sides of a cube
 // Either for tile in area or for cube style entity
-function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideStyle) {
+function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideStyle, mustDrawSides) {
 	R.ctx.save();
 	// top side
-	if (y > y2 && !IsSolid(realX, realY - 1, realZ)) {
+	if (y > y2 && (!IsOpaque(realX, realY - 1, realZ) || mustDrawSides)) {
 		R.ctx.beginPath();
 		R.ctx.moveTo(x, y);
 		R.ctx.lineTo(x2, y2);
@@ -968,7 +969,7 @@ function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideSt
 		R.ctx.stroke();
 	}
 	// bottom side
-	if (y2 + scale2 > y + scale && !IsSolid(realX, realY + 1, realZ)) {
+	if (y2 + scale2 > y + scale && (!IsOpaque(realX, realY + 1, realZ) || mustDrawSides)) {
 		R.ctx.beginPath();
 		R.ctx.moveTo(x, y + scale);
 		R.ctx.lineTo(x2, y2 + scale2);
@@ -982,7 +983,7 @@ function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideSt
 		R.ctx.stroke();
 	}
 	// left side
-	if (x > x2 && !IsSolid(realX - 1, realY, realZ)) {
+	if (x > x2 && (!IsOpaque(realX - 1, realY, realZ) || mustDrawSides)) {
 		R.ctx.beginPath();
 		R.ctx.moveTo(x, y);
 		R.ctx.lineTo(x2, y2);
@@ -996,7 +997,7 @@ function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideSt
 		R.ctx.stroke();
 	}
 	// right side
-	if (x2 + scale2 > x + scale && !IsSolid(realX + 1, realY, realZ)) {
+	if (x2 + scale2 > x + scale && (!IsOpaque(realX + 1, realY, realZ) || mustDrawSides)) {
 		R.ctx.beginPath();
 		R.ctx.moveTo(x + scale, y);
 		R.ctx.lineTo(x2 + scale2, y2);
@@ -1077,10 +1078,10 @@ function InCeiling (x, y, z) {
 	return true;
 }*/
 
-function IsSolid (x, y, z) {
-	return curLevel.CheckLocationSolid(Math.round(x), Math.round(y), Math.round(z));
+function IsOpaque (x, y, z) {
+	return curLevel.CheckLocationSolid(Math.round(x), Math.round(y), Math.round(z), true);
 }
-/*function IsSolid (x, y, z) {
+/*function IsOpaque (x, y, z) {
 	for (var i = 0; i < areas.length; i++) {
 		var area = areas[i];
 		if (x >= area.x && x < area.x + area.xSize &&
@@ -1088,7 +1089,7 @@ function IsSolid (x, y, z) {
 			z >= area.z && z < area.z + area.zSize) {
 			//Within area's bounds
 			var tile = area.map[x - area.x][y - area.y][z - area.z];
-			if (TileIsSolid(tile)) {
+			if (TileIsOpaque(tile)) {
 				return true;
 			}
 		}
@@ -1098,7 +1099,7 @@ function IsSolid (x, y, z) {
 				y >= area.y + area.yMov && y < area.y + area.yMov + area.ySize &&
 				z >= area.z + area.zMov && z < area.z + area.zMov + area.zSize) {
 				var tile = area.map[x - area.x - area.xMov][y - area.y - area.yMov][z - area.z - area.zMov];
-				if (TileIsSolid(tile)) {
+				if (TileIsOpaque(tile)) {
 					return true;
 				}
 			}
