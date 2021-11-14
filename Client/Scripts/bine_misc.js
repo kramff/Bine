@@ -7,7 +7,7 @@ function Debug (text) {
 	debug_zone.textContent = text;
 }
 
-//Up to <dist> tiles away in all directions, except for z which is more forgiving by 2
+// Up to <dist> tiles away in all directions, except for z which is more forgiving by 2
 function IsNear (x1, y1, z1, x2, y2, z2, dist) {
 	if (Math.abs(x1 - x2) <= dist && Math.abs(y1 - y2) <= dist && Math.abs(z1 - z2) <= dist + 2) {
 		return true;
@@ -15,7 +15,21 @@ function IsNear (x1, y1, z1, x2, y2, z2, dist) {
 	return false;
 }
 
-//Up to <dist> tiles away in X or Y directions
+// Up to <dist> tiles away in all directions, except for z which is more forgiving
+// Allows for size values to be passed in as well
+function IsNearWithSizes (x1, y1, z1, xSize1, ySize1, zSize1, x2, y2, z2, xSize2, ySize2, zSize2, dist) {
+	if (x1 + xSize1 + dist - 1 >= x2 &&
+		y1 + ySize1 + dist - 1 >= y2 &&
+		z1 + zSize1 + dist - 1 + 2 >= z2 &&
+		x2 + xSize2 + dist - 1 >= x1 &&
+		y2 + ySize2 + dist - 1 >= y1 &&
+		z2 + zSize2 + dist - 1 + 2 >= z1) {
+		return true;
+	}
+	return false;
+}
+
+// Up to <dist> tiles away in X or Y directions
 function IsNearXY (x1, y1, x2, y2, dist) {
 	if (Math.abs(x1 - x2) <= dist && Math.abs(y1 - y2) <= dist) {
 		return true;
@@ -25,6 +39,18 @@ function IsNearXY (x1, y1, x2, y2, dist) {
 
 function IsSameCoord (x1, y1, z1, x2, y2, z2) {
 	if (x1 === x2 && y1 === y2 && z1 === z2) {
+		return true;
+	}
+	return false;
+}
+
+function CoordsOverlapWithSizes (x1, y1, z1, xSize1, ySize1, zSize1, x2, y2, z2, xSize2, ySize2, zSize2) {
+	if (x1 + xSize1 - 1 >= x2 &&
+		y1 + ySize1 - 1 >= y2 &&
+		z1 + zSize1 - 1 >= z2 &&
+		x2 + xSize2 - 1 >= x1 &&
+		y2 + ySize2 - 1 >= y1 &&
+		z2 + zSize2 - 1 >= z1) {
 		return true;
 	}
 	return false;

@@ -107,6 +107,23 @@ function EnableMultiplayerFeatures () {
 
 }
 
+// Copy a string to the clipboard
+function copyStringToClipboard (str) {
+	// Create new element
+	var newElement = document.createElement('textarea');
+	newElement.value = str;
+	// Set element to be non-editable and move off screen
+	newElement.setAttribute('readonly', '');
+	newElement.style = {position: 'absolute', left: '-999px'};
+	document.body.appendChild(newElement);
+	// Select text in element
+	newElement.select();
+	// Copy to clipboard
+	document.execCommand('copy');
+	// Remove element
+	document.body.removeChild(newElement);
+}
+
 // Hide "gameplay_hide" elements for non-testing mode (aka actual gameplay)
 function HideTestingElements () {
 	var gameplayHideElements = document.getElementsByClassName("gameplay_hide");
@@ -899,7 +916,8 @@ function DoButtonAction (action, extra) {
 			inInventory = false;
 		break;
 		case "export_world_to_file":
-			alert("clicked export button");
+			copyStringToClipboard(JSON.stringify(curSession.ExportWorld()));
+			alert("Copied to clipboard");
 		break;
 		case "play_direct_world_game":
 			// Click "Begin" button and start playing a game!

@@ -263,7 +263,7 @@ function ReceiveEnterLevel (levelID) {
 
 function ReceiveCreateEntity (levelID, entityData) {
 	var level = curSession.GetLevelByID(levelID);
-	level.AddEntity(entityData);
+	level.AddEntity(entityData, curSession, level);
 }
 
 function ReceiveAssignPlayer (playerID) {
@@ -450,7 +450,7 @@ function CreateNewEntity (createX, createY, createZ) {
 			templates: [],
 			variableCounter: 0,
 		};
-		var entity = curLevel.AddEntity(blankEntityData);
+		var entity = curLevel.AddEntity(blankEntityData, curLevel, curSession);
 		// handleMessageData("createNewEntity", {x: createX, y: createY, z: createZ});
 	}
 }

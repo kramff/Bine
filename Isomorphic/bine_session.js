@@ -47,6 +47,42 @@ var Session = (function () {
 				},
 			],
 		},
+		entity_created_adjacent: {
+			text: "Entity created adjacent -> [Entity]",
+			createdVariables: [
+				{
+					name: "adjacent_created_entity",
+					type: "entity",
+				},
+			],
+		},
+		entity_created_here: {
+			text: "Entity created here -> [Entity]",
+			createdVariables: [
+				{
+					name: "here_created_entity",
+					type: "entity",
+				},
+			],
+		},
+		entity_removed_adjacent: {
+			text: "Entity removed adjacent -> [Entity]",
+			createdVariables: [
+				{
+					name: "adjacent_removed_entity",
+					type: "entity",
+				},
+			],
+		},
+		entity_removed_here: {
+			text: "Entity removed here -> [Entity]",
+			createdVariables: [
+				{
+					name: "here_removed_entity",
+					type: "entity",
+				},
+			],
+		},
 		// When the player clicks in the play area
 		player_click: {
 			text: "Player clicks to do action. (Only for player entity) -> [String, String]",
@@ -139,7 +175,7 @@ var Session = (function () {
 				entityToWarp.y = Number(coordinatesToWarpTo.y);
 				entityToWarp.z = Number(coordinatesToWarpTo.z);
 				levelToWarpTo.AddExistingEntity(entityToWarp);
-				levelRef.RemoveEntity(entityToWarp);
+				levelRef.RemoveEntity(entityToWarp, sessionRef, levelRef);
 			},
 		},
 		create_entity: {
@@ -207,12 +243,16 @@ var Session = (function () {
 								// console.log("Can't make block! Too close");
 								return;
 							}
-							var existingEntity = levelRef.GetEntityAtLocation(curX - dirX, curY - dirY, curZ);
-							if (existingEntity !== undefined) {
-								// There's already an entity here
-								// console.log("Space occupied! Can't make block");
-								return;
-							}
+							// Actually: okay to place block on existing entity
+							// If there is a reason to bring this back,
+							// it would need to actually loop through all entities at
+							// this location, not just the first (using GetEntitiesAtLocation)
+							// var existingEntity = levelRef.GetEntityAtLocation(curX - dirX, curY - dirY, curZ);
+							// if (existingEntity !== undefined) {
+							// 	// There's already an entity here
+							// 	// console.log("Space occupied! Can't make block");
+							// 	return;
+							// }
 							// console.log("Make a block entity at " + (curX - dirX) + ", " + (curY - dirY) + ", " + curZ);
 							levelRef.entityCounter ++;
 							var newX = curX - dirX;
@@ -235,7 +275,7 @@ var Session = (function () {
 								templates: ["block"],
 								variableCounter: 0,
 							};
-							levelRef.AddEntity(blockEntityData);
+							levelRef.AddEntity(blockEntityData, sessionRef, levelRef);
 							// The following is just for making a neat particle effect
 							if (!IS_SERVER) {
 								var startX = entityRef.x;
@@ -271,44 +311,47 @@ var Session = (function () {
 						passedFirstTile = true;
 					}
 					else if (collectMode) {
-						var entityAtLocation = levelRef.GetEntityAtLocation(curX, curY, curZ);
-						if (entityAtLocation !== undefined && Array.isArray(entityAtLocation.templates) && entityAtLocation.templates.includes("block")) {
-							// console.log("Remove entity at " + curX + ", " + curY + ", " + curZ)
-							levelRef.RemoveEntity(entityAtLocation);
-							// The following is just to make a neat particle effect
-							if (!IS_SERVER) {
-								var startX = entityRef.x;
-								var startY = entityRef.y;
-								var xSize = Math.abs(curX - startX);
-								var ySize = Math.abs(curY - startY);
-								if (curX > startX) {
-									startX += 1;
-									xSize -= 1;
-									ySize = 1;
+						var entitiesAtLocation = levelRef.GetEntitiesAtLocation(curX, curY, curZ);
+						for (var ei = 0; ei < entitiesAtLocation.length; ei++) {
+							var entityAtLocation = entitiesAtLocation[ei]
+							if (Array.isArray(entityAtLocation.templates) && entityAtLocation.templates.includes("block")) {
+								// console.log("Remove entity at " + curX + ", " + curY + ", " + curZ)
+								levelRef.RemoveEntity(entityAtLocation, sessionRef, levelRef);
+								// The following is just to make a neat particle effect
+								if (!IS_SERVER) {
+									var startX = entityRef.x;
+									var startY = entityRef.y;
+									var xSize = Math.abs(curX - startX);
+									var ySize = Math.abs(curY - startY);
+									if (curX > startX) {
+										startX += 1;
+										xSize -= 1;
+										ySize = 1;
+									}
+									if (curX < startX) {
+										startX -= xSize - 1;
+										xSize -= 1;
+										ySize = 1;
+									}
+									if (curY > startY) {
+										startY += 1;
+										ySize -= 1;
+										xSize = 1;
+									}
+									if (curY < startY) {
+										startY -= ySize - 1;
+										ySize -= 1;
+										xSize = 1;
+									}
+									//xSize = Math.max(xSize, 1);
+									//ySize = Math.max(ySize, 1);
+									// Beam
+									MakeParticle("block_collect", startX, startY, entityRef.z, xSize, ySize, 1, 10);
+									// Dissapearing block
+									MakeParticle("block_disappear", curX, curY, curZ, 1, 1, 1, 10);
 								}
-								if (curX < startX) {
-									startX -= xSize - 1;
-									xSize -= 1;
-									ySize = 1;
-								}
-								if (curY > startY) {
-									startY += 1;
-									ySize -= 1;
-									xSize = 1;
-								}
-								if (curY < startY) {
-									startY -= ySize - 1;
-									ySize -= 1;
-									xSize = 1;
-								}
-								//xSize = Math.max(xSize, 1);
-								//ySize = Math.max(ySize, 1);
-								// Beam
-								MakeParticle("block_collect", startX, startY, entityRef.z, xSize, ySize, 1, 10);
-								// Dissapearing block
-								MakeParticle("block_disappear", curX, curY, curZ, 1, 1, 1, 10);
+								return;
 							}
-							return;
 						}
 						// Check if the tile is otherwise solid - hit a wall for example
 						if (levelRef.CheckLocationSolid(curX, curY, curZ)) {
@@ -337,16 +380,23 @@ var Session = (function () {
 				var solidOverlapEntityCount = 0;
 				for (var i = 0; i < levelRef.entities.length; i++) {
 					var checkEntity = levelRef.entities[i]
+					// Must be solid
 					if (checkEntity.settings.solid === true) {
+						// Must be inside the bounds of this laser
 						if (checkEntity.x >= xStart && checkEntity.y >= yStart && checkEntity.z >= zStart && checkEntity.x <= xEnd && checkEntity.y <= yEnd && checkEntity.z <= zEnd) {
+							// Must not be the same entity as this laser
 							if (checkEntity !== entityRef) {
-								solidOverlapEntityCount += 1;
+								// Must not be marked for deletion
+								// (for example, block getting removed right now)
+								if (!checkEntity.toBeRemoved) {
+									solidOverlapEntityCount += 1;
+								}
 							}
 						}
 					}
 				}
 				// Signal value is either true or false
-				var signalValue = (solidOverlapEntityCount > 0);
+				var signalValue = (solidOverlapEntityCount === 0);
 				// Send signal to connected entity
 				// useVariables[0]
 				// debugger;
@@ -356,13 +406,14 @@ var Session = (function () {
 		},
 		door_action: {
 			text: "Door: Use signal to either open or close this door, setting solid state on/off",
-			requiredVariables: [],
-			requiredVariableTypes: [],
+			requiredVariables: ["signal_bool_state"],
+			requiredVariableTypes: ["boolean"],
 			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
 				//
 				// debugger;
-				entityRef.settings.solid = !entityRef.settings.solid;
-				entityRef.settings.visible = !entityRef.settings.visible;
+				var signalState = useVariables[0];
+				entityRef.settings.solid = signalState;
+				entityRef.settings.visible = signalState;
 			},
 		},
 		// Variable setters
@@ -743,6 +794,9 @@ var Session = (function () {
 			x: this.x,
 			y: this.y,
 			z: this.z,
+			xSize: this.xSize,
+			ySize: this.ySize,
+			zSize: this.zSize,
 			style: this.style,
 			settings: this.settings,
 			variables: this.variables,
@@ -981,7 +1035,8 @@ var Session = (function () {
 		for (var i = 0; i < levelRef.entities.length; i++) {
 			var otherEntity = levelRef.entities[i];
 			// Requires bine_misc
-			if (IsNear(this.x, this.y, this.z, otherEntity.x, otherEntity.y, otherEntity.z, 1)) {
+			// if (IsNear(this.x, this.y, this.z, otherEntity.x, otherEntity.y, otherEntity.z, 1)) {
+			if (IsNearWithSizes(this.x, this.y, this.z, this.xSize, this.ySize, this.zSize, otherEntity.x, otherEntity.y, otherEntity.z, otherEntity.xSize, otherEntity.ySize, otherEntity.zSize, 1)) {
 				// No need to check if rule exists before running it?
 				// if (otherEntity.CheckHaveTrigger("entity_steps_adjacent"))
 				// {
@@ -989,17 +1044,48 @@ var Session = (function () {
 				otherEntity.FireTrigger("entity_steps_adjacent", this, sessionRef, levelRef);
 			}
 			// Requires bine_misc
-			if (IsSameCoord(this.x, this.y, this.z, otherEntity.x, otherEntity.y, otherEntity.z, 1)) {
+			// if (IsSameCoord(this.x, this.y, this.z, otherEntity.x, otherEntity.y, otherEntity.z)) {
+			if (CoordsOverlapWithSizes(this.x, this.y, this.z, this.xSize, this.ySize, this.zSize, otherEntity.x, otherEntity.y, otherEntity.z, otherEntity.xSize, otherEntity.ySize, otherEntity.zSize)) {
 				// No need to check for rule exists
 				otherEntity.FireTrigger("entity_steps_here", this, sessionRef, levelRef);
 			}
 		}
-		if (!IS_SERVER) {
-			// Play footstep sound when stepping on solid tiles
-			if (levelRef.CheckRelativeLocationSolid(this, 0, 0, -1)) {
-				// PlayRandomFootstep();
-				// DirectionalSound("footstep", this.x, this.y, this.z, levelRef);
-				// soundType, sourceX, sourceY, sourceZ, levelRef
+		// if (!IS_SERVER) {
+		// 	// Play footstep sound when stepping on solid tiles
+		// 	if (levelRef.CheckRelativeLocationSolid(this, 0, 0, -1)) {
+		// 		// PlayRandomFootstep();
+		// 		// DirectionalSound("footstep", this.x, this.y, this.z, levelRef);
+		// 		// soundType, sourceX, sourceY, sourceZ, levelRef
+		// 	}
+		// }
+	};
+	Entity.prototype.TriggerCreationsForNearby = function (sessionRef, levelRef) {
+		for (var i = 0; i < levelRef.entities.length; i++) {
+			var otherEntity = levelRef.entities[i];
+			// Requires bine_misc
+			if (IsNearWithSizes(this.x, this.y, this.z, this.xSize, this.ySize, this.zSize, otherEntity.x, otherEntity.y, otherEntity.z, otherEntity.xSize, otherEntity.ySize, otherEntity.zSize, 1)) {
+				// No need to check if rule exists
+				otherEntity.FireTrigger("entity_created_adjacent", this, sessionRef, levelRef);
+			}
+			// Requires bine_misc
+			if (CoordsOverlapWithSizes(this.x, this.y, this.z, this.xSize, this.ySize, this.zSize, otherEntity.x, otherEntity.y, otherEntity.z, otherEntity.xSize, otherEntity.ySize, otherEntity.zSize)) {
+				// No need to check for rule exists
+				otherEntity.FireTrigger("entity_created_here", this, sessionRef, levelRef);
+			}
+		}
+	};
+	Entity.prototype.TriggerRemovalsForNearby = function (sessionRef, levelRef) {
+		for (var i = 0; i < levelRef.entities.length; i++) {
+			var otherEntity = levelRef.entities[i];
+			// Requires bine_misc
+			if (IsNearWithSizes(this.x, this.y, this.z, this.xSize, this.ySize, this.zSize, otherEntity.x, otherEntity.y, otherEntity.z, otherEntity.xSize, otherEntity.ySize, otherEntity.zSize, 1)) {
+				// No need to check if rule exists
+				otherEntity.FireTrigger("entity_removed_adjacent", this, sessionRef, levelRef);
+			}
+			// Requires bine_misc
+			if (CoordsOverlapWithSizes(this.x, this.y, this.z, this.xSize, this.ySize, this.zSize, otherEntity.x, otherEntity.y, otherEntity.z, otherEntity.xSize, otherEntity.ySize, otherEntity.zSize)) {
+				// No need to check for rule exists
+				otherEntity.FireTrigger("entity_removed_here", this, sessionRef, levelRef);
 			}
 		}
 	};
@@ -1248,12 +1334,14 @@ var Session = (function () {
 		}
 		this.areas.splice(this.areas.indexOf(area), 1);
 	};
-	Level.prototype.AddEntity = function (entityData) {
+	Level.prototype.AddEntity = function (entityData, sessionRef, levelRef) {
 		var newEntity = new Entity(entityData);
 		this.entities.push(newEntity);
 		if (!IS_SERVER) {
 			this.drawObjects.push(newEntity);
 		}
+		// This can trigger another entity's events possibly
+		newEntity.TriggerCreationsForNearby(sessionRef, levelRef);
 		return newEntity;
 	};
 	Level.prototype.AddExistingEntity = function (entity) {
@@ -1263,7 +1351,10 @@ var Session = (function () {
 		}
 		return entity;
 	};
-	Level.prototype.RemoveEntity = function (entity) {
+	Level.prototype.RemoveEntity = function (entity, sessionRef, levelRef) {
+		entity.toBeRemoved = true;
+		// Can trigger another entity's events
+		entity.TriggerRemovalsForNearby(sessionRef, levelRef);
 		this.entities.splice(this.entities.indexOf(entity), 1);
 		if (!IS_SERVER) {
 			this.drawObjects.splice(this.drawObjects.indexOf(entity), 1);
@@ -1337,6 +1428,7 @@ var Session = (function () {
 		}
 		return undefined;
 	};
+	// Only gets first entity found
 	Level.prototype.GetEntityAtLocation = function (x, y, z) {
 		for (var i = 0; i < this.entities.length; i++) {
 			var entity = this.entities[i];
@@ -1348,6 +1440,19 @@ var Session = (function () {
 			}
 		}
 		return undefined;
+	};
+	Level.prototype.GetEntitiesAtLocation = function (x, y, z) {
+		var resultArr = [];
+		for (var i = 0; i < this.entities.length; i++) {
+			var entity = this.entities[i];
+			if (x === entity.x &&
+				y === entity.y &&
+				z === entity.z) {
+				// On entity's location
+				resultArr.push(entity);
+			}
+		}
+		return resultArr;
 	};
 	function TileIsSolid (tile) {
 		if (tile !== 0) {
@@ -1467,6 +1572,10 @@ var Session = (function () {
 	Session.prototype.DeleteEntity = function (levelID, entityID) {
 		var level = this.GetLevelByID(levelID);
 		var entity = level.GetEntityByID(entityID);
+		entity.toBeRemoved = true;
+
+		// Can trigger removal events
+		entity.TriggerRemovalsForNearby(this, level);
 
 		if (!IS_SERVER) {
 			level.drawObjects.splice(level.drawObjects.indexOf(entity), 1);

@@ -509,7 +509,7 @@ function DrawEntity (entity) {
 	if (scale < 0) {
 		return;
 	}
-	if (xScr > 0 - scale && xScr < R.CANVAS_WIDTH && yScr > 0 - scale && yScr < R.CANVAS_HEIGHT) {
+	if (xScr + entity.xSize * scale > 0 && xScr < R.CANVAS_WIDTH && yScr + entity.ySize * scale > 0 && yScr < R.CANVAS_HEIGHT) {
 		R.ctx.save();
 
 		// Entity is player
@@ -529,10 +529,14 @@ function DrawEntity (entity) {
 			// Entity has template
 			// Currently - hard coded ways to draw these
 			if (entity.templates.includes("laser")) {
-				R.ctx.strokeStyle = "#C07070";
-				R.ctx.fillStyle = "#B06060";
-				// DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "laser");
-				// skipRegularDraw = true;
+				// R.ctx.strokeStyle = "#C07070";
+				// R.ctx.fillStyle = "#B06060";
+				var laserColor = "#B06060";
+				if (entity.style !== undefined && typeof entity.style === "string") {
+					laserColor = entity.style;
+				}
+				DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "laser", entity.xSize, entity.ySize, entity.zSize, laserColor);
+				skipRegularDraw = true;
 			}
 			else if (entity.templates.includes("door")) {
 				R.ctx.strokeStyle = "#9090D0";
@@ -615,10 +619,10 @@ function DrawEntitySideTiles (entity) {
 			// Entity has template
 			// Currently - hard coded ways to draw these
 			if (entity.templates.includes("laser")) {
-				R.ctx.strokeStyle = "#C07070";
-				R.ctx.fillStyle = "#B06060";
+				// R.ctx.strokeStyle = "#C07070";
+				// R.ctx.fillStyle = "#B06060";
 				// DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "laser");
-				// skipRegularDraw = true;
+				skipRegularDraw = true;
 			}
 			else if (entity.templates.includes("door")) {
 				R.ctx.strokeStyle = "#9090D0";
@@ -1116,11 +1120,7 @@ function IsOpaque (x, y, z) {
 	return false;
 }*/
 
-function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, kind) {
-	if (kind !== "wizard") {
-		console.log("Don't have a drawing approch for " + kind + " yet!");
-		return;
-	}
+function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, kind, xSize, ySize, zSize, color) {
 	// Prep
 	// Scale values from top to bottom of block
 	var scale00 = scaleTop;
@@ -1159,56 +1159,87 @@ function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, ki
 	var yScr09 = GetScreenYHaveScale(xPos, yPos, zPos - 0.9, scale09);
 	var yScr10 = GetScreenYHaveScale(xPos, yPos, zPos - 1.0, scale10);
 	R.ctx.save();
-	// Draw feet/shoes
-	R.ctx.beginPath();
-	R.ctx.fillStyle = "#8D501C";
-	R.ctx.strokeStyle = "#5C3412";
-	R.ctx.arc(xScr10 + scale10 * 0.45, yScr10 + scale10 * 0.5, scale10 * 0.05, Math.PI * 2, false);
-	R.ctx.fill();
-	R.ctx.stroke();
-	R.ctx.beginPath();
-	R.ctx.arc(xScr10 + scale10 * 0.55, yScr10 + scale10 * 0.5, scale10 * 0.05, Math.PI * 2, false);
-	R.ctx.fill();
-	R.ctx.stroke();
-	// Draw legs
-	// Draw arms
-	// Draw sleeves
-	// Draw shirt
-	R.ctx.beginPath();
-	R.ctx.fillStyle = "#1080F0";
-	R.ctx.strokeStyle = "#0070E0";
-	// R.ctx.rect(xScr04 + scale04 * 0.4, yScr04 + scale04 * 0.5, scale04 * 0.2, scale04 * 0.4);
-	R.ctx.moveTo(xScr05 + scale05 * 0.42, yScr05 + scale05 * 0.5);
-	R.ctx.lineTo(xScr05 + scale05 * 0.58, yScr05 + scale05 * 0.5);
-	R.ctx.lineTo(xScr09 + scale09 * 0.58, yScr09 + scale09 * 0.5);
-	R.ctx.lineTo(xScr09 + scale09 * 0.42, yScr09 + scale09 * 0.5);
-	R.ctx.closePath()
-	R.ctx.fill();
-	R.ctx.stroke();
-	// Draw head
-	R.ctx.beginPath();
-	R.ctx.fillStyle = "#B18456";
-	R.ctx.strokeStyle = "#956738";
-	R.ctx.arc(xScr03 + scale03 * 0.5, yScr03 + scale03 * 0.5, scale03 * 0.1, Math.PI * 2, false);
-	R.ctx.fill();
-	R.ctx.stroke();
-	// Draw hat rim
-	R.ctx.fillStyle = "#1080F0";
-	R.ctx.strokeStyle = "#0070E0";
-	R.ctx.beginPath();
-	// R.ctx.ellipse(xScrTop + scaleTop / 2, yScrTop + scaleTop / 2, scaleTop / 2, scaleTop * R.CAMERA_TILT / 2, 0, 0, Math.PI * 2);
-	R.ctx.ellipse(xScr02 + scale02 * 0.5, yScr02 + scale02 * 0.5, scale02 * 0.15, scale02 * 0.15 * R.CAMERA_TILT, 0, 0, Math.PI * 2);
-	R.ctx.fill();
-	R.ctx.stroke();
-	// Draw hat cone
-	R.ctx.fillStyle = "#1080F0";
-	R.ctx.strokeStyle = "#0070E0";
-	R.ctx.beginPath();
-	R.ctx.moveTo(xScr02 + scale02 * 0.45, yScr02 + scale02 * 0.5);
-	R.ctx.lineTo(xScr00 + scale00 * 0.5, yScr00 + scale00 * 0.5);
-	R.ctx.lineTo(xScr02 + scale02 * 0.55, yScr02 + scale02 * 0.5);
-	R.ctx.fill();
-	R.ctx.stroke();
+	if (kind === "laser") {
+		// Draw beam
+		R.ctx.beginPath();
+		R.ctx.fillStyle = color;
+		R.ctx.strokeStyle = color;
+		if (xSize !== 1) {
+			// Horizontal laser left-right on screen
+			R.ctx.rect(xScr05 + scale05 * 0.2, yScr05 + scale05 * 0.2, scale05 * (0.6 + xSize - 1), scale05 * 0.6);
+		}
+		else if (ySize !== 1) {
+			// "Horizontal" laser up-down on screen
+			R.ctx.rect(xScr05 + scale05 * 0.2, yScr05 + scale05 * 0.2, scale05 * 0.6, scale05 * (0.6 + ySize - 1));
+		}
+		else {
+			// 1x1 laser so just draw a dot??
+			R.ctx.rect(xScr05 + scale05 * 0.2, yScr05 + scale05 * 0.2, scale05 * 0.6, scale05 * 0.6);
+		}
+		R.ctx.fill();
+	}
+	else if (kind === "door") {
+
+	}
+	else if (kind === "teleporter") {
+
+	}
+	// Wizard
+	else if (kind === "wizard") {
+		// Draw feet/shoes
+		R.ctx.beginPath();
+		R.ctx.fillStyle = "#8D501C";
+		R.ctx.strokeStyle = "#5C3412";
+		R.ctx.arc(xScr10 + scale10 * 0.45, yScr10 + scale10 * 0.5, scale10 * 0.05, Math.PI * 2, false);
+		R.ctx.fill();
+		R.ctx.stroke();
+		R.ctx.beginPath();
+		R.ctx.arc(xScr10 + scale10 * 0.55, yScr10 + scale10 * 0.5, scale10 * 0.05, Math.PI * 2, false);
+		R.ctx.fill();
+		R.ctx.stroke();
+		// Draw legs
+		// Draw arms
+		// Draw sleeves
+		// Draw shirt
+		R.ctx.beginPath();
+		R.ctx.fillStyle = "#1080F0";
+		R.ctx.strokeStyle = "#0070E0";
+		// R.ctx.rect(xScr04 + scale04 * 0.4, yScr04 + scale04 * 0.5, scale04 * 0.2, scale04 * 0.4);
+		R.ctx.moveTo(xScr05 + scale05 * 0.42, yScr05 + scale05 * 0.5);
+		R.ctx.lineTo(xScr05 + scale05 * 0.58, yScr05 + scale05 * 0.5);
+		R.ctx.lineTo(xScr09 + scale09 * 0.58, yScr09 + scale09 * 0.5);
+		R.ctx.lineTo(xScr09 + scale09 * 0.42, yScr09 + scale09 * 0.5);
+		R.ctx.closePath()
+		R.ctx.fill();
+		R.ctx.stroke();
+		// Draw head
+		R.ctx.beginPath();
+		R.ctx.fillStyle = "#B18456";
+		R.ctx.strokeStyle = "#956738";
+		R.ctx.arc(xScr03 + scale03 * 0.5, yScr03 + scale03 * 0.5, scale03 * 0.1, Math.PI * 2, false);
+		R.ctx.fill();
+		R.ctx.stroke();
+		// Draw hat rim
+		R.ctx.fillStyle = "#1080F0";
+		R.ctx.strokeStyle = "#0070E0";
+		R.ctx.beginPath();
+		// R.ctx.ellipse(xScrTop + scaleTop / 2, yScrTop + scaleTop / 2, scaleTop / 2, scaleTop * R.CAMERA_TILT / 2, 0, 0, Math.PI * 2);
+		R.ctx.ellipse(xScr02 + scale02 * 0.5, yScr02 + scale02 * 0.5, scale02 * 0.15, scale02 * 0.15 * R.CAMERA_TILT, 0, 0, Math.PI * 2);
+		R.ctx.fill();
+		R.ctx.stroke();
+		// Draw hat cone
+		R.ctx.fillStyle = "#1080F0";
+		R.ctx.strokeStyle = "#0070E0";
+		R.ctx.beginPath();
+		R.ctx.moveTo(xScr02 + scale02 * 0.45, yScr02 + scale02 * 0.5);
+		R.ctx.lineTo(xScr00 + scale00 * 0.5, yScr00 + scale00 * 0.5);
+		R.ctx.lineTo(xScr02 + scale02 * 0.55, yScr02 + scale02 * 0.5);
+		R.ctx.fill();
+		R.ctx.stroke();
+	}
+	else {
+		console.log("Don't have a drawing approch for " + kind + " yet!")
+	}
 	// Done
 	R.ctx.restore();
 }
