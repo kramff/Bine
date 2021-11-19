@@ -1160,7 +1160,7 @@ function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, ki
 	var yScr10 = GetScreenYHaveScale(xPos, yPos, zPos - 1.0, scale10);
 	R.ctx.save();
 	if (kind === "laser") {
-		// Draw beam
+		// Draw beam as rectangle
 		R.ctx.beginPath();
 		R.ctx.fillStyle = color;
 		R.ctx.strokeStyle = color;
@@ -1177,6 +1177,53 @@ function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, ki
 			R.ctx.rect(xScr05 + scale05 * 0.2, yScr05 + scale05 * 0.2, scale05 * 0.6, scale05 * 0.6);
 		}
 		R.ctx.fill();
+		// Straight line with 3D rotating spiral of dots
+		// Set colors
+		R.ctx.fillStyle = color;
+		R.ctx.strokeStyle = color;
+		var xCurrent = xPos;
+		var yCurrent = yPos;
+		var zCurrent = zPos;
+		var xChange = (xSize > 1 ? 1 : 0);
+		var yChange = (ySize > 1 ? 1 : 0);
+		// Case for 1x1 laser: just make it horizontal
+		if (xChange === 0 && yChange === 0) {
+			xChange = 1;
+		}
+		var xEnd = xStart + xSize - 1;
+		var yEnd = yStart + ySize - 1;
+		while (xCurrent < xEnd || yCurrent < yEnd) {
+			// Check opaqueness of tile
+			if (!IsOpaque(xCurrent, yCurrent,  zCurrent)) {
+				// Draw line and dots
+				R.ctx.beginPath();
+				if (xChange === 1) {
+					// Determine x distance from start
+					var xDif = xCurrent - xPos;
+					// Horizontal line
+					R.ctx.moveTo(xScr05 + xDif * scale05, yScr05 + scale05 * 0.5);
+					R.ctx.lineTo(xScr05 + (xDif + 1) * scale05, yScr05 + scale05 * 0.5);
+					R.ctx.stroke();
+					// Draw spiral of dots
+					R.ctx.beginPath();
+					// TODO: draw half of these dots below the line
+					for (var i = 0; i < 7; i++) {
+						//R.ctx.rect(xScr05 + xDif * scale05 + (i / 8) , 
+					}
+				}
+				else {
+					// Determine y distance from start
+					var yDif = yCurrent - yPos;
+					//Vertical line
+					R.ctx.moveTo(xScr05 + scale05 * 0.5, yScr05 + yDif * scale05);
+					R.ctx.lineTo(xScr05 + scale05 * 0.5, yScr05 + (yDif + 1) * scale05);
+					R.ctx.stroke();
+				}
+			}
+			// Move to next tile
+			xCurrent += xChange;
+			yCurrent += yChange;
+		}
 	}
 	else if (kind === "door") {
 
