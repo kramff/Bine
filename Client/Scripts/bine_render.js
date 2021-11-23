@@ -216,7 +216,7 @@ function DrawParticle (particle) {
 			var xTMini = GetScreenXHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
 			var yTMini = GetScreenYHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
 			// Sides of cube
-			DrawCubeSides(xTMini, yTMini, scaleTMini * size, xBMini, yBMini, scaleBMini * size, xPos, yPos, zPos, undefined, true);
+			DrawCubeSides(xTMini, yTMini, scaleTMini * size, xBMini, yBMini, scaleBMini * size, xPos, yPos, zPos, 1, 1, 1, undefined, true);
 			// (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideStyle)
 			// Top of cube
 			R.ctx.rect(xTMini, yTMini, scaleTMini * size, scaleTMini * size);
@@ -469,10 +469,10 @@ function DObjInZ (dObj, z) {
 function DrawDObjZ (dObj, z, drawSideTiles) {
 	if (dObj.type === "Entity") {
 		if (drawSideTiles) {
-			DrawEntitySideTiles(dObj);
+			DrawEntitySideTiles(dObj, z);
 		}
 		else {
-			DrawEntity(dObj);
+			DrawEntity(dObj, z);
 		}
 	}
 	else if (dObj.type === "Area") {
@@ -485,31 +485,40 @@ function DrawDObjZ (dObj, z, drawSideTiles) {
 	}
 	else {
 		// Otherwise: Network player
+		// (Unused? Remove this part?)
 		if (drawSideTiles) {
 		}
 		else {
 			// DrawNPlayer(dObj);
-			DrawEntity(dObj)
+			DrawEntity(dObj, z)
 		}
 	}
 }
 
-function DrawEntity (entity) {
+function DrawEntity (entity, z) {
 	// If not visible: skip drawing
 	if (entity.settings.visible === false) {
 		return;
 	}
 	var xPos = entity.GetX();
 	var yPos = entity.GetY();
-	var zPos = entity.GetZ();
+	var zPos = entity.GetZ() + entity.zSize - 1;
 	var scale = GetScale(zPos);
 	var xScr = GetScreenXHaveScale(xPos, yPos, zPos, scale);
 	var yScr = GetScreenYHaveScale(xPos, yPos, zPos, scale);
 	var skipRegularDraw = false;
 
+	// Too small to see
 	if (scale < 0) {
 		return;
 	}
+
+	// This function draws the top of the cube (or rectangular box)
+	// Skip if this isn't the highest z level of this entity
+	if (z < entity.z + entity.zSize - 1) {
+		return;
+	}
+
 	if (xScr + entity.xSize * scale > 0 && xScr < R.CANVAS_WIDTH && yScr + entity.ySize * scale > 0 && yScr < R.CANVAS_HEIGHT) {
 		R.ctx.save();
 
@@ -585,14 +594,14 @@ function DrawEntity (entity) {
 	}
 }
 
-function DrawEntitySideTiles (entity) {
+function DrawEntitySideTiles (entity, z) {
 	// If not visible: skip drawing
 	if (entity.settings.visible === false) {
 		return;
 	}
 	var xPos = entity.GetX();
 	var yPos = entity.GetY();
-	var zPos = entity.GetZ();
+	var zPos = entity.GetZ() - entity.z + z;
 	var scale = GetScale(zPos);
 	var scale2 = GetScale(zPos - 1);
 	var x = GetScreenXHaveScale(xPos, yPos, zPos, scale);
@@ -658,7 +667,7 @@ function DrawEntitySideTiles (entity) {
 		}
 		if (!skipRegularDraw) {
 			var mustDrawSides = entity.xMov !== 0 || entity.yMov !== 0 || entity.zMov !== 0;
-			DrawCubeSides(x, y, scale, x2, y2, scale2, xPos, yPos, zPos, undefined, mustDrawSides);
+			DrawCubeSides(x, y, scale, x2, y2, scale2, xPos, yPos, zPos, entity.xSize, entity.ySize, entity.zSize, undefined, mustDrawSides);
 		}
 		R.ctx.restore();
 	}
@@ -753,7 +762,7 @@ function DrawAreaZSliceSideTiles (area, z) {
 									// DrawTileInCeiling(x, y, scale);
 								}
 								else {
-									DrawCubeSides(x, y, scale, x2, y2, scale2, realX, realY, z, "wall_grad");
+									DrawCubeSides(x, y, scale, x2, y2, scale2, realX, realY, z, 1, 1, 1, "wall_grad");
 								}
 							}
 							// numSquares ++;
@@ -967,15 +976,15 @@ function GetWallGradientHorizontal (x, x2, z) {
 
 // Draw the top, bottom, left, and right sides of a cube
 // Either for tile in area or for cube style entity
-function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideStyle, mustDrawSides) {
+function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, xSize, ySize, zSize, sideStyle, mustDrawSides) {
 	R.ctx.save();
 	// top side
-	if (y > y2 && (!IsOpaque(realX, realY - 1, realZ) || mustDrawSides)) {
+	if (y > y2 && (!IsOpaqueMulti(realX, realY - 1, realZ, xSize, 1, 1) || mustDrawSides)) {
 		R.ctx.beginPath();
 		R.ctx.moveTo(x, y);
 		R.ctx.lineTo(x2, y2);
-		R.ctx.lineTo(x2 + scale2, y2);
-		R.ctx.lineTo(x + scale, y);
+		R.ctx.lineTo(x2 + scale2 * xSize, y2);
+		R.ctx.lineTo(x + scale * xSize, y);
 		R.ctx.closePath();
 		if (sideStyle === "wall_grad") {
 			R.ctx.fillStyle = GetWallGradientVertical(y, y2, realZ);
@@ -984,12 +993,12 @@ function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideSt
 		R.ctx.stroke();
 	}
 	// bottom side
-	if (y2 + scale2 > y + scale && (!IsOpaque(realX, realY + 1, realZ) || mustDrawSides)) {
+	if (y2 + scale2 > y + scale && (!IsOpaqueMulti(realX, realY + ySize, realZ, xSize, 1, 1) || mustDrawSides)) {
 		R.ctx.beginPath();
-		R.ctx.moveTo(x, y + scale);
-		R.ctx.lineTo(x2, y2 + scale2);
-		R.ctx.lineTo(x2 + scale2, y2 + scale2);
-		R.ctx.lineTo(x + scale, y + scale);
+		R.ctx.moveTo(x, y + scale * ySize);
+		R.ctx.lineTo(x2, y2 + scale2 * ySize);
+		R.ctx.lineTo(x2 + scale2 * xSize, y2 + scale2 * ySize);
+		R.ctx.lineTo(x + scale * xSize, y + scale * ySize);
 		R.ctx.closePath();
 		if (sideStyle === "wall_grad") {
 			R.ctx.fillStyle = GetWallGradientVertical(y + scale, y2 + scale2, realZ);
@@ -998,12 +1007,12 @@ function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideSt
 		R.ctx.stroke();
 	}
 	// left side
-	if (x > x2 && (!IsOpaque(realX - 1, realY, realZ) || mustDrawSides)) {
+	if (x > x2 && (!IsOpaqueMulti(realX - 1, realY, realZ, 1, ySize, 1) || mustDrawSides)) {
 		R.ctx.beginPath();
 		R.ctx.moveTo(x, y);
 		R.ctx.lineTo(x2, y2);
-		R.ctx.lineTo(x2, y2 + scale2);
-		R.ctx.lineTo(x, y + scale);
+		R.ctx.lineTo(x2, y2 + scale2 * ySize);
+		R.ctx.lineTo(x, y + scale * ySize);
 		R.ctx.closePath();
 		if (sideStyle === "wall_grad") {
 			R.ctx.fillStyle = GetWallGradientHorizontal(x, x2, realZ);
@@ -1012,12 +1021,12 @@ function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideSt
 		R.ctx.stroke();
 	}
 	// right side
-	if (x2 + scale2 > x + scale && (!IsOpaque(realX + 1, realY, realZ) || mustDrawSides)) {
+	if (x2 + scale2 > x + scale && (!IsOpaqueMulti(realX +xSize, realY, realZ, 1, ySize, 1) || mustDrawSides)) {
 		R.ctx.beginPath();
-		R.ctx.moveTo(x + scale, y);
-		R.ctx.lineTo(x2 + scale2, y2);
-		R.ctx.lineTo(x2 + scale2, y2 + scale2);
-		R.ctx.lineTo(x + scale, y + scale);
+		R.ctx.moveTo(x + scale * xSize, y);
+		R.ctx.lineTo(x2 + scale2 * xSize, y2);
+		R.ctx.lineTo(x2 + scale2 * xSize, y2 + scale2 * ySize);
+		R.ctx.lineTo(x + scale * xSize, y + scale * ySize);
 		R.ctx.closePath();
 		if (sideStyle === "wall_grad") {
 			R.ctx.fillStyle = GetWallGradientHorizontal(x + scale, x2 + scale2, realZ);
@@ -1096,6 +1105,12 @@ function InCeiling (x, y, z) {
 function IsOpaque (x, y, z) {
 	return curLevel.CheckLocationSolid(Math.round(x), Math.round(y), Math.round(z), true);
 }
+
+function IsOpaqueMulti (x, y, z, xSize, ySize, zSize) {
+	// TODO: Finish this function
+	return curLevel.CheckLocationSolid(Math.round(x), Math.round(y), Math.round(z), true);
+}
+
 /*function IsOpaque (x, y, z) {
 	for (var i = 0; i < areas.length; i++) {
 		var area = areas[i];
@@ -1164,22 +1179,22 @@ function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, ki
 	R.ctx.save();
 	if (kind === "laser") {
 		// Draw beam as rectangle
-		R.ctx.beginPath();
-		R.ctx.fillStyle = color;
-		R.ctx.strokeStyle = color;
-		if (xSize !== 1) {
-			// Horizontal laser left-right on screen
-			R.ctx.rect(xScr05 + scale05 * 0.2, yScr05 + scale05 * 0.2, scale05 * (0.6 + xSize - 1), scale05 * 0.6);
-		}
-		else if (ySize !== 1) {
-			// "Horizontal" laser up-down on screen
-			R.ctx.rect(xScr05 + scale05 * 0.2, yScr05 + scale05 * 0.2, scale05 * 0.6, scale05 * (0.6 + ySize - 1));
-		}
-		else {
-			// 1x1 laser so just draw a dot??
-			R.ctx.rect(xScr05 + scale05 * 0.2, yScr05 + scale05 * 0.2, scale05 * 0.6, scale05 * 0.6);
-		}
-		R.ctx.fill();
+		// R.ctx.beginPath();
+		// R.ctx.fillStyle = color;
+		// R.ctx.strokeStyle = color;
+		// if (xSize !== 1) {
+		// 	// Horizontal laser left-right on screen
+		// 	R.ctx.rect(xScr05 + scale05 * 0.2, yScr05 + scale05 * 0.2, scale05 * (0.6 + xSize - 1), scale05 * 0.6);
+		// }
+		// else if (ySize !== 1) {
+		// 	// "Horizontal" laser up-down on screen
+		// 	R.ctx.rect(xScr05 + scale05 * 0.2, yScr05 + scale05 * 0.2, scale05 * 0.6, scale05 * (0.6 + ySize - 1));
+		// }
+		// else {
+		// 	// 1x1 laser so just draw a dot??
+		// 	R.ctx.rect(xScr05 + scale05 * 0.2, yScr05 + scale05 * 0.2, scale05 * 0.6, scale05 * 0.6);
+		// }
+		// R.ctx.fill();
 		// Straight line with 3D rotating spiral of dots
 		// Set colors
 		R.ctx.fillStyle = color;
@@ -1193,9 +1208,9 @@ function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, ki
 		if (xChange === 0 && yChange === 0) {
 			xChange = 1;
 		}
-		var xEnd = xStart + xSize - 1;
-		var yEnd = yStart + ySize - 1;
-		while (xCurrent < xEnd || yCurrent < yEnd) {
+		var xEnd = xPos + xSize - 1;
+		var yEnd = yPos + ySize - 1;
+		while (xCurrent <= xEnd && yCurrent <= yEnd) {
 			// Check opaqueness of tile
 			if (!IsOpaque(xCurrent, yCurrent,  zCurrent)) {
 				// Draw line and dots
