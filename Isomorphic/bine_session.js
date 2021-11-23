@@ -1398,7 +1398,13 @@ var Session = (function () {
 		for (var i = 0; i < this.entities.length; i++) {
 			var entity = this.entities[i];
 			if (entity.settings.solid === true) {
-				if (entity.x === x && entity.y === y && entity.z === z) {
+				// if (entity.x === x && entity.y === y && entity.z === z) {
+				// xyz within bounds of entity.xyz + entity.xyzSize
+				if (x >= entity.x && y >= entity.y && z >= entity.z &&
+					x <= entity.x + entity.xSize - 1 &&
+					y <= entity.y + entity.ySize - 1 &&
+					z <= entity.z + entity.zSize - 1) {
+					// If this is a solidity check for rendering purposes, skip if entity is moving
 					if (forRendering) {
 						if (entity.xMov === 0 && entity.yMov === 0 && entity.zMov === 0) {
 							return true;

@@ -451,7 +451,8 @@ function GetScreenYHaveScale (x, y, z, scale) {
  
 function DObjInZ (dObj, z) {
 	if (dObj.type === "Entity") {
-		return Math.ceil(dObj.GetZ()) === z;
+		//return Math.ceil(dObj.GetZ()) === z;
+		return (dObj.z <= z && dObj.z + dObj.zSize > z);
 	}
 	else if (dObj.type === "Area") {
 		return (dObj.z <= z && dObj.z + dObj.zSize > z);
@@ -568,8 +569,10 @@ function DrawEntity (entity) {
 			R.ctx.fillStyle = "#C0C070";
 		}
 		if (!skipRegularDraw) {
-			R.ctx.fillRect(xScr, yScr, scale, scale);
-			R.ctx.strokeRect(xScr, yScr, scale, scale);
+			// R.ctx.fillRect(xScr, yScr, scale, scale);
+			R.ctx.fillRect(xScr, yScr, scale * entity.xSize, scale * entity.ySize);
+			// R.ctx.strokeRect(xScr, yScr, scale, scale);
+			R.ctx.strokeRect(xScr, yScr, scale * entity.xSize, scale * entity.ySize);
 		}
 
 		// Draw temporary text above entity
