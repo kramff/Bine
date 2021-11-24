@@ -1102,13 +1102,26 @@ function InCeiling (x, y, z) {
 	return true;
 }*/
 
+// Check if a single tile is opaque
 function IsOpaque (x, y, z) {
 	return curLevel.CheckLocationSolid(Math.round(x), Math.round(y), Math.round(z), true);
 }
 
+// Check if multiple tiles are opaque
+// Return true if all of the tiles are opaque
 function IsOpaqueMulti (x, y, z, xSize, ySize, zSize) {
-	// TODO: Finish this function
-	return curLevel.CheckLocationSolid(Math.round(x), Math.round(y), Math.round(z), true);
+	
+	for (var xi = 0; xi < xSize; xi++) {
+		for (var yi = 0; yi < ySize; yi++) {
+			for (var zi = 0; zi < zSize; zi++) {
+				var tileIsOpaque = curLevel.CheckLocationSolid(Math.round(x + xi), Math.round(y + yi), Math.round(z + zi), true);
+				if (!tileIsOpaque) {
+					return false;
+				}
+			}
+		}
+	}
+	return true;
 }
 
 /*function IsOpaque (x, y, z) {

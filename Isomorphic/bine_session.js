@@ -1407,7 +1407,9 @@ var Session = (function () {
 					// If this is a solidity check for rendering purposes, skip if entity is moving
 					if (forRendering) {
 						if (entity.xMov === 0 && entity.yMov === 0 && entity.zMov === 0) {
-							return true;
+							if (entity.settings.visible === true) {
+								return true;
+							}
 						}
 					}
 					else

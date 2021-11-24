@@ -1088,6 +1088,9 @@ function FillWorldBox (worldData, boxType) {
 }
 
 function FillLevelBox (levelArray) {
+	//Sort levelArray
+	levelArray.sort(levelSortFunc);
+
 	var levelBox = document.getElementsByClassName("level_box").item(0);
 
 	// Clear out old elements
@@ -1102,6 +1105,10 @@ function FillLevelBox (levelArray) {
 		var levelDiv = CreateNewDiv(levelBox, "level", level.name, level.id);
 		levelDiv.setAttribute("level_id", level.id);
 	}
+}
+
+function levelSortFunc (a, b) {
+	return a.id - b.id;
 }
 
 function AddSingleLevelToBox (level) {
