@@ -1078,7 +1078,8 @@ function FillWorldBox (worldData, boxType) {
 			// Main new div
 			var worldDiv = CreateNewDiv(worldBox, "world", undefined, undefined);
 			worldDiv.setAttribute("world_id", world.id);
-			worldDiv.setAttribute("world_name", world.worldName.toLowerCase());
+			var worldNameLC = (world.worldName + "").toLowerCase();
+			worldDiv.setAttribute("world_name", worldNameLC);
 			// Name
 			CreateNewDiv(worldDiv, "world_name", world.worldName, undefined);
 			// Level Count

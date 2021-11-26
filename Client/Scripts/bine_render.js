@@ -541,11 +541,11 @@ function DrawEntity (entity, z) {
 			if (entity.templates.includes("laser")) {
 				// R.ctx.strokeStyle = "#C07070";
 				// R.ctx.fillStyle = "#B06060";
-				var laserColor = "#B06060";
-				if (entity.style !== undefined && typeof entity.style === "string") {
-					laserColor = entity.style;
-				}
-				DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "laser", entity.xSize, entity.ySize, entity.zSize, laserColor);
+				// var laserColor = "#B06060";
+				// if (entity.style !== undefined && typeof entity.style === "string") {
+				// 	laserColor = entity.style;
+				// }
+				// DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "laser", entity.xSize, entity.ySize, entity.zSize, laserColor);
 				skipRegularDraw = true;
 			}
 			else if (entity.templates.includes("door")) {
@@ -608,6 +608,8 @@ function DrawEntitySideTiles (entity, z) {
 	var x2 = GetScreenXHaveScale(xPos, yPos, zPos - 1, scale2);
 	var y = GetScreenYHaveScale(xPos, yPos, zPos, scale);
 	var y2 = GetScreenYHaveScale(xPos, yPos, zPos - 1, scale2);
+	var xScr = GetScreenXHaveScale(xPos, yPos, zPos, scale);
+	var yScr = GetScreenYHaveScale(xPos, yPos, zPos, scale);
 	if (scale < 0) {
 		return;
 	}
@@ -634,6 +636,11 @@ function DrawEntitySideTiles (entity, z) {
 				// R.ctx.strokeStyle = "#C07070";
 				// R.ctx.fillStyle = "#B06060";
 				// DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "laser");
+				var laserColor = "#B06060";
+				if (entity.style !== undefined && typeof entity.style === "string") {
+					laserColor = entity.style;
+				}
+				DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "laser", entity.xSize, entity.ySize, entity.zSize, laserColor);
 				skipRegularDraw = true;
 			}
 			else if (entity.templates.includes("door")) {
@@ -1191,23 +1198,6 @@ function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, ki
 	var yScr10 = GetScreenYHaveScale(xPos, yPos, zPos - 1.0, scale10);
 	R.ctx.save();
 	if (kind === "laser") {
-		// Draw beam as rectangle
-		// R.ctx.beginPath();
-		// R.ctx.fillStyle = color;
-		// R.ctx.strokeStyle = color;
-		// if (xSize !== 1) {
-		// 	// Horizontal laser left-right on screen
-		// 	R.ctx.rect(xScr05 + scale05 * 0.2, yScr05 + scale05 * 0.2, scale05 * (0.6 + xSize - 1), scale05 * 0.6);
-		// }
-		// else if (ySize !== 1) {
-		// 	// "Horizontal" laser up-down on screen
-		// 	R.ctx.rect(xScr05 + scale05 * 0.2, yScr05 + scale05 * 0.2, scale05 * 0.6, scale05 * (0.6 + ySize - 1));
-		// }
-		// else {
-		// 	// 1x1 laser so just draw a dot??
-		// 	R.ctx.rect(xScr05 + scale05 * 0.2, yScr05 + scale05 * 0.2, scale05 * 0.6, scale05 * 0.6);
-		// }
-		// R.ctx.fill();
 		// Straight line with 3D rotating spiral of dots
 		// Set colors
 		R.ctx.fillStyle = color;
@@ -1236,10 +1226,11 @@ function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, ki
 					R.ctx.lineTo(xScr05 + (xDif + 1) * scale05, yScr05 + scale05 * 0.5);
 					R.ctx.stroke();
 					// Draw spiral of dots
-					R.ctx.beginPath();
 					// TODO: draw half of these dots below the line
 					for (var i = 0; i < 7; i++) {
-						//R.ctx.rect(xScr05 + xDif * scale05 + (i / 8) , 
+						R.ctx.beginPath();
+						R.ctx.rect(xScr05 + xDif * scale05 + (i / 8), yScr05 + (0.5 + Math.sin(i / (8 * Math.PI)) * 0.5) * scale05, 5, 5);
+						R.ctx.fill();
 					}
 				}
 				else {
@@ -1249,6 +1240,13 @@ function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, ki
 					R.ctx.moveTo(xScr05 + scale05 * 0.5, yScr05 + yDif * scale05);
 					R.ctx.lineTo(xScr05 + scale05 * 0.5, yScr05 + (yDif + 1) * scale05);
 					R.ctx.stroke();
+					// Draw spiral of dots
+					// TODO: draw half of these dots below the line
+					for (var i = 0; i < 7; i++) {
+						R.ctx.beginPath();
+						R.ctx.rect(xScr05 + (0.5 + Math.sin(i / (8 * Math.PI)) * 0.5) * scale05, yScr05 + yDif * scale05 + (i / 8), 5, 5);
+						R.ctx.fill();
+					}
 				}
 			}
 			// Move to next tile

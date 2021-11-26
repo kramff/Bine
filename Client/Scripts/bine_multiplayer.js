@@ -450,7 +450,7 @@ function CreateNewEntity (createX, createY, createZ) {
 			templates: [],
 			variableCounter: 0,
 		};
-		var entity = curLevel.AddEntity(blankEntityData, curLevel, curSession);
+		var entity = curLevel.AddEntity(blankEntityData, curSession, curLevel);
 		// handleMessageData("createNewEntity", {x: createX, y: createY, z: createZ});
 	}
 }
