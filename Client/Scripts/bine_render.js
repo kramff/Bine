@@ -1224,12 +1224,15 @@ function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, ki
 					// Horizontal line
 					R.ctx.moveTo(xScr05 + xDif * scale05, yScr05 + scale05 * 0.5);
 					R.ctx.lineTo(xScr05 + (xDif + 1) * scale05, yScr05 + scale05 * 0.5);
+					R.ctx.lineWidth = 3;
 					R.ctx.stroke();
 					// Draw spiral of dots
 					// TODO: draw half of these dots below the line
-					for (var i = 0; i < 7; i++) {
+					for (var i = 0; i < 6; i++) {
 						R.ctx.beginPath();
-						R.ctx.rect(xScr05 + xDif * scale05 + (i / 8), yScr05 + (0.5 + Math.sin(i / (8 * Math.PI)) * 0.5) * scale05, 5, 5);
+						// R.ctx.rect(xScr05 + xDif * scale05 + (i / 8), yScr05 + (0.5 + Math.sin(i / (8 * Math.PI)) * 0.5) * scale05, 5, 5);
+						//R.ctx.rect(xScr05 + scale05 * (xDif + Math.sin(frameCounter / 200)), yScr05 + scale05 * Math.sin(frameCounter / 200), 2, 2);
+						R.ctx.rect(xScr05 + scale05 * (xDif + 0.5 + Math.cos(i + frameCounter / 10) * 0.5), yScr05 + scale05 * (0.5 + Math.sin(i + frameCounter / 10) * 0.5), 2, 2);
 						R.ctx.fill();
 					}
 				}
@@ -1239,12 +1242,14 @@ function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, ki
 					//Vertical line
 					R.ctx.moveTo(xScr05 + scale05 * 0.5, yScr05 + yDif * scale05);
 					R.ctx.lineTo(xScr05 + scale05 * 0.5, yScr05 + (yDif + 1) * scale05);
+					R.ctx.lineWidth = 3;
 					R.ctx.stroke();
 					// Draw spiral of dots
 					// TODO: draw half of these dots below the line
-					for (var i = 0; i < 7; i++) {
+					for (var i = 0; i < 6; i++) {
 						R.ctx.beginPath();
-						R.ctx.rect(xScr05 + (0.5 + Math.sin(i / (8 * Math.PI)) * 0.5) * scale05, yScr05 + yDif * scale05 + (i / 8), 5, 5);
+						// R.ctx.rect(xScr05 + (0.5 + Math.sin(i / (8 * Math.PI)) * 0.5) * scale05, yScr05 + yDif * scale05 + (i / 8), 5, 5);
+						R.ctx.rect(xScr05 + scale05 * (0.5 + Math.cos(i + frameCounter / 10) * 0.5), yScr05 + scale05 * (yDif + 0.5 + Math.sin(i + frameCounter / 10) * 0.5), 2, 2);
 						R.ctx.fill();
 					}
 				}
