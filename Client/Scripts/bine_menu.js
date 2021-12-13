@@ -645,6 +645,53 @@ function DoButtonAction (action, extra) {
 			}
 		break;
 
+		// Specific to blockomancy game
+		case "make_door":
+			curLevel.entityCounter ++;
+			var blankEntityData = {
+				id: curLevel.entityCounter,
+				x: editCamX,
+				y: editCamY,
+				z: editCamZ,
+				settings: {
+					visible: true,
+					solid: true,
+					standable: true,
+					pushable: false,
+					gravity: false,
+				},
+				style: [],
+				variables: [{"name":"signal_value","type":"boolean","local":true,"id":1}],
+				rules: [{"trigger":"receive_signal_boolean","block":[{"effect":"door_action","variables":["1"]}],"connectedVariables":[1]}],
+				templates: ["door"],
+				variableCounter: 1,
+			};
+			var entity = curLevel.AddEntity(blankEntityData, curSession, curLevel);
+		break;
+
+		case "make_laser":
+			curLevel.entityCounter ++;
+			var blankEntityData = {
+				id: curLevel.entityCounter,
+				x: editCamX,
+				y: editCamY,
+				z: editCamZ,
+				settings: {
+					visible: true,
+					solid: true,
+					standable: true,
+					pushable: false,
+					gravity: true,
+				},
+				style: [],
+				variables: [{"name":"myDoor","value":"1","type":"entity","id":1},{"name":"here_entity","type":"entity","local":true,"id":2},{"name":"here_created_entity","type":"entity","local":true,"id":3},{"name":"adjacent_created_entity","type":"entity","local":true,"id":4},{"name":"adjacent_removed_entity","type":"entity","local":true,"id":5}],
+				rules: [{"trigger":"entity_steps_adjacent","block":[{"effect":"laser_action","variables":["1"]}],"connectedVariables":[2]},{"trigger":"entity_created_adjacent","block":[{"effect":"laser_action","variables":["1"]}],"connectedVariables":[4]},{"trigger":"entity_removed_adjacent","block":[{"effect":"laser_action","variables":["1"]}],"connectedVariables":[5]}],
+				templates: ["laser"],
+				variableCounter: 5,
+			};
+			var entity = curLevel.AddEntity(blankEntityData, curSession, curLevel);
+		break;
+
 		case "test_as_player":
 			TestAsPlayer();
 		break;
