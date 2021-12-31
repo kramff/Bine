@@ -255,6 +255,8 @@ function ClearCanvas (canvas) {
 	canvas.width = canvas.width;
 }
 
+var textsToDraw = [];
+
 function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMode) {
 	// Set up render object
 	if (R.canvas !== canvas) {
@@ -294,6 +296,9 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	R.ctx.font = "16px sans-serif";
 	R.ctx.strokeStyle = "#E0E8F6";
 	R.ctx.fillStyle = "#303846";
+
+	// Clear text
+	textsToDraw = [];
 	
 	// Get level to draw and draw all objects in that level 
 	var drawObjects = R.level.drawObjects;
@@ -389,6 +394,18 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	}
 
 	ParticleTick();
+
+	// Loop through and draw text items
+	R.ctx.save();
+	for (var i = 0; i < textsToDraw.length; i++) {
+		var splitText = textsToDraw[i].text.split("\n");
+		R.ctx.fillStyle = "#FFFFFF";
+		for (var j = 0; j < splitText.length; j++) {
+			var textLine = splitText[j];
+			R.ctx.fillText(textLine, textsToDraw[i].x, textsToDraw[i].y + 20 * j);
+		}
+	}
+	R.ctx.restore();
 }
 
 function DrawEditOutline (x, y, z) {
@@ -586,8 +603,9 @@ function DrawEntity (entity, z) {
 
 		// Draw temporary text above entity
 		if (entity.tempMessageTime > 0) {
-			R.ctx.fillStyle = "#FFFFFF";
-			R.ctx.fillText(entity.tempMessageString + " (" + entity.tempMessageTime + ")", xScr - 50, yScr - 100);
+			// R.ctx.fillStyle = "#FFFFFF";
+			// R.ctx.fillText(entity.tempMessageString + " (" + entity.tempMessageTime + ")", xScr - 50, yScr - 100);
+			textsToDraw.push({text: entity.tempMessageString, x: xScr - 50, y: yScr - 100});
 		}
 
 		R.ctx.restore();

@@ -196,15 +196,26 @@ var Session = (function () {
 		},
 		blockomancy_action: {
 			text: "Block Gun: Shoot or collect a block",
-			requiredVariables: ["mouse_button", "direction"],
-			requiredVariableTypes: ["string", "string"],
-			effectFunction: function (sessionRef, levelRef, entityRef, useVariables) {
+			requiredVariables: ["mouse_button", "direction", "block_count"],
+			requiredVariableTypes: ["string", "string", "number"],
+			// variableSetter: true, because it changes the block count
+			variableSetter: true,
+			effectFunction: function (sessionRef, levelRef, entityRef, useVariables, variableIDs) {
 				// console.log("blockomancy_action effect happened");
 				// entityRef is curPlayer
-				// useVariables seems to be an array of 2 arrays,
+				// useVariables: first two elements are each an array of 2 arrays,
 				// each with the first element as mouse button
 				//  (0 is left button, 2 is right button)
 				// and second element as direction
+				// Third element: Block count, need to reduce when shooting and increase when collecting
+
+				// Figure out block count stuff
+				var prevBlockCount = Number(useVariables[2]);
+				var haveEnoughBlocksToShoot = prevBlockCount >= 1;
+				var newBlockCount = prevBlockCount;
+				// get the variable 2 object (block count)
+				var blockCountVariableToSet = GetVariableByID(entityRef.variables, variableIDs[2]);
+
 				var mouseButton = useVariables[0][0];
 				var direction = useVariables[0][1];
 				var dirX = (direction === "left" ? -1 : (direction === "right" ? 1 : 0));
@@ -225,8 +236,16 @@ var Session = (function () {
 					// console.log("Collect block from " + direction);
 					collectMode = true;
 				}
+				if (shootMode && !haveEnoughBlocksToShoot) {
+					// Cannot shoot because not enough blocks
+					document.querySelector(".variable_tracker").style.backgroundColor = "#992020"
+					setTimeout(function() {
+						document.querySelector(".variable_tracker").style.backgroundColor = ""
+					}, 300);
+					return;
+				}
 				// Arbitrary limit
-				var limit = 20;
+				var limit = 30;
 				// Starting point: entity's location
 				var curX = entityRef.x;
 				var curY = entityRef.y;
@@ -276,7 +295,14 @@ var Session = (function () {
 								variableCounter: 0,
 							};
 							levelRef.AddEntity(blockEntityData, sessionRef, levelRef);
-							// The following is just for making a neat particle effect
+							// Subtract 1 block
+							newBlockCount = prevBlockCount - 1;
+							blockCountVariableToSet.value = newBlockCount;
+							// Update block count value visible on web page
+							if (!IS_SERVER) {
+								document.querySelector(".variable_tracker").textContent = "Blocks: " + newBlockCount;
+							}
+							// Making a neat particle effect
 							if (!IS_SERVER) {
 								var startX = entityRef.x;
 								var startY = entityRef.y;
@@ -317,7 +343,14 @@ var Session = (function () {
 							if (Array.isArray(entityAtLocation.templates) && entityAtLocation.templates.includes("block")) {
 								// console.log("Remove entity at " + curX + ", " + curY + ", " + curZ)
 								levelRef.RemoveEntity(entityAtLocation, sessionRef, levelRef);
-								// The following is just to make a neat particle effect
+								// Add 1 block
+								newBlockCount = prevBlockCount + 1;
+								blockCountVariableToSet.value = newBlockCount;
+								// Update block count value visible on web page
+								if (!IS_SERVER) {
+									document.querySelector(".variable_tracker").textContent = "Blocks: " + newBlockCount;
+								}
+								// Make a neat particle effect
 								if (!IS_SERVER) {
 									var startX = entityRef.x;
 									var startY = entityRef.y;
