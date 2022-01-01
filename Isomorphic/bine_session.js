@@ -176,6 +176,7 @@ var Session = (function () {
 				entityToWarp.z = Number(coordinatesToWarpTo.z);
 				levelToWarpTo.AddExistingEntity(entityToWarp);
 				levelRef.RemoveEntity(entityToWarp, sessionRef, levelRef);
+				entityToWarp.toBeRemoved = false;
 			},
 		},
 		create_entity: {
