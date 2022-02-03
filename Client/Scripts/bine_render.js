@@ -136,16 +136,22 @@ function DrawParticle (particle) {
 	var yPos = particle.y;
 	var zPos = particle.z;
 	// Get coordinates at top and bottom of tile for particle
+	/*
 	var scaleT = GetScale(zPos);
 	var xT = GetScreenXHaveScale(xPos, yPos, zPos, scaleT);
 	var yT = GetScreenYHaveScale(xPos, yPos, zPos, scaleT);
 	var scaleB = GetScale(zPos - 1);
 	var xB = GetScreenXHaveScale(xPos, yPos, zPos - 1, scaleB);
 	var yB = GetScreenYHaveScale(xPos, yPos, zPos - 1, scaleB);
+	*/
+	var xT = GetScreenXNew(xPos, yPos, zPos);
+	var yT = GetScreenYNew(xPos, yPos, zPos);
+	var xB = GetScreenXNew(xPos, yPos, zPos - 1);
+	var yB = GetScreenYNew(xPos, yPos, zPos - 1);
 	// If too small or out of camera view, skip
-	if (scaleB < 0) {
-		return;
-	}
+	// if (scaleB < 0) {
+	// 	return;
+	// }
 	// currently any xyz size bigger than 1 excludes it from being off the screen not drawn
 	if ((xB < 0 || xB > R.CANVAS_WIDTH || yB < 0 || yB > R.CANVAS_HEIGHT) && !(particle.xSize > 1 || particle.ySize > 1 || particle.zSize > 1)) {
 		return;
@@ -164,13 +170,15 @@ function DrawParticle (particle) {
 		case "splash":
 			R.ctx.strokeStyle = "#9090F0";
 			var splashSize = (10 - particle.dur);
+			// Actual rectangle
 			R.ctx.strokeRect(xB - splashSize / 2, yB - splashSize / 2, splashSize, splashSize);
 		break;
 		case "block_shot":
 			R.ctx.strokeStyle = "#30F060";
 			R.ctx.fillStyle = "#60D060";
 			R.ctx.globalAlpha = (particle.dur / 20);
-			R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
+			// R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
+			DrawQuad(xPos, yPos, zPos, particle.xSize, particle.ySize);
 			R.ctx.fill();
 			R.ctx.stroke();
 		break;
@@ -178,7 +186,8 @@ function DrawParticle (particle) {
 			R.ctx.strokeStyle = "#30F060";
 			R.ctx.fillStyle = "#60D060";
 			R.ctx.globalAlpha = (particle.dur / 20);
-			R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
+			// R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
+			DrawQuad(xPos, yPos, zPos, particle.xSize, particle.ySize);
 			// R.ctx.fill();
 			R.ctx.stroke();
 		break;
@@ -186,7 +195,8 @@ function DrawParticle (particle) {
 			R.ctx.strokeStyle = "#30F060";
 			R.ctx.fillStyle = "#60D060";
 			R.ctx.globalAlpha = (particle.dur / 20);
-			R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
+			// R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
+			DrawQuad(xPos, yPos, zPos, particle.xSize, particle.ySize);
 			R.ctx.fill();
 			R.ctx.stroke();
 		break;
@@ -194,7 +204,8 @@ function DrawParticle (particle) {
 			R.ctx.strokeStyle = "#30F060";
 			R.ctx.fillStyle = "#60D060";
 			R.ctx.globalAlpha = (particle.dur / 20);
-			R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
+			// R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
+			DrawQuad(xPos, yPos, zPos, particle.xSize, particle.ySize);
 			// R.ctx.fill();
 			R.ctx.stroke();
 		break;
@@ -205,27 +216,143 @@ function DrawParticle (particle) {
 			// The apothem is half the width of the square
 			var apothem = size / 2;
 			var edgeToMini = 0.5 - apothem;
-			var zBPosMini = (zPos - 1 + edgeToMini);
-			var scaleBMini = GetScale(zBPosMini);
-			var zTPosMini = (zPos - edgeToMini);
-			var scaleTMini = GetScale(zTPosMini);
-			var xPosMini = xPos + edgeToMini;
-			var yPosMini = yPos + edgeToMini;
-			var xBMini = GetScreenXHaveScale(xPosMini, yPosMini, zBPosMini, scaleBMini);
-			var yBMini = GetScreenYHaveScale(xPosMini, yPosMini, zBPosMini, scaleBMini);
-			var xTMini = GetScreenXHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
-			var yTMini = GetScreenYHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
+			// var zBPosMini = (zPos - 1 + edgeToMini);
+			// var scaleBMini = GetScale(zBPosMini);
+			// var zTPosMini = (zPos - edgeToMini);
+			// var scaleTMini = GetScale(zTPosMini);
+			// var xPosMini = xPos + edgeToMini;
+			// var yPosMini = yPos + edgeToMini;
+			// var xBMini = GetScreenXHaveScale(xPosMini, yPosMini, zBPosMini, scaleBMini);
+			// var yBMini = GetScreenYHaveScale(xPosMini, yPosMini, zBPosMini, scaleBMini);
+			// var xTMini = GetScreenXHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
+			// var yTMini = GetScreenYHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
 			// Sides of cube
-			DrawCubeSides(xTMini, yTMini, scaleTMini * size, xBMini, yBMini, scaleBMini * size, xPos, yPos, zPos, 1, 1, 1, undefined, true);
+			// DrawCubeSides(xTMini, yTMini, scaleTMini * size, xBMini, yBMini, scaleBMini * size, xPos, yPos, zPos, 1, 1, 1, undefined, true);
+			DrawQuadSides(xPos + edgeToMini, yPos + edgeToMini, zPos - edgeToMini, size, size);
 			// (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideStyle)
 			// Top of cube
-			R.ctx.rect(xTMini, yTMini, scaleTMini * size, scaleTMini * size);
+			// R.ctx.rect(xTMini, yTMini, scaleTMini * size, scaleTMini * size);
+			DrawQuad(xPos + edgeToMini, yPos + edgeToMini, zPos - edgeToMini, size, size);
 			R.ctx.fill();
 			R.ctx.stroke();
 		break;
 	}
 	// Restore ctx state
 	R.ctx.restore();
+}
+
+function DrawSingleQuad (x, y, z) {
+	DrawQuad(x, y, z, 1, 1);
+}
+
+function DrawQuad (x, y, z, xSize, ySize) {
+	// 1 > 2
+	// ^   v
+	// 4 < 3
+	var x1 = GetScreenXNew(x, y, z);
+	var x2 = GetScreenXNew(x + xSize, y, z);
+	var x3 = GetScreenXNew(x + xSize, y + ySize1, z);
+	var x4 = GetScreenXNew(x, y + ySize1, z);
+	var y1 = GetScreenYNew(x, y, z);
+	var y2 = GetScreenYNew(x + xSize, y, z);
+	var y3 = GetScreenYNew(x + xSize, y + ySize1, z);
+	var y4 = GetScreenYNew(x, y + ySize1, z);
+	// R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
+	// R.ctx.beginPath();
+	R.ctx.moveTo(x1, y1);
+	R.ctx.lineTo(x2, y2);
+	R.ctx.lineTo(x3, y3);
+	R.ctx.lineTo(x4, y4);
+	R.ctx.lineTo(x1, y1);
+	// R.ctx.fill();
+	// R.ctx.stroke();
+}
+
+function DrawSingleQuadSides(x, y, z) {
+	DrawQuadSides(x, y, z, 1, 1, 1);
+}
+
+function DrawQuadSides(x, y, z, xSize, ySize, zSize) {
+	//         top
+	//        1---2
+	//       /|   |
+	//      5 4---3 (6 is hidden) 
+	// left |/   / right
+	//      8---7
+	//      bottom
+	var x1 = GetScreenXNew(x, y, z);
+	var x2 = GetScreenXNew(x + xSize, y, z);
+	var x3 = GetScreenXNew(x + xSize, y + ySize, z);
+	var x4 = GetScreenXNew(x, y + ySize1, z);
+	var x5 = GetScreenXNew(x, y, z + zSize);
+	var x6 = GetScreenXNew(x + xSize, y, z + zSize);
+	var x7 = GetScreenXNew(x + xSize, y + ySize, z + zSize);
+	var x8 = GetScreenXNew(x, y + ySize, z + zSize);
+	var y1 = GetScreenYNew(x, y, z);
+	var y2 = GetScreenYNew(x + xSize, y, z);
+	var y3 = GetScreenYNew(x + xSize, y + ySize, z);
+	var y4 = GetScreenYNew(x, y + ySize1, z);
+	var y5 = GetScreenYNew(x, y, z + zSize);
+	var y6 = GetScreenYNew(x + xSize, y, z + zSize);
+	var y7 = GetScreenYNew(x + xSize, y + ySize, z + zSize);
+	var y8 = GetScreenYNew(x, y + ySize, z + zSize);
+	R.ctx.save();
+	// Top: 1-2-6-5
+	if (y1 > y5 && (!IsOpaqueMulti(x, y - 1, z, xSize, 1, 1) || mustDrawSides)) {
+		R.ctx.beginPath();
+		R.ctx.moveTo(x1, y1);
+		R.ctx.lineTo(x2, y2);
+		R.ctx.lineTo(x6, y6);
+		R.ctx.lineTo(x5, y5);
+		R.ctx.lineTo(x1, y1);
+		if (sideStyle === "wall_grad") {
+			R.ctx.fillStyle = GetWallGradientVertical(y1, y5, z);
+		}
+		R.ctx.fill();
+		R.ctx.stroke();
+	}
+	// Bottom: 4-3-7-8
+	if (y4 < y8 && (!IsOpaqueMulti(x, y - 1, z, xSize, 1, 1) || mustDrawSides)) {
+		R.ctx.beginPath();
+		R.ctx.moveTo(x4, y4);
+		R.ctx.lineTo(x3, y3);
+		R.ctx.lineTo(x7, y7);
+		R.ctx.lineTo(x8, y8);
+		R.ctx.lineTo(x4, y4);
+		if (sideStyle === "wall_grad") {
+			R.ctx.fillStyle = GetWallGradientVertical(y4, y8, z);
+		}
+		R.ctx.fill();
+		R.ctx.stroke();
+	}
+	// Left: 1-4-8-5
+	if (x1 > x5 && (!IsOpaqueMulti(x, y - 1, z, xSize, 1, 1) || mustDrawSides)) {
+		R.ctx.beginPath();
+		R.ctx.moveTo(x1, y1);
+		R.ctx.lineTo(x4, y4);
+		R.ctx.lineTo(x8, y8);
+		R.ctx.lineTo(x5, y5);
+		R.ctx.lineTo(x1, y1);
+		if (sideStyle === "wall_grad") {
+			R.ctx.fillStyle = GetWallGradientHorizontal(x1, x5, z);
+		}
+		R.ctx.fill();
+		R.ctx.stroke();
+	}
+	// Right: 2-3-7-6
+	if (x2 < x6 && (!IsOpaqueMulti(x, y - 1, z, xSize, 1, 1) || mustDrawSides)) {
+		R.ctx.beginPath();
+		R.ctx.moveTo(x2, y2);
+		R.ctx.lineTo(x3, y3);
+		R.ctx.lineTo(x7, y7);
+		R.ctx.lineTo(x6, y6);
+		R.ctx.lineTo(x2, y2);
+		if (sideStyle === "wall_grad") {
+			R.ctx.fillStyle = GetWallGradientHorizontal(x2, x6, z);
+		}
+		R.ctx.fill();
+		R.ctx.stroke();
+	}
 }
 
 // Global object to use instead of passing all variables to every function
@@ -246,7 +373,11 @@ var R = {
 	SCALE_MULTIPLIER: 490,
 	Z_MULTIPLIER: 3.1,
 	TILE_SIZE: 5.4,
+	TILE_SIZE_NEW: 60,
 	CAMERA_TILT: 0.45,
+	cameraXAngle: 0,
+	cameraYAngle: Math.PI / 4,
+	cameraZAngle: 0,
 	EDIT_MODE: false,
 	ceilingMode: false,
 }
@@ -446,6 +577,7 @@ function SetDrawZ (dObj) {
 
 function GetScale (z) {
 	return -(R.TILE_SIZE / ( R.Z_MULTIPLIER * (z - R.cameraZ) - R.EYE_DISTANCE)) * R.SCALE_MULTIPLIER;
+	// return (850 / (14.5 - (z - R.cameraZ)));
 }
 
 function GetScreenX (x, y, z) {
@@ -464,6 +596,26 @@ function GetScreenY (x, y, z) {
 
 function GetScreenYHaveScale (x, y, z, scale) {
 	return scale * (y - R.cameraY) + R.CANVAS_HALF_HEIGHT - ((z - R.cameraZ) * scale * R.CAMERA_TILT);
+}
+
+function GetScreenXNew (x, y, z) {
+	// R.cameraX, R.cameraY, R.cameraZ
+	// R.cameraXAngle, R.cameraYAngle, R.cameraZAngle
+
+	// R.cameraX, R.cameraXAngle
+	var xRelativeDist = (x - R.cameraX);
+	var yRelativeDist = (y - R.cameraY);
+	var zRelativeDist = (z - R.cameraZ);
+	var ZPlaneDist = (z - R.cameraZ) + (Math.sin(R.cameraXAngle) * xRelativeDist) + (Math.sin(R.cameraYAngle) * yRelativeDist);
+	return R.CANVAS_HALF_WIDTH + R.TILE_SIZE_NEW * (xRelativeDist / ZPlaneDist);
+}
+
+function GetScreenYNew (x, y, z) {
+	var xRelativeDist = (x - R.cameraX);
+	var yRelativeDist = (y - R.cameraY);
+	var zRelativeDist = (z - R.cameraZ);
+	var ZPlaneDist = (z - R.cameraZ) + (Math.sin(R.cameraXAngle) * xRelativeDist) + (Math.sin(R.cameraYAngle) * yRelativeDist);
+	return R.CANVAS_HALF_WIDTH + R.TILE_SIZE_NEW * (yRelativeDist / ZPlaneDist);
 }
  
 function DObjInZ (dObj, z) {
