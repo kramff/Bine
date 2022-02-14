@@ -216,22 +216,9 @@ function DrawParticle (particle) {
 			// The apothem is half the width of the square
 			var apothem = size / 2;
 			var edgeToMini = 0.5 - apothem;
-			// var zBPosMini = (zPos - 1 + edgeToMini);
-			// var scaleBMini = GetScale(zBPosMini);
-			// var zTPosMini = (zPos - edgeToMini);
-			// var scaleTMini = GetScale(zTPosMini);
-			// var xPosMini = xPos + edgeToMini;
-			// var yPosMini = yPos + edgeToMini;
-			// var xBMini = GetScreenXHaveScale(xPosMini, yPosMini, zBPosMini, scaleBMini);
-			// var yBMini = GetScreenYHaveScale(xPosMini, yPosMini, zBPosMini, scaleBMini);
-			// var xTMini = GetScreenXHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
-			// var yTMini = GetScreenYHaveScale(xPosMini, yPosMini, zTPosMini, scaleTMini);
 			// Sides of cube
-			// DrawCubeSides(xTMini, yTMini, scaleTMini * size, xBMini, yBMini, scaleBMini * size, xPos, yPos, zPos, 1, 1, 1, undefined, true);
 			DrawQuadSides(xPos + edgeToMini, yPos + edgeToMini, zPos - edgeToMini, size, size);
-			// (x, y, scale, x2, y2, scale2, realX, realY, realZ, sideStyle)
 			// Top of cube
-			// R.ctx.rect(xTMini, yTMini, scaleTMini * size, scaleTMini * size);
 			DrawQuad(xPos + edgeToMini, yPos + edgeToMini, zPos - edgeToMini, size, size);
 			R.ctx.fill();
 			R.ctx.stroke();
@@ -246,19 +233,17 @@ function DrawSingleQuad (x, y, z) {
 }
 
 function DrawQuad (x, y, z, xSize, ySize) {
-	// 1 > 2
-	// ^   v
-	// 4 < 3
+	// 1 > 2 1---2
+	// ^   v |   |
+	// 4 < 3 4---3
 	var x1 = GetScreenXNew(x, y, z);
 	var x2 = GetScreenXNew(x + xSize, y, z);
-	var x3 = GetScreenXNew(x + xSize, y + ySize1, z);
-	var x4 = GetScreenXNew(x, y + ySize1, z);
+	var x3 = GetScreenXNew(x + xSize, y + ySize, z);
+	var x4 = GetScreenXNew(x, y + ySize, z);
 	var y1 = GetScreenYNew(x, y, z);
 	var y2 = GetScreenYNew(x + xSize, y, z);
-	var y3 = GetScreenYNew(x + xSize, y + ySize1, z);
-	var y4 = GetScreenYNew(x, y + ySize1, z);
-	// R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
-	// R.ctx.beginPath();
+	var y3 = GetScreenYNew(x + xSize, y + ySize, z);
+	var y4 = GetScreenYNew(x, y + ySize, z);
 	R.ctx.moveTo(x1, y1);
 	R.ctx.lineTo(x2, y2);
 	R.ctx.lineTo(x3, y3);
@@ -272,7 +257,7 @@ function DrawSingleQuadSides(x, y, z) {
 	DrawQuadSides(x, y, z, 1, 1, 1);
 }
 
-function DrawQuadSides(x, y, z, xSize, ySize, zSize) {
+function DrawQuadSides(x, y, z, xSize, ySize, zSize, sideStyle, mustDrawSides) {
 	//         top
 	//        1---2
 	//       /|   |
@@ -283,7 +268,7 @@ function DrawQuadSides(x, y, z, xSize, ySize, zSize) {
 	var x1 = GetScreenXNew(x, y, z);
 	var x2 = GetScreenXNew(x + xSize, y, z);
 	var x3 = GetScreenXNew(x + xSize, y + ySize, z);
-	var x4 = GetScreenXNew(x, y + ySize1, z);
+	var x4 = GetScreenXNew(x, y + ySize, z);
 	var x5 = GetScreenXNew(x, y, z + zSize);
 	var x6 = GetScreenXNew(x + xSize, y, z + zSize);
 	var x7 = GetScreenXNew(x + xSize, y + ySize, z + zSize);
@@ -291,7 +276,7 @@ function DrawQuadSides(x, y, z, xSize, ySize, zSize) {
 	var y1 = GetScreenYNew(x, y, z);
 	var y2 = GetScreenYNew(x + xSize, y, z);
 	var y3 = GetScreenYNew(x + xSize, y + ySize, z);
-	var y4 = GetScreenYNew(x, y + ySize1, z);
+	var y4 = GetScreenYNew(x, y + ySize, z);
 	var y5 = GetScreenYNew(x, y, z + zSize);
 	var y6 = GetScreenYNew(x + xSize, y, z + zSize);
 	var y7 = GetScreenYNew(x + xSize, y + ySize, z + zSize);
@@ -541,12 +526,15 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 
 function DrawEditOutline (x, y, z) {
 	R.ctx.save();
-	var scale = GetScale(z);
-	var xScreen = GetScreenXHaveScale(x, y, z, scale);
-	var yScreen = GetScreenYHaveScale(x, y, z, scale);
+	// var scale = GetScale(z);
+	// var xScreen = GetScreenXHaveScale(x, y, z, scale);
+	// var yScreen = GetScreenYHaveScale(x, y, z, scale);
+
 	R.ctx.strokeStyle = "#40FF80";
 	// R.ctx.strokeRect(R.CANVAS_HALF_WIDTH - size / 2, R.CANVAS_HALF_HEIGHT - size / 2, size, size);
-	R.ctx.strokeRect(xScreen, yScreen, scale, scale);
+	// R.ctx.strokeRect(xScreen, yScreen, scale, scale);
+	DrawSingleQuad(x, y, z);
+	R.ctx.stroke();
 	R.ctx.restore();
 }
 
@@ -672,15 +660,17 @@ function DrawEntity (entity, z) {
 	var xPos = entity.GetX();
 	var yPos = entity.GetY();
 	var zPos = entity.GetZ() + entity.zSize - 1;
-	var scale = GetScale(zPos);
-	var xScr = GetScreenXHaveScale(xPos, yPos, zPos, scale);
-	var yScr = GetScreenYHaveScale(xPos, yPos, zPos, scale);
-	var skipRegularDraw = false;
+	// var scale = GetScale(zPos);
+	// var xScr = GetScreenXHaveScale(xPos, yPos, zPos, scale);
+	// var yScr = GetScreenYHaveScale(xPos, yPos, zPos, scale);
+
+	var xScr = GetScreenXNew(xPos, yPos, zPos);
+	var yScr = GetScreenYNew(xPos, yPos, zPos);
 
 	// Too small to see
-	if (scale < 0) {
-		return;
-	}
+	// if (scale < 0) {
+	// 	return;
+	// }
 
 	// This function draws the top of the cube (or rectangular box)
 	// Skip if this isn't the highest z level of this entity
@@ -688,8 +678,13 @@ function DrawEntity (entity, z) {
 		return;
 	}
 
-	if (xScr + entity.xSize * scale > 0 && xScr < R.CANVAS_WIDTH && yScr + entity.ySize * scale > 0 && yScr < R.CANVAS_HEIGHT) {
+	//if (xScr + entity.xSize * scale > 0 && xScr < R.CANVAS_WIDTH && yScr + entity.ySize * scale > 0 && yScr < R.CANVAS_HEIGHT) {
+
+	// 60 is arbitrary (?)
+	// if (xScr + entity.xSize * 60 > 0 && xScr < R.CANVAS_WIDTH && yScr + entityRef.ySize * 60 > 0 && yScr < R.CANVAS_HEIGHT) {
+	if (true) {
 		R.ctx.save();
+		var skipRegularDraw = false;
 
 		// Entity is player
 		if (entity === curPlayer) {
@@ -747,10 +742,11 @@ function DrawEntity (entity, z) {
 			R.ctx.fillStyle = "#C0C070";
 		}
 		if (!skipRegularDraw) {
-			// R.ctx.fillRect(xScr, yScr, scale, scale);
-			R.ctx.fillRect(xScr, yScr, scale * entity.xSize, scale * entity.ySize);
-			// R.ctx.strokeRect(xScr, yScr, scale, scale);
-			R.ctx.strokeRect(xScr, yScr, scale * entity.xSize, scale * entity.ySize);
+			// R.ctx.fillRect(xScr, yScr, scale * entity.xSize, scale * entity.ySize);
+			// R.ctx.strokeRect(xScr, yScr, scale * entity.xSize, scale * entity.ySize);
+			DrawQuad(xPos, yPos, zPos)
+			R.ctx.fill();
+			R.ctx.stroke();
 		}
 
 		// Draw temporary text above entity
@@ -772,20 +768,24 @@ function DrawEntitySideTiles (entity, z) {
 	var xPos = entity.GetX();
 	var yPos = entity.GetY();
 	var zPos = entity.GetZ() - entity.z + z;
-	var scale = GetScale(zPos);
-	var scale2 = GetScale(zPos - 1);
-	var x = GetScreenXHaveScale(xPos, yPos, zPos, scale);
-	var x2 = GetScreenXHaveScale(xPos, yPos, zPos - 1, scale2);
-	var y = GetScreenYHaveScale(xPos, yPos, zPos, scale);
-	var y2 = GetScreenYHaveScale(xPos, yPos, zPos - 1, scale2);
-	var xScr = GetScreenXHaveScale(xPos, yPos, zPos, scale);
-	var yScr = GetScreenYHaveScale(xPos, yPos, zPos, scale);
-	if (scale < 0) {
-		return;
-	}
-	if (x2 > 0 - scale && x2 < R.CANVAS_WIDTH && y2 > 0 - scale && y2 < R.CANVAS_HEIGHT) {
+	//var scale = GetScale(zPos);
+	//var scale2 = GetScale(zPos - 1);
+	//var x = GetScreenXHaveScale(xPos, yPos, zPos, scale);
+	//var x2 = GetScreenXHaveScale(xPos, yPos, zPos - 1, scale2);
+	//var y = GetScreenYHaveScale(xPos, yPos, zPos, scale);
+	//var y2 = GetScreenYHaveScale(xPos, yPos, zPos - 1, scale2);
+	//var xScr = GetScreenXHaveScale(xPos, yPos, zPos, scale);
+	//var yScr = GetScreenYHaveScale(xPos, yPos, zPos, scale);
+	// if (scale < 0) {
+	// 	return;
+	// }
+
+	var xScr = GetScreenXNew(xPos, yPos, zPos);
+	var yScr = GetScreenYNew(xPos, yPos, zPos);
+
+	// if (x2 > 0 - scale && x2 < R.CANVAS_WIDTH && y2 > 0 - scale && y2 < R.CANVAS_HEIGHT) {
+	if (false) {
 		R.ctx.save();
-		
 		var skipRegularDraw = false;
 
 		// Entity is player
@@ -810,7 +810,8 @@ function DrawEntitySideTiles (entity, z) {
 				if (entity.style !== undefined && typeof entity.style === "string") {
 					laserColor = entity.style;
 				}
-				DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "laser", entity.xSize, entity.ySize, entity.zSize, laserColor);
+				// DrawComplicatedEntity(xPos, yPos, zPos, scale, xScr, yScr, "laser", entity.xSize, entity.ySize, entity.zSize, laserColor);
+				DrawComplicatedEntity(xPos, yPos, zPos, "laser", entity.xSize, entity.ySize, entity.zSize, laserColor);
 				skipRegularDraw = true;
 			}
 			else if (entity.templates.includes("door")) {
@@ -844,7 +845,7 @@ function DrawEntitySideTiles (entity, z) {
 		}
 		if (!skipRegularDraw) {
 			var mustDrawSides = entity.xMov !== 0 || entity.yMov !== 0 || entity.zMov !== 0;
-			DrawCubeSides(x, y, scale, x2, y2, scale2, xPos, yPos, zPos, entity.xSize, entity.ySize, entity.zSize, undefined, mustDrawSides);
+			DrawQuadSides(xPos, yPos, zPos, entity.xSize, entity.ySize, entity.zSize, undefined, mustDrawSides)
 		}
 		R.ctx.restore();
 	}
@@ -854,107 +855,72 @@ function DrawEntitySideTiles (entity, z) {
 function DrawAreaZSlice (area, z) {
 	var xPos = area.GetX();
 	var yPos = area.GetY();
-	// var zPos = area.GetZ();
-	var scale = GetScale(z);
-
-	// var realZ = z;
-	// var scale = GetScale(z + area.GetZ() - area.z);
-	var scale = GetScale(z);
-	if (scale > 0.01) {
+	// if (scale > 0.01) {
+	if (true) {
 		for (var i = 0; i < area.xSize; i++) {
-			var realX = i + area.GetX();
-			//var x = scale * (i + area.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
-			//var x = GetScreenXHaveScale(i + xPos, yPos, zPos, scale);
-			// if (x > 0 - scale && x < R.CANVAS_WIDTH) {
+			var x = i + xPos;
 				for (var j = 0; j < area.ySize; j++) {
-					var realY = j + area.GetY();
-					// var y = scale * (j + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-					var x = GetScreenXHaveScale(realX, realY, z, scale);
-					var y = GetScreenYHaveScale(realX, realY, z, scale);
-					if ((y > 0 - scale && y < R.CANVAS_HEIGHT) && (x > 0 - scale && x < R.CANVAS_WIDTH)) {	
+					var y = j + yPos;
+					//if ((y > 0 - scale && y < R.CANVAS_HEIGHT) && (x > 0 - scale && x < R.CANVAS_WIDTH)) {	
+					if (true) {
 						var tile = area.map[i][j][z - area.z];
 						if (tile > 0) {
 							if (tile > 1) {
-								DrawTileExtra(x, y, scale, tile, i + area.x, j + area.y, z, area.extraData[i][j][z - area.z]);
+								DrawTileExtra(x, y, z, tile, area.extraData[i][j][z - area.z]);
 							}
 							else {
 								//SOLID tile
 								if (R.ceilingMode && InCeiling(i + area.x, j + area.y, z)) {
-									DrawTileInCeiling(x, y, scale);
+									DrawTileInCeiling(x, y, z);
 								}
 								else {
-									DrawTile(x, y, scale, realX, realY, z);
+									DrawTile(x, y, z);
 								}
 							}
-							// numSquares ++;
 						}
 					}
 				}
 			//}
 		}
 		if (editorActive) {
-			DrawAreaEdges(area, scale, xPos, yPos, z);
-
+			DrawAreaEdges(area, xPos, yPos, z);
 		}
 	}
 }
+
 function DrawAreaZSliceSideTiles (area, z) {
 	var xPos = area.GetX();
 	var yPos = area.GetY();
-	// var zPos = area.GetZ();
-	// var scale = GetScale(zPos);
-	// var y = GetScreenYHaveScale(xPos, yPos, zPos, scale);
-	// R.ctx.save();
-	// R.ctx.fillStyle = "#101826";
-	// var realZ = z;
-	// var scale = GetScale(z + area.GetZ() - area.z);
-	var scale = GetScale(z);
-	// var scale2 = GetScale(-1 + z + area.GetZ() - area.z);
-	var scale2 = GetScale(z - 1);
-	if (scale > 0.01) {
+	// if (scale > 0.01) {
+	if (true) {
 		for (var i = 0; i < area.xSize; i++) {
-			var realX = i + xPos;
-			// var x = scale * (realX - R.cameraX) + R.CANVAS_HALF_WIDTH;
-			// var x = GetScreenXHaveScale(realX, yPos, zPos, scale);
-			// var x2 = scale2 * (realX - R.cameraX) + R.CANVAS_HALF_WIDTH;
-			// var x2 = GetScreenXHaveScale(xPos, yPos, zPos, scale2);
-			// if (x2 > 0 - scale2 && x2 < R.CANVAS_WIDTH) {
-				for (var j = 0; j < area.ySize; j++) {
-					var realY = j + area.GetY()
-					var x = GetScreenXHaveScale(realX, realY, z, scale);
-					var x2 = GetScreenXHaveScale(realX, realY, z - 1, scale2);
-					// var y = scale * (realY - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-					var y = GetScreenYHaveScale(realX, realY, z, scale);
-					// var y2 = scale2 * (realY - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-					var y2 = GetScreenYHaveScale(realX, realY, z - 1, scale2);
-					if ((y2 > 0 - scale2 && y2 < R.CANVAS_HEIGHT) && (x2 > 0 - scale2 && x2 < R.CANVAS_WIDTH)) {	
-						var tile = area.map[i][j][z - area.z];
-						if (tile > 0) {
-							if (tile > 1) {
-								// DrawTileExtra(x, y, scale, tile, i + area.x, j + area.y, z, area.extraData[i][j][z - area.z]);
+			var x = i + xPos;
+			for (var j = 0; j < area.ySize; j++) {
+				var y = j + area.GetY()
+				// if ((y2 > 0 - scale2 && y2 < R.CANVAS_HEIGHT) && (x2 > 0 - scale2 && x2 < R.CANVAS_WIDTH)) {	
+				if (true) {
+					var tile = area.map[i][j][z - area.z];
+					if (tile > 0) {
+						if (tile > 1) {
+							// DrawTileExtra(x, y, scale, tile, i + area.x, j + area.y, z, area.extraData[i][j][z - area.z]);
+						}
+						else {
+							//SOLID tile
+							if (R.ceilingMode && InCeiling(i + area.x, j + area.y, z)) {
+								// DrawTileInCeiling(x, y, scale);
 							}
 							else {
-								//SOLID tile
-								if (R.ceilingMode && InCeiling(i + area.x, j + area.y, z)) {
-									// DrawTileInCeiling(x, y, scale);
-								}
-								else {
-									DrawCubeSides(x, y, scale, x2, y2, scale2, realX, realY, z, 1, 1, 1, "wall_grad");
-								}
+								DrawQuadSides(x, y, z, 1, 1, 1, "wall_grad");
 							}
-							// numSquares ++;
 						}
 					}
 				}
-			// }
-		}
-		if (editorActive) {
-			// DrawAreaEdges(area, scale, z);
+			}
 		}
 	}
-	// R.ctx.restore();
 }
-function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
+// function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
+function DrawTileExtra (x, y, z, tile, extra) {
 	R.ctx.save();
 	var doDraw = true;
 	switch (tile) {
@@ -1039,22 +1005,22 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 			R.ctx.globalAlpha = extra.prevFill;
 		break;
 		case ORB_BLOCK:
-			// Draw tile but then draw circle on top
-			doDraw = false;
-			R.ctx.fillStyle = "#606060";
-			if (R.ceilingMode && InCeiling(i, j, k)) {
-				DrawTileInCeiling(x, y, scale);
-			}
-			else {
-				DrawTile(x, y, scale, i, j, k);
-			}
-			if (extra.orbHere) {
-				R.ctx.fillStyle = "#C0C0C0";
-				R.ctx.beginPath();
-				R.ctx.arc(x + scale / 2, y + scale / 2, scale / 4, 0, 2 * Math.PI);
-				R.ctx.stroke();
-				R.ctx.fill();
-			}
+			// // Draw tile but then draw circle on top
+			// doDraw = false;
+			// R.ctx.fillStyle = "#606060";
+			// if (R.ceilingMode && InCeiling(i, j, k)) {
+			// 	DrawTileInCeiling(x, y, scale);
+			// }
+			// else {
+			// 	DrawTile(x, y, scale, i, j, k);
+			// }
+			// if (extra.orbHere) {
+			// 	R.ctx.fillStyle = "#C0C0C0";
+			// 	R.ctx.beginPath();
+			// 	R.ctx.arc(x + scale / 2, y + scale / 2, scale / 4, 0, 2 * Math.PI);
+			// 	R.ctx.stroke();
+			// 	R.ctx.fill();
+			// }
 		break;
 	}
 	if (doDraw) {
@@ -1062,27 +1028,47 @@ function DrawTileExtra (x, y, scale, tile, i, j, k, extra) {
 			DrawTileInCeiling(x, y, scale);
 		}
 		else {
-			DrawTile(x, y, scale, i, j, k);
+			// DrawTile(x, y, scale, i, j, k);
+			DrawTile(x, y, z);
+			R.ctx.fill();
+			R.ctx.stroke();
 		}
 	}
 	R.ctx.restore();
 }
 //i, j, k: world x, y, z position
-function DrawTile (x, y, scale, realX, realY, realZ) {
-	// If realX isn't passed in, don't bother doing the check
-	if ((realX === undefined) || !IsOpaque(realX, realY, realZ + 1)) {
-		R.ctx.fillRect(x, y, scale, scale);
-		R.ctx.strokeRect(x, y, scale, scale);
+// function DrawTile (x, y, scale, realX, realY, realZ) {
+// 	// If realX isn't passed in, don't bother doing the check
+// 	if ((realX === undefined) || !IsOpaque(realX, realY, realZ + 1)) {
+// 		R.ctx.fillRect(x, y, scale, scale);
+// 		R.ctx.strokeRect(x, y, scale, scale);
+// 	}
+// }
+function DrawTile (x, y, z) {
+	if (!IsOpaque(x, y, z + 1)) {
+		DrawSingleQuad(x, y, z);
+		R.ctx.fill();
+		R.ctx.stroke();
 	}
 }
 //i, j, k: world x, y, z position
-function DrawTileInCeiling (x, y, scale, realX, realY, realZ) {
-	// If realX isn't passed in, don't bother doing the check
-	if ((realX === undefined) || !IsOpaque(realX, realY, realZ + 1)) {
+// function DrawTileInCeiling (x, y, scale, realX, realY, realZ) {
+// 	// If realX isn't passed in, don't bother doing the check
+// 	if ((realX === undefined) || !IsOpaque(realX, realY, realZ + 1)) {
+// 		R.ctx.save();
+// 		R.ctx.globalAlpha = 0.5;
+// 		R.ctx.fillRect(x, y, scale, scale);
+// 		R.ctx.strokeRect(x, y, scale, scale);
+// 		R.ctx.restore();
+// 	}
+// }
+function DrawTileInCeiling (x, y, z) {
+	if (!IsOpaque(x, y, z + 1)) {
 		R.ctx.save();
 		R.ctx.globalAlpha = 0.5;
-		R.ctx.fillRect(x, y, scale, scale);
-		R.ctx.strokeRect(x, y, scale, scale);
+		DrawSingleQuad(x, y, z);
+		R.ctx.fill();
+		R.ctx.stroke();
 		R.ctx.restore();
 	}
 }
@@ -1153,83 +1139,78 @@ function GetWallGradientHorizontal (x, x2, z) {
 
 // Draw the top, bottom, left, and right sides of a cube
 // Either for tile in area or for cube style entity
-function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, xSize, ySize, zSize, sideStyle, mustDrawSides) {
-	R.ctx.save();
-	// top side
-	if (y > y2 && (!IsOpaqueMulti(realX, realY - 1, realZ, xSize, 1, 1) || mustDrawSides)) {
-		R.ctx.beginPath();
-		R.ctx.moveTo(x, y);
-		R.ctx.lineTo(x2, y2);
-		R.ctx.lineTo(x2 + scale2 * xSize, y2);
-		R.ctx.lineTo(x + scale * xSize, y);
-		R.ctx.closePath();
-		if (sideStyle === "wall_grad") {
-			R.ctx.fillStyle = GetWallGradientVertical(y, y2, realZ);
-		}
-		R.ctx.fill();
-		R.ctx.stroke();
-	}
-	// bottom side
-	if (y2 + scale2 > y + scale && (!IsOpaqueMulti(realX, realY + ySize, realZ, xSize, 1, 1) || mustDrawSides)) {
-		R.ctx.beginPath();
-		R.ctx.moveTo(x, y + scale * ySize);
-		R.ctx.lineTo(x2, y2 + scale2 * ySize);
-		R.ctx.lineTo(x2 + scale2 * xSize, y2 + scale2 * ySize);
-		R.ctx.lineTo(x + scale * xSize, y + scale * ySize);
-		R.ctx.closePath();
-		if (sideStyle === "wall_grad") {
-			R.ctx.fillStyle = GetWallGradientVertical(y + scale, y2 + scale2, realZ);
-		}
-		R.ctx.fill();
-		R.ctx.stroke();
-	}
-	// left side
-	if (x > x2 && (!IsOpaqueMulti(realX - 1, realY, realZ, 1, ySize, 1) || mustDrawSides)) {
-		R.ctx.beginPath();
-		R.ctx.moveTo(x, y);
-		R.ctx.lineTo(x2, y2);
-		R.ctx.lineTo(x2, y2 + scale2 * ySize);
-		R.ctx.lineTo(x, y + scale * ySize);
-		R.ctx.closePath();
-		if (sideStyle === "wall_grad") {
-			R.ctx.fillStyle = GetWallGradientHorizontal(x, x2, realZ);
-		}
-		R.ctx.fill();
-		R.ctx.stroke();
-	}
-	// right side
-	if (x2 + scale2 > x + scale && (!IsOpaqueMulti(realX +xSize, realY, realZ, 1, ySize, 1) || mustDrawSides)) {
-		R.ctx.beginPath();
-		R.ctx.moveTo(x + scale * xSize, y);
-		R.ctx.lineTo(x2 + scale2 * xSize, y2);
-		R.ctx.lineTo(x2 + scale2 * xSize, y2 + scale2 * ySize);
-		R.ctx.lineTo(x + scale * xSize, y + scale * ySize);
-		R.ctx.closePath();
-		if (sideStyle === "wall_grad") {
-			R.ctx.fillStyle = GetWallGradientHorizontal(x + scale, x2 + scale2, realZ);
-		}
-		R.ctx.fill();
-		R.ctx.stroke();
-	}
-	R.ctx.restore();
-}
+// function DrawCubeSides (x, y, scale, x2, y2, scale2, realX, realY, realZ, xSize, ySize, zSize, sideStyle, mustDrawSides) {
+// 	R.ctx.save();
+// 	// top side
+// 	if (y > y2 && (!IsOpaqueMulti(realX, realY - 1, realZ, xSize, 1, 1) || mustDrawSides)) {
+// 		R.ctx.beginPath();
+// 		R.ctx.moveTo(x, y);
+// 		R.ctx.lineTo(x2, y2);
+// 		R.ctx.lineTo(x2 + scale2 * xSize, y2);
+// 		R.ctx.lineTo(x + scale * xSize, y);
+// 		R.ctx.closePath();
+// 		if (sideStyle === "wall_grad") {
+// 			R.ctx.fillStyle = GetWallGradientVertical(y, y2, realZ);
+// 		}
+// 		R.ctx.fill();
+// 		R.ctx.stroke();
+// 	}
+// 	// bottom side
+// 	if (y2 + scale2 > y + scale && (!IsOpaqueMulti(realX, realY + ySize, realZ, xSize, 1, 1) || mustDrawSides)) {
+// 		R.ctx.beginPath();
+// 		R.ctx.moveTo(x, y + scale * ySize);
+// 		R.ctx.lineTo(x2, y2 + scale2 * ySize);
+// 		R.ctx.lineTo(x2 + scale2 * xSize, y2 + scale2 * ySize);
+// 		R.ctx.lineTo(x + scale * xSize, y + scale * ySize);
+// 		R.ctx.closePath();
+// 		if (sideStyle === "wall_grad") {
+// 			R.ctx.fillStyle = GetWallGradientVertical(y + scale, y2 + scale2, realZ);
+// 		}
+// 		R.ctx.fill();
+// 		R.ctx.stroke();
+// 	}
+// 	// left side
+// 	if (x > x2 && (!IsOpaqueMulti(realX - 1, realY, realZ, 1, ySize, 1) || mustDrawSides)) {
+// 		R.ctx.beginPath();
+// 		R.ctx.moveTo(x, y);
+// 		R.ctx.lineTo(x2, y2);
+// 		R.ctx.lineTo(x2, y2 + scale2 * ySize);
+// 		R.ctx.lineTo(x, y + scale * ySize);
+// 		R.ctx.closePath();
+// 		if (sideStyle === "wall_grad") {
+// 			R.ctx.fillStyle = GetWallGradientHorizontal(x, x2, realZ);
+// 		}
+// 		R.ctx.fill();
+// 		R.ctx.stroke();
+// 	}
+// 	// right side
+// 	if (x2 + scale2 > x + scale && (!IsOpaqueMulti(realX +xSize, realY, realZ, 1, ySize, 1) || mustDrawSides)) {
+// 		R.ctx.beginPath();
+// 		R.ctx.moveTo(x + scale * xSize, y);
+// 		R.ctx.lineTo(x2 + scale2 * xSize, y2);
+// 		R.ctx.lineTo(x2 + scale2 * xSize, y2 + scale2 * ySize);
+// 		R.ctx.lineTo(x + scale * xSize, y + scale * ySize);
+// 		R.ctx.closePath();
+// 		if (sideStyle === "wall_grad") {
+// 			R.ctx.fillStyle = GetWallGradientHorizontal(x + scale, x2 + scale2, realZ);
+// 		}
+// 		R.ctx.fill();
+// 		R.ctx.stroke();
+// 	}
+// 	R.ctx.restore();
+// }
 
-function DrawAreaEdges (area, scale, x, y, z) {
-	// var x0 = scale * (0 + area.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var x0 = GetScreenXHaveScale(x, y, z, scale);
-	// var x1 = scale * (area.xSize + area.GetX() - R.cameraX) + R.CANVAS_HALF_WIDTH;
-	var x1 = GetScreenXHaveScale(x + area.xSize, y + area.ySize, z, scale);
-	// var y0 = scale * (0 + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-	var y0 = GetScreenYHaveScale(x, y, z, scale);
-	// var y1 = scale * (area.ySize + area.GetY() - R.cameraY) + R.CANVAS_HALF_HEIGHT;
-	var y1 = GetScreenYHaveScale(x + area.xSize, y + area.ySize, z, scale);
+function DrawAreaEdges (area, x, y, z) {
+	var areaXSize = area.xSize;
+	var areaYSize = area.ySize;
 	R.ctx.save();
+	DrawQuad(x, y, z, area.xSize, area.ySize);
 
 	// Dark cover over tiles below the edit level
 	if (R.EDIT_MODE && z === Math.floor(R.cameraZ) - 1) {
 		R.ctx.fillStyle = "#000000";
 		R.ctx.globalAlpha = 0.7;
-		R.ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+		R.ctx.fill();
 	}
 	// R.ctx.strokeStyle = areaColors[areas.indexOf(area)];
 	// Only in editior
@@ -1240,13 +1221,13 @@ function DrawAreaEdges (area, scale, x, y, z) {
 	else {
 		R.ctx.strokeStyle = "#FFFFFF";
 	}
-	R.ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+	R.ctx.stroke();
 
 	// Light cover over tiles at the current edit level
 	if (R.EDIT_MODE && z === Math.floor(R.cameraZ)) {
 		R.ctx.fillStyle = "#FFFFFF";
 		R.ctx.globalAlpha = 0.15;
-		R.ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+		R.ctx.fill();
 	}
 	R.ctx.restore();
 }
