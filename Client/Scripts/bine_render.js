@@ -179,17 +179,13 @@ function DrawParticle (particle) {
 			R.ctx.globalAlpha = (particle.dur / 20);
 			// R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
 			DrawQuad(xPos, yPos, zPos, particle.xSize, particle.ySize);
-			R.ctx.fill();
-			R.ctx.stroke();
 		break;
 		case "block_shot_fail":
 			R.ctx.strokeStyle = "#30F060";
 			R.ctx.fillStyle = "#60D060";
 			R.ctx.globalAlpha = (particle.dur / 20);
 			// R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
-			DrawQuad(xPos, yPos, zPos, particle.xSize, particle.ySize);
-			// R.ctx.fill();
-			R.ctx.stroke();
+			DrawQuad(xPos, yPos, zPos, particle.xSize, particle.ySize, true, false);
 		break;
 		case "block_collect":
 			R.ctx.strokeStyle = "#30F060";
@@ -197,17 +193,13 @@ function DrawParticle (particle) {
 			R.ctx.globalAlpha = (particle.dur / 20);
 			// R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
 			DrawQuad(xPos, yPos, zPos, particle.xSize, particle.ySize);
-			R.ctx.fill();
-			R.ctx.stroke();
 		break;
 		case "block_collect_fail":
 			R.ctx.strokeStyle = "#30F060";
 			R.ctx.fillStyle = "#60D060";
 			R.ctx.globalAlpha = (particle.dur / 20);
 			// R.ctx.rect(xT, yT, particle.xSize * scaleT, particle.ySize * scaleT);
-			DrawQuad(xPos, yPos, zPos, particle.xSize, particle.ySize);
-			// R.ctx.fill();
-			R.ctx.stroke();
+			DrawQuad(xPos, yPos, zPos, particle.xSize, particle.ySize, true, false);
 		break;
 		case "block_disappear":
 			R.ctx.strokeStyle = "#80FF80";
@@ -220,8 +212,6 @@ function DrawParticle (particle) {
 			DrawQuadSides(xPos + edgeToMini, yPos + edgeToMini, zPos - edgeToMini, size, size);
 			// Top of cube
 			DrawQuad(xPos + edgeToMini, yPos + edgeToMini, zPos - edgeToMini, size, size);
-			R.ctx.fill();
-			R.ctx.stroke();
 		break;
 	}
 	// Restore ctx state
@@ -232,32 +222,43 @@ function DrawSingleQuad (x, y, z) {
 	DrawQuad(x, y, z, 1, 1);
 }
 
-function DrawQuad (x, y, z, xSize, ySize) {
+function DrawQuad (x, y, z, xSize, ySize, doStroke, doFill) {
 	// 1 > 2 1---2
 	// ^   v |   |
 	// 4 < 3 4---3
 	var x1 = GetScreenXNew(x, y, z);
+	if (x1 < -100 || x1 > R.CANVAS_WIDTH + 100) {
+		return;
+	}
 	var x2 = GetScreenXNew(x + xSize, y, z);
 	var x3 = GetScreenXNew(x + xSize, y + ySize, z);
 	var x4 = GetScreenXNew(x, y + ySize, z);
 	var y1 = GetScreenYNew(x, y, z);
+	if (y1 < -100 || y1 > R.CANVAS_HEIGHT + 100) {
+		return;
+	}
 	var y2 = GetScreenYNew(x + xSize, y, z);
 	var y3 = GetScreenYNew(x + xSize, y + ySize, z);
 	var y4 = GetScreenYNew(x, y + ySize, z);
+	R.ctx.beginPath();
 	R.ctx.moveTo(x1, y1);
 	R.ctx.lineTo(x2, y2);
 	R.ctx.lineTo(x3, y3);
 	R.ctx.lineTo(x4, y4);
 	R.ctx.lineTo(x1, y1);
-	// R.ctx.fill();
-	// R.ctx.stroke();
+	if (doFill === undefined || doFill) {
+		R.ctx.fill();
+	}
+	if (doStroke === undefined || doStroke) {
+		R.ctx.stroke();
+	}
 }
 
-function DrawSingleQuadSides(x, y, z) {
+function DrawSingleQuadSides (x, y, z) {
 	DrawQuadSides(x, y, z, 1, 1, 1);
 }
 
-function DrawQuadSides(x, y, z, xSize, ySize, zSize, sideStyle, mustDrawSides) {
+function DrawQuadSides (x, y, z, xSize, ySize, zSize, sideStyle, mustDrawSides) {
 	//         top
 	//        1---2
 	//       /|   |
@@ -266,22 +267,27 @@ function DrawQuadSides(x, y, z, xSize, ySize, zSize, sideStyle, mustDrawSides) {
 	//      8---7
 	//      bottom
 	var x1 = GetScreenXNew(x, y, z);
+	if (x1 < -100 || x1 > R.CANVAS_WIDTH + 100) {
+		return;
+	}
 	var x2 = GetScreenXNew(x + xSize, y, z);
 	var x3 = GetScreenXNew(x + xSize, y + ySize, z);
 	var x4 = GetScreenXNew(x, y + ySize, z);
-	var x5 = GetScreenXNew(x, y, z + zSize);
-	var x6 = GetScreenXNew(x + xSize, y, z + zSize);
-	var x7 = GetScreenXNew(x + xSize, y + ySize, z + zSize);
-	var x8 = GetScreenXNew(x, y + ySize, z + zSize);
+	var x5 = GetScreenXNew(x, y, z - zSize);
+	var x6 = GetScreenXNew(x + xSize, y, z - zSize);
+	var x7 = GetScreenXNew(x + xSize, y + ySize, z - zSize);
+	var x8 = GetScreenXNew(x, y + ySize, z - zSize);
 	var y1 = GetScreenYNew(x, y, z);
+	if (y1 < -100 || y1 > R.CANVAS_HEIGHT + 100) {
+		return;
+	}
 	var y2 = GetScreenYNew(x + xSize, y, z);
 	var y3 = GetScreenYNew(x + xSize, y + ySize, z);
 	var y4 = GetScreenYNew(x, y + ySize, z);
-	var y5 = GetScreenYNew(x, y, z + zSize);
-	var y6 = GetScreenYNew(x + xSize, y, z + zSize);
-	var y7 = GetScreenYNew(x + xSize, y + ySize, z + zSize);
-	var y8 = GetScreenYNew(x, y + ySize, z + zSize);
-	R.ctx.save();
+	var y5 = GetScreenYNew(x, y, z - zSize);
+	var y6 = GetScreenYNew(x + xSize, y, z - zSize);
+	var y7 = GetScreenYNew(x + xSize, y + ySize, z - zSize);
+	var y8 = GetScreenYNew(x, y + ySize, z - zSize);
 	// Top: 1-2-6-5
 	if (y1 > y5 && (!IsOpaqueMulti(x, y - 1, z, xSize, 1, 1) || mustDrawSides)) {
 		R.ctx.beginPath();
@@ -290,51 +296,51 @@ function DrawQuadSides(x, y, z, xSize, ySize, zSize, sideStyle, mustDrawSides) {
 		R.ctx.lineTo(x6, y6);
 		R.ctx.lineTo(x5, y5);
 		R.ctx.lineTo(x1, y1);
-		if (sideStyle === "wall_grad") {
-			R.ctx.fillStyle = GetWallGradientVertical(y1, y5, z);
-		}
+		// if (sideStyle === "wall_grad") {
+		// 	R.ctx.fillStyle = GetWallGradientVertical(y1, y5, z);
+		// }
 		R.ctx.fill();
 		R.ctx.stroke();
 	}
 	// Bottom: 4-3-7-8
-	if (y4 < y8 && (!IsOpaqueMulti(x, y - 1, z, xSize, 1, 1) || mustDrawSides)) {
+	if (y4 < y8 && (!IsOpaqueMulti(x, y + 1, z, xSize, 1, 1) || mustDrawSides)) {
 		R.ctx.beginPath();
 		R.ctx.moveTo(x4, y4);
 		R.ctx.lineTo(x3, y3);
 		R.ctx.lineTo(x7, y7);
 		R.ctx.lineTo(x8, y8);
 		R.ctx.lineTo(x4, y4);
-		if (sideStyle === "wall_grad") {
-			R.ctx.fillStyle = GetWallGradientVertical(y4, y8, z);
-		}
+		// if (sideStyle === "wall_grad") {
+		// 	R.ctx.fillStyle = GetWallGradientVertical(y4, y8, z);
+		// }
 		R.ctx.fill();
 		R.ctx.stroke();
 	}
 	// Left: 1-4-8-5
-	if (x1 > x5 && (!IsOpaqueMulti(x, y - 1, z, xSize, 1, 1) || mustDrawSides)) {
+	if (x1 > x5 && (!IsOpaqueMulti(x - 1, y, z, xSize, 1, 1) || mustDrawSides)) {
 		R.ctx.beginPath();
 		R.ctx.moveTo(x1, y1);
 		R.ctx.lineTo(x4, y4);
 		R.ctx.lineTo(x8, y8);
 		R.ctx.lineTo(x5, y5);
 		R.ctx.lineTo(x1, y1);
-		if (sideStyle === "wall_grad") {
-			R.ctx.fillStyle = GetWallGradientHorizontal(x1, x5, z);
-		}
+		// if (sideStyle === "wall_grad") {
+		// 	R.ctx.fillStyle = GetWallGradientHorizontal(x1, x5, z);
+		// }
 		R.ctx.fill();
 		R.ctx.stroke();
 	}
 	// Right: 2-3-7-6
-	if (x2 < x6 && (!IsOpaqueMulti(x, y - 1, z, xSize, 1, 1) || mustDrawSides)) {
+	if (x2 < x6 && (!IsOpaqueMulti(x + 1, y, z, xSize, 1, 1) || mustDrawSides)) {
 		R.ctx.beginPath();
 		R.ctx.moveTo(x2, y2);
 		R.ctx.lineTo(x3, y3);
 		R.ctx.lineTo(x7, y7);
 		R.ctx.lineTo(x6, y6);
 		R.ctx.lineTo(x2, y2);
-		if (sideStyle === "wall_grad") {
-			R.ctx.fillStyle = GetWallGradientHorizontal(x2, x6, z);
-		}
+		// if (sideStyle === "wall_grad") {
+		// 	R.ctx.fillStyle = GetWallGradientHorizontal(x2, x6, z);
+		// }
 		R.ctx.fill();
 		R.ctx.stroke();
 	}
@@ -354,12 +360,13 @@ var R = {
 	CANVAS_HEIGHT: undefined,
 	CANVAS_HALF_WIDTH: undefined,
 	CANVAS_HALF_HEIGHT: undefined,
-	EYE_DISTANCE: 45,
-	SCALE_MULTIPLIER: 490,
-	Z_MULTIPLIER: 3.1,
-	TILE_SIZE: 5.4,
-	TILE_SIZE_NEW: 60,
-	CAMERA_TILT: 0.45,
+	EYE_DISTANCE: 45, // To be removed
+	CAMERA_DISTANCE: 20,
+	SCALE_MULTIPLIER: 490, // To be removed
+	Z_MULTIPLIER: 3.1, // To be removed
+	TILE_SIZE: 5.4, // To be removed
+	TILE_SIZE_NEW: 1000, // Rename this
+	CAMERA_TILT: 0.45, // To be removed
 	cameraXAngle: 0,
 	cameraYAngle: Math.PI / 4,
 	cameraZAngle: 0,
@@ -533,8 +540,7 @@ function DrawEditOutline (x, y, z) {
 	R.ctx.strokeStyle = "#40FF80";
 	// R.ctx.strokeRect(R.CANVAS_HALF_WIDTH - size / 2, R.CANVAS_HALF_HEIGHT - size / 2, size, size);
 	// R.ctx.strokeRect(xScreen, yScreen, scale, scale);
-	DrawSingleQuad(x, y, z);
-	R.ctx.stroke();
+	DrawQuad(x, y, z, 1, 1, true, false);
 	R.ctx.restore();
 }
 
@@ -593,17 +599,21 @@ function GetScreenXNew (x, y, z) {
 	// R.cameraX, R.cameraXAngle
 	var xRelativeDist = (x - R.cameraX);
 	var yRelativeDist = (y - R.cameraY);
-	var zRelativeDist = (z - R.cameraZ);
-	var ZPlaneDist = (z - R.cameraZ) + (Math.sin(R.cameraXAngle) * xRelativeDist) + (Math.sin(R.cameraYAngle) * yRelativeDist);
-	return R.CANVAS_HALF_WIDTH + R.TILE_SIZE_NEW * (xRelativeDist / ZPlaneDist);
+	var zRelativeDist = (z - (R.cameraZ + R.CAMERA_DISTANCE));
+	// Very simple version
+	// return xRelativeDist * R.TILE_SIZE_NEW + R.CANVAS_HALF_WIDTH - zRelativeDist * R.TILE_SIZE_NEW / R.Z_MULTIPLIER;
+	var ZPlaneDist = zRelativeDist + (Math.sin(R.cameraXAngle) * xRelativeDist) + (Math.sin(R.cameraYAngle) * yRelativeDist);
+	return R.CANVAS_HALF_WIDTH - R.TILE_SIZE_NEW * (xRelativeDist / ZPlaneDist);
 }
 
 function GetScreenYNew (x, y, z) {
 	var xRelativeDist = (x - R.cameraX);
 	var yRelativeDist = (y - R.cameraY);
-	var zRelativeDist = (z - R.cameraZ);
-	var ZPlaneDist = (z - R.cameraZ) + (Math.sin(R.cameraXAngle) * xRelativeDist) + (Math.sin(R.cameraYAngle) * yRelativeDist);
-	return R.CANVAS_HALF_WIDTH + R.TILE_SIZE_NEW * (yRelativeDist / ZPlaneDist);
+	var zRelativeDist = (z - (R.cameraZ + R.CAMERA_DISTANCE));
+	// Very simple version
+	// return yRelativeDist * R.TILE_SIZE_NEW + R.CANVAS_HALF_HEIGHT - zRelativeDist * R.TILE_SIZE_NEW / R.Z_MULTIPLIER;
+	var ZPlaneDist = zRelativeDist + (Math.sin(R.cameraXAngle) * xRelativeDist) + (Math.sin(R.cameraYAngle) * yRelativeDist);
+	return R.CANVAS_HALF_HEIGHT - R.TILE_SIZE_NEW * (yRelativeDist / ZPlaneDist);
 }
  
 function DObjInZ (dObj, z) {
@@ -744,9 +754,7 @@ function DrawEntity (entity, z) {
 		if (!skipRegularDraw) {
 			// R.ctx.fillRect(xScr, yScr, scale * entity.xSize, scale * entity.ySize);
 			// R.ctx.strokeRect(xScr, yScr, scale * entity.xSize, scale * entity.ySize);
-			DrawQuad(xPos, yPos, zPos)
-			R.ctx.fill();
-			R.ctx.stroke();
+			DrawQuad(xPos, yPos, zPos, entity.xSize, entity.ySize);
 		}
 
 		// Draw temporary text above entity
@@ -780,11 +788,11 @@ function DrawEntitySideTiles (entity, z) {
 	// 	return;
 	// }
 
-	var xScr = GetScreenXNew(xPos, yPos, zPos);
-	var yScr = GetScreenYNew(xPos, yPos, zPos);
+	// var xScr = GetScreenXNew(xPos, yPos, zPos);
+	// var yScr = GetScreenYNew(xPos, yPos, zPos);
 
 	// if (x2 > 0 - scale && x2 < R.CANVAS_WIDTH && y2 > 0 - scale && y2 < R.CANVAS_HEIGHT) {
-	if (false) {
+	if (true) {
 		R.ctx.save();
 		var skipRegularDraw = false;
 
@@ -845,7 +853,7 @@ function DrawEntitySideTiles (entity, z) {
 		}
 		if (!skipRegularDraw) {
 			var mustDrawSides = entity.xMov !== 0 || entity.yMov !== 0 || entity.zMov !== 0;
-			DrawQuadSides(xPos, yPos, zPos, entity.xSize, entity.ySize, entity.zSize, undefined, mustDrawSides)
+			DrawQuadSides(xPos, yPos, zPos, entity.xSize, entity.ySize, entity.zSize, undefined, mustDrawSides);
 		}
 		R.ctx.restore();
 	}
@@ -910,7 +918,8 @@ function DrawAreaZSliceSideTiles (area, z) {
 								// DrawTileInCeiling(x, y, scale);
 							}
 							else {
-								DrawQuadSides(x, y, z, 1, 1, 1, "wall_grad");
+								// DrawQuadSides(x, y, z, 1, 1, 1, "wall_grad");
+								DrawSingleQuadSides(x, y, z);
 							}
 						}
 					}
@@ -1030,8 +1039,8 @@ function DrawTileExtra (x, y, z, tile, extra) {
 		else {
 			// DrawTile(x, y, scale, i, j, k);
 			DrawTile(x, y, z);
-			R.ctx.fill();
-			R.ctx.stroke();
+			// R.ctx.fill();
+			// R.ctx.stroke();
 		}
 	}
 	R.ctx.restore();
@@ -1047,8 +1056,8 @@ function DrawTileExtra (x, y, z, tile, extra) {
 function DrawTile (x, y, z) {
 	if (!IsOpaque(x, y, z + 1)) {
 		DrawSingleQuad(x, y, z);
-		R.ctx.fill();
-		R.ctx.stroke();
+		// R.ctx.fill();
+		// R.ctx.stroke();
 	}
 }
 //i, j, k: world x, y, z position
@@ -1067,8 +1076,6 @@ function DrawTileInCeiling (x, y, z) {
 		R.ctx.save();
 		R.ctx.globalAlpha = 0.5;
 		DrawSingleQuad(x, y, z);
-		R.ctx.fill();
-		R.ctx.stroke();
 		R.ctx.restore();
 	}
 }
@@ -1204,13 +1211,13 @@ function DrawAreaEdges (area, x, y, z) {
 	var areaXSize = area.xSize;
 	var areaYSize = area.ySize;
 	R.ctx.save();
-	DrawQuad(x, y, z, area.xSize, area.ySize);
-
+	
+	var doFill = false;
 	// Dark cover over tiles below the edit level
 	if (R.EDIT_MODE && z === Math.floor(R.cameraZ) - 1) {
 		R.ctx.fillStyle = "#000000";
 		R.ctx.globalAlpha = 0.7;
-		R.ctx.fill();
+		doFill = true;
 	}
 	// R.ctx.strokeStyle = areaColors[areas.indexOf(area)];
 	// Only in editior
@@ -1221,14 +1228,16 @@ function DrawAreaEdges (area, x, y, z) {
 	else {
 		R.ctx.strokeStyle = "#FFFFFF";
 	}
-	R.ctx.stroke();
+
+	// R.ctx.stroke();
 
 	// Light cover over tiles at the current edit level
 	if (R.EDIT_MODE && z === Math.floor(R.cameraZ)) {
 		R.ctx.fillStyle = "#FFFFFF";
 		R.ctx.globalAlpha = 0.15;
-		R.ctx.fill();
+		doFill = true;
 	}
+	DrawQuad(x, y, z, area.xSize, area.ySize, true, doFill);
 	R.ctx.restore();
 }
 
@@ -1309,44 +1318,46 @@ function IsOpaqueMulti (x, y, z, xSize, ySize, zSize) {
 	return false;
 }*/
 
-function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, kind, xSize, ySize, zSize, color) {
+// function DrawComplicatedEntity (xPos, yPos, zPos, scaleTop, xScrTop, yScrTop, kind, xSize, ySize, zSize, color) {
+function DrawComplicatedEntity (xPos, yPos, zPos, kind, xSize, ySize, zSize, color) {
+	return;
 	// Prep
 	// Scale values from top to bottom of block
-	var scale00 = scaleTop;
-	var scale01 = GetScale(zPos - 0.1);
-	var scale02 = GetScale(zPos - 0.2);
-	var scale03 = GetScale(zPos - 0.3);
-	var scale04 = GetScale(zPos - 0.4);
-	var scale05 = GetScale(zPos - 0.5);
-	var scale06 = GetScale(zPos - 0.6);
-	var scale07 = GetScale(zPos - 0.7);
-	var scale08 = GetScale(zPos - 0.8);
-	var scale09 = GetScale(zPos - 0.9);
-	var scale10 = GetScale(zPos - 1.0);
+	// var scale00 = scaleTop;
+	// var scale01 = GetScale(zPos - 0.1);
+	// var scale02 = GetScale(zPos - 0.2);
+	// var scale03 = GetScale(zPos - 0.3);
+	// var scale04 = GetScale(zPos - 0.4);
+	// var scale05 = GetScale(zPos - 0.5);
+	// var scale06 = GetScale(zPos - 0.6);
+	// var scale07 = GetScale(zPos - 0.7);
+	// var scale08 = GetScale(zPos - 0.8);
+	// var scale09 = GetScale(zPos - 0.9);
+	// var scale10 = GetScale(zPos - 1.0);
 	// x positions from top to bottom of block
-	var xScr00 = xScrTop;
-	var xScr01 = GetScreenXHaveScale(xPos, yPos, zPos - 0.1, scale01);
-	var xScr02 = GetScreenXHaveScale(xPos, yPos, zPos - 0.2, scale02);
-	var xScr03 = GetScreenXHaveScale(xPos, yPos, zPos - 0.3, scale03);
-	var xScr04 = GetScreenXHaveScale(xPos, yPos, zPos - 0.4, scale04);
-	var xScr05 = GetScreenXHaveScale(xPos, yPos, zPos - 0.5, scale05);
-	var xScr06 = GetScreenXHaveScale(xPos, yPos, zPos - 0.6, scale06);
-	var xScr07 = GetScreenXHaveScale(xPos, yPos, zPos - 0.7, scale07);
-	var xScr08 = GetScreenXHaveScale(xPos, yPos, zPos - 0.8, scale08);
-	var xScr09 = GetScreenXHaveScale(xPos, yPos, zPos - 0.9, scale09);
-	var xScr10 = GetScreenXHaveScale(xPos, yPos, zPos - 1.0, scale10);
+	// var xScr00 = xScrTop;
+	// var xScr01 = GetScreenXHaveScale(xPos, yPos, zPos - 0.1, scale01);
+	// var xScr02 = GetScreenXHaveScale(xPos, yPos, zPos - 0.2, scale02);
+	// var xScr03 = GetScreenXHaveScale(xPos, yPos, zPos - 0.3, scale03);
+	// var xScr04 = GetScreenXHaveScale(xPos, yPos, zPos - 0.4, scale04);
+	// var xScr05 = GetScreenXHaveScale(xPos, yPos, zPos - 0.5, scale05);
+	// var xScr06 = GetScreenXHaveScale(xPos, yPos, zPos - 0.6, scale06);
+	// var xScr07 = GetScreenXHaveScale(xPos, yPos, zPos - 0.7, scale07);
+	// var xScr08 = GetScreenXHaveScale(xPos, yPos, zPos - 0.8, scale08);
+	// var xScr09 = GetScreenXHaveScale(xPos, yPos, zPos - 0.9, scale09);
+	// var xScr10 = GetScreenXHaveScale(xPos, yPos, zPos - 1.0, scale10);
 	// y positions from top to bottom of block
-	var yScr00 = yScrTop;
-	var yScr01 = GetScreenYHaveScale(xPos, yPos, zPos - 0.1, scale01);
-	var yScr02 = GetScreenYHaveScale(xPos, yPos, zPos - 0.2, scale02);
-	var yScr03 = GetScreenYHaveScale(xPos, yPos, zPos - 0.3, scale03);
-	var yScr04 = GetScreenYHaveScale(xPos, yPos, zPos - 0.4, scale04);
-	var yScr05 = GetScreenYHaveScale(xPos, yPos, zPos - 0.5, scale05);
-	var yScr06 = GetScreenYHaveScale(xPos, yPos, zPos - 0.6, scale06);
-	var yScr07 = GetScreenYHaveScale(xPos, yPos, zPos - 0.7, scale07);
-	var yScr08 = GetScreenYHaveScale(xPos, yPos, zPos - 0.8, scale08);
-	var yScr09 = GetScreenYHaveScale(xPos, yPos, zPos - 0.9, scale09);
-	var yScr10 = GetScreenYHaveScale(xPos, yPos, zPos - 1.0, scale10);
+	// var yScr00 = yScrTop;
+	// var yScr01 = GetScreenYHaveScale(xPos, yPos, zPos - 0.1, scale01);
+	// var yScr02 = GetScreenYHaveScale(xPos, yPos, zPos - 0.2, scale02);
+	// var yScr03 = GetScreenYHaveScale(xPos, yPos, zPos - 0.3, scale03);
+	// var yScr04 = GetScreenYHaveScale(xPos, yPos, zPos - 0.4, scale04);
+	// var yScr05 = GetScreenYHaveScale(xPos, yPos, zPos - 0.5, scale05);
+	// var yScr06 = GetScreenYHaveScale(xPos, yPos, zPos - 0.6, scale06);
+	// var yScr07 = GetScreenYHaveScale(xPos, yPos, zPos - 0.7, scale07);
+	// var yScr08 = GetScreenYHaveScale(xPos, yPos, zPos - 0.8, scale08);
+	// var yScr09 = GetScreenYHaveScale(xPos, yPos, zPos - 0.9, scale09);
+	// var yScr10 = GetScreenYHaveScale(xPos, yPos, zPos - 1.0, scale10);
 	R.ctx.save();
 	if (kind === "laser") {
 		// Straight line with 3D rotating spiral of dots
