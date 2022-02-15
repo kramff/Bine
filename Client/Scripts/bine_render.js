@@ -607,13 +607,14 @@ function GetScreenXNew (x, y, z) {
 }
 
 function GetScreenYNew (x, y, z) {
-	var xRelativeDist = (x - R.cameraX);
-	var yRelativeDist = (y - R.cameraY);
-	var zRelativeDist = (z - (R.cameraZ + R.CAMERA_DISTANCE));
+	var xRelativeDist = x - R.cameraX;
+	var yRelativeDist = y - R.cameraY;
+	var zRelativeDist = z - R.cameraZ;
+	var zRelativeDistWithCamDist = zRelativeDist - R.CAMERA_DISTANCE;
 	// Very simple version
 	// return yRelativeDist * R.TILE_SIZE_NEW + R.CANVAS_HALF_HEIGHT - zRelativeDist * R.TILE_SIZE_NEW / R.Z_MULTIPLIER;
-	var ZPlaneDist = zRelativeDist + (Math.sin(R.cameraXAngle) * xRelativeDist) + (Math.sin(R.cameraYAngle) * yRelativeDist);
-	return R.CANVAS_HALF_HEIGHT - R.TILE_SIZE_NEW * (yRelativeDist / ZPlaneDist);
+	var ZPlaneDist = zRelativeDistWithCamDist + (Math.sin(R.cameraXAngle) * xRelativeDist) + (Math.sin(R.cameraYAngle) * yRelativeDist);
+	return R.CANVAS_HALF_HEIGHT - R.TILE_SIZE_NEW * ((yRelativeDist - (Math.sin(R.cameraYAngle) * zRelativeDist)) / ZPlaneDist);
 }
  
 function DObjInZ (dObj, z) {
