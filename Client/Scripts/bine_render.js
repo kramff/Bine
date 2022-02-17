@@ -367,6 +367,7 @@ var R = {
 	TILE_SIZE: 5.4, // To be removed
 	TILE_SIZE_NEW: 1000, // Rename this
 	CAMERA_TILT: 0.45, // To be removed
+	//Camera angles between 0 and Math.PI / 2?
 	cameraXAngle: 0,
 	cameraYAngle: Math.PI / 4,
 	cameraZAngle: 0,
@@ -399,14 +400,14 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 
 	if (cameraTilting) {
 		if (!cameraTilting2) {
-			R.CAMERA_TILT += 0.01;
-			if (R.CAMERA_TILT > 1) {
+			R.cameraYAngle += 0.002;
+			if (R.cameraYAngle >= Math.PI / 2) {
 				cameraTilting2 = true;
 			}
 		}
 		else {
-			R.CAMERA_TILT -= 0.01;
-			if (R.CAMERA_TILT < 0.1) {
+			R.cameraYAngle -= 0.002;
+			if (R.cameraYAngle < 0.05) {
 				cameraTilting2 = false;
 			}
 		}
@@ -593,29 +594,28 @@ function GetScreenYHaveScale (x, y, z, scale) {
 }
 
 function GetScreenXNew (x, y, z) {
-	// R.cameraX, R.cameraY, R.cameraZ
-	// R.cameraXAngle, R.cameraYAngle, R.cameraZAngle
-
-	// R.cameraX, R.cameraXAngle
-	var xRelativeDist = (x - R.cameraX);
-	var yRelativeDist = (y - R.cameraY);
-	var zRelativeDist = (z - (R.cameraZ + R.CAMERA_DISTANCE));
-	// Very simple version
-	// return xRelativeDist * R.TILE_SIZE_NEW + R.CANVAS_HALF_WIDTH - zRelativeDist * R.TILE_SIZE_NEW / R.Z_MULTIPLIER;
-	var ZPlaneDist = zRelativeDist + (Math.sin(R.cameraXAngle) * xRelativeDist) + (Math.sin(R.cameraYAngle) * yRelativeDist);
-	return R.CANVAS_HALF_WIDTH - R.TILE_SIZE_NEW * (xRelativeDist / ZPlaneDist);
+	var xRelativeDist = x - R.cameraX;
+	var yRelativeDist = y - R.cameraY;
+	var zRelativeDist = z - R.cameraZ;
+	// var subjectDistance = Math.sqrt(((zRelativeDist - R.CAMERA_DISTANCE) * (1 - R.cameraXAngle) * (1 - R.cameraYAngle)) ** 2 + (R.cameraXAngle * (xRelativeDist - R.CAMERA_DISTANCE)) ** 2 + (R.cameraYAngle * (yRelativeDist - R.CAMERA_DISTANCE)) ** 2);
+	var subjectDistance = Math.sqrt(((zRelativeDist - R.CAMERA_DISTANCE) * Math.cos(R.cameraXAngle) * Math.cos(R.cameraYAngle)) ** 2 + (Math.sin(R.cameraXAngle) * (xRelativeDist - R.CAMERA_DISTANCE)) ** 2 + (Math.sin(R.cameraYAngle) * (yRelativeDist - R.CAMERA_DISTANCE)) ** 2);
+	// return R.CANVAS_HALF_WIDTH + R.TILE_SIZE_NEW * (((xRelativeDist * (1 - R.cameraXAngle)) - (zRelativeDist * R.cameraXAngle)) / subjectDistance);
+	return R.CANVAS_HALF_WIDTH + R.TILE_SIZE_NEW * (((xRelativeDist * Math.cos(R.cameraXAngle)) - (zRelativeDist * Math.sin(R.cameraXAngle))) / subjectDistance);
 }
+// Very simple version
+// return xRelativeDist * R.TILE_SIZE_NEW + R.CANVAS_HALF_WIDTH - zRelativeDist * R.TILE_SIZE_NEW / R.Z_MULTIPLIER;
 
 function GetScreenYNew (x, y, z) {
 	var xRelativeDist = x - R.cameraX;
 	var yRelativeDist = y - R.cameraY;
 	var zRelativeDist = z - R.cameraZ;
-	var zRelativeDistWithCamDist = zRelativeDist - R.CAMERA_DISTANCE;
-	// Very simple version
-	// return yRelativeDist * R.TILE_SIZE_NEW + R.CANVAS_HALF_HEIGHT - zRelativeDist * R.TILE_SIZE_NEW / R.Z_MULTIPLIER;
-	var ZPlaneDist = zRelativeDistWithCamDist + (Math.sin(R.cameraXAngle) * xRelativeDist) + (Math.sin(R.cameraYAngle) * yRelativeDist);
-	return R.CANVAS_HALF_HEIGHT - R.TILE_SIZE_NEW * ((yRelativeDist - (Math.sin(R.cameraYAngle) * zRelativeDist)) / ZPlaneDist);
+	// var subjectDistance = Math.sqrt(((zRelativeDist - R.CAMERA_DISTANCE) * (1 - R.cameraXAngle) * (1 - R.cameraYAngle)) ** 2 + (R.cameraXAngle * (xRelativeDist - R.CAMERA_DISTANCE)) ** 2 + (R.cameraYAngle * (yRelativeDist - R.CAMERA_DISTANCE)) ** 2);
+	var subjectDistance = Math.sqrt(((zRelativeDist - R.CAMERA_DISTANCE) * Math.cos(R.cameraXAngle) * Math.cos(R.cameraYAngle)) ** 2 + (Math.sin(R.cameraXAngle) * (xRelativeDist - R.CAMERA_DISTANCE)) ** 2 + (Math.sin(R.cameraYAngle) * (yRelativeDist - R.CAMERA_DISTANCE)) ** 2);
+	// return R.CANVAS_HALF_HEIGHT + R.TILE_SIZE_NEW * (((yRelativeDist * (1 - R.cameraYAngle)) - (zRelativeDist * R.cameraYAngle)) / subjectDistance);
+	return R.CANVAS_HALF_HEIGHT + R.TILE_SIZE_NEW * (((yRelativeDist * Math.cos(R.cameraYAngle)) - (zRelativeDist * Math.sin(R.cameraYAngle))) / subjectDistance);
 }
+// Very simple version
+// return yRelativeDist * R.TILE_SIZE_NEW + R.CANVAS_HALF_HEIGHT - zRelativeDist * R.TILE_SIZE_NEW / R.Z_MULTIPLIER;
  
 function DObjInZ (dObj, z) {
 	if (dObj.type === "Entity") {
