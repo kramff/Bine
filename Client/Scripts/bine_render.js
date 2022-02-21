@@ -400,17 +400,21 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 
 	if (cameraTilting) {
 		if (!cameraTilting2) {
-			R.cameraYAngle += 0.002;
+			R.cameraYAngle += 0.005;
 			if (R.cameraYAngle >= Math.PI / 2) {
 				cameraTilting2 = true;
 			}
 		}
 		else {
-			R.cameraYAngle -= 0.002;
+			R.cameraYAngle -= 0.005;
 			if (R.cameraYAngle < -Math.PI / 2) {
 				cameraTilting2 = false;
 			}
 		}
+		// R.cameraYAngle += 0.005;
+		// if (R.cameraYAngle > Math.PI) {
+		// 	R.cameraYAngle = -Math.PI;
+		// }
 	}
 
 	// Clear canvas
@@ -594,9 +598,29 @@ function GetScreenYHaveScale (x, y, z, scale) {
 }
 
 function GetScreenXNew (x, y, z) {
+	return GetScreenXorY(x, y, z, true);
+}
+
+function GetScreenYNew (x, y, z) {
+	return GetScreenXorY(x, y, z, false);
+}
+
+//var screenCoordCacheX = {};
+//var screenCoordCacheY = {};
+
+function GetScreenXorY (x, y, z, xMode) {
+	//var cache = (xMode ? screenCoordCacheX : screenCoordCacheY);
+	//var cacheStr = x + "," + y + "," + z + "," + R.cameraX + "," + R.cameraY + "," + R.cameraZ + "," + R.cameraXAngle + "," + R.cameraYAngle + "," + R.cameraZAngle;
+	//var cacheCoord = cache[cacheStr];
+	//if (cacheCoord !== undefined) {
+	//	return cacheCoord;
+	//}
 	var xRelativeDist = x - R.cameraX;
 	var yRelativeDist = y - R.cameraY;
 	var zRelativeDist = z - R.cameraZ;
+	// Get the positive / negative sign of the angles to multiply the camera distance by, so that negative angles are in the right direction
+	var xAngSign = Math.sign(R.cameraXAngle);
+	var yAngSign = Math.sign(R.cameraYAngle);
 	// Distance from point to the camera plane using a^2 + b^2 + c^2 = d^2
 	var subjectDistance = Math.sqrt(
 		// Z distance: Multiplied by cosine of x angle and y angle
@@ -606,59 +630,32 @@ function GetScreenXNew (x, y, z) {
 		// X distance: Multiplied by sine of x angle.
 		// At 0, sine is 0 so the x distance isn't used
 		// At higher values, sine is higher, and the x distance becomes more used
-		((xRelativeDist - R.CAMERA_DISTANCE) * Math.sin(R.cameraXAngle)) ** 2 +
+		((xRelativeDist - (R.CAMERA_DISTANCE * xAngSign)) * Math.sin(R.cameraXAngle)) ** 2 +
 		// Y distance: Multiplied by sine of y angle.
 		// At 0, sine is 0 so the y distance isn't used
 		// At higher values, sines is higher, and the y distance becomes more used
-		((yRelativeDist - R.CAMERA_DISTANCE) * Math.sin(R.cameraYAngle)) ** 2
+		((yRelativeDist - (R.CAMERA_DISTANCE * yAngSign)) * Math.sin(R.cameraYAngle)) ** 2
 	);
-	// Calculate x position on screen
-	// Start in middle of screen, then move left or right
-	return R.CANVAS_HALF_WIDTH + R.TILE_SIZE_NEW * ((
-		// X distance: Multiplied by cosine of x angle.
-		// At 0, cosine is 1, so the full x distance is used
-		// At higher values, cosine is lower, and the x distance becomes less used
-		(xRelativeDist * Math.cos(R.cameraXAngle)) -
+	// Different values for x or y mode
+	var midPoint = xMode ? R.CANVAS_HALF_WIDTH : R.CANVAS_HALF_HEIGHT;
+	var cameraAngle = xMode ? R.cameraXAngle : R.cameraYAngle;
+	var relativeDist = xMode ? xRelativeDist : yRelativeDist;
+	// Calculate x or y position on screen
+	// Start in middle of screen, then move left or right (or up or down)
+	// var coord = 
+	return midPoint + R.TILE_SIZE_NEW * ((
+		// X or Y distance: Multiplied by cosine of x or y angle.
+		// At 0, cosine is 1, so the full x or y distance is used
+		// At higher values, cosine is lower, and the x or y distance becomes less used
+		(relativeDist * Math.cos(cameraAngle)) -
 		// Z distance: Multiplied by sine of x angle.
 		// At 0, sine is 0, so the z distance isn't used
 		// At higher values, sine is higher, and the z distance becomes more used
-		(zRelativeDist * Math.sin(R.cameraXAngle))
+		(zRelativeDist * Math.sin(cameraAngle))
 	// Divided by the distance to the camera plane
 	) / subjectDistance);
-}
-
-function GetScreenYNew (x, y, z) {
-	var xRelativeDist = x - R.cameraX;
-	var yRelativeDist = y - R.cameraY;
-	var zRelativeDist = z - R.cameraZ;
-	// Distance from point to the camera plane using a^2 + b^2 + c^2 = d^2
-	var subjectDistance = Math.sqrt(
-		// Z distance: Multiplied by cosine of x angle and y angle
-		// At 0, the cosines are 1 so the full z distance is used
-		// At higher values, the cosines go down so less of the z distance is used
-		((zRelativeDist - R.CAMERA_DISTANCE) * Math.cos(R.cameraXAngle) * Math.cos(R.cameraYAngle)) ** 2 +
-		// X distance: Multiplied by sine of x angle.
-		// At 0, sine is 0 so the x distance isn't used
-		// At higher values, sine is higher, and the x distance becomes used
-		((xRelativeDist - R.CAMERA_DISTANCE) * Math.sin(R.cameraXAngle)) ** 2 +
-		// Y distance: Multiplied by sine of y angle.
-		// At 0, sine is 0 so the y distance isn't used
-		// At higher values, sines is higher, and the y distance becomes used
-		((yRelativeDist - R.CAMERA_DISTANCE) * Math.sin(R.cameraYAngle)) ** 2
-	);
-	// Calculate y position on screen
-	// Start in middle of screen, then move up or down
-	return R.CANVAS_HALF_HEIGHT + R.TILE_SIZE_NEW * ((
-		// Y distance: Multiplied by cosine of y angle.
-		// At 0, cosine is 1, so the full y distance is used
-		// At higher values, cosine is lower, and the y distance becomes less used
-		(yRelativeDist * Math.cos(R.cameraYAngle)) -
-		// Z distance: Multiplied by sine of y angle.
-		// At 0, sine is 0, so the z distance isn't used
-		// At higher values, sine is higher, and the z distance becomes more used
-		(zRelativeDist * Math.sin(R.cameraYAngle))
-	// Divided by the distance to the camera plane
-	) / subjectDistance);
+	//cache[cacheStr] = coord;
+	//return coord;
 }
  
 function DObjInZ (dObj, z) {
