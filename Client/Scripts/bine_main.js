@@ -1039,7 +1039,8 @@ function GameplayMouseDown (event) {
 }
 
 function GameplayMouseMove () {
-
+	R.cameraXAngle = (mouseX - R.CANVAS_HALF_WIDTH) * 2 * Math.PI / R.CANVAS_WIDTH;
+	R.cameraYAngle = (mouseY - R.CANVAS_HALF_HEIGHT) * 2 * Math.PI / R.CANVAS_HEIGHT;
 }
 
 function GameplayMouseUp () {

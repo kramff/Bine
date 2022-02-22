@@ -399,22 +399,22 @@ function RenderLevel (canvas, session, level, cameraX, cameraY, cameraZ, editMod
 	R.EDIT_MODE = editMode || false;
 
 	if (cameraTilting) {
-		if (!cameraTilting2) {
-			R.cameraYAngle += 0.005;
-			if (R.cameraYAngle >= Math.PI / 2) {
-				cameraTilting2 = true;
-			}
-		}
-		else {
-			R.cameraYAngle -= 0.005;
-			if (R.cameraYAngle < -Math.PI / 2) {
-				cameraTilting2 = false;
-			}
-		}
-		// R.cameraYAngle += 0.005;
-		// if (R.cameraYAngle > Math.PI) {
-		// 	R.cameraYAngle = -Math.PI;
+		// if (!cameraTilting2) {
+		// 	R.cameraYAngle += 0.005;
+		// 	if (R.cameraYAngle >= Math.PI / 2) {
+		// 		cameraTilting2 = true;
+		// 	}
 		// }
+		// else {
+		// 	R.cameraYAngle -= 0.005;
+		// 	if (R.cameraYAngle < -Math.PI / 2) {
+		// 		cameraTilting2 = false;
+		// 	}
+		// }
+		R.cameraYAngle += 0.008;
+		if (R.cameraYAngle > Math.PI) {
+			R.cameraYAngle -= 2 * Math.PI;
+		}
 	}
 
 	// Clear canvas
