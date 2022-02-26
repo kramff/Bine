@@ -574,6 +574,7 @@ function SetDrawZ (dObj) {
 	}
 }
 
+// Start of deprecated funcs
 function GetScale (z) {
 	return -(R.TILE_SIZE / ( R.Z_MULTIPLIER * (z - R.cameraZ) - R.EYE_DISTANCE)) * R.SCALE_MULTIPLIER;
 	// return (850 / (14.5 - (z - R.cameraZ)));
@@ -596,6 +597,7 @@ function GetScreenY (x, y, z) {
 function GetScreenYHaveScale (x, y, z, scale) {
 	return scale * (y - R.cameraY) + R.CANVAS_HALF_HEIGHT - ((z - R.cameraZ) * scale * R.CAMERA_TILT);
 }
+// End of deprecated funcs
 
 function GetScreenXNew (x, y, z) {
 	return GetScreenXorY(x, y, z, true);
@@ -605,22 +607,15 @@ function GetScreenYNew (x, y, z) {
 	return GetScreenXorY(x, y, z, false);
 }
 
-//var screenCoordCacheX = {};
-//var screenCoordCacheY = {};
-
 function GetScreenXorY (x, y, z, xMode) {
-	//var cache = (xMode ? screenCoordCacheX : screenCoordCacheY);
-	//var cacheStr = x + "," + y + "," + z + "," + R.cameraX + "," + R.cameraY + "," + R.cameraZ + "," + R.cameraXAngle + "," + R.cameraYAngle + "," + R.cameraZAngle;
-	//var cacheCoord = cache[cacheStr];
-	//if (cacheCoord !== undefined) {
-	//	return cacheCoord;
-	//}
+
 	var xRelativeDist = x - R.cameraX;
 	var yRelativeDist = y - R.cameraY;
 	var zRelativeDist = z - R.cameraZ;
 	// Get the positive / negative sign of the angles to multiply the camera distance by, so that negative angles are in the right direction
-	var xAngSign = Math.sign(R.cameraXAngle);
-	var yAngSign = Math.sign(R.cameraYAngle);
+	var xAngSign = Math.sign(R.cameraXAngle % (Math.PI * 2));
+	// var yAngSign = Math.sign(R.cameraYAngle);
+	var yAngSign = Math.sign(R.cameraYAngle % (Math.PI * 2));
 	// Distance from point to the camera plane using a^2 + b^2 + c^2 = d^2
 	var subjectDistance = Math.sqrt(
 		// Z distance: Multiplied by cosine of x angle and y angle

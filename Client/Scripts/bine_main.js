@@ -468,10 +468,11 @@ function MainUpdate () {
 			if (touchEventsActive) {
 				if (touchWalk) {
 					touchChanged = false;
-					// var coords = ScreenCoordToGameCoord(touchScreenX, touchScreenY, Math.round(zCam), xCam, yCam, zCam);
 					var coords = ScreenCoordToGameCoord(touchScreenX, touchScreenY, Math.round(zCam));
-					touchGoalX = coords.x;
-					touchGoalY = coords.y;
+					if (coords !== undefined) {
+						touchGoalX = coords.x;
+						touchGoalY = coords.y;
+					}
 				}
 				var prevWKey = wKey;
 				var prevAKey = aKey;
@@ -580,13 +581,45 @@ function loadDefaultWorlds () {
 }
 
 // Determine game coordinates from screen coordinates
-// function ScreenCoordToGameCoord (screenX, screenY, inputZ, cameraX, cameraY, cameraZ) {
-function ScreenCoordToGameCoord (screenX, screenY, inputZ) {
-	var scale = GetScale(inputZ);
-	var gameX = Math.floor((screenX - R.CANVAS_HALF_WIDTH) / scale + R.cameraX);
-	var gameY = Math.floor((screenY - R.CANVAS_HALF_HEIGHT) / scale + R.cameraY + (inputZ - R.cameraZ) * R.CAMERA_TILT);
-	var gameZ = inputZ;
-	return {x: gameX, y: gameY, z: gameZ};
+function ScreenCoordToGameCoord (xScreen, yScreen, zInput) {
+	// var scale = GetScale(inputZ);
+	// var gameX = Math.floor((screenX - R.CANVAS_HALF_WIDTH) / scale + R.cameraX);
+	// var gameY = Math.floor((screenY - R.CANVAS_HALF_HEIGHT) / scale + R.cameraY + (inputZ - R.cameraZ) * R.CAMERA_TILT);
+	// var gameZ = inputZ;
+	// return {x: gameX, y: gameY, z: gameZ};
+
+	// New approach - start at camera position, go toward cursor tile by tile
+	var limit = 50;
+	var coordFound = false;
+	var xTry = Math.floor(R.cameraX);
+	var yTry = Math.floor(R.cameraY);
+	var zTry = zInput;
+	var xLastChange = 0;
+	var yLastChange = 0;
+	while (limit > 0 && !coordFound) {
+		limit -= 1;
+		var xScreenTry = GetScreenXNew(xTry, yTry, zTry);
+		var yScreenTry = GetScreenYNew(xTry, yTry, zTry);
+		var xStep = Math.sign(xScreen - xScreenTry);
+		var yStep = Math.sign(yScreen - yScreenTry);
+		if ((xLastChange !== xStep && xLastChange !== 0) && (yLastChange !== yStep && yLastChange !== 0)) {
+			coordFound = true;
+			return {
+				x: xTry + (xStep > 0 ? 0 : -1),
+				y: yTry + (yStep > 0 ? 0 : -1),
+				z: zTry,
+			};
+		}
+		else
+		{
+			xTry += xStep;
+			yTry += yStep;
+			xLastChange = xStep;
+			yLastChange = yStep;
+		}
+	}
+	// Could not find coord before hitting limit
+	return undefined;
 }
 
 function DoKeyDown (event) {
@@ -1039,8 +1072,10 @@ function GameplayMouseDown (event) {
 }
 
 function GameplayMouseMove () {
-	R.cameraXAngle = (mouseX - R.CANVAS_HALF_WIDTH) * 2 * Math.PI / R.CANVAS_WIDTH;
-	R.cameraYAngle = (mouseY - R.CANVAS_HALF_HEIGHT) * 2 * Math.PI / R.CANVAS_HEIGHT;
+	// R.cameraXAngle = (mouseX - R.CANVAS_HALF_WIDTH) * 2 * Math.PI / R.CANVAS_WIDTH;
+	//R.cameraXAngle = 0;
+	// R.cameraYAngle = (mouseY - R.CANVAS_HALF_HEIGHT) * 2 * Math.PI / R.CANVAS_HEIGHT;
+	//R.cameraYAngle = 5 * (mouseY - R.CANVAS_HALF_HEIGHT) * 2 * Math.PI / R.CANVAS_HEIGHT;
 }
 
 function GameplayMouseUp () {
@@ -1057,8 +1092,12 @@ function EditTileIfNewCoord (x, y) {
 		return;
 	}
 
-	// var gameCoords = ScreenCoordToGameCoord(x, y, Math.round(editCamZ), editCamX + editMovX * (1 - 0.1 * editMovTime) + 0.5, editCamY + editMovY * (1 - 0.1 * editMovTime) + 0.5, editCamZ + editMovZ * (1 - 0.1 * editMovTime) + 0.5);
 	var gameCoords = ScreenCoordToGameCoord(x, y, Math.round(editCamZ));
+
+	if (gameCoords === undefined) {
+		// Skip because couldn't find coords
+		return;
+	}
 
 	if (gameCoords.x === lastEditX && gameCoords.y === lastEditY && gameCoords.z === lastEditZ) {
 		// Skip because exact same coords as last edited location
