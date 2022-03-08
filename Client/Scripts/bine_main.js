@@ -545,6 +545,7 @@ function MainUpdate () {
 var defaultWorlds = [
 	"entity_test",
 	"blockomancy",
+	"coherence",
 ];
 
 var loadResponseId = 0;

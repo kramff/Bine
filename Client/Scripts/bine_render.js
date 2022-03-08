@@ -369,7 +369,8 @@ var R = {
 	CAMERA_TILT: 0.45, // To be removed
 	//Camera angles between 0 and Math.PI / 2?
 	cameraXAngle: 0,
-	cameraYAngle: Math.PI / 4,
+	// cameraYAngle: Math.PI / 4, // 0.7853981633974483
+	cameraYAngle: 0.65,
 	cameraZAngle: 0,
 	EDIT_MODE: false,
 	ceilingMode: false,
